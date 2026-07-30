@@ -1,0 +1,16 @@
+*.zip
+*.log
+*.tmp
+.DS_Store
+*.jks
+*.keystore
+key.properties
+**/android/key.properties
+
+**/.dart_tool/
+**/.gradle/
+**/.idea/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages

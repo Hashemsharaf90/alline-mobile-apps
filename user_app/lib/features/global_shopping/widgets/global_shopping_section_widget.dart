@@ -1,0 +1,205 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/global_store_webview_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
+import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:provider/provider.dart';
+
+class GlobalShoppingSectionWidget extends StatelessWidget {
+  const GlobalShoppingSectionWidget({super.key});
+
+  static const List<_GlobalStore> _stores = [
+    _GlobalStore(
+      name: 'AliExpress',
+      url: 'https://www.aliexpress.com/',
+      color: Color(0xFFEE3B2F),
+    ),
+    _GlobalStore(
+      name: 'Alibaba.com',
+      url: 'https://www.alibaba.com/',
+      color: Color(0xFFFF7A1A),
+      badgeAr: 'جملة',
+      badgeEn: 'Wholesale',
+    ),
+    _GlobalStore(
+      name: 'amazon',
+      url: 'https://www.amazon.com/',
+      color: Color(0xFFFFA41C),
+      badgeAr: 'قريباً',
+      badgeEn: 'Soon',
+    ),
+    _GlobalStore(
+      name: 'SHEIN',
+      url: 'https://www.shein.com/',
+      color: Color(0xFF111111),
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        Dimensions.homePagePadding,
+        Dimensions.paddingSizeSmall,
+        Dimensions.homePagePadding,
+        Dimensions.paddingSizeDefault,
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(
+          isLtr ? 'Order from global stores' : 'أطلب من المواقع العالمية',
+          textAlign: TextAlign.start,
+          style: textBold.copyWith(
+            fontSize: 22,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
+        ),
+        const SizedBox(height: Dimensions.paddingSizeDefault),
+        GridView.builder(
+          itemCount: _stores.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: Dimensions.paddingSizeDefault,
+            crossAxisSpacing: Dimensions.paddingSizeDefault,
+            childAspectRatio: 2.05,
+          ),
+          itemBuilder: (context, index) => _GlobalStoreCard(
+            store: _stores[index],
+            isLtr: isLtr,
+          ),
+        ),
+      ]),
+    );
+  }
+}
+
+class _GlobalStoreCard extends StatelessWidget {
+  final _GlobalStore store;
+  final bool isLtr;
+
+  const _GlobalStoreCard({
+    required this.store,
+    required this.isLtr,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final badge = isLtr ? store.badgeEn : store.badgeAr;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GlobalStoreWebViewScreen(
+              storeName: store.name,
+              initialUrl: store.url,
+            ),
+          ),
+        ),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: store.color,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: store.color.withValues(alpha: .20),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(children: [
+            PositionedDirectional(
+              start: -18,
+              top: -24,
+              child: Container(
+                width: 96,
+                height: 96,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .10),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            PositionedDirectional(
+              end: -42,
+              bottom: -58,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .08),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            if (badge != null)
+              PositionedDirectional(
+                start: 12,
+                top: 12,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withValues(alpha: .8)),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    badge,
+                    style: textBold.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: Dimensions.fontSizeSmall,
+                    ),
+                  ),
+                ),
+              ),
+            Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    store.name,
+                    textDirection: TextDirection.ltr,
+                    style: textBold.copyWith(
+                      color: Colors.white,
+                      fontSize: store.name == 'SHEIN' ? 30 : 25,
+                      letterSpacing: 0,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlobalStore {
+  final String name;
+  final String url;
+  final Color color;
+  final String? badgeAr;
+  final String? badgeEn;
+
+  const _GlobalStore({
+    required this.name,
+    required this.url,
+    required this.color,
+    this.badgeAr,
+    this.badgeEn,
+  });
+}
