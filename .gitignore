@@ -2,10 +2,15 @@
 *.log
 *.tmp
 .DS_Store
+__MACOSX/
+Documentation.url
+Readme.txt
+Delivery Man App changed files from V5.0 to V5.1/
 *.jks
 *.keystore
 key.properties
 **/android/key.properties
+**/local.properties
 
 **/.dart_tool/
 **/.gradle/
