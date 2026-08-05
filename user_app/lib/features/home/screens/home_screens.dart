@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/title_row_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/address/domain/models/address_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/banner/controllers/banner_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/banners_widget.dart';
@@ -90,7 +91,15 @@ class HomePage extends StatefulWidget {
     shopController.getAllSellerList(offset: 1, isUpdate: reload);
     shopController.getTopSellerList(offset: 1, isUpdate: reload);
 
-    addressController.getAddressList();
+    final addresses = await addressController.getAddressList();
+    AddressModel? locationAddress;
+    for (final address in addresses ?? []) {
+      if ((address.latitude?.isNotEmpty ?? false) &&
+          (address.longitude?.isNotEmpty ?? false)) {
+        locationAddress = address;
+        break;
+      }
+    }
 
     cartController.getCartData(Get.context!);
 
@@ -103,6 +112,12 @@ class HomePage extends StatefulWidget {
     // productController.getLProductList('1', reload: reload);
 
     productController.getLatestProductList(1, isUpdate: reload);
+    productController.getSupermarketProductList(
+      1,
+      isUpdate: reload,
+      latitude: locationAddress?.latitude,
+      longitude: locationAddress?.longitude,
+    );
     productController.getSelectedProductModel(1, isUpdate: reload);
 
     productController.getFeaturedProductModel(1, isUpdate: reload);
