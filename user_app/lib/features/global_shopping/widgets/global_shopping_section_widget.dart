@@ -22,10 +22,10 @@ class GlobalShoppingSectionWidget extends StatelessWidget {
       badgeEn: 'Wholesale',
     ),
     _GlobalStore(
-      name: 'amazon',
+      name: 'Amazon',
       url: 'https://www.amazon.com/',
       color: Color(0xFFFFA41C),
-      badgeAr: 'قريباً',
+      badgeAr: 'قريبا',
       badgeEn: 'Soon',
     ),
     _GlobalStore(
@@ -49,7 +49,7 @@ class GlobalShoppingSectionWidget extends StatelessWidget {
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text(
-          isLtr ? 'Order from global stores' : 'أطلب من المواقع العالمية',
+          isLtr ? 'Order from global stores' : 'اطلب من المواقع العالمية',
           textAlign: TextAlign.start,
           style: textBold.copyWith(
             fontSize: 22,
@@ -150,9 +150,8 @@ class _GlobalStoreCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(
-                        color: Theme.of(context)
-                            .primaryColor
-                            .withValues(alpha: .8)),
+                      color: Theme.of(context).primaryColor.withValues(alpha: .8),
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

@@ -44,15 +44,25 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(
-        onProgress: (progress) => setState(() => _progress = progress),
-        onPageStarted: (url) => setState(() {
-          _currentUrl = url;
-          _progress = 0;
-        }),
-        onPageFinished: (url) => setState(() {
-          _currentUrl = url;
-          _progress = 100;
-        }),
+        onProgress: (progress) {
+          if (mounted) setState(() => _progress = progress);
+        },
+        onPageStarted: (url) {
+          if (mounted) {
+            setState(() {
+              _currentUrl = url;
+              _progress = 0;
+            });
+          }
+        },
+        onPageFinished: (url) {
+          if (mounted) {
+            setState(() {
+              _currentUrl = url;
+              _progress = 100;
+            });
+          }
+        },
       ))
       ..loadRequest(Uri.parse(widget.initialUrl));
   }
@@ -60,6 +70,24 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   Future<String> _activeUrl() async {
     final url = await _controller.currentUrl();
     return url?.isNotEmpty == true ? url! : _currentUrl;
+  }
+
+  bool _isValidProductUrl(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) return false;
+    if (!['http', 'https'].contains(uri.scheme.toLowerCase())) return false;
+    if ((uri.host).isEmpty) return false;
+
+    final lower = url.toLowerCase();
+    if (lower.contains('javascript:') ||
+        lower.contains('mailto:') ||
+        lower.contains('tel:') ||
+        lower.contains('/cart') ||
+        lower.contains('/checkout')) {
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> _copyCurrentUrl(BuildContext context) async {
@@ -91,6 +119,18 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
         Provider.of<LocalizationController>(context, listen: false).isLtr;
     final url = await _activeUrl();
     if (!context.mounted) return;
+
+    if (!_isValidProductUrl(url)) {
+      showCustomSnackBarWidget(
+        isLtr
+            ? 'Open a product page first, then send the request'
+            : 'افتح صفحة المنتج أولاً ثم أرسل طلب الشراء',
+        context,
+        snackBarType: SnackBarType.warning,
+      );
+      return;
+    }
+
     int quantity = 1;
     final notesController = TextEditingController();
 
@@ -115,15 +155,15 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
               ),
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 Text(
-                  isLtr ? 'Request this product' : 'طلب هذا المنتج',
+                  isLtr ? 'Request this product' : 'طلب شراء هذا المنتج',
                   textAlign: TextAlign.center,
                   style: textBold.copyWith(fontSize: Dimensions.fontSizeLarge),
                 ),
                 const SizedBox(height: Dimensions.paddingSizeSmall),
                 Text(
                   isLtr
-                      ? 'Send the product link to Allinye for pricing, shipping calculation, and approval before checkout.'
-                      : 'سيتم إرسال رابط المنتج إلى الإدارة للتسعير وحساب الشحن والاعتماد قبل إتمام الطلب.',
+                      ? 'Send the product link to Allinye. The team will price it, calculate shipping, then add it for approval before checkout.'
+                      : 'أرسل رابط المنتج إلى Allinye ليتم تسعيره وحساب الشحن، ثم إضافته للموافقة قبل إتمام الطلب.',
                   textAlign: TextAlign.center,
                   style:
                       textRegular.copyWith(color: Theme.of(context).hintColor),
@@ -142,7 +182,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                     overflow: TextOverflow.ellipsis,
                     textDirection: TextDirection.ltr,
                     style: textRegular.copyWith(
-                        fontSize: Dimensions.fontSizeSmall),
+                      fontSize: Dimensions.fontSizeSmall,
+                    ),
                   ),
                 ),
                 const SizedBox(height: Dimensions.paddingSizeDefault),
@@ -161,7 +202,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: Dimensions.paddingSizeDefault),
+                      horizontal: Dimensions.paddingSizeDefault,
+                    ),
                     child: Text(
                       quantity.toString(),
                       style:
@@ -215,7 +257,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.add_shopping_cart_rounded, size: 19),
-                    label: Text(isLtr ? 'Send request' : 'إرسال طلب الشراء'),
+                    label: Text(isLtr ? 'Send purchase request' : 'إرسال طلب الشراء'),
                   ),
                 ),
               ]),
@@ -268,7 +310,9 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
           response.data is Map ? response.data['message']?.toString() : null;
       showCustomSnackBarWidget(
         message ??
-            (isLtr ? 'Request sent for pricing' : 'تم إرسال الطلب للتسعير'),
+            (isLtr
+                ? 'Request sent for pricing and approval'
+                : 'تم إرسال الطلب للتسعير والموافقة'),
         context,
         snackBarType: SnackBarType.success,
       );
@@ -302,8 +346,10 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.storeName,
-              style: textBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+          title: Text(
+            widget.storeName,
+            style: textBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+          ),
           centerTitle: true,
           actions: [
             IconButton(
@@ -383,7 +429,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                     onPressed: () => _showAssistedOrderSheet(context),
                     icon: const Icon(Icons.shopping_bag_outlined, size: 19),
                     label: Text(
-                        isLtr ? 'Request via Allinye' : 'اطلبه عبر Allinye'),
+                      isLtr ? 'Request via Allinye' : 'اطلبه عبر Allinye',
+                    ),
                   ),
                 ),
               ]),
