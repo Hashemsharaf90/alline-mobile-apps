@@ -33,7 +33,6 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   late final WebViewController _controller;
   int _progress = 0;
   String _currentUrl = '';
-  bool _isSubmittingRequest = false;
 
   bool get _isLoaded => _progress >= 100;
 
@@ -43,27 +42,39 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     _currentUrl = widget.initialUrl;
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(NavigationDelegate(
-        onProgress: (progress) {
-          if (mounted) setState(() => _progress = progress);
-        },
-        onPageStarted: (url) {
-          if (mounted) {
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (progress) {
+            if (mounted) setState(() => _progress = progress);
+          },
+          onPageStarted: (url) {
+            if (!mounted) return;
             setState(() {
               _currentUrl = url;
               _progress = 0;
             });
-          }
-        },
-        onPageFinished: (url) {
-          if (mounted) {
+          },
+          onPageFinished: (url) {
+            if (!mounted) return;
             setState(() {
               _currentUrl = url;
               _progress = 100;
             });
-          }
-        },
-      ))
+          },
+          onNavigationRequest: (request) {
+            final uri = Uri.tryParse(request.url);
+            if (uri == null) return NavigationDecision.prevent;
+
+            final scheme = uri.scheme.toLowerCase();
+            if (scheme == 'http' || scheme == 'https') {
+              return NavigationDecision.navigate;
+            }
+
+            launchUrl(uri, mode: LaunchMode.externalApplication);
+            return NavigationDecision.prevent;
+          },
+        ),
+      )
       ..loadRequest(Uri.parse(widget.initialUrl));
   }
 
@@ -76,7 +87,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     final uri = Uri.tryParse(url.trim());
     if (uri == null) return false;
     if (!['http', 'https'].contains(uri.scheme.toLowerCase())) return false;
-    if ((uri.host).isEmpty) return false;
+    if (uri.host.isEmpty) return false;
 
     final lower = url.toLowerCase();
     if (lower.contains('javascript:') ||
@@ -90,18 +101,22 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     return true;
   }
 
-  Future<void> _copyCurrentUrl(BuildContext context) async {
+  String _text(BuildContext context, String en, String ar) {
     final isLtr =
         Provider.of<LocalizationController>(context, listen: false).isLtr;
+    return isLtr ? en : ar;
+  }
+
+  Future<void> _copyCurrentUrl(BuildContext context) async {
     final url = await _activeUrl();
     await Clipboard.setData(ClipboardData(text: url));
-    if (context.mounted) {
-      showCustomSnackBarWidget(
-        isLtr ? 'Product link copied' : 'تم نسخ رابط المنتج',
-        context,
-        snackBarType: SnackBarType.success,
-      );
-    }
+    if (!context.mounted) return;
+
+    showCustomSnackBarWidget(
+      _text(context, 'Product link copied', 'تم نسخ رابط المنتج'),
+      context,
+      snackBarType: SnackBarType.success,
+    );
   }
 
   Future<void> _shareCurrentUrl() async {
@@ -115,7 +130,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   }
 
   Future<void> _showAssistedOrderSheet(BuildContext context) async {
-    final isLtr =
+    final bool isLtr =
         Provider.of<LocalizationController>(context, listen: false).isLtr;
     final url = await _activeUrl();
     if (!context.mounted) return;
@@ -124,7 +139,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
       showCustomSnackBarWidget(
         isLtr
             ? 'Open a product page first, then send the request'
-            : 'افتح صفحة المنتج أولاً ثم أرسل طلب الشراء',
+            : 'افتح صفحة المنتج أولا ثم أرسل طلب الشراء',
         context,
         snackBarType: SnackBarType.warning,
       );
@@ -132,6 +147,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     }
 
     int quantity = 1;
+    bool isSubmittingRequest = false;
     final notesController = TextEditingController();
 
     await showModalBottomSheet<void>(
@@ -234,30 +250,37 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: _isSubmittingRequest
+                    onPressed: isSubmittingRequest
                         ? null
                         : () async {
-                            setSheetState(() => _isSubmittingRequest = true);
-                            await _submitGlobalShoppingRequest(
-                              context: context,
-                              sheetContext: sheetContext,
-                              url: url,
-                              quantity: quantity,
-                              notes: notesController.text,
-                              isLtr: isLtr,
-                            );
-                            if (mounted && sheetContext.mounted) {
-                              setSheetState(() => _isSubmittingRequest = false);
+                            setSheetState(() => isSubmittingRequest = true);
+                            try {
+                              await _submitGlobalShoppingRequest(
+                                context: context,
+                                sheetContext: sheetContext,
+                                url: url,
+                                quantity: quantity,
+                                notes: notesController.text,
+                                isLtr: isLtr,
+                              );
+                            } finally {
+                              if (sheetContext.mounted) {
+                                setSheetState(
+                                  () => isSubmittingRequest = false,
+                                );
+                              }
                             }
                           },
-                    icon: _isSubmittingRequest
+                    icon: isSubmittingRequest
                         ? const SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.add_shopping_cart_rounded, size: 19),
-                    label: Text(isLtr ? 'Send purchase request' : 'إرسال طلب الشراء'),
+                    label: Text(
+                      isLtr ? 'Send purchase request' : 'إرسال طلب الشراء',
+                    ),
                   ),
                 ),
               ]),
@@ -281,10 +304,12 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     final authController = Provider.of<AuthController>(context, listen: false);
     if (!authController.isLoggedIn()) {
       if (sheetContext.mounted) Navigator.pop(sheetContext);
+      if (!context.mounted) return;
+
       showCustomSnackBarWidget(
         isLtr
             ? 'Please sign in first to send the request'
-            : 'يرجى تسجيل الدخول أولاً لإرسال الطلب',
+            : 'يرجى تسجيل الدخول أولا لإرسال الطلب',
         context,
         snackBarType: SnackBarType.warning,
       );

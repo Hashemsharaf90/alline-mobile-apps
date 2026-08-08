@@ -150,7 +150,8 @@ class _GlobalStoreCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(
-                      color: Theme.of(context).primaryColor.withValues(alpha: .8),
+                      color:
+                          Theme.of(context).primaryColor.withValues(alpha: .8),
                     ),
                     borderRadius: BorderRadius.circular(20),
                   ),
