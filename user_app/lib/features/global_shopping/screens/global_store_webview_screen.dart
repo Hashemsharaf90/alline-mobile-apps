@@ -150,7 +150,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     bool isSubmittingRequest = false;
     final notesController = TextEditingController();
 
-    await showModalBottomSheet<void>(
+    final sheetResult = await showModalBottomSheet<_GlobalRequestSheetResult>(
       context: context,
       showDragHandle: true,
       isScrollControlled: true,
@@ -255,7 +255,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                         : () async {
                             setSheetState(() => isSubmittingRequest = true);
                             try {
-                              await _submitGlobalShoppingRequest(
+                              final result = await _submitGlobalShoppingRequest(
                                 context: context,
                                 sheetContext: sheetContext,
                                 url: url,
@@ -263,6 +263,11 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                                 notes: notesController.text,
                                 isLtr: isLtr,
                               );
+                              if (result ==
+                                      _GlobalRequestSheetResult.loginRequired &&
+                                  sheetContext.mounted) {
+                                Navigator.of(sheetContext).pop(result);
+                              }
                             } finally {
                               if (sheetContext.mounted) {
                                 setSheetState(
@@ -290,10 +295,32 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
       },
     );
 
+    await Future<void>.delayed(const Duration(milliseconds: 350));
     notesController.dispose();
+
+    if (sheetResult == _GlobalRequestSheetResult.loginRequired) {
+      await Future<void>.delayed(Duration.zero);
+      if (!mounted || !context.mounted) {
+        return;
+      }
+
+      showCustomSnackBarWidget(
+        isLtr
+            ? 'Please sign in first to send the request'
+            : 'يرجى تسجيل الدخول أولا لإرسال الطلب',
+        context,
+        snackBarType: SnackBarType.warning,
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          RouterHelper.getLoginRoute(action: RouteAction.push);
+        }
+      });
+    }
   }
 
-  Future<void> _submitGlobalShoppingRequest({
+  Future<_GlobalRequestSheetResult?> _submitGlobalShoppingRequest({
     required BuildContext context,
     required BuildContext sheetContext,
     required String url,
@@ -303,18 +330,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   }) async {
     final authController = Provider.of<AuthController>(context, listen: false);
     if (!authController.isLoggedIn()) {
-      if (sheetContext.mounted) Navigator.pop(sheetContext);
-      if (!context.mounted) return;
-
-      showCustomSnackBarWidget(
-        isLtr
-            ? 'Please sign in first to send the request'
-            : 'يرجى تسجيل الدخول أولا لإرسال الطلب',
-        context,
-        snackBarType: SnackBarType.warning,
-      );
-      RouterHelper.getLoginRoute(action: RouteAction.push);
-      return;
+      return _GlobalRequestSheetResult.loginRequired;
     }
 
     try {
@@ -329,7 +345,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
       );
 
       if (sheetContext.mounted) Navigator.pop(sheetContext);
-      if (!context.mounted) return;
+      if (!context.mounted) return _GlobalRequestSheetResult.sent;
 
       final message =
           response.data is Map ? response.data['message']?.toString() : null;
@@ -341,8 +357,9 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
         context,
         snackBarType: SnackBarType.success,
       );
+      return _GlobalRequestSheetResult.sent;
     } catch (_) {
-      if (!context.mounted) return;
+      if (!context.mounted) return _GlobalRequestSheetResult.failed;
       showCustomSnackBarWidget(
         isLtr
             ? 'Could not send the request. Please try again.'
@@ -350,6 +367,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
         context,
         snackBarType: SnackBarType.error,
       );
+      return _GlobalRequestSheetResult.failed;
     }
   }
 
@@ -471,4 +489,10 @@ enum _GlobalStoreAction {
   copy,
   share,
   external,
+}
+
+enum _GlobalRequestSheetResult {
+  loginRequired,
+  sent,
+  failed,
 }
