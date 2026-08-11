@@ -347,8 +347,12 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
       if (sheetContext.mounted) Navigator.pop(sheetContext);
       if (!context.mounted) return _GlobalRequestSheetResult.sent;
 
-      final message =
-          response.data is Map ? response.data['message']?.toString() : null;
+      final responseData = response.data is Map ? response.data as Map : null;
+      final message = responseData?['message']?.toString();
+      final cartAdded = responseData?['cart_added'] == true ||
+          responseData?['cart_added'] == 1 ||
+          responseData?['next_action']?.toString() == 'cart';
+
       showCustomSnackBarWidget(
         message ??
             (isLtr
@@ -357,6 +361,15 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
         context,
         snackBarType: SnackBarType.success,
       );
+
+      if (cartAdded) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            RouterHelper.getCartScreenRoute(action: RouteAction.push);
+          }
+        });
+      }
+
       return _GlobalRequestSheetResult.sent;
     } catch (_) {
       if (!context.mounted) return _GlobalRequestSheetResult.failed;
