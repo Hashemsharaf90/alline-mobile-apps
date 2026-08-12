@@ -30,9 +30,10 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
         final stores =
             productController.nearbySupermarkets.whereType<Map>().toList();
         final hasLocation = (addressController.addressList ?? []).any(
-            (address) =>
-                (address.latitude?.isNotEmpty ?? false) &&
-                (address.longitude?.isNotEmpty ?? false));
+          (address) =>
+              (address.latitude?.isNotEmpty ?? false) &&
+              (address.longitude?.isNotEmpty ?? false),
+        );
 
         if (products.isEmpty && category == null && stores.isEmpty) {
           return const SizedBox();
@@ -46,156 +47,167 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
             Dimensions.homePagePadding,
             Dimensions.paddingSizeDefault,
           ),
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            Row(children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isLtr ? 'Supermarket' : 'السوبر ماركت',
-                      textAlign: TextAlign.start,
-                      style: textBold.copyWith(
-                        fontSize: 22,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasLocation
-                          ? (isLtr
-                              ? 'Available around your saved location'
-                              : 'متاجر ومنتجات قريبة حسب موقعك المحفوظ')
-                          : (isLtr
-                              ? 'Add an address for better local results'
-                              : 'أضف عنوانك لعرض المتاجر الأقرب إليك'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textRegular.copyWith(
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () => _openSupermarket(context, category, isLtr),
-                child: Text(isLtr ? 'View all' : 'عرض الكل'),
-              ),
-            ]),
-            const SizedBox(height: Dimensions.paddingSizeSmall),
-            if (productController.nearbySupermarketLoading)
-              const LinearProgressIndicator(minHeight: 2),
-            if (stores.isNotEmpty) ...[
-              SizedBox(
-                height: 92,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: stores.length > 8 ? 8 : stores.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(width: Dimensions.paddingSizeSmall),
-                  itemBuilder: (context, index) {
-                    final store = stores[index];
-                    return _NearbyStoreCard(
-                      name: _storeString(store, 'name'),
-                      distanceKm: _storeDouble(store, 'distance_km'),
-                      productsCount: _storeInt(store, 'products_count'),
-                      isLtr: isLtr,
-                      onTap: () => _openStore(context, store, category, isLtr),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-            ],
-            InkWell(
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-              onTap: () => _openSupermarket(context, category, isLtr),
-              child: Ink(
-                height: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  image: const DecorationImage(
-                    image: AssetImage(Images.allineSupermarketBanner),
-                    fit: BoxFit.cover,
-                  ),
-                  boxShadow: ThemeShadow.getShadow(context),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(Dimensions.radiusDefault),
-                    gradient: LinearGradient(
-                      begin: AlignmentDirectional.centerStart,
-                      end: AlignmentDirectional.centerEnd,
-                      colors: [
-                        Colors.white.withValues(alpha: .94),
-                        Colors.white.withValues(alpha: .55),
-                        Colors.transparent,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isLtr ? 'Supermarket' : 'السوبر ماركت',
+                          textAlign: TextAlign.start,
+                          style: textBold.copyWith(
+                            fontSize: 22,
+                            color:
+                                Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          hasLocation
+                              ? (isLtr
+                                  ? 'Available around your saved location'
+                                  : 'متاجر ومنتجات قريبة حسب موقعك المحفوظ')
+                              : (isLtr
+                                  ? 'Add an address for better local results'
+                                  : 'أضف عنوانك لعرض المتاجر الأقرب إليك'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textRegular.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            color: Theme.of(context).hintColor,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 260),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            isLtr
-                                ? 'Fresh essentials near you'
-                                : 'احتياجاتك اليومية بالقرب منك',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: textBold.copyWith(
-                              fontSize: 19,
-                              color: const Color(0xFF103A52),
-                            ),
-                          ),
-                          const SizedBox(
-                              height: Dimensions.paddingSizeExtraSmall),
-                          Text(
-                            isLtr
-                                ? 'Groceries, cleaning, food, and home basics in one place.'
-                                : 'مواد غذائية، منظفات، وخيارات منزلية أساسية في مكان واحد.',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: textRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: const Color(0xFF516A78),
-                            ),
-                          ),
+                  TextButton(
+                    onPressed: () => _openSupermarket(context, category, isLtr),
+                    child: Text(isLtr ? 'View all' : 'عرض الكل'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: Dimensions.paddingSizeSmall),
+              if (productController.nearbySupermarketLoading)
+                const LinearProgressIndicator(minHeight: 2),
+              if (stores.isNotEmpty) ...[
+                SizedBox(
+                  height: 102,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: stores.length > 8 ? 8 : stores.length,
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(width: Dimensions.paddingSizeSmall),
+                    itemBuilder: (context, index) {
+                      final store = stores[index];
+                      return _NearbyStoreCard(
+                        name: _storeString(store, 'name'),
+                        distanceKm: _storeDouble(store, 'distance_km'),
+                        deliveryFee: _storeDouble(store, 'delivery_fee'),
+                        estimatedDeliveryMinutes:
+                            _storeInt(store, 'estimated_delivery_minutes'),
+                        productsCount: _storeInt(store, 'products_count'),
+                        isLtr: isLtr,
+                        onTap: () =>
+                            _openStore(context, store, category, isLtr),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+              ],
+              InkWell(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                onTap: () => _openSupermarket(context, category, isLtr),
+                child: Ink(
+                  height: 150,
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        BorderRadius.circular(Dimensions.radiusDefault),
+                    image: const DecorationImage(
+                      image: AssetImage(Images.allineSupermarketBanner),
+                      fit: BoxFit.cover,
+                    ),
+                    boxShadow: ThemeShadow.getShadow(context),
+                  ),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          BorderRadius.circular(Dimensions.radiusDefault),
+                      gradient: LinearGradient(
+                        begin: AlignmentDirectional.centerStart,
+                        end: AlignmentDirectional.centerEnd,
+                        colors: [
+                          Colors.white.withValues(alpha: .94),
+                          Colors.white.withValues(alpha: .55),
+                          Colors.transparent,
                         ],
+                      ),
+                    ),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 260),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              isLtr
+                                  ? 'Fresh essentials near you'
+                                  : 'احتياجاتك اليومية بالقرب منك',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textBold.copyWith(
+                                fontSize: 19,
+                                color: const Color(0xFF103A52),
+                              ),
+                            ),
+                            const SizedBox(
+                                height: Dimensions.paddingSizeExtraSmall),
+                            Text(
+                              isLtr
+                                  ? 'Groceries, cleaning, food, and home basics in one place.'
+                                  : 'مواد غذائية، منظفات، وخيارات منزلية أساسية في مكان واحد.',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textRegular.copyWith(
+                                fontSize: Dimensions.fontSizeSmall,
+                                color: const Color(0xFF516A78),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            if (products.isNotEmpty) ...[
-              const SizedBox(height: Dimensions.paddingSizeDefault),
-              SizedBox(
-                height: 255,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: products.length > 6 ? 6 : products.length,
-                  itemBuilder: (context, index) => SizedBox(
-                    width: 170,
-                    child: ProductWidget(
-                      productModel: products[index],
-                      productNameLine: 2,
-                      margin: Dimensions.paddingSizeExtraSmall,
+              if (products.isNotEmpty) ...[
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+                SizedBox(
+                  height: 255,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: products.length > 6 ? 6 : products.length,
+                    itemBuilder: (context, index) => SizedBox(
+                      width: 170,
+                      child: ProductWidget(
+                        productModel: products[index],
+                        productNameLine: 2,
+                        margin: Dimensions.paddingSizeExtraSmall,
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ]),
+          ),
         );
       },
     );
@@ -302,6 +314,8 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
 class _NearbyStoreCard extends StatelessWidget {
   final String name;
   final double? distanceKm;
+  final double? deliveryFee;
+  final int estimatedDeliveryMinutes;
   final int productsCount;
   final bool isLtr;
   final VoidCallback onTap;
@@ -309,6 +323,8 @@ class _NearbyStoreCard extends StatelessWidget {
   const _NearbyStoreCard({
     required this.name,
     required this.distanceKm,
+    required this.deliveryFee,
+    required this.estimatedDeliveryMinutes,
     required this.productsCount,
     required this.isLtr,
     required this.onTap,
@@ -321,57 +337,83 @@ class _NearbyStoreCard extends StatelessWidget {
         : (isLtr
             ? '${distanceKm!.toStringAsFixed(1)} km'
             : '${distanceKm!.toStringAsFixed(1)} كم');
+    final deliveryText = deliveryFee == null
+        ? ''
+        : (isLtr
+            ? ' - delivery ${deliveryFee!.toStringAsFixed(0)}'
+            : ' - توصيل ${deliveryFee!.toStringAsFixed(0)}');
+    final etaText = estimatedDeliveryMinutes > 0
+        ? (isLtr
+            ? ' - $estimatedDeliveryMinutes min'
+            : ' - $estimatedDeliveryMinutes د')
+        : '';
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
       child: Container(
-        width: 190,
+        width: 210,
         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
         decoration: BoxDecoration(
           color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           border: Border.all(color: Theme.of(context).dividerColor),
         ),
-        child: Row(children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: .12),
-              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+              ),
+              child: Icon(
+                Icons.storefront_outlined,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
-            child: Icon(Icons.storefront_outlined,
-                color: Theme.of(context).primaryColor),
-          ),
-          const SizedBox(width: Dimensions.paddingSizeSmall),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name.isEmpty ? (isLtr ? 'Supermarket' : 'سوبر ماركت') : name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textMedium.copyWith(
-                    fontSize: Dimensions.fontSizeSmall,
+            const SizedBox(width: Dimensions.paddingSizeSmall),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name.isEmpty
+                        ? (isLtr ? 'Supermarket' : 'سوبر ماركت')
+                        : name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textMedium.copyWith(
+                      fontSize: Dimensions.fontSizeSmall,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '$distanceText - $productsCount ${isLtr ? 'items' : 'منتج'}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textRegular.copyWith(
-                    fontSize: Dimensions.fontSizeExtraSmall,
-                    color: Theme.of(context).hintColor,
+                  const SizedBox(height: 3),
+                  Text(
+                    '$distanceText$deliveryText$etaText',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textRegular.copyWith(
+                      fontSize: Dimensions.fontSizeExtraSmall,
+                      color: Theme.of(context).hintColor,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+                  Text(
+                    '$productsCount ${isLtr ? 'items' : 'منتج'}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textRegular.copyWith(
+                      fontSize: Dimensions.fontSizeExtraSmall,
+                      color: Theme.of(context).hintColor,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
