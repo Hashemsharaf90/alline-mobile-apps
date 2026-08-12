@@ -69,7 +69,7 @@ class LocationController with ChangeNotifier {
     _locationController.text = text;
   }
 
-  void getCurrentLocation(BuildContext context, bool fromAddress,
+  Future<void> getCurrentLocation(BuildContext context, bool fromAddress,
       {GoogleMapController? mapController}) async {
     _loading = true;
     notifyListeners();
@@ -117,6 +117,54 @@ class LocationController with ChangeNotifier {
     if (fromAddress) {
       _locationController.text = placeMarkToAddress(_address);
     }
+    _loading = false;
+    notifyListeners();
+  }
+
+  Future<void> setPickedCoordinates({
+    required double latitude,
+    required double longitude,
+    required bool fromAddress,
+    String? address,
+    BuildContext? context,
+  }) async {
+    _loading = true;
+    notifyListeners();
+
+    final position = Position(
+      latitude: latitude,
+      longitude: longitude,
+      timestamp: DateTime.now(),
+      heading: 1,
+      accuracy: 1,
+      altitude: 1,
+      speedAccuracy: 1,
+      speed: 1,
+      altitudeAccuracy: 1,
+      headingAccuracy: 1,
+    );
+
+    if (fromAddress) {
+      _position = position;
+    } else {
+      _pickPosition = position;
+    }
+
+    final resolvedAddress = address?.trim().isNotEmpty == true
+        ? address!.trim()
+        : await getAddressFromCoordinates(
+            latitude,
+            longitude,
+            context ?? Get.context!,
+          );
+
+    final placemark = Placemark(name: resolvedAddress);
+    fromAddress ? _address = placemark : _pickAddress = placemark;
+
+    if (fromAddress) {
+      _locationController.text = placeMarkToAddress(_address);
+    }
+
     _loading = false;
     notifyListeners();
   }
@@ -240,6 +288,16 @@ class LocationController with ChangeNotifier {
 
   Future<String> getAddressFromGeocode(
       LatLng latLng, BuildContext context) async {
+    final localAddress = await getAddressFromCoordinates(
+      latLng.latitude,
+      latLng.longitude,
+      context,
+    );
+
+    if (localAddress.isNotEmpty) {
+      return localAddress;
+    }
+
     ApiResponseModel response =
         await locationServiceInterface.getAddressFromGeocode(latLng);
     String address = '';
@@ -251,6 +309,30 @@ class LocationController with ChangeNotifier {
       }
     }
     return address;
+  }
+
+  Future<String> getAddressFromCoordinates(
+      double latitude, double longitude, BuildContext context) async {
+    try {
+      final placeMarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placeMarks.isEmpty) {
+        return '';
+      }
+
+      final place = placeMarks.first;
+      return [
+        place.street,
+        place.subLocality,
+        place.locality,
+        place.subAdministrativeArea,
+        place.country,
+      ].where((part) => part?.trim().isNotEmpty ?? false).join(', ');
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+      return '';
+    }
   }
 
   Future<List<Suggestions>> searchLocation(
