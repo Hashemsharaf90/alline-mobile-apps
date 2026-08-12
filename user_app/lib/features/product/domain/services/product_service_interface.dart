@@ -16,6 +16,7 @@ abstract class ProductServiceInterface {
   Future<dynamic> getLatestProductList(String offset);
   Future<dynamic> getSupermarketProductList(String offset,
       {String? latitude, String? longitude});
+  Future<dynamic> getNearbySupermarkets({String? latitude, String? longitude});
   Future<ApiResponseModel<T>> getRecommendedProduct<T>(
       {required DataSourceEnum source});
   Future<ApiResponseModel<T>> getMostDemandedProduct<T>(

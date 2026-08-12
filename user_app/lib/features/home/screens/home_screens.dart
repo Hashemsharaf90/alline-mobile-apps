@@ -118,6 +118,11 @@ class HomePage extends StatefulWidget {
       latitude: locationAddress?.latitude,
       longitude: locationAddress?.longitude,
     );
+    productController.getNearbySupermarkets(
+      isUpdate: reload,
+      latitude: locationAddress?.latitude,
+      longitude: locationAddress?.longitude,
+    );
     productController.getSelectedProductModel(1, isUpdate: reload);
 
     productController.getFeaturedProductModel(1, isUpdate: reload);

@@ -139,6 +139,22 @@ class ProductRepository extends DataSyncService
   }
 
   @override
+  Future<ApiResponseModel> getNearbySupermarkets(
+      {String? latitude, String? longitude}) async {
+    try {
+      String uri = AppConstants.nearbySupermarketsUri;
+      if ((latitude?.isNotEmpty ?? false) && (longitude?.isNotEmpty ?? false)) {
+        uri = '$uri&latitude=$latitude&longitude=$longitude';
+      }
+
+      final response = await dioClient.get(uri);
+      return ApiResponseModel.withSuccess(response);
+    } catch (e) {
+      return ApiResponseModel.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
+
+  @override
   Future<ApiResponseModel<T>> getRecommendedProduct<T>(
       {required DataSourceEnum source}) async {
     return await fetchData<T>(AppConstants.dealOfTheDay, source);

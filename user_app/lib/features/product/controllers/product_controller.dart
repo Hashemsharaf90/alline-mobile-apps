@@ -41,6 +41,12 @@ class ProductController extends ChangeNotifier {
   ProductModel? _supermarketProductModel;
   ProductModel? get supermarketProductModel => _supermarketProductModel;
 
+  List<dynamic> _nearbySupermarkets = [];
+  List<dynamic> get nearbySupermarkets => _nearbySupermarkets;
+
+  bool _nearbySupermarketLoading = false;
+  bool get nearbySupermarketLoading => _nearbySupermarketLoading;
+
   final List<HomeCategoryProduct> _homeCategoryProductList = [];
   List<HomeCategoryProduct> get homeCategoryProductList =>
       _homeCategoryProductList;
@@ -255,6 +261,34 @@ class ProductController extends ChangeNotifier {
       ApiChecker.checkApi(apiResponse);
     }
 
+    notifyListeners();
+  }
+
+  Future<void> getNearbySupermarkets(
+      {bool isUpdate = false, String? latitude, String? longitude}) async {
+    _nearbySupermarketLoading = true;
+    if (isUpdate) {
+      notifyListeners();
+    }
+
+    final ApiResponseModel? apiResponse =
+        await productServiceInterface?.getNearbySupermarkets(
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    if (apiResponse?.response?.statusCode == 200) {
+      final data = apiResponse?.response?.data;
+      if (data is Map && data['stores'] is List) {
+        _nearbySupermarkets = List<dynamic>.from(data['stores']);
+      } else {
+        _nearbySupermarkets = [];
+      }
+    } else if (apiResponse != null) {
+      ApiChecker.checkApi(apiResponse);
+    }
+
+    _nearbySupermarketLoading = false;
     notifyListeners();
   }
 

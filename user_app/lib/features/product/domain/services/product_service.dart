@@ -60,6 +60,12 @@ class ProductService implements ProductServiceInterface {
   }
 
   @override
+  Future getNearbySupermarkets({String? latitude, String? longitude}) async {
+    return await productRepositoryInterface.getNearbySupermarkets(
+        latitude: latitude, longitude: longitude);
+  }
+
+  @override
   Future<ApiResponseModel<T>> getMostDemandedProduct<T>(
       {required DataSourceEnum source}) async {
     return await productRepositoryInterface.getMostDemandedProduct(

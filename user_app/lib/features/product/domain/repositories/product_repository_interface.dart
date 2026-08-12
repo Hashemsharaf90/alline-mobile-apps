@@ -26,6 +26,8 @@ abstract class ProductRepositoryInterface extends RepositoryInterface {
   Future<dynamic> getSupermarketProductList(String offset,
       {String? latitude, String? longitude});
 
+  Future<dynamic> getNearbySupermarkets({String? latitude, String? longitude});
+
   Future<ApiResponseModel<T>> getRecommendedProduct<T>(
       {required DataSourceEnum source});
 

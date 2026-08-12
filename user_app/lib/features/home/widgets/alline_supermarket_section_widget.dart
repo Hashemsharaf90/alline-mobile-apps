@@ -27,12 +27,14 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
             _findSupermarketCategory(categoryController.categoryList);
         final products =
             productController.supermarketProductModel?.products ?? [];
+        final stores =
+            productController.nearbySupermarkets.whereType<Map>().toList();
         final hasLocation = (addressController.addressList ?? []).any(
             (address) =>
                 (address.latitude?.isNotEmpty ?? false) &&
                 (address.longitude?.isNotEmpty ?? false));
 
-        if (products.isEmpty && category == null) {
+        if (products.isEmpty && category == null && stores.isEmpty) {
           return const SizedBox();
         }
 
@@ -64,10 +66,10 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
                       hasLocation
                           ? (isLtr
                               ? 'Available around your saved location'
-                              : 'متوفر حسب موقعك المحفوظ')
+                              : 'متاجر ومنتجات قريبة حسب موقعك المحفوظ')
                           : (isLtr
                               ? 'Add an address for better local results'
-                              : 'أضف عنوانك لعرض نتائج أقرب'),
+                              : 'أضف عنوانك لعرض المتاجر الأقرب إليك'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textRegular.copyWith(
@@ -84,6 +86,30 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
               ),
             ]),
             const SizedBox(height: Dimensions.paddingSizeSmall),
+            if (productController.nearbySupermarketLoading)
+              const LinearProgressIndicator(minHeight: 2),
+            if (stores.isNotEmpty) ...[
+              SizedBox(
+                height: 92,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: stores.length > 8 ? 8 : stores.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: Dimensions.paddingSizeSmall),
+                  itemBuilder: (context, index) {
+                    final store = stores[index];
+                    return _NearbyStoreCard(
+                      name: _storeString(store, 'name'),
+                      distanceKm: _storeDouble(store, 'distance_km'),
+                      productsCount: _storeInt(store, 'products_count'),
+                      isLtr: isLtr,
+                      onTap: () => _openStore(context, store, category, isLtr),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+            ],
             InkWell(
               borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
               onTap: () => _openSupermarket(context, category, isLtr),
@@ -179,6 +205,7 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
     const keywords = [
       'سوبرماركت',
       'سوبر ماركت',
+      'السوبر ماركت',
       'بقالة',
       'مواد غذائية',
       'مواد غذائيه',
@@ -214,7 +241,7 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
       showCustomSnackBarWidget(
         isLtr
             ? 'Create a supermarket category first, then add grocery products to it.'
-            : 'أنشئ فئة سوبر ماركت أولاً ثم أضف منتجات البقالة إليها.',
+            : 'أنشئ فئة السوبر ماركت أولاً ثم أضف منتجات البقالة إليها.',
         context,
         snackBarType: SnackBarType.warning,
       );
@@ -226,6 +253,126 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
       isBrand: false,
       id: category!.id,
       name: category.name,
+    );
+  }
+
+  void _openStore(
+      BuildContext context, Map store, CategoryModel? category, bool isLtr) {
+    final slug = _storeString(store, 'slug');
+    if (slug.isEmpty) {
+      _openSupermarket(context, category, isLtr);
+      return;
+    }
+
+    RouterHelper.getTopSellerRoute(
+      action: RouteAction.push,
+      slug: slug,
+      sellerId: _storeInt(store, 'seller_id'),
+      name: _storeString(store, 'name'),
+      totalProduct: _storeInt(store, 'products_count'),
+    );
+  }
+
+  String _storeString(Map store, String key) {
+    return store[key]?.toString().trim() ?? '';
+  }
+
+  int _storeInt(Map store, String key) {
+    final value = store[key];
+    if (value is int) {
+      return value;
+    }
+
+    return int.tryParse(value?.toString() ?? '') ?? 0;
+  }
+
+  double? _storeDouble(Map store, String key) {
+    final value = store[key];
+    if (value == null) {
+      return null;
+    }
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString());
+  }
+}
+
+class _NearbyStoreCard extends StatelessWidget {
+  final String name;
+  final double? distanceKm;
+  final int productsCount;
+  final bool isLtr;
+  final VoidCallback onTap;
+
+  const _NearbyStoreCard({
+    required this.name,
+    required this.distanceKm,
+    required this.productsCount,
+    required this.isLtr,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final distanceText = distanceKm == null
+        ? (isLtr ? 'Nearby' : 'قريب')
+        : (isLtr
+            ? '${distanceKm!.toStringAsFixed(1)} km'
+            : '${distanceKm!.toStringAsFixed(1)} كم');
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+      child: Container(
+        width: 190,
+        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+          border: Border.all(color: Theme.of(context).dividerColor),
+        ),
+        child: Row(children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: .12),
+              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+            ),
+            child: Icon(Icons.storefront_outlined,
+                color: Theme.of(context).primaryColor),
+          ),
+          const SizedBox(width: Dimensions.paddingSizeSmall),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name.isEmpty ? (isLtr ? 'Supermarket' : 'سوبر ماركت') : name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textMedium.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '$distanceText - $productsCount ${isLtr ? 'items' : 'منتج'}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: textRegular.copyWith(
+                    fontSize: Dimensions.fontSizeExtraSmall,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }

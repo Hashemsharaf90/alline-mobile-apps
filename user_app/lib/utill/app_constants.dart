@@ -44,6 +44,8 @@ class AppConstants {
       '/api/v1/products/home-categories?guest_id=1';
   static const String supermarketProductUri =
       '/api/v1/products/supermarket?guest_id=1&limit=10&offset=';
+  static const String nearbySupermarketsUri =
+      '/api/v1/supermarkets/nearby?guest_id=1&limit=10';
   static const String productDetailsUri = '/api/v1/products/details/';
   static const String productReviewUri = '/api/v1/products/reviews/';
   static const String searchUri = '/api/v1/products/filter';
