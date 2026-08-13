@@ -50,6 +50,10 @@ import 'package:provider/provider.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  static bool _locationServicePromptShowing = false;
+  static bool _locationServicePromptDismissed = false;
+  static bool _locationSettingsOpened = false;
+
   @override
   State<HomePage> createState() => _HomePageState();
 
@@ -60,7 +64,7 @@ class HomePage extends StatefulWidget {
 
   static Future<List<String>?> _getCurrentLocationCoordinates() async {
     try {
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      final serviceEnabled = await _ensureLocationServiceEnabled();
       if (!serviceEnabled) {
         return null;
       }
@@ -102,6 +106,59 @@ class HomePage extends StatefulWidget {
     } catch (_) {
       return null;
     }
+  }
+
+  static Future<bool> _ensureLocationServiceEnabled() async {
+    if (await Geolocator.isLocationServiceEnabled()) {
+      return true;
+    }
+
+    await _showEnableLocationServiceDialog();
+    return Geolocator.isLocationServiceEnabled();
+  }
+
+  static Future<void> _showEnableLocationServiceDialog() async {
+    final context = Get.context;
+    if (context == null ||
+        _locationServicePromptShowing ||
+        _locationServicePromptDismissed) {
+      return;
+    }
+
+    _locationServicePromptShowing = true;
+    final isLtr = Directionality.of(context) == TextDirection.ltr;
+
+    final openSettings = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isLtr ? 'Enable location' : 'تشغيل الموقع'),
+        content: Text(
+          isLtr
+              ? 'Turn on GPS so we can show nearby supermarkets on the map.'
+              : 'فعّل GPS حتى نعرض لك السوبرماركت الأقرب على الخريطة حسب موقعك الحالي.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(isLtr ? 'Later' : 'لاحقًا'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(isLtr ? 'Open settings' : 'فتح الإعدادات'),
+          ),
+        ],
+      ),
+    );
+
+    _locationServicePromptShowing = false;
+    if (openSettings == true) {
+      _locationSettingsOpened = true;
+      await Geolocator.openLocationSettings();
+      return;
+    }
+
+    _locationServicePromptDismissed = true;
   }
 
   static Future<void> loadData(bool reload) async {
@@ -212,7 +269,7 @@ class HomePage extends StatefulWidget {
   }
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
 
   void passData(int index, String title) {
@@ -224,11 +281,29 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     singleVendor = Provider.of<SplashController>(context, listen: false)
             .configModel
             ?.businessMode ==
         "single";
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        HomePage._locationSettingsOpened) {
+      HomePage._locationSettingsOpened = false;
+      HomePage._locationServicePromptDismissed = false;
+      HomePage.loadData(true);
+    }
   }
 
   @override
