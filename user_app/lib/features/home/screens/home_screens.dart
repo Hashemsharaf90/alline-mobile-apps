@@ -44,6 +44,7 @@ import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.d
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
@@ -55,6 +56,52 @@ class HomePage extends StatefulWidget {
   static bool _hasUsableCoordinates(AddressModel address) {
     return (address.latitude?.trim().isNotEmpty ?? false) &&
         (address.longitude?.trim().isNotEmpty ?? false);
+  }
+
+  static Future<List<String>?> _getCurrentLocationCoordinates() async {
+    try {
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return null;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return null;
+      }
+
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+      } catch (_) {
+        position = await Geolocator.getLastKnownPosition();
+      }
+
+      if (position == null) {
+        return null;
+      }
+
+      if (position.latitude == 0 && position.longitude == 0) {
+        return null;
+      }
+
+      return [
+        position.latitude.toString(),
+        position.longitude.toString(),
+      ];
+    } catch (_) {
+      return null;
+    }
   }
 
   static Future<void> loadData(bool reload) async {
@@ -110,6 +157,16 @@ class HomePage extends StatefulWidget {
         break;
       }
     }
+    final currentLocationCoordinates = await _getCurrentLocationCoordinates();
+    final supermarketLatitude =
+        currentLocationCoordinates?[0] ?? locationAddress?.latitude;
+    final supermarketLongitude =
+        currentLocationCoordinates?[1] ?? locationAddress?.longitude;
+    productController.setSupermarketLocationSource(
+      latitude: supermarketLatitude,
+      longitude: supermarketLongitude,
+      usingCurrentLocation: currentLocationCoordinates != null,
+    );
 
     cartController.getCartData(Get.context!);
 
@@ -125,13 +182,13 @@ class HomePage extends StatefulWidget {
     productController.getSupermarketProductList(
       1,
       isUpdate: reload,
-      latitude: locationAddress?.latitude,
-      longitude: locationAddress?.longitude,
+      latitude: supermarketLatitude,
+      longitude: supermarketLongitude,
     );
     productController.getNearbySupermarkets(
       isUpdate: reload,
-      latitude: locationAddress?.latitude,
-      longitude: locationAddress?.longitude,
+      latitude: supermarketLatitude,
+      longitude: supermarketLongitude,
     );
     productController.getSelectedProductModel(1, isUpdate: reload);
 

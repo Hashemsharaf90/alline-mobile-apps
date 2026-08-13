@@ -44,6 +44,15 @@ class ProductController extends ChangeNotifier {
   List<dynamic> _nearbySupermarkets = [];
   List<dynamic> get nearbySupermarkets => _nearbySupermarkets;
 
+  String? _supermarketLatitude;
+  String? get supermarketLatitude => _supermarketLatitude;
+
+  String? _supermarketLongitude;
+  String? get supermarketLongitude => _supermarketLongitude;
+
+  bool _supermarketUsingCurrentLocation = false;
+  bool get supermarketUsingCurrentLocation => _supermarketUsingCurrentLocation;
+
   bool _nearbySupermarketLoading = false;
   bool get nearbySupermarketLoading => _nearbySupermarketLoading;
 
@@ -290,6 +299,21 @@ class ProductController extends ChangeNotifier {
 
     _nearbySupermarketLoading = false;
     notifyListeners();
+  }
+
+  void setSupermarketLocationSource({
+    String? latitude,
+    String? longitude,
+    bool usingCurrentLocation = false,
+    bool isUpdate = false,
+  }) {
+    _supermarketLatitude = latitude;
+    _supermarketLongitude = longitude;
+    _supermarketUsingCurrentLocation = usingCurrentLocation;
+
+    if (isUpdate) {
+      notifyListeners();
+    }
   }
 
   void onChangeSelectedProductType(ProductType type) {
