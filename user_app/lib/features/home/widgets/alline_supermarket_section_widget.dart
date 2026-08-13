@@ -6,6 +6,7 @@ import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
@@ -27,8 +28,9 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
           addressController, _) {
         final category =
             _findSupermarketCategory(categoryController.categoryList);
-        final products =
-            productController.supermarketProductModel?.products ?? [];
+        final products = List<Product>.from(
+          productController.supermarketProductModel?.products ?? <Product>[],
+        )..sort(_compareProductsWithRealImagesFirst);
         final stores =
             productController.nearbySupermarkets.whereType<Map>().toList();
         final userLocation = _latLngFromStrings(
@@ -102,6 +104,24 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
               const SizedBox(height: Dimensions.paddingSizeSmall),
               if (productController.nearbySupermarketLoading)
                 const LinearProgressIndicator(minHeight: 2),
+              if (products.isNotEmpty) ...[
+                SizedBox(
+                  height: 255,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: products.length > 8 ? 8 : products.length,
+                    itemBuilder: (context, index) => SizedBox(
+                      width: 170,
+                      child: ProductWidget(
+                        productModel: products[index],
+                        productNameLine: 2,
+                        margin: Dimensions.paddingSizeExtraSmall,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: Dimensions.paddingSizeDefault),
+              ],
               if (stores.isNotEmpty) ...[
                 if (userLocation != null && storeLocations.isNotEmpty) ...[
                   _NearbyStoresMap(
@@ -207,24 +227,6 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              if (products.isNotEmpty) ...[
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                SizedBox(
-                  height: 255,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: products.length > 6 ? 6 : products.length,
-                    itemBuilder: (context, index) => SizedBox(
-                      width: 170,
-                      child: ProductWidget(
-                        productModel: products[index],
-                        productNameLine: 2,
-                        margin: Dimensions.paddingSizeExtraSmall,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ],
           ),
         );
@@ -285,6 +287,36 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
     }
 
     return null;
+  }
+
+  int _compareProductsWithRealImagesFirst(Product first, Product second) {
+    final firstHasImage = _hasRealProductImage(first);
+    final secondHasImage = _hasRealProductImage(second);
+
+    if (firstHasImage == secondHasImage) {
+      return 0;
+    }
+
+    return firstHasImage ? -1 : 1;
+  }
+
+  bool _hasRealProductImage(Product product) {
+    final thumbnailPath = product.thumbnailFullUrl?.path?.trim();
+    if (thumbnailPath != null &&
+        thumbnailPath.isNotEmpty &&
+        !thumbnailPath.endsWith('/def.png') &&
+        !thumbnailPath.contains('placeholder')) {
+      return true;
+    }
+
+    return product.imagesFullUrl?.any((image) {
+          final path = image.path?.trim();
+          return path != null &&
+              path.isNotEmpty &&
+              !path.endsWith('/def.png') &&
+              !path.contains('placeholder');
+        }) ??
+        false;
   }
 
   void _openSupermarket(
