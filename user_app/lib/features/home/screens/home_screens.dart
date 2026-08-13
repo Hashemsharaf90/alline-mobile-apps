@@ -52,6 +52,11 @@ class HomePage extends StatefulWidget {
   @override
   State<HomePage> createState() => _HomePageState();
 
+  static bool _hasUsableCoordinates(AddressModel address) {
+    return (address.latitude?.trim().isNotEmpty ?? false) &&
+        (address.longitude?.trim().isNotEmpty ?? false);
+  }
+
   static Future<void> loadData(bool reload) async {
     final flashDealController =
         Provider.of<FlashDealController>(Get.context!, listen: false);
@@ -94,8 +99,13 @@ class HomePage extends StatefulWidget {
     final addresses = await addressController.getAddressList();
     AddressModel? locationAddress;
     for (final address in addresses ?? []) {
-      if ((address.latitude?.isNotEmpty ?? false) &&
-          (address.longitude?.isNotEmpty ?? false)) {
+      if (_hasUsableCoordinates(address) && address.isBilling != true) {
+        locationAddress = address;
+        break;
+      }
+    }
+    for (final address in addresses ?? []) {
+      if (locationAddress == null && _hasUsableCoordinates(address)) {
         locationAddress = address;
         break;
       }

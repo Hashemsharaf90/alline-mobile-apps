@@ -296,7 +296,7 @@ class RouterHelper {
     if (totalReview != null) params['totalReview'] = totalReview.toString();
     if (totalProduct != null) params['totalProduct'] = totalProduct.toString();
     if (rating != null) params['rating'] = rating;
-    if (slug != null) params['slug'] = slug;
+    if (slug != null) params['slug'] = Uri.encodeComponent(slug);
     final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
     return _navigateRoute('$topSellerScreen${query.isNotEmpty ? '?$query' : ''}', route: action);
   }
@@ -872,6 +872,18 @@ class RouterHelper {
     return path;
   }
 
+  static String? _safeDecodeQueryValue(String? value) {
+    if (value == null) {
+      return null;
+    }
+
+    try {
+      return Uri.decodeComponent(value);
+    } catch (_) {
+      return value;
+    }
+  }
+
 
 
   static  Widget _routeHandler(BuildContext context, Widget route,  {bool isBranchCheck = false, required String? path}) {
@@ -921,8 +933,8 @@ class RouterHelper {
       GoRoute(path: initial, builder: (context, state) => DashBoardScreen(pageIndex: 0)),
 
       GoRoute(path: trackOrder, builder: (context, state) => GuestTrackOrderScreen(
-        orderId : state.uri.queryParameters['order_id'] != null ? Uri.decodeComponent(state.uri.queryParameters['order_id']!) : '',
-        phone: state.uri.queryParameters['phone_number'] != null ? Uri.decodeComponent(state.uri.queryParameters['phone_number']!) : '',
+        orderId : _safeDecodeQueryValue(state.uri.queryParameters['order_id']) ?? '',
+        phone: _safeDecodeQueryValue(state.uri.queryParameters['phone_number']) ?? '',
       )),
 
       GoRoute(
@@ -977,7 +989,7 @@ class RouterHelper {
         );
       }),
       GoRoute(path: profileScreen1, builder: (context, state) => const ProfileScreen1()),
-      GoRoute(path: blogScreen, builder: (context, state) => BlogScreen(url: state.uri.queryParameters['url'] ?? '')),
+      GoRoute(path: blogScreen, builder: (context, state) => BlogScreen(url: _safeDecodeQueryValue(state.uri.queryParameters['url']) ?? '')),
       GoRoute(path: addressScreen, builder: (context, state) => AddressListScreen()),
       GoRoute(
         path: addNewAddressScreen,
@@ -1063,9 +1075,9 @@ class RouterHelper {
                   v.toString() == qp['vacationDurationType'], // fallback (for safety)
               orElse: () => VacationDurationType.custom,
             ) : null,
-            name: qp['name'] != null ? Uri.decodeComponent(qp['name'] ?? '') : null,
-            banner: qp['banner'] != null ? Uri.decodeComponent(qp['banner'] ?? '') : null,
-            image: qp['image'] != null ? Uri.decodeComponent(qp['image'] ?? '') : null,
+            name: _safeDecodeQueryValue(qp['name']),
+            banner: _safeDecodeQueryValue(qp['banner']),
+            image: _safeDecodeQueryValue(qp['image']),
             fromMore: qp['fromMore'] == 'true',
             totalReview: int.tryParse(qp['totalReview'] ?? ''),
             totalProduct: int.tryParse(qp['totalProduct'] ?? ''),
@@ -1174,10 +1186,10 @@ class RouterHelper {
           final qp = state.uri.queryParameters;
           return ChatScreen(
             id: qp['id'] != null ? int.tryParse(qp['id']!) : null,
-            name: qp['name'] != null ? Uri.decodeComponent(qp['name']!) : '',
+            name: _safeDecodeQueryValue(qp['name']) ?? '',
             isDelivery: qp['isDelivery'] == 'true',
-            image: qp['image'] != null ? Uri.decodeComponent(qp['image']!) : null,
-            phone: qp['phone'] != null ? Uri.decodeComponent(qp['phone']!) : null,
+            image: _safeDecodeQueryValue(qp['image']),
+            phone: _safeDecodeQueryValue(qp['phone']),
             userType: qp['userType'] != null ? int.tryParse(qp['userType']!) : null,
             isShopOnVacation: qp['isShopOnVacation'] == 'true',
             isShopTemporaryClosed: qp['isShopTemporaryClosed'] == 'true',
@@ -1392,8 +1404,7 @@ class RouterHelper {
       GoRoute(
         path: faqScreen,
         builder: (context, state) {
-          final title = state.uri.queryParameters['title'] != null
-            ? Uri.decodeComponent(state.uri.queryParameters['title']!) : null;
+          final title = _safeDecodeQueryValue(state.uri.queryParameters['title']);
           return FaqScreen(title: title);
         },
       ),
@@ -1415,7 +1426,7 @@ class RouterHelper {
           return OrderDetailsScreen(
             orderId: int.tryParse(qp['orderId'] ?? '') ?? 0,
             isNotification: qp['isNotification'] == 'true',
-            phone: qp['phone'] != null ? Uri.decodeComponent(qp['phone']!) : null,
+            phone: _safeDecodeQueryValue(qp['phone']),
             fromTrack: qp['fromTrack'] == 'true',
           );
         },
@@ -1479,9 +1490,9 @@ class RouterHelper {
       GoRoute(
         path: allTopSellerScreen,
         builder: (context, state) {
-          final title = state.uri.queryParameters['title'] != null
-            ? Uri.decodeComponent(state.uri.queryParameters['title']!)
-            : '';
+          final title = _safeDecodeQueryValue(
+            state.uri.queryParameters['title'],
+          ) ?? '';
           return AllTopSellerScreen(title: title);
         },
       ),
@@ -1554,9 +1565,7 @@ class RouterHelper {
       GoRoute(
         path: RouterHelper.addFundToWalletScreen,
         builder: (context, state) {
-          final url = state.uri.queryParameters['url'] != null
-              ? Uri.decodeComponent(state.uri.queryParameters['url']!)
-              : '';
+          final url = _safeDecodeQueryValue(state.uri.queryParameters['url']) ?? '';
           return AddFundToWalletScreen(url: url);
         },
       ),

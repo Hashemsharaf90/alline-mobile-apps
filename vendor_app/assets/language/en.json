@@ -1278,5 +1278,22 @@
   "color" : "Color",
   "approve_note" : "Approve note ",
   "withdraw_request_updated_successfully": "Withdraw request updated successfully",
-  "this_order_was_placed_with_the_inhouse_shipping": "This order was placed with the inhouse shipping method and must be delivered using the shipping option selected by the customer during checkout."
+  "this_order_was_placed_with_the_inhouse_shipping": "This order was placed with the inhouse shipping method and must be delivered using the shipping option selected by the customer during checkout.",
+  "supermarket_settings": "Supermarket settings",
+  "store_type": "Store type",
+  "general_store": "General store",
+  "supermarket": "Supermarket",
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+  "service_radius_km": "Service radius (km)",
+  "delivery_fee_type": "Delivery fee type",
+  "system": "System",
+  "fixed": "Fixed",
+  "per_km": "Per km",
+  "base_delivery_fee": "Base delivery fee",
+  "delivery_fee_per_km": "Delivery fee per km",
+  "enter_supermarket_location": "Enter supermarket latitude and longitude",
+  "enter_valid_latitude": "Enter a valid latitude",
+  "enter_valid_longitude": "Enter a valid longitude",
+  "enter_valid_service_radius": "Enter a valid service radius from 1 to 200 km"
 }
