@@ -1,3 +1,5 @@
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/services/global_shopping_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/dio/dio_client.dart';
@@ -284,6 +286,7 @@ Future<void> init() async {
   sl.registerFactory(() => RefundController(refundServiceInterface: sl()));
   sl.registerFactory(() => ReOrderController(reOrderServiceInterface: sl()));
   sl.registerFactory(() => RestockController(restockServiceInterface: sl()));
+  sl.registerFactory(() => GlobalShoppingController(globalShoppingService: sl()));
 
   //interface
   AddressRepoInterface addressRepoInterface = AddressRepository(dioClient: sl());
@@ -507,4 +510,5 @@ Future<void> init() async {
   sl.registerLazySingleton(() => WalletService(walletRepositoryInterface : sl()));
   sl.registerLazySingleton(() => SearchProductService(searchProductRepositoryInterface : sl()));
   sl.registerLazySingleton(() => RestockService(restockRepositoryInterface : sl()));
+  sl.registerLazySingleton(() => GlobalShoppingService(dioClient: sl()));
 }

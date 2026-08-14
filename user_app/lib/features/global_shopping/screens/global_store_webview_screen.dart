@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/dio/dio_client.dart';
-import 'package:flutter_sixvalley_ecommerce/di_container.dart' as di;
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/models/global_product_preview_model.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +27,7 @@ class GlobalStoreWebViewScreen extends StatefulWidget {
   });
 
   @override
-  State<GlobalStoreWebViewScreen> createState() =>
-      _GlobalStoreWebViewScreenState();
+  State<GlobalStoreWebViewScreen> createState() => _GlobalStoreWebViewScreenState();
 }
 
 class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
@@ -83,311 +84,93 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     return url?.isNotEmpty == true ? url! : _currentUrl;
   }
 
-  bool _isValidProductUrl(String url) {
-    final uri = Uri.tryParse(url.trim());
-    if (uri == null) return false;
-    if (!['http', 'https'].contains(uri.scheme.toLowerCase())) return false;
-    if (uri.host.isEmpty) return false;
 
-    final lower = url.toLowerCase();
-    if (lower.contains('javascript:') ||
-        lower.contains('mailto:') ||
-        lower.contains('tel:') ||
-        lower.contains('/cart') ||
-        lower.contains('/checkout')) {
-      return false;
-    }
 
-    return true;
-  }
-
-  String _text(BuildContext context, String en, String ar) {
-    final isLtr =
-        Provider.of<LocalizationController>(context, listen: false).isLtr;
-    return isLtr ? en : ar;
-  }
-
-  Future<void> _copyCurrentUrl(BuildContext context) async {
-    final url = await _activeUrl();
-    await Clipboard.setData(ClipboardData(text: url));
-    if (!context.mounted) return;
-
-    showCustomSnackBarWidget(
-      _text(context, 'Product link copied', 'تم نسخ رابط المنتج'),
-      context,
-      snackBarType: SnackBarType.success,
-    );
-  }
-
-  Future<void> _shareCurrentUrl() async {
-    final url = await _activeUrl();
-    await SharePlus.instance.share(ShareParams(text: url));
-  }
-
-  Future<void> _openExternal() async {
-    final url = await _activeUrl();
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-  }
-
-  Future<void> _showAssistedOrderSheet(BuildContext context) async {
-    final bool isLtr =
-        Provider.of<LocalizationController>(context, listen: false).isLtr;
+  Future<void> _openInstantBuySheet(BuildContext context) async {
+    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
     final url = await _activeUrl();
     if (!context.mounted) return;
 
-    if (!_isValidProductUrl(url)) {
-      showCustomSnackBarWidget(
-        isLtr
-            ? 'Open a product page first, then send the request'
-            : 'افتح صفحة المنتج أولا ثم أرسل طلب الشراء',
-        context,
-        snackBarType: SnackBarType.warning,
-      );
-      return;
-    }
+    final globalCtrl = Provider.of<GlobalShoppingController>(context, listen: false);
 
-    int quantity = 1;
-    bool isSubmittingRequest = false;
-    final notesController = TextEditingController();
+    // Trigger instant preview extraction
+    globalCtrl.previewProduct(url, context);
 
-    final sheetResult = await showModalBottomSheet<_GlobalRequestSheetResult>(
+    showModalBottomSheet(
       context: context,
-      showDragHandle: true,
       isScrollControlled: true,
+      showDragHandle: true,
       backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
       builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                Dimensions.paddingSizeDefault,
-                0,
-                Dimensions.paddingSizeDefault,
-                MediaQuery.of(sheetContext).viewInsets.bottom +
-                    Dimensions.paddingSizeDefault,
-              ),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text(
-                  isLtr ? 'Request this product' : 'طلب شراء هذا المنتج',
-                  textAlign: TextAlign.center,
-                  style: textBold.copyWith(fontSize: Dimensions.fontSizeLarge),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-                Text(
-                  isLtr
-                      ? 'Send the product link to Allinye. The team will price it, calculate shipping, then add it for approval before checkout.'
-                      : 'أرسل رابط المنتج إلى Allinye ليتم تسعيره وحساب الشحن، ثم إضافته للموافقة قبل إتمام الطلب.',
-                  textAlign: TextAlign.center,
-                  style:
-                      textRegular.copyWith(color: Theme.of(context).hintColor),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).hintColor.withValues(alpha: .08),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    url,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textDirection: TextDirection.ltr,
-                    style: textRegular.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
+        return Consumer<GlobalShoppingController>(
+          builder: (ctx, ctrl, _) {
+            if (ctrl.isPreviewLoading) {
+              return Container(
+                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      isLtr ? 'Extracting product & calculating landed price...' : 'جاري قراءة المنتج وحساب تكلفة الشحن لليمن...',
+                      textAlign: TextAlign.center,
+                      style: textMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                Row(children: [
-                  Text(
-                    isLtr ? 'Quantity' : 'الكمية',
-                    style:
-                        textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                  ),
-                  const Spacer(),
-                  IconButton.filledTonal(
-                    onPressed: quantity > 1
-                        ? () => setSheetState(() => quantity--)
-                        : null,
-                    icon: const Icon(Icons.remove_rounded),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Dimensions.paddingSizeDefault,
+              );
+            }
+
+            final preview = ctrl.productPreview;
+            if (preview == null) {
+              return Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.orange, size: 36),
+                    const SizedBox(height: 10),
+                    Text(
+                      isLtr ? 'Please open a specific product page' : 'يرجى فتح صفحة منتج محددة داخل المتجر ثم الضغط على الزر',
+                      textAlign: TextAlign.center,
+                      style: textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
                     ),
-                    child: Text(
-                      quantity.toString(),
-                      style:
-                          textBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                      onPressed: () => Navigator.pop(sheetContext),
+                      child: Text(isLtr ? 'Continue Browsing' : 'متابعة التصفح', style: const TextStyle(color: Colors.white)),
                     ),
-                  ),
-                  IconButton.filledTonal(
-                    onPressed: () => setSheetState(() => quantity++),
-                    icon: const Icon(Icons.add_rounded),
-                  ),
-                ]),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
-                TextField(
-                  controller: notesController,
-                  minLines: 2,
-                  maxLines: 4,
-                  textInputAction: TextInputAction.newline,
-                  decoration: InputDecoration(
-                    hintText: isLtr
-                        ? 'Color, size, notes...'
-                        : 'اللون، المقاس، أي ملاحظات...',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: isSubmittingRequest
-                        ? null
-                        : () async {
-                            setSheetState(() => isSubmittingRequest = true);
-                            try {
-                              final result = await _submitGlobalShoppingRequest(
-                                context: context,
-                                sheetContext: sheetContext,
-                                url: url,
-                                quantity: quantity,
-                                notes: notesController.text,
-                                isLtr: isLtr,
-                              );
-                              if (result ==
-                                      _GlobalRequestSheetResult.loginRequired &&
-                                  sheetContext.mounted) {
-                                Navigator.of(sheetContext).pop(result);
-                              }
-                            } finally {
-                              if (sheetContext.mounted) {
-                                setSheetState(
-                                  () => isSubmittingRequest = false,
-                                );
-                              }
-                            }
-                          },
-                    icon: isSubmittingRequest
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.add_shopping_cart_rounded, size: 19),
-                    label: Text(
-                      isLtr ? 'Send purchase request' : 'إرسال طلب الشراء',
-                    ),
-                  ),
-                ),
-              ]),
+              );
+            }
+
+            return _InstantBuyContent(
+              preview: preview,
+              url: url,
+              storeName: widget.storeName,
+              onSuccess: () {
+                Navigator.pop(sheetContext);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MyGlobalOrdersScreen()),
+                );
+              },
             );
           },
         );
       },
     );
-
-    await Future<void>.delayed(const Duration(milliseconds: 350));
-    notesController.dispose();
-
-    if (sheetResult == _GlobalRequestSheetResult.loginRequired) {
-      await Future<void>.delayed(Duration.zero);
-      if (!mounted || !context.mounted) {
-        return;
-      }
-
-      showCustomSnackBarWidget(
-        isLtr
-            ? 'Please sign in first to send the request'
-            : 'يرجى تسجيل الدخول أولا لإرسال الطلب',
-        context,
-        snackBarType: SnackBarType.warning,
-      );
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          RouterHelper.getLoginRoute(action: RouteAction.push);
-        }
-      });
-    }
-  }
-
-  Future<_GlobalRequestSheetResult?> _submitGlobalShoppingRequest({
-    required BuildContext context,
-    required BuildContext sheetContext,
-    required String url,
-    required int quantity,
-    required String notes,
-    required bool isLtr,
-  }) async {
-    final authController = Provider.of<AuthController>(context, listen: false);
-    if (!authController.isLoggedIn()) {
-      return _GlobalRequestSheetResult.loginRequired;
-    }
-
-    try {
-      final response = await di.sl<DioClient>().post(
-        AppConstants.globalShoppingRequestUri,
-        data: {
-          'store_name': widget.storeName,
-          'product_url': url,
-          'quantity': quantity,
-          'customer_notes': notes.trim().isEmpty ? null : notes.trim(),
-        },
-      );
-
-      if (sheetContext.mounted) Navigator.pop(sheetContext);
-      if (!context.mounted) return _GlobalRequestSheetResult.sent;
-
-      final responseData = response.data is Map ? response.data as Map : null;
-      final message = responseData?['message']?.toString();
-      final cartAdded = responseData?['cart_added'] == true ||
-          responseData?['cart_added'] == 1 ||
-          responseData?['next_action']?.toString() == 'cart';
-
-      showCustomSnackBarWidget(
-        message ??
-            (isLtr
-                ? 'Request sent for pricing and approval'
-                : 'تم إرسال الطلب للتسعير والموافقة'),
-        context,
-        snackBarType: SnackBarType.success,
-      );
-
-      if (cartAdded) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            RouterHelper.getCartScreenRoute(action: RouteAction.push);
-          }
-        });
-      }
-
-      return _GlobalRequestSheetResult.sent;
-    } catch (_) {
-      if (!context.mounted) return _GlobalRequestSheetResult.failed;
-      showCustomSnackBarWidget(
-        isLtr
-            ? 'Could not send the request. Please try again.'
-            : 'تعذر إرسال الطلب، حاول مرة أخرى.',
-        context,
-        snackBarType: SnackBarType.error,
-      );
-      return _GlobalRequestSheetResult.failed;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLtr =
-        Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
     _controller.setBackgroundColor(Theme.of(context).scaffoldBackgroundColor);
 
     return PopScope(
@@ -402,110 +185,377 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
           title: Text(
             widget.storeName,
-            style: textBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+            style: textBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeLarge),
           ),
           centerTitle: true,
           actions: [
             IconButton(
               tooltip: isLtr ? 'Refresh' : 'تحديث',
               onPressed: () => _controller.reload(),
-              icon: const Icon(Icons.refresh_rounded),
+              icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             ),
-            PopupMenuButton<_GlobalStoreAction>(
-              onSelected: (action) {
-                switch (action) {
-                  case _GlobalStoreAction.copy:
-                    _copyCurrentUrl(context);
-                    break;
-                  case _GlobalStoreAction.share:
-                    _shareCurrentUrl();
-                    break;
-                  case _GlobalStoreAction.external:
-                    _openExternal();
-                    break;
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert, color: Colors.white),
+              onSelected: (action) async {
+                final url = await _activeUrl();
+                if (action == 'copy') {
+                  await Clipboard.setData(ClipboardData(text: url));
+                  if (context.mounted) {
+                    showCustomSnackBarWidget(
+                      isLtr ? 'Link copied' : 'تم نسخ رابط السلعة',
+                      context,
+                      snackBarType: SnackBarType.success,
+                    );
+                  }
+                } else if (action == 'share') {
+                  await SharePlus.instance.share(ShareParams(text: url));
+                } else if (action == 'browser') {
+                  await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: _GlobalStoreAction.copy,
-                  child: Text(isLtr ? 'Copy link' : 'نسخ الرابط'),
-                ),
-                PopupMenuItem(
-                  value: _GlobalStoreAction.share,
-                  child: Text(isLtr ? 'Share link' : 'مشاركة الرابط'),
-                ),
-                PopupMenuItem(
-                  value: _GlobalStoreAction.external,
-                  child: Text(isLtr ? 'Open in browser' : 'فتح في المتصفح'),
-                ),
+                PopupMenuItem(value: 'copy', child: Text(isLtr ? 'Copy link' : 'نسخ الرابط')),
+                PopupMenuItem(value: 'share', child: Text(isLtr ? 'Share link' : 'مشاركة الرابط')),
+                PopupMenuItem(value: 'browser', child: Text(isLtr ? 'Open in browser' : 'فتح في المتصفح الخارجي')),
               ],
             ),
           ],
         ),
-        body: Column(children: [
-          if (!_isLoaded)
-            LinearProgressIndicator(
-              value: _progress == 0 ? null : _progress / 100,
-              minHeight: 2,
-            ),
-          Expanded(child: WebViewWidget(controller: _controller)),
-          SafeArea(
-            top: false,
-            child: Container(
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                boxShadow: ThemeShadow.getShadow(context),
+        body: Column(
+          children: [
+            if (!_isLoaded)
+              LinearProgressIndicator(
+                value: _progress == 0 ? null : _progress / 100,
+                minHeight: 2.5,
+                color: Theme.of(context).primaryColor,
               ),
-              child: Row(children: [
-                IconButton.filledTonal(
-                  tooltip: isLtr ? 'Back' : 'رجوع',
-                  onPressed: () async {
-                    if (await _controller.canGoBack()) {
-                      await _controller.goBack();
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_back_rounded),
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-                IconButton.filledTonal(
-                  tooltip: isLtr ? 'Forward' : 'تقدم',
-                  onPressed: () async {
-                    if (await _controller.canGoForward()) {
-                      await _controller.goForward();
-                    }
-                  },
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                ),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _showAssistedOrderSheet(context),
-                    icon: const Icon(Icons.shopping_bag_outlined, size: 19),
-                    label: Text(
-                      isLtr ? 'Request via Allinye' : 'اطلبه عبر Allinye',
+            Expanded(child: WebViewWidget(controller: _controller)),
+
+            // Smart Floating 1-Click Purchase Bar
+            SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, -3),
                     ),
-                  ),
+                  ],
                 ),
-              ]),
+                child: Row(
+                  children: [
+                    IconButton.filledTonal(
+                      tooltip: isLtr ? 'Back' : 'رجوع',
+                      onPressed: () async {
+                        if (await _controller.canGoBack()) {
+                          await _controller.goBack();
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_back_rounded, size: 20),
+                    ),
+                    const SizedBox(width: 6),
+                    IconButton.filledTonal(
+                      tooltip: isLtr ? 'Forward' : 'تقدم',
+                      onPressed: () async {
+                        if (await _controller.canGoForward()) {
+                          await _controller.goForward();
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_forward_rounded, size: 20),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Primary Instant Purchase Button
+                    Expanded(
+                      child: SizedBox(
+                        height: 46,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            elevation: 2,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () => _openInstantBuySheet(context),
+                          icon: const Icon(Icons.bolt, color: Colors.white, size: 22),
+                          label: Text(
+                            isLtr ? 'Buy via Alline ⚡' : 'اطلب عبر Alline ⚡',
+                            style: textBold.copyWith(
+                              color: Colors.white,
+                              fontSize: Dimensions.fontSizeDefault,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
 }
 
-enum _GlobalStoreAction {
-  copy,
-  share,
-  external,
+class _InstantBuyContent extends StatefulWidget {
+  final GlobalProductPreviewModel preview;
+  final String url;
+  final String storeName;
+  final VoidCallback onSuccess;
+
+  const _InstantBuyContent({
+    required this.preview,
+    required this.url,
+    required this.storeName,
+    required this.onSuccess,
+  });
+
+  @override
+  State<_InstantBuyContent> createState() => _InstantBuyContentState();
 }
 
-enum _GlobalRequestSheetResult {
-  loginRequired,
-  sent,
-  failed,
+class _InstantBuyContentState extends State<_InstantBuyContent> {
+  int _quantity = 1;
+  final TextEditingController _notesController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final globalCtrl = Provider.of<GlobalShoppingController>(context);
+
+    final isAir = globalCtrl.selectedShippingType == 'air';
+    final shippingCost = isAir ? (widget.preview.airShippingCost ?? 0.0) : (widget.preview.seaShippingCost ?? 0.0);
+    final totalUsd = ((widget.preview.originalPrice ?? 0.0) + shippingCost + (widget.preview.customsFee ?? 0.0) + (widget.preview.serviceFee ?? 0.0)) * _quantity;
+    final totalYer = totalUsd * 535.0;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        Dimensions.paddingSizeDefault,
+        0,
+        Dimensions.paddingSizeDefault,
+        MediaQuery.of(context).viewInsets.bottom + Dimensions.paddingSizeDefault,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    color: isDark ? Theme.of(context).highlightColor : const Color(0xFFF9FAFB),
+                    child: CustomImageWidget(
+                      image: widget.preview.thumbnail ?? '',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.preview.title ?? widget.storeName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: textBold.copyWith(fontSize: 13, height: 1.3),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${totalYer.toStringAsFixed(0)} YER (≈ \$${totalUsd.toStringAsFixed(2)})',
+                        style: textBold.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeDefault),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+            const Divider(),
+
+            // Shipping Selector
+            Text(
+              isLtr ? 'Shipping Method to Yemen:' : 'طريقة الشحن لليمن:',
+              style: textBold.copyWith(fontSize: Dimensions.fontSizeSmall),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: _shipChip(
+                    title: isLtr ? 'Air Express ✈️ (7-12d)' : 'شحن جوي سريع ✈️ (7-12 يوم)',
+                    isSelected: isAir,
+                    onTap: () => globalCtrl.setShippingType('air'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _shipChip(
+                    title: isLtr ? 'Sea Cargo 🚢 (25-35d)' : 'شحن بحري اقتصادي 🚢 (25-35 يوم)',
+                    isSelected: !isAir,
+                    onTap: () => globalCtrl.setShippingType('sea'),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Quantity Stepper
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(isLtr ? 'Quantity:' : 'الكمية المطلوبة:', style: textMedium.copyWith(fontSize: 13)),
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove, size: 14),
+                        onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                      ),
+                      Text('$_quantity', style: textBold.copyWith(fontSize: 13)),
+                      IconButton(
+                        icon: const Icon(Icons.add, size: 14),
+                        onPressed: () => setState(() => _quantity++),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Notes / Specs
+            TextField(
+              controller: _notesController,
+              decoration: InputDecoration(
+                hintText: isLtr ? 'Notes: (Color, Size, Specs)' : 'الملاحظات: (اللون، المقاس، المواصفات المطلوبة)',
+                hintStyle: textRegular.copyWith(fontSize: 11, color: Theme.of(context).hintColor),
+                filled: true,
+                fillColor: isDark ? Theme.of(context).highlightColor : const Color(0xFFF9FAFB),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Theme.of(context).dividerColor),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // Submit Button
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: globalCtrl.isSubmitLoading
+                    ? null
+                    : () async {
+                        final auth = Provider.of<AuthController>(context, listen: false);
+                        if (!auth.isLoggedIn()) {
+                          Navigator.pop(context);
+                          RouterHelper.getLoginRoute(action: RouteAction.push);
+                          return;
+                        }
+
+                        final success = await globalCtrl.submitRequest(
+                          productUrl: widget.url,
+                          storeName: widget.storeName,
+                          quantity: _quantity,
+                          customerNotes: _notesController.text.trim(),
+                          onSuccess: () {
+                            showCustomSnackBarWidget(
+                              isLtr ? 'Order placed successfully!' : 'تم إرسال طلب الشراء بنجاح! سيتم اعتماده وتوصيله لك.',
+                              context,
+                              snackBarType: SnackBarType.success,
+                            );
+                          },
+                        );
+
+                        if (success) {
+                          widget.onSuccess();
+                        }
+                      },
+                child: globalCtrl.isSubmitLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.shopping_cart_checkout, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            isLtr ? 'Confirm & Order Now 🛒' : 'تأكيد وإتمام الطلب 🛒',
+                            style: textBold.copyWith(color: Colors.white, fontSize: 14),
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shipChip({required String title, required bool isSelected, required VoidCallback onTap}) {
+    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
+              : (isDark ? Theme.of(context).highlightColor : const Color(0xFFF9FAFB)),
+          border: Border.all(
+            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,
+            width: isSelected ? 1.5 : 1,
+          ),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: textBold.copyWith(
+            fontSize: 10,
+            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge?.color,
+          ),
+        ),
+      ),
+    );
+  }
 }

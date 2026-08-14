@@ -1,3 +1,4 @@
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
 import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -152,6 +153,7 @@ Future<void> main() async {
       ChangeNotifierProvider(
           create: (context) => di.sl<SellerProductController>()),
       ChangeNotifierProvider(create: (context) => di.sl<RestockController>()),
+      ChangeNotifierProvider(create: (context) => di.sl<GlobalShoppingController>()),
     ],
     child: MyApp(body: body, route: path),
   ));
