@@ -28,22 +28,16 @@ class GlobalShoppingController extends ChangeNotifier {
   List<dynamic> _supportedStores = [];
   List<dynamic> get supportedStores => _supportedStores;
 
-  String _selectedShippingType = 'air'; // 'air' or 'sea'
-  String get selectedShippingType => _selectedShippingType;
-
-  void setShippingType(String type) {
-    _selectedShippingType = type;
-    notifyListeners();
-  }
-
   void clearPreview() {
     _productPreview = null;
     notifyListeners();
   }
 
   Future<void> fetchSupportedStores() async {
-    final ApiResponseModel apiResponse = await globalShoppingService.getSupportedStores();
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    final ApiResponseModel apiResponse =
+        await globalShoppingService.getSupportedStores();
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       final data = apiResponse.response!.data;
       if (data['stores'] is List) {
         _supportedStores = data['stores'];
@@ -54,7 +48,8 @@ class GlobalShoppingController extends ChangeNotifier {
 
   Future<void> previewProduct(String url, BuildContext context) async {
     if (url.trim().isEmpty) {
-      showCustomSnackBarWidget('Please enter a valid product URL', context, snackBarType: SnackBarType.warning);
+      showCustomSnackBarWidget('Please enter a valid product URL', context,
+          snackBarType: SnackBarType.warning);
       return;
     }
 
@@ -62,10 +57,12 @@ class GlobalShoppingController extends ChangeNotifier {
     _productPreview = null;
     notifyListeners();
 
-    final ApiResponseModel apiResponse = await globalShoppingService.previewProduct(url.trim());
+    final ApiResponseModel apiResponse =
+        await globalShoppingService.previewProduct(url.trim());
     _isPreviewLoading = false;
 
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       final data = apiResponse.response!.data;
       if (data['status'] == true && data['data'] != null) {
         _productPreview = GlobalProductPreviewModel.fromJson(data['data']);
@@ -81,24 +78,35 @@ class GlobalShoppingController extends ChangeNotifier {
     String? storeName,
     int quantity = 1,
     String? customerNotes,
+    double? estimatedTotalUsd,
+    double? estimatedTotalYer,
+    String? estimatedDeliveryTime,
     Function? onSuccess,
   }) async {
     _isSubmitLoading = true;
     notifyListeners();
 
-    final ApiResponseModel apiResponse = await globalShoppingService.submitRequest(
+    final ApiResponseModel apiResponse =
+        await globalShoppingService.submitRequest(
       productUrl: productUrl,
       storeName: storeName ?? _productPreview?.storeName,
       quantity: quantity,
       customerNotes: customerNotes,
-      shippingType: _selectedShippingType,
+      shippingType: 'air',
+      estimatedTotalUsd: estimatedTotalUsd,
+      estimatedTotalYer: estimatedTotalYer,
+      estimatedDeliveryTime: estimatedDeliveryTime,
     );
 
     _isSubmitLoading = false;
     notifyListeners();
 
-    if (apiResponse.response != null && (apiResponse.response!.statusCode == 200 || apiResponse.response!.statusCode == 201)) {
-      if (onSuccess != null) { onSuccess(); }
+    if (apiResponse.response != null &&
+        (apiResponse.response!.statusCode == 200 ||
+            apiResponse.response!.statusCode == 201)) {
+      if (onSuccess != null) {
+        onSuccess();
+      }
       clearPreview();
       getMyRequests();
       return true;
@@ -112,10 +120,12 @@ class GlobalShoppingController extends ChangeNotifier {
     _isRequestsLoading = true;
     notifyListeners();
 
-    final ApiResponseModel apiResponse = await globalShoppingService.getRequests(offset: offset);
+    final ApiResponseModel apiResponse =
+        await globalShoppingService.getRequests(offset: offset);
     _isRequestsLoading = false;
 
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       final data = apiResponse.response!.data;
       if (data['requests'] is List) {
         _requestsList = (data['requests'] as List)

@@ -27,7 +27,8 @@ class GlobalStoreWebViewScreen extends StatefulWidget {
   });
 
   @override
-  State<GlobalStoreWebViewScreen> createState() => _GlobalStoreWebViewScreenState();
+  State<GlobalStoreWebViewScreen> createState() =>
+      _GlobalStoreWebViewScreenState();
 }
 
 class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
@@ -84,14 +85,14 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     return url?.isNotEmpty == true ? url! : _currentUrl;
   }
 
-
-
   Future<void> _openInstantBuySheet(BuildContext context) async {
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
     final url = await _activeUrl();
     if (!context.mounted) return;
 
-    final globalCtrl = Provider.of<GlobalShoppingController>(context, listen: false);
+    final globalCtrl =
+        Provider.of<GlobalShoppingController>(context, listen: false);
 
     // Trigger instant preview extraction
     globalCtrl.previewProduct(url, context);
@@ -109,16 +110,20 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
           builder: (ctx, ctrl, _) {
             if (ctrl.isPreviewLoading) {
               return Container(
-                padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const CircularProgressIndicator(),
                     const SizedBox(height: 16),
                     Text(
-                      isLtr ? 'Extracting product & calculating landed price...' : 'جاري قراءة المنتج وحساب تكلفة الشحن لليمن...',
+                      isLtr
+                          ? 'Extracting product & calculating landed price...'
+                          : 'جاري قراءة المنتج وحساب تكلفة الشحن لليمن...',
                       textAlign: TextAlign.center,
-                      style: textMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                      style: textMedium.copyWith(
+                          fontSize: Dimensions.fontSizeDefault),
                     ),
                   ],
                 ),
@@ -132,18 +137,24 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.orange, size: 36),
+                    const Icon(Icons.info_outline,
+                        color: Colors.orange, size: 36),
                     const SizedBox(height: 10),
                     Text(
-                      isLtr ? 'Please open a specific product page' : 'يرجى فتح صفحة منتج محددة داخل المتجر ثم الضغط على الزر',
+                      isLtr
+                          ? 'Please open a specific product page'
+                          : 'يرجى فتح صفحة منتج محددة داخل المتجر ثم الضغط على الزر',
                       textAlign: TextAlign.center,
-                      style: textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                      style: textBold.copyWith(
+                          fontSize: Dimensions.fontSizeDefault),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).primaryColor),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor),
                       onPressed: () => Navigator.pop(sheetContext),
-                      child: Text(isLtr ? 'Continue Browsing' : 'متابعة التصفح', style: const TextStyle(color: Colors.white)),
+                      child: Text(isLtr ? 'Continue Browsing' : 'متابعة التصفح',
+                          style: const TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
@@ -158,7 +169,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                 Navigator.pop(sheetContext);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const MyGlobalOrdersScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const MyGlobalOrdersScreen()),
                 );
               },
             );
@@ -170,7 +182,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
     _controller.setBackgroundColor(Theme.of(context).scaffoldBackgroundColor);
 
     return PopScope(
@@ -193,7 +206,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
           ),
           title: Text(
             widget.storeName,
-            style: textBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeLarge),
+            style: textBold.copyWith(
+                color: Colors.white, fontSize: Dimensions.fontSizeLarge),
           ),
           centerTitle: true,
           actions: [
@@ -218,13 +232,21 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                 } else if (action == 'share') {
                   await SharePlus.instance.share(ShareParams(text: url));
                 } else if (action == 'browser') {
-                  await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                  await launchUrl(Uri.parse(url),
+                      mode: LaunchMode.externalApplication);
                 }
               },
               itemBuilder: (context) => [
-                PopupMenuItem(value: 'copy', child: Text(isLtr ? 'Copy link' : 'نسخ الرابط')),
-                PopupMenuItem(value: 'share', child: Text(isLtr ? 'Share link' : 'مشاركة الرابط')),
-                PopupMenuItem(value: 'browser', child: Text(isLtr ? 'Open in browser' : 'فتح في المتصفح الخارجي')),
+                PopupMenuItem(
+                    value: 'copy',
+                    child: Text(isLtr ? 'Copy link' : 'نسخ الرابط')),
+                PopupMenuItem(
+                    value: 'share',
+                    child: Text(isLtr ? 'Share link' : 'مشاركة الرابط')),
+                PopupMenuItem(
+                    value: 'browser',
+                    child: Text(
+                        isLtr ? 'Open in browser' : 'فتح في المتصفح الخارجي')),
               ],
             ),
           ],
@@ -243,7 +265,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
             SafeArea(
               top: false,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
                   boxShadow: [
@@ -290,7 +313,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                             ),
                           ),
                           onPressed: () => _openInstantBuySheet(context),
-                          icon: const Icon(Icons.bolt, color: Colors.white, size: 22),
+                          icon: const Icon(Icons.bolt,
+                              color: Colors.white, size: 22),
                           label: Text(
                             isLtr ? 'Buy via Alline ⚡' : 'اطلب عبر Alline ⚡',
                             style: textBold.copyWith(
@@ -335,13 +359,19 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
 
   @override
   Widget build(BuildContext context) {
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
-    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isDark =
+        Provider.of<ThemeController>(context, listen: false).darkTheme;
     final globalCtrl = Provider.of<GlobalShoppingController>(context);
 
-    final isAir = globalCtrl.selectedShippingType == 'air';
-    final shippingCost = isAir ? (widget.preview.airShippingCost ?? 0.0) : (widget.preview.seaShippingCost ?? 0.0);
-    final totalUsd = ((widget.preview.originalPrice ?? 0.0) + shippingCost + (widget.preview.customsFee ?? 0.0) + (widget.preview.serviceFee ?? 0.0)) * _quantity;
+    final shippingCost = widget.preview.airShippingCost ?? 0.0;
+    final deliveryTime = widget.preview.deliveryTimeAir ?? '7 - 12 days';
+    final totalUsd = ((widget.preview.originalPrice ?? 0.0) +
+            shippingCost +
+            (widget.preview.customsFee ?? 0.0) +
+            (widget.preview.serviceFee ?? 0.0)) *
+        _quantity;
     final totalYer = totalUsd * 535.0;
 
     return Padding(
@@ -349,7 +379,8 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
         Dimensions.paddingSizeDefault,
         0,
         Dimensions.paddingSizeDefault,
-        MediaQuery.of(context).viewInsets.bottom + Dimensions.paddingSizeDefault,
+        MediaQuery.of(context).viewInsets.bottom +
+            Dimensions.paddingSizeDefault,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -364,7 +395,9 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                   child: Container(
                     width: 70,
                     height: 70,
-                    color: isDark ? Theme.of(context).highlightColor : const Color(0xFFF9FAFB),
+                    color: isDark
+                        ? Theme.of(context).highlightColor
+                        : const Color(0xFFF9FAFB),
                     child: CustomImageWidget(
                       image: widget.preview.thumbnail ?? '',
                       fit: BoxFit.cover,
@@ -385,7 +418,9 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                       const SizedBox(height: 4),
                       Text(
                         '${totalYer.toStringAsFixed(0)} YER (≈ \$${totalUsd.toStringAsFixed(2)})',
-                        style: textBold.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeDefault),
+                        style: textBold.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: Dimensions.fontSizeDefault),
                       ),
                     ],
                   ),
@@ -396,30 +431,53 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
             const SizedBox(height: 12),
             const Divider(),
 
-            // Shipping Selector
+            // Shipping Method
             Text(
-              isLtr ? 'Shipping Method to Yemen:' : 'طريقة الشحن لليمن:',
+              isLtr ? 'Shipping to Yemen:' : 'الشحن إلى اليمن:',
               style: textBold.copyWith(fontSize: Dimensions.fontSizeSmall),
             ),
             const SizedBox(height: 6),
-            Row(
-              children: [
-                Expanded(
-                  child: _shipChip(
-                    title: isLtr ? 'Air Express ✈️ (7-12d)' : 'شحن جوي سريع ✈️ (7-12 يوم)',
-                    isSelected: isAir,
-                    onTap: () => globalCtrl.setShippingType('air'),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                border: Border.all(
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.24)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.flight_takeoff,
+                      color: Theme.of(context).primaryColor, size: 19),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isLtr ? 'Air Express' : 'شحن جوي سريع',
+                          style: textBold.copyWith(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: 12),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isLtr
+                              ? 'Estimated arrival: $deliveryTime'
+                              : 'مدة الوصول المتوقعة: $deliveryTime',
+                          style: textRegular.copyWith(
+                              fontSize: 10.5,
+                              color: Theme.of(context).hintColor),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _shipChip(
-                    title: isLtr ? 'Sea Cargo 🚢 (25-35d)' : 'شحن بحري اقتصادي 🚢 (25-35 يوم)',
-                    isSelected: !isAir,
-                    onTap: () => globalCtrl.setShippingType('sea'),
-                  ),
-                ),
-              ],
+                  Text('\$${shippingCost.toStringAsFixed(2)}',
+                      style: textBold.copyWith(fontSize: 12)),
+                ],
+              ),
             ),
 
             const SizedBox(height: 12),
@@ -428,7 +486,8 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(isLtr ? 'Quantity:' : 'الكمية المطلوبة:', style: textMedium.copyWith(fontSize: 13)),
+                Text(isLtr ? 'Quantity:' : 'الكمية المطلوبة:',
+                    style: textMedium.copyWith(fontSize: 13)),
                 Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Theme.of(context).dividerColor),
@@ -438,9 +497,12 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove, size: 14),
-                        onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                        onPressed: _quantity > 1
+                            ? () => setState(() => _quantity--)
+                            : null,
                       ),
-                      Text('$_quantity', style: textBold.copyWith(fontSize: 13)),
+                      Text('$_quantity',
+                          style: textBold.copyWith(fontSize: 13)),
                       IconButton(
                         icon: const Icon(Icons.add, size: 14),
                         onPressed: () => setState(() => _quantity++),
@@ -457,11 +519,17 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
             TextField(
               controller: _notesController,
               decoration: InputDecoration(
-                hintText: isLtr ? 'Notes: (Color, Size, Specs)' : 'الملاحظات: (اللون، المقاس، المواصفات المطلوبة)',
-                hintStyle: textRegular.copyWith(fontSize: 11, color: Theme.of(context).hintColor),
+                hintText: isLtr
+                    ? 'Notes: (Color, Size, Specs)'
+                    : 'الملاحظات: (اللون، المقاس، المواصفات المطلوبة)',
+                hintStyle: textRegular.copyWith(
+                    fontSize: 11, color: Theme.of(context).hintColor),
                 filled: true,
-                fillColor: isDark ? Theme.of(context).highlightColor : const Color(0xFFF9FAFB),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                fillColor: isDark
+                    ? Theme.of(context).highlightColor
+                    : const Color(0xFFF9FAFB),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: Theme.of(context).dividerColor),
@@ -478,12 +546,14 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
                 ),
                 onPressed: globalCtrl.isSubmitLoading
                     ? null
                     : () async {
-                        final auth = Provider.of<AuthController>(context, listen: false);
+                        final auth =
+                            Provider.of<AuthController>(context, listen: false);
                         if (!auth.isLoggedIn()) {
                           Navigator.pop(context);
                           RouterHelper.getLoginRoute(action: RouteAction.push);
@@ -495,9 +565,14 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                           storeName: widget.storeName,
                           quantity: _quantity,
                           customerNotes: _notesController.text.trim(),
+                          estimatedTotalUsd: totalUsd,
+                          estimatedTotalYer: totalYer,
+                          estimatedDeliveryTime: deliveryTime,
                           onSuccess: () {
                             showCustomSnackBarWidget(
-                              isLtr ? 'Order placed successfully!' : 'تم إرسال طلب الشراء بنجاح! سيتم اعتماده وتوصيله لك.',
+                              isLtr
+                                  ? 'Order placed successfully!'
+                                  : 'تم إرسال طلب الشراء بنجاح! سيتم اعتماده وتوصيله لك.',
                               context,
                               snackBarType: SnackBarType.success,
                             );
@@ -513,47 +588,21 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.shopping_cart_checkout, color: Colors.white, size: 20),
+                          const Icon(Icons.shopping_cart_checkout,
+                              color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            isLtr ? 'Confirm & Order Now 🛒' : 'تأكيد وإتمام الطلب 🛒',
-                            style: textBold.copyWith(color: Colors.white, fontSize: 14),
+                            isLtr
+                                ? 'Confirm & Order Now 🛒'
+                                : 'تأكيد وإتمام الطلب 🛒',
+                            style: textBold.copyWith(
+                                color: Colors.white, fontSize: 14),
                           ),
                         ],
                       ),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _shipChip({required String title, required bool isSelected, required VoidCallback onTap}) {
-    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Theme.of(context).primaryColor.withValues(alpha: 0.1)
-              : (isDark ? Theme.of(context).highlightColor : const Color(0xFFF9FAFB)),
-          border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,
-            width: isSelected ? 1.5 : 1,
-          ),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          title,
-          textAlign: TextAlign.center,
-          style: textBold.copyWith(
-            fontSize: 10,
-            color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge?.color,
-          ),
         ),
       ),
     );

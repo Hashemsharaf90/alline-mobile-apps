@@ -35,6 +35,9 @@ class GlobalShoppingService {
     int quantity = 1,
     String? customerNotes,
     String? shippingType,
+    double? estimatedTotalUsd,
+    double? estimatedTotalYer,
+    String? estimatedDeliveryTime,
   }) async {
     try {
       final response = await dioClient.post(
@@ -44,7 +47,10 @@ class GlobalShoppingService {
           'store_name': storeName,
           'quantity': quantity,
           'customer_notes': customerNotes,
-          'shipping_type': shippingType,
+          'shipping_type': shippingType ?? 'air',
+          'estimated_total_usd': estimatedTotalUsd,
+          'estimated_total_yer': estimatedTotalYer,
+          'estimated_delivery_time': estimatedDeliveryTime,
         },
       );
       return ApiResponseModel.withSuccess(response);
@@ -55,7 +61,8 @@ class GlobalShoppingService {
 
   Future<ApiResponseModel> getRequests({int offset = 1, int limit = 20}) async {
     try {
-      final response = await dioClient.get('$_basePath/requests?offset=$offset&limit=$limit');
+      final response = await dioClient
+          .get('$_basePath/requests?offset=$offset&limit=$limit');
       return ApiResponseModel.withSuccess(response);
     } catch (e) {
       return ApiResponseModel.withError(ApiErrorHandler.getMessage(e));

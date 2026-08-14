@@ -22,17 +22,22 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<GlobalShoppingController>(context, listen: false).getMyRequests();
+    Provider.of<GlobalShoppingController>(context, listen: false)
+        .getMyRequests();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
-    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isDark =
+        Provider.of<ThemeController>(context, listen: false).darkTheme;
 
     return Scaffold(
-      backgroundColor: isDark ? Theme.of(context).cardColor : const Color(0xFFF7F9FA),
-      appBar: CustomAppBar(title: isLtr ? 'My Global Requests' : 'طلباتي من المواقع العالمية'),
+      backgroundColor:
+          isDark ? Theme.of(context).cardColor : const Color(0xFFF7F9FA),
+      appBar: CustomAppBar(
+          title: isLtr ? 'My Global Requests' : 'طلباتي من المواقع العالمية'),
       body: Consumer<GlobalShoppingController>(
         builder: (context, globalCtrl, _) {
           if (globalCtrl.isRequestsLoading) {
@@ -43,7 +48,9 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
             return Center(
               child: NoInternetOrDataScreenWidget(
                 isNoInternet: false,
-                message: isLtr ? 'You have no global shopping requests yet' : 'ليس لديك أي طلبات شراء عالمية حتى الآن',
+                message: isLtr
+                    ? 'You have no global shopping requests yet'
+                    : 'ليس لديك أي طلبات شراء عالمية حتى الآن',
               ),
             );
           }
@@ -64,7 +71,8 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
     );
   }
 
-  Widget _requestCard(BuildContext context, GlobalShoppingRequestModel req, bool isLtr, bool isDark) {
+  Widget _requestCard(BuildContext context, GlobalShoppingRequestModel req,
+      bool isLtr, bool isDark) {
     Color statusColor;
     String statusTitle;
     IconData statusIcon;
@@ -73,13 +81,16 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
       case 'priced':
       case 'approved':
         statusColor = const Color(0xFF168B4A);
-        statusTitle = isLtr ? 'Priced - Ready to Order' : 'تم التسعير - جاهز للشراء';
+        statusTitle =
+            isLtr ? 'Priced - Ready to Order' : 'تم التسعير - جاهز للشراء';
         statusIcon = Icons.check_circle;
         break;
       case 'ordered':
       case 'shipped':
         statusColor = const Color(0xFF2196F3);
-        statusTitle = isLtr ? 'Purchased & Shipping ✈️' : 'تم الشراء وجاري الشحن الدولي ✈️';
+        statusTitle = isLtr
+            ? 'Purchased & Shipping ✈️'
+            : 'تم الشراء وجاري الشحن الدولي ✈️';
         statusIcon = Icons.flight_takeoff;
         break;
       case 'delivered':
@@ -89,7 +100,8 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
         break;
       default:
         statusColor = const Color(0xFFFF9800);
-        statusTitle = isLtr ? 'Under Pricing & Review ⏳' : 'قيد المراجعة والتسعير ⏳';
+        statusTitle =
+            isLtr ? 'Under Pricing & Review ⏳' : 'قيد المراجعة والتسعير ⏳';
         statusIcon = Icons.hourglass_top;
     }
 
@@ -126,7 +138,8 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
                     const SizedBox(width: 4),
                     Text(
                       statusTitle,
-                      style: textBold.copyWith(color: statusColor, fontSize: 11),
+                      style:
+                          textBold.copyWith(color: statusColor, fontSize: 11),
                     ),
                   ],
                 ),
@@ -134,7 +147,8 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
               if (req.createdAt != null)
                 Text(
                   req.createdAt!.substring(0, 10),
-                  style: textRegular.copyWith(color: Theme.of(context).hintColor, fontSize: 11),
+                  style: textRegular.copyWith(
+                      color: Theme.of(context).hintColor, fontSize: 11),
                 ),
             ],
           ),
@@ -148,13 +162,16 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
             req.productUrl ?? '',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeExtraSmall),
+            style: textRegular.copyWith(
+                color: Theme.of(context).hintColor,
+                fontSize: Dimensions.fontSizeExtraSmall),
           ),
           if (req.customerNotes != null && req.customerNotes!.isNotEmpty) ...[
             const SizedBox(height: 6),
             Text(
               'ملاحظاتك: ${req.customerNotes}',
-              style: textRegular.copyWith(fontSize: 11, fontStyle: FontStyle.italic),
+              style: textRegular.copyWith(
+                  fontSize: 11, fontStyle: FontStyle.italic),
             ),
           ],
           if (req.approvedPrice != null && req.approvedPrice! > 0) ...[
@@ -165,20 +182,27 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('السعر المعتمد الواصل:', style: textRegular.copyWith(fontSize: 10, color: Theme.of(context).hintColor)),
+                    Text('السعر المعتمد الواصل:',
+                        style: textRegular.copyWith(
+                            fontSize: 10, color: Theme.of(context).hintColor)),
                     Text(
-                      '${(req.approvedPrice! * 535.0).toStringAsFixed(0)} YER (\$${req.approvedPrice})',
-                      style: textBold.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeDefault),
+                      _formatApprovedPrice(req),
+                      style: textBold.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: Dimensions.fontSizeDefault),
                     ),
                   ],
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   ),
                   onPressed: () async {
-                    final globalCtrl = Provider.of<GlobalShoppingController>(context, listen: false);
+                    final globalCtrl = Provider.of<GlobalShoppingController>(
+                        context,
+                        listen: false);
                     final success = await globalCtrl.submitRequest(
                       productUrl: req.productUrl ?? '',
                       storeName: req.storeName,
@@ -192,14 +216,19 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
 
                     if (success) {
                       showCustomSnackBarWidget(
-                        isLtr ? 'Added to cart successfully' : 'تمت إضافة الطلب إلى السلة بنجاح',
+                        isLtr
+                            ? 'Added to cart successfully'
+                            : 'تمت إضافة الطلب إلى السلة بنجاح',
                         context,
                         snackBarType: SnackBarType.success,
                       );
-                      RouterHelper.getCartScreenRoute(action: RouteAction.push, showBackButton: true);
+                      RouterHelper.getCartScreenRoute(
+                          action: RouteAction.push, showBackButton: true);
                     }
                   },
-                  child: Text('إتمام الشراء 🛒', style: textBold.copyWith(color: Colors.white, fontSize: 12)),
+                  child: Text('إتمام الشراء 🛒',
+                      style:
+                          textBold.copyWith(color: Colors.white, fontSize: 12)),
                 ),
               ],
             ),
@@ -207,5 +236,16 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
         ],
       ),
     );
+  }
+
+  String _formatApprovedPrice(GlobalShoppingRequestModel req) {
+    final currency = (req.quotedCurrency ?? 'YER').toUpperCase();
+    final price = req.approvedPrice ?? 0;
+
+    if (currency == 'USD') {
+      return '${(price * 535.0).toStringAsFixed(0)} YER (\$${price.toStringAsFixed(2)})';
+    }
+
+    return '${price.toStringAsFixed(0)} $currency';
   }
 }
