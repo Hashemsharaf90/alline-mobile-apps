@@ -1,18 +1,54 @@
 import 'package:flutter_sixvalley_ecommerce/features/wallet/domain/repositories/wallet_repository_interface.dart';
 import 'package:flutter_sixvalley_ecommerce/features/wallet/domain/services/wallet_service_interface.dart';
 
-class WalletService implements WalletServiceInterface{
+class WalletService implements WalletServiceInterface {
   WalletRepositoryInterface walletRepositoryInterface;
 
   WalletService({required this.walletRepositoryInterface});
 
   @override
-  Future addFundToWallet(String amount, String paymentMethod) async{
-    return await walletRepositoryInterface.addFundToWallet(amount, paymentMethod);
+  Future addFundToWallet(String amount, String paymentMethod) async {
+    return await walletRepositoryInterface.addFundToWallet(
+        amount, paymentMethod);
   }
 
   @override
-  Future getWalletBonusBannerList() async{
+  Future getLocalWalletMethods() async {
+    return await walletRepositoryInterface.getLocalWalletMethods();
+  }
+
+  @override
+  Future getLocalWalletTopUpRequests({int? offset = 1}) async {
+    return await walletRepositoryInterface.getLocalWalletTopUpRequests(
+        offset: offset);
+  }
+
+  @override
+  Future createLocalWalletTopUpRequest({
+    required int methodId,
+    required String amount,
+  }) async {
+    return await walletRepositoryInterface.createLocalWalletTopUpRequest(
+        methodId: methodId, amount: amount);
+  }
+
+  @override
+  Future confirmLocalWalletTopUpRequest({
+    required int requestId,
+    required String transactionId,
+    String? payerPhone,
+    String? customerNote,
+  }) async {
+    return await walletRepositoryInterface.confirmLocalWalletTopUpRequest(
+      requestId: requestId,
+      transactionId: transactionId,
+      payerPhone: payerPhone,
+      customerNote: customerNote,
+    );
+  }
+
+  @override
+  Future getWalletBonusBannerList() async {
     return await walletRepositoryInterface.getWalletBonusBannerList();
   }
 
@@ -28,8 +64,12 @@ class WalletService implements WalletServiceInterface{
     DateTime? startDate,
     DateTime? endDate,
     List<String>? transactionTypes,
-  }) async{
-    return walletRepositoryInterface.getList(offset: offset, startDate: startDate, endDate: endDate, transactionTypes: transactionTypes, filterBy: filterBy);
+  }) async {
+    return walletRepositoryInterface.getList(
+        offset: offset,
+        startDate: startDate,
+        endDate: endDate,
+        transactionTypes: transactionTypes,
+        filterBy: filterBy);
   }
-
 }

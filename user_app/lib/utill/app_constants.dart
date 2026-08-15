@@ -3,7 +3,7 @@ import 'package:flutter_sixvalley_ecommerce/localization/models/language_model.d
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 
 class AppConstants {
-  static const String appName = 'alline';
+  static const String appName = 'Alline';
   static const String slogan = 'Global Shopping Marketplace';
   static const String appVersion = '16.2';
 
@@ -132,6 +132,10 @@ class AppConstants {
       '/api/v1/shipping-method/check-shipping-type';
   static const String dealOfTheDay = '/api/v1/dealsoftheday/deal-of-the-day';
   static const String walletTransactionUri = '/api/v1/customer/wallet/list';
+  static const String localWalletMethodsUri =
+      '/api/v1/customer/wallet/local-methods';
+  static const String localWalletTopUpRequestsUri =
+      '/api/v1/customer/wallet/local-topup-requests';
   static const String loyaltyPointUri = '/api/v1/customer/loyalty/list';
   static const String loyaltyPointConvert =
       '/api/v1/customer/loyalty/loyalty-exchange-currency';
