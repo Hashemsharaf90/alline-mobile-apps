@@ -489,23 +489,25 @@ class Product {
 }
 
 class CategoryIds {
+  String? _id;
   int? _position;
 
-  CategoryIds({int? position}) {
+  CategoryIds({String? id, int? position}) {
+    _id = id;
     _position = position;
   }
 
+  String? get id => _id;
   int? get position => _position;
 
   CategoryIds.fromJson(Map<String, dynamic> json) {
-    _position = json['position'];
+    _id = json['id']?.toString();
+    _position = json['position'] is int ? json['position'] : int.tryParse(json['position']?.toString() ?? '');
   }
-
 
   Map<String, dynamic> toJson() {
-    return {'position': _position};
+    return {'id': _id, 'position': _position};
   }
-
 }
 
 class ProductColors {

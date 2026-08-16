@@ -11,7 +11,6 @@ import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:provider/provider.dart';
 
-
 class CartController extends ChangeNotifier {
   final CartServiceInterface? cartServiceInterface;
   CartController({required this.cartServiceInterface});
@@ -94,6 +93,30 @@ class CartController extends ChangeNotifier {
 
 
 
+
+
+  Future<ApiResponseModel> addToCartAPISilent(CartModelBody cart, BuildContext context, List<ChoiceOptions> choices, List<int>? variationIndexes, {int buyNow = 0, int? shippingMethodExist, int? shippingMethodId, bool showSnackbar = false}) async {
+    _addToCartLoading = true;
+    notifyListeners();
+    ApiResponseModel apiResponse = await cartServiceInterface!.addToCartListData(cart, choices, variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
+    _addToCartLoading = false;
+    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+      if (showSnackbar && apiResponse.response!.data['message'] != null) {
+        showCustomSnackBarWidget(apiResponse.response!.data['message'], Get.context!, snackBarType: SnackBarType.success);
+      }
+      getCartData(Get.context!, reload: false);
+    } else {
+      ApiChecker.checkApi(apiResponse);
+    }
+    notifyListeners();
+    return apiResponse;
+  }
+
+  Future<void> removeFromCart(int index) async {
+    if (index >= 0 && index < cartList.length) {
+      await removeFromCartAPI(cartList[index].id, index);
+    }
+  }
 
   Future<ApiResponseModel> addToCartAPI(CartModelBody cart, BuildContext context, List<ChoiceOptions> choices, List<int>? variationIndexes, {int buyNow = 0, int? shippingMethodExist, int? shippingMethodId}) async {
     _addToCartLoading = true;

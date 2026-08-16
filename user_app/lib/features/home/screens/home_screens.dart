@@ -1,3 +1,7 @@
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_operation_status_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_services_grid_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_store_tabs_section_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/title_row_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
@@ -321,14 +325,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
-              SliverAppBar(
-                floating: true,
-                elevation: 0,
-                centerTitle: false,
-                automaticallyImplyLeading: false,
-                backgroundColor: Theme.of(context).highlightColor,
-                title: Image.asset(Images.logoWithNameImage, height: 35),
-              ),
+              SliverToBoxAdapter(child: const AllineSmartHeaderWidget()),
+              SliverToBoxAdapter(child: const AllineOperationStatusWidget()),
               SliverToBoxAdapter(
                   child: Provider.of<SplashController>(context, listen: false)
                               .configModel
@@ -356,7 +354,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       child: Material(child: SearchHomePageWidget()),
                     ),
                   )),
+              const SliverToBoxAdapter(child: AllineServicesGridWidget()),
               SliverToBoxAdapter(child: BannersWidget()),
+              const SliverToBoxAdapter(child: AllineStoreTabsSectionWidget()),
               const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
               const SliverToBoxAdapter(child: AllineSupermarketSectionWidget()),
               SliverToBoxAdapter(

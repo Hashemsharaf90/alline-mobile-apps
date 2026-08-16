@@ -1,13 +1,13 @@
+import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_home_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
+import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_store_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/product_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
-import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
@@ -112,9 +112,8 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
                     itemCount: products.length > 8 ? 8 : products.length,
                     itemBuilder: (context, index) => SizedBox(
                       width: 170,
-                      child: ProductWidget(
-                        productModel: products[index],
-                        productNameLine: 2,
+                      child: SupermarketProductCard(
+                        product: products[index],
                         margin: Dimensions.paddingSizeExtraSmall,
                       ),
                     ),
@@ -321,39 +320,29 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
 
   void _openSupermarket(
       BuildContext context, CategoryModel? category, bool isLtr) {
-    if (category?.id == null) {
-      showCustomSnackBarWidget(
-        isLtr
-            ? 'Create a supermarket category first, then add grocery products to it.'
-            : 'أنشئ فئة السوبر ماركت أولًا ثم أضف منتجات البقالة إليها.',
-        context,
-        snackBarType: SnackBarType.warning,
-      );
-      return;
-    }
-
-    RouterHelper.getBrandCategoryRoute(
-      action: RouteAction.push,
-      isBrand: false,
-      id: category!.id,
-      name: category.name,
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const SupermarketHomeScreen(),
+      ),
     );
   }
 
   void _openStore(
       BuildContext context, Map store, CategoryModel? category, bool isLtr) {
     final slug = _storeString(store, 'slug');
-    if (slug.isEmpty) {
-      _openSupermarket(context, category, isLtr);
-      return;
-    }
-
-    RouterHelper.getTopSellerRoute(
-      action: RouteAction.push,
-      slug: slug,
-      sellerId: _storeInt(store, 'seller_id'),
-      name: _storeString(store, 'name'),
-      totalProduct: _storeInt(store, 'products_count'),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SupermarketStoreScreen(
+          slug: slug.isNotEmpty ? slug : null,
+          sellerId: _storeInt(store, 'seller_id'),
+          name: _storeString(store, 'name'),
+          banner: _storeString(store, 'banner'),
+          image: _storeString(store, 'image'),
+          address: _storeString(store, 'address'),
+          distanceKm: _storeDouble(store, 'distance_km'),
+          estimatedDeliveryMinutes: _storeInt(store, 'estimated_delivery_minutes'),
+        ),
+      ),
     );
   }
 

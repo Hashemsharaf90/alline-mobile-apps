@@ -33,7 +33,7 @@
     </queries>
 
     <application
-        android:label="6Valley"
+        android:label="Alline"
         android:name="${applicationName}"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"

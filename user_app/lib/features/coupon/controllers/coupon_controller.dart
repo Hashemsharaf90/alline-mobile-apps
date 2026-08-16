@@ -100,16 +100,12 @@ class CouponController extends ChangeNotifier {
   Future<void> getSellerWiseCouponList(String slug, int offset) async {
     _isLoading = true;
     ApiResponseModel apiResponse = await couponRepo!.getSellerCouponList(slug, offset);
-    if (apiResponse.response != null  && apiResponse.response!.statusCode == 200) {
-      _isLoading = false;
+    if (apiResponse.response != null && apiResponse.response!.statusCode == 200 && apiResponse.response!.data != null) {
       couponItemModel = CouponItemModel.fromJson(apiResponse.response!.data);
-    } else {
-      showCustomSnackBarWidget(apiResponse.response!.data, Get.context!, snackBarType: SnackBarType.error);
     }
     _isLoading = false;
     notifyListeners();
   }
-
 
   void removePrevCouponData() {
     _coupon = null;
