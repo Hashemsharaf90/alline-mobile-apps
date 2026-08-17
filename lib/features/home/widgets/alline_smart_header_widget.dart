@@ -25,12 +25,21 @@ class AllineSmartHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).cardColor,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
       padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 6,
-        bottom: 8,
-        left: 12,
-        right: 12,
+        top: MediaQuery.of(context).padding.top + 8,
+        bottom: 10,
+        left: 14,
+        right: 14,
       ),
       child: Row(
         children: [
@@ -42,13 +51,15 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                 context: context,
                 icon: Icons.headset_mic_rounded,
                 tooltip: 'الدعم الفني',
+                iconColor: const Color(0xFF10B981),
                 onTap: _openSupport,
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               _buildCircularButton(
                 context: context,
                 icon: Icons.search_rounded,
                 tooltip: 'البحث',
+                iconColor: Theme.of(context).primaryColor,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -56,15 +67,17 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 8),
               Consumer<NotificationController>(
                 builder: (context, notifCtrl, _) {
                   return Stack(
+                    clipBehavior: Clip.none,
                     children: [
                       _buildCircularButton(
                         context: context,
                         icon: Icons.notifications_none_rounded,
                         tooltip: 'الإشعارات',
+                        iconColor: const Color(0xFFF59E0B),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -74,14 +87,15 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                       ),
                       if ((notifCtrl.notificationModel?.notification?.length ?? 0) > 0)
                         Positioned(
-                          top: 4,
-                          right: 4,
+                          top: 2,
+                          right: 2,
                           child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.redAccent,
+                            width: 9,
+                            height: 9,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEF4444),
                               shape: BoxShape.circle,
+                              border: Border.all(color: Theme.of(context).cardColor, width: 1.5),
                             ),
                           ),
                         ),
@@ -107,16 +121,24 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                     builder: (_) => const TopUpWalletBottomSheet(),
                   );
                 },
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(24),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E293B),
-                    borderRadius: BorderRadius.circular(20),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                      width: 1,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 4,
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -125,24 +147,33 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(3),
+                        padding: const EdgeInsets.all(3.5),
                         decoration: const BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xFFF7931A),
+                          gradient: LinearGradient(
+                            colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
+                          ),
                         ),
                         child: const Icon(
-                          Icons.attach_money_rounded,
-                          size: 14,
+                          Icons.account_balance_wallet_rounded,
+                          size: 12,
                           color: Colors.white,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'لك ${balance.toStringAsFixed(0)} ر.ي',
+                        '${balance.toStringAsFixed(0)} ر.ي',
                         style: textBold.copyWith(
                           fontSize: Dimensions.fontSizeSmall,
-                          color: Colors.white,
+                          color: const Color(0xFFFBBF24),
+                          letterSpacing: 0.2,
                         ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.add_circle_outline_rounded,
+                        size: 14,
+                        color: Color(0xFFFBBF24),
                       ),
                     ],
                   ),
@@ -151,16 +182,16 @@ class AllineSmartHeaderWidget extends StatelessWidget {
             },
           ),
 
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
 
           // Right Location Selector & Logo
           Consumer<AddressController>(
             builder: (context, addressCtrl, _) {
-              String locationText = 'صنعاء، اليمن';
+              String locationText = 'صنعاء';
               if (addressCtrl.addressList != null && addressCtrl.addressList!.isNotEmpty) {
                 locationText = addressCtrl.addressList![0].city ?? addressCtrl.addressList![0].address ?? 'صنعاء';
-                if (locationText.length > 16) {
-                  locationText = '${locationText.substring(0, 16)}...';
+                if (locationText.length > 14) {
+                  locationText = '${locationText.substring(0, 14)}...';
                 }
               }
 
@@ -168,48 +199,47 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                 onTap: () {
                   RouterHelper.getSavedAddressListRoute(action: RouteAction.push);
                 },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Alline',
-                          style: textBold.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: Dimensions.fontSizeLarge,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Alline',
+                        style: textBold.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 14,
+                            color: Theme.of(context).hintColor,
                           ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              size: 14,
-                              color: Colors.redAccent,
+                          Text(
+                            locationText,
+                            style: textRegular.copyWith(
+                              fontSize: Dimensions.fontSizeExtraSmall,
+                              color: Theme.of(context).hintColor,
                             ),
-                            Text(
-                              locationText,
-                              style: textRegular.copyWith(
-                                fontSize: Dimensions.fontSizeExtraSmall,
-                                color: Theme.of(context).hintColor,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                            const Icon(
-                              Icons.location_on_rounded,
-                              size: 13,
-                              color: Colors.redAccent,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(
+                            Icons.location_on_rounded,
+                            size: 13,
+                            color: Color(0xFFEF4444),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -224,21 +254,26 @@ class AllineSmartHeaderWidget extends StatelessWidget {
     required IconData icon,
     required String tooltip,
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 36,
-        height: 36,
+        width: 38,
+        height: 38,
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.06),
           shape: BoxShape.circle,
+          border: Border.all(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.12),
+            width: 0.8,
+          ),
         ),
         child: Icon(
           icon,
           size: 19,
-          color: Theme.of(context).textTheme.bodyLarge?.color,
+          color: iconColor ?? Theme.of(context).textTheme.bodyLarge?.color,
         ),
       ),
     );
