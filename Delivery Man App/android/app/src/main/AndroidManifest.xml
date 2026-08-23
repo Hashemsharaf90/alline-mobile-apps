@@ -24,7 +24,7 @@
     </queries>
    <application
        android:name="${applicationName}"
-       android:label="6valley delivery"
+       android:label="Alline Delivery"
        android:requestLegacyExternalStorage="true"
        android:usesCleartextTraffic="false"
        android:icon="@mipmap/ic_launcher"

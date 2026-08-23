@@ -28,70 +28,90 @@ class OrderTypeButtonHeadWidget extends StatelessWidget {
         callback!();
       },
       child: Container(
-        margin: EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+        margin: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(Dimensions.paddingSizeExtraSmall),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: circleColor!.withValues(alpha: 0.25),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: circleColor!.withValues(alpha: 0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  margin : EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  padding : EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  height: 35, width: 35,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: circleColor
-                  ),
-                  child: CustomAssetImageWidget(image!, color: Colors.white,),
-                )
-              ],
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-              child: Container(alignment: Alignment.center,
-                child: Center(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(numberOfOrder.toString(),
-                        style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color,
-                        fontSize: Dimensions.fontSizeHeaderLarge)
-                      ),
-
-                      Row(children: [
-                        Text(text!, style: robotoMedium.copyWith(color: Theme.of(context).textTheme.headlineLarge?.color,
-                          fontSize: Dimensions.fontSizeSmall)
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                        Text(subText!, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.headlineLarge?.color)),
-                        ],
-                      ),
-
-                    ],
-                  )
-                )
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                height: 32,
+                width: 32,
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: circleColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: circleColor!.withValues(alpha: 0.35),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: CustomAssetImageWidget(image!, color: Colors.white),
               ),
             ),
 
-            Row(
-              children: [
-                Provider.of<LocalizationController>(context,listen: false).isLtr?const SizedBox.shrink():const Spacer(),
-                Container(width: MediaQuery.of(context).size.width/4,
-                  height:MediaQuery.of(context).size.width/4,
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor.withValues(alpha:.10),
-                      borderRadius: const BorderRadius.only(bottomRight: Radius.circular(100))
-                  ),),
-                Provider.of<LocalizationController>(context,listen: false).isLtr?const Spacer():const SizedBox.shrink(),
-              ],
-            )
-
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    numberOfOrder.toString(),
+                    style: robotoBold.copyWith(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          text!,
+                          style: robotoMedium.copyWith(
+                            color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.85),
+                            fontSize: Dimensions.fontSizeSmall,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (subText != null && subText!.isNotEmpty) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          subText!,
+                          style: robotoRegular.copyWith(
+                            fontSize: Dimensions.fontSizeExtraSmall,
+                            color: Theme.of(context).hintColor,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

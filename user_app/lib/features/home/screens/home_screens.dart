@@ -1,4 +1,12 @@
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_search_field_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_categories_grid_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_banner_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
+import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_operation_status_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_services_grid_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_store_tabs_section_widget.dart';
@@ -318,300 +326,60 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: RefreshIndicator(
+        child: Stack(
+          children: [
+            RefreshIndicator(
           onRefresh: () async {
             await HomePage.loadData(true);
           },
           child: CustomScrollView(
             controller: _scrollController,
-            slivers: [
-              SliverToBoxAdapter(child: const AllineSmartHeaderWidget()),
-              SliverToBoxAdapter(child: const AllineOperationStatusWidget()),
-              SliverToBoxAdapter(
-                  child: Provider.of<SplashController>(context, listen: false)
-                              .configModel
-                              ?.announcement
-                              ?.status ==
-                          '1'
-                      ? Consumer<SplashController>(
-                          builder: (context, announcement, _) {
-                          return (announcement.configModel?.announcement
-                                          ?.announcement !=
-                                      null &&
-                                  announcement.onOff)
-                              ? AnnouncementWidget(
-                                  announcement:
-                                      announcement.configModel?.announcement)
-                              : const SizedBox();
-                        })
-                      : const SizedBox()),
-              SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SliverSearchDelegate(
-                    child: InkWell(
-                      onTap: () =>
-                          RouterHelper.getSearchRoute(action: RouteAction.push),
-                      child: Material(child: SearchHomePageWidget()),
-                    ),
-                  )),
-              const SliverToBoxAdapter(child: AllineServicesGridWidget()),
-              SliverToBoxAdapter(child: BannersWidget()),
-              const SliverToBoxAdapter(child: AllineStoreTabsSectionWidget()),
-              const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
+                        slivers: [
+              const SliverToBoxAdapter(child: AllineSmartHeaderWidget()),
+              const SliverToBoxAdapter(child: AllineSearchFieldWidget()),
+              const SliverToBoxAdapter(child: AllineCategoriesGridWidget()),
+              const SliverToBoxAdapter(child: AllinePromoBannerWidget()),
+              const SliverToBoxAdapter(child: AllineNearbyStoresSectionWidget()),
+              const SliverToBoxAdapter(child: AllineFeaturedOffersSectionWidget()),
               const SliverToBoxAdapter(child: AllineSupermarketSectionWidget()),
+              const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
+              const SliverToBoxAdapter(child: ClearanceListWidget()),
               SliverToBoxAdapter(
-                child: CategoryListWidget(isHomePage: true),
-              ),
-              SliverToBoxAdapter(
-                  child: SizedBox(height: Dimensions.paddingSizeDefault)),
-              SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    Consumer<FlashDealController>(
-                        builder: (context, megaDeal, child) {
-                      return megaDeal.flashDeal == null
-                          ? const FlashDealShimmer()
-                          : megaDeal.flashDealList.isNotEmpty
-                              ? Column(children: [
-                                  Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal:
-                                            Dimensions.paddingSizeDefault),
-                                    child: FlashDealBar(
-                                      title:
-                                          getTranslated('flash_deal', context)!
-                                              .toUpperCase(),
-                                      eventDuration: megaDeal.flashDeal != null
-                                          ? megaDeal.duration
-                                          : null,
-                                      onTap: () {
-                                        RouterHelper
-                                            .getFlashDealScreenViewRoute();
-                                      },
-                                    ),
-
-                                    // TitleRowWidget(
-                                    //   title: getTranslated('flash_deal', context)?.toUpperCase(),
-                                    //   eventDuration: megaDeal.flashDeal != null ? megaDeal.duration : null,
-                                    //   onTap: () {
-                                    //     RouterHelper.getFlashDealScreenViewRoute();
-                                    //   },
-                                    //   isFlash: true,
-                                    // ),
-                                  ),
-                                  const SizedBox(
-                                      height: Dimensions.paddingSizeSmall),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal:
-                                            Dimensions.paddingSizeDefault),
-                                    child: Text(
-                                      getTranslated(
-                                              'hurry_up_the_offer_is_limited_grab_while_it_lasts',
-                                              context) ??
-                                          '',
-                                      style: textRegular.copyWith(
-                                          color: Provider.of<ThemeController>(
-                                                      context,
-                                                      listen: false)
-                                                  .darkTheme
-                                              ? Theme.of(context).hintColor
-                                              : Theme.of(context).primaryColor,
-                                          fontSize: Dimensions.fontSizeDefault),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                      height: Dimensions.paddingSizeSmall),
-                                  const FlashDealsListWidget()
-                                ])
-                              : const SizedBox.shrink();
-                    }),
-                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: RecommendedProductWidget(),
                 ),
               ),
               SliverToBoxAdapter(
-                child: Consumer<FeaturedDealController>(
-                    builder: (context, featuredDealProvider, child) {
-                  return featuredDealProvider.featuredDealProductList != null
-                      ? featuredDealProvider.featuredDealProductList!.isNotEmpty
-                          ? Column(
-                              children: [
-                                Stack(children: [
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: 150,
-                                    color: Provider.of<ThemeController>(context,
-                                                listen: false)
-                                            .darkTheme
-                                        ? Theme.of(context).highlightColor
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .onTertiary,
-                                  ),
-                                  Column(children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical:
-                                              Dimensions.paddingSizeDefault),
-                                      child: TitleRowWidget(
-                                        title:
-                                            '${getTranslated('featured_deals', context)}',
-                                        onTap: () {
-                                          RouterHelper
-                                              .getFeaturedDealScreenViewRoute();
-                                        },
-                                      ),
-                                    ),
-                                    const FeaturedDealsListWidget(),
-                                  ]),
-                                ]),
-                                const SizedBox(
-                                    height: Dimensions.paddingSizeDefault),
-                              ],
-                            )
-                          : const SizedBox.shrink()
-                      : const FindWhatYouNeedShimmer();
-                }),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: LatestProductListWidget(),
+                ),
               ),
-              SliverToBoxAdapter(
-                child: const ClearanceListWidget(),
-              ),
-              SliverToBoxAdapter(
-                  child: SizedBox(height: Dimensions.paddingSizeDefault)),
-              SliverToBoxAdapter(
-                child: Consumer<BannerController>(
-                    builder: (context, footerBannerProvider, child) {
-                  return footerBannerProvider.footerBannerList != null &&
-                          footerBannerProvider.footerBannerList!.isNotEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: Dimensions.paddingSizeDefault),
-                          child: SingleBannersWidget(
-                              bannerModel:
-                                  footerBannerProvider.footerBannerList?[0]))
-                      : const SizedBox();
-                }),
-              ),
-              SliverToBoxAdapter(
-                  child: SizedBox(height: Dimensions.paddingSizeDefault)),
-              SliverToBoxAdapter(
-                child: const FeaturedProductWidget(),
-              ),
-              SliverToBoxAdapter(
-                  child: SizedBox(height: Dimensions.paddingSizeDefault)),
-              if (!singleVendor)
-                SliverToBoxAdapter(
-                  child: Container(
-                    padding: EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-                    color: Theme.of(context).cardColor,
-                    child: Column(
-                      children: [
-                        Consumer<ShopController>(
-                            builder: (context, topSellerProvider, child) {
-                          return (topSellerProvider.topSellerModel != null &&
-                                  (topSellerProvider.topSellerModel!.sellers !=
-                                          null &&
-                                      topSellerProvider
-                                          .topSellerModel!.sellers!.isNotEmpty))
-                              ? TitleRowWidget(
-                                  title: getTranslated('top_seller', context),
-                                  onTap: () =>
-                                      RouterHelper.getAllTopSellerRoute(
-                                          action: RouteAction.push,
-                                          title: 'top_seller'))
-                              : const SizedBox();
-                        }),
-                        singleVendor
-                            ? const SizedBox(height: 0)
-                            : const SizedBox(
-                                height: Dimensions.paddingSizeSmall),
-                        singleVendor
-                            ? const SizedBox()
-                            : Consumer<ShopController>(
-                                builder: (context, topSellerProvider, child) {
-                                return (topSellerProvider.topSellerModel !=
-                                            null &&
-                                        (topSellerProvider
-                                                    .topSellerModel!.sellers !=
-                                                null &&
-                                            topSellerProvider.topSellerModel!
-                                                .sellers!.isNotEmpty))
-                                    ? Padding(
-                                        padding:
-                                            const EdgeInsets.only(
-                                                bottom:
-                                                    Dimensions
-                                                        .paddingSizeDefault),
-                                        child:
-                                            SizedBox(
-                                                height: ResponsiveHelper.isTab(
-                                                        context)
-                                                    ? 170
-                                                    : 150,
-                                                child: const TopSellerWidget()))
-                                    : const SizedBox();
-                              })
-                      ],
+              const HomeCategoryProductWidget(isHomePage: true),
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: SliverDelegate(
+                  height: 50,
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: const ProductPopupFilterWidget(),
                     ),
                   ),
                 ),
-              if (!singleVendor)
-                SliverToBoxAdapter(
-                    child: SizedBox(height: Dimensions.paddingSizeDefault)),
-              SliverToBoxAdapter(
-                child: Padding(
-                    padding:
-                        EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                    child: RecommendedProductWidget()),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                    padding:
-                        EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
-                    child: LatestProductListWidget()),
-              ),
-              if (configModel?.brandSetting == "1")
-                SliverToBoxAdapter(
-                    child: Column(
-                  children: [
-                    const BrandListWidget(isHomePage: true),
-                    const SizedBox(height: Dimensions.paddingSizeDefault),
-                  ],
-                )),
-              const HomeCategoryProductWidget(isHomePage: true),
-              SliverToBoxAdapter(
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if ((Provider.of<BannerController>(context, listen: false)
-                                  .footerBannerList
-                                  ?.length ??
-                              0) >
-                          1)
-                        const SizedBox(height: Dimensions.paddingSizeDefault),
-                      const FooterBannerSliderWidget(),
-                    ]),
-              ),
-              SliverPersistentHeader(
-                  pinned: true,
-                  delegate: SliverDelegate(
-                    height: 50,
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: Container(
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          child: const ProductPopupFilterWidget()),
-                    ),
-                  )),
               HomeProductListWidget(scrollController: _scrollController),
+              const SliverToBoxAdapter(child: SizedBox(height: 90)),
             ],
           ),
         ),
-      ),
-      // ),
-    );
+        const FloatingSmartCartBar(),
+      ],
+    ),
+  ),
+);
   }
 }
 

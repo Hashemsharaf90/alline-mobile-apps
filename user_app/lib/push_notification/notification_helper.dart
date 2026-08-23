@@ -216,7 +216,9 @@ class NotificationHelper {
 
   static Future<void> showTextNotification(String title, String body, String orderID, NotificationBody? notificationBody, FlutterLocalNotificationsPlugin fln) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      '6valley', '6valley', playSound: true,
+      'alline_customer_channel', 'Alline Notifications',
+      channelDescription: 'Order and delivery updates for Alline Customer',
+      playSound: true,
       importance: Importance.max, priority: Priority.max, sound: RawResourceAndroidNotificationSound('notification'),
     );
     const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
@@ -229,7 +231,9 @@ class NotificationHelper {
       contentTitle: title, htmlFormatContentTitle: true,
     );
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      '6valley', '6valley', importance: Importance.max,
+      'alline_customer_channel', 'Alline Notifications',
+      channelDescription: 'Order and delivery updates for Alline Customer',
+      importance: Importance.max,
       styleInformation: bigTextStyleInformation, priority: Priority.max, playSound: true,
       sound: const RawResourceAndroidNotificationSound('notification'),
     );
@@ -246,7 +250,8 @@ class NotificationHelper {
       summaryText: body, htmlFormatSummaryText: true,
     );
     final AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      '6valley', '6valley',
+      'alline_customer_channel', 'Alline Notifications',
+      channelDescription: 'Order and delivery updates for Alline Customer',
       largeIcon: FilePathAndroidBitmap(largeIconPath), priority: Priority.max, playSound: true,
       styleInformation: bigPictureStyleInformation, importance: Importance.max,
       sound: const RawResourceAndroidNotificationSound('notification'),

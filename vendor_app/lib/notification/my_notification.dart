@@ -197,7 +197,9 @@ class MyNotification {
       contentTitle: title, htmlFormatContentTitle: true,
     );
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'your channel id', 'your channel name', importance: Importance.max,
+      'alline_vendor_orders', 'Alline Vendor Orders',
+      channelDescription: 'Notifications for new orders and updates in Alline Vendor',
+      importance: Importance.max,
       styleInformation: bigTextStyleInformation, priority: Priority.max, playSound: true,
       sound: const RawResourceAndroidNotificationSound('notification'),
     );
@@ -214,7 +216,8 @@ class MyNotification {
       summaryText: body, htmlFormatSummaryText: true,
     );
     final AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'your channel id', 'your channel name',
+      'alline_vendor_orders', 'Alline Vendor Orders',
+      channelDescription: 'Notifications for new orders and updates in Alline Vendor',
       largeIcon: FilePathAndroidBitmap(largeIconPath), priority: Priority.max, playSound: true,
       styleInformation: bigPictureStyleInformation, importance: Importance.max,
       sound: const RawResourceAndroidNotificationSound('notification'),

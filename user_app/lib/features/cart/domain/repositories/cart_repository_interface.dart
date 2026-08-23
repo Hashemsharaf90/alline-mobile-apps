@@ -18,6 +18,6 @@ abstract class CartRepositoryInterface implements RepositoryInterface{
 
   Future<dynamic> mergeGuestCart();
 
-  Future<dynamic> getCartList({String? couponCode});
+  Future<dynamic> getCartList({String? couponCode, String? addressId});
 
 }

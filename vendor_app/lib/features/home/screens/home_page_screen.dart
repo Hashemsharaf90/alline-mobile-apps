@@ -1,3 +1,4 @@
+import 'package:sixvalley_vendor_app/features/home/widgets/alline_vendor_dashboard_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -142,6 +143,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                 SliverToBoxAdapter(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      AllineVendorDashboardWidget(callback: widget.callback),
                       const SizedBox(height: Dimensions.paddingSizeSmall),
                       OngoingOrderWidget(callback: widget.callback),
 

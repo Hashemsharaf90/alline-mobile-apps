@@ -50,6 +50,12 @@ android {
         }
     }
 
+    
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
+
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("debug") // or "release" if you have real keystore

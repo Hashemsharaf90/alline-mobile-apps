@@ -22,9 +22,14 @@ class CartRepository extends DataSyncService implements CartRepositoryInterface 
   }
 
   @override
-  Future<ApiResponseModel> getCartList({String? couponCode}) async {
+  Future<ApiResponseModel> getCartList({String? couponCode, String? addressId}) async {
     try {
-      final response = await dioClient.get('${AppConstants.getCartDataUri}?coupon_code=$couponCode&guest_id=${Provider.of<AuthController>(Get.context!, listen: false).getGuestToken()}');
+      final query = <String, dynamic>{
+        'coupon_code': couponCode ?? '',
+        'guest_id': Provider.of<AuthController>(Get.context!, listen: false).getGuestToken(),
+        if (addressId != null && addressId.isNotEmpty) 'address_id': addressId,
+      };
+      final response = await dioClient.get(AppConstants.getCartDataUri, queryParameters: query);
       return ApiResponseModel.withSuccess(response);
     } catch (e) {
       return ApiResponseModel.withError(ApiErrorHandler.getMessage(e));
@@ -190,4 +195,3 @@ class CartRepository extends DataSyncService implements CartRepositoryInterface 
 
 
 // ----Add to cart data----{id: 62, guest_id: 1, variant: null, quantity: 1, buy_now: 0, shipping_method_exist: null, shipping_method_id: null, choice_2: C, choice_1: Mid, color: #FF0000}
-

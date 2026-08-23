@@ -45,7 +45,7 @@ class AllineOperationStatusWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  'مفتوح',
+                  'مفتوح 🟢',
                   style: textBold.copyWith(
                     color: Colors.white,
                     fontSize: Dimensions.fontSizeExtraSmall,
@@ -63,7 +63,7 @@ class AllineOperationStatusWidget extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    'أوقات الدوام والتوصيل من 7:30 ص حتى 11:30 م',
+                    'أوقات الدوام والتوصيل السريع من 7:30 ص حتى 11:30 م',
                     style: textRegular.copyWith(
                       color: const Color(0xFFE2E8F0),
                       fontSize: Dimensions.fontSizeExtraSmall,

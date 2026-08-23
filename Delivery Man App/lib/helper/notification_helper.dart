@@ -182,7 +182,9 @@ class NotificationHelper {
 
   static Future<void> showTextNotification(String title, String body, String orderID, FlutterLocalNotificationsPlugin fln, {bool playSound = true}) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      '6valley_delivery', '6valley_delivery name', playSound:  true,
+      'alline_delivery_orders', 'Alline Delivery Orders',
+      channelDescription: 'Trip and delivery assignment notifications for Alline Delivery',
+      playSound:  true,
       importance: Importance.max, priority: Priority.max, sound: RawResourceAndroidNotificationSound('notification'),
     );
     const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
@@ -195,7 +197,9 @@ class NotificationHelper {
       contentTitle: title, htmlFormatContentTitle: true,
     );
     AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      '6valley_delivery channel id', '6valley_delivery name', importance: Importance.max,
+      'alline_delivery_orders', 'Alline Delivery Orders',
+      channelDescription: 'Trip and delivery assignment notifications for Alline Delivery',
+      importance: Importance.max,
       styleInformation: bigTextStyleInformation, priority: Priority.max, playSound: true,
       sound: const RawResourceAndroidNotificationSound('notification'),
     );
@@ -212,8 +216,9 @@ class NotificationHelper {
       summaryText: body, htmlFormatSummaryText: true,
     );
     final AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      '6valley_delivery', '6valley_delivery name',
-      largeIcon: FilePathAndroidBitmap(largeIconPath), priority: Priority.max, playSound: playSound? true: false,
+      'alline_delivery_orders', 'Alline Delivery Orders',
+      channelDescription: 'Trip and delivery assignment notifications for Alline Delivery',
+      largeIcon: FilePathAndroidBitmap(largeIconPath), priority: Priority.max, playSound: true,
       styleInformation: bigPictureStyleInformation, importance: Importance.max,
       sound: const RawResourceAndroidNotificationSound('notification'),
     );

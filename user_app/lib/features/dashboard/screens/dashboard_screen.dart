@@ -1,3 +1,4 @@
+import 'package:flutter_sixvalley_ecommerce/features/category/screens/category_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/ai_chat/screens/ai_chat_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
@@ -82,12 +83,10 @@ class DashBoardScreenState extends State<DashBoardScreen> {
             ? const HomePage() : (splashController.configModel?.activeTheme == "theme_aster")
             ? const AsterThemeHomeScreen(): const HomePage(),
         ),
-
-        NavigationModel(name: 'inbox', icon: Images.messageImage, screen: InboxScreen(fromDashboard: true)),
-        NavigationModel(name: 'ai_assistant', icon: Images.messageImage, screen: const AiChatScreen()),
+        NavigationModel(name: 'all_category', icon: Images.category, screen: const CategoryScreen()),
         NavigationModel(name: 'cart', icon: Images.cartArrowDownImage, screen: const CartScreen(showBackButton: false, fromDashboard: true), showCartIcon: true),
-        NavigationModel(name: 'orders', icon: Images.shoppingImage, screen:  const OrderScreen(isBacButtonExist: false, fromDashboard: true)),
-        NavigationModel(name: 'more', icon: Images.moreImage, screen:  const MoreScreen()),
+        NavigationModel(name: 'orders', icon: Images.shoppingImage, screen: const OrderScreen(isBacButtonExist: false, fromDashboard: true)),
+        NavigationModel(name: 'more', icon: Images.moreImage, screen: const MoreScreen()),
       ];
 
 

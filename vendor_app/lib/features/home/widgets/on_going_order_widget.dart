@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sixvalley_vendor_app/features/addProduct/screens/add_product_tab_view_screen.dart';
 import 'package:sixvalley_vendor_app/features/bank_info/controllers/bank_info_controller.dart';
+import 'package:sixvalley_vendor_app/features/chat/screens/inbox_screen.dart';
+import 'package:sixvalley_vendor_app/features/product/screens/product_list_screen.dart';
+import 'package:sixvalley_vendor_app/features/wallet/screens/wallet_screen.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
 import 'package:sixvalley_vendor_app/theme/controllers/theme_controller.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
@@ -28,6 +32,55 @@ class OngoingOrderWidget extends StatelessWidget {
             ],
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start,children: [
+
+            // Quick Actions Bar for Vendor
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+              child: Row(
+                children: [
+                  _buildQuickActionButton(
+                    context: context,
+                    icon: Icons.add_circle_outline_rounded,
+                    label: 'إضافة منتج',
+                    color: Theme.of(context).primaryColor,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const AddProductTabView(fromHome: true)));
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
+                    context: context,
+                    icon: Icons.inventory_2_outlined,
+                    label: 'المنتجات',
+                    color: const Color(0xFF0284C7),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductListMenuScreen()));
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
+                    context: context,
+                    icon: Icons.chat_bubble_outline_rounded,
+                    label: 'المحادثات',
+                    color: const Color(0xFF10B981),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const InboxScreen()));
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _buildQuickActionButton(
+                    context: context,
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'المحفظة',
+                    color: const Color(0xFFF59E0B),
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletScreen()));
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeMedium),
@@ -135,6 +188,63 @@ class OngoingOrderWidget extends StatelessWidget {
             const SizedBox(height: Dimensions.paddingSizeSmall),
           ],),);
       },
+    );
+  }
+
+  Widget _buildQuickActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: color.withValues(alpha: 0.25),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.35),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, size: 16, color: Colors.white),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                style: robotoMedium.copyWith(
+                  fontSize: 11,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -14,10 +14,12 @@ class AllineServicesGridWidget extends StatelessWidget {
     final List<Map<String, dynamic>> services = [
       {
         'title': 'كل التصنيفات',
+        'subtitle': '+500 صنف',
         'icon': Icons.grid_view_rounded,
-        'badge': '',
-        'bg_color': const Color(0xFF1E293B),
-        'icon_color': const Color(0xFFF43F5E),
+        'badge': 'الكل',
+        'badge_color': const Color(0xFF64748B),
+        'gradient': const [Color(0xFF1E293B), Color(0xFF0F172A)],
+        'icon_gradient': const [Color(0xFF38BDF8), Color(0xFF0284C7)],
         'action': () {
           Navigator.push(
             context,
@@ -27,12 +29,13 @@ class AllineServicesGridWidget extends StatelessWidget {
       },
       {
         'title': 'المطاعم',
+        'subtitle': 'وجبات ساخنة',
         'icon': Icons.lunch_dining_rounded,
-        'badge': 'طازج',
-        'bg_color': const Color(0xFF1E293B),
-        'icon_color': const Color(0xFFF59E0B),
+        'badge': 'طازج 🔥',
+        'badge_color': const Color(0xFFF59E0B),
+        'gradient': const [Color(0xFF78350F), Color(0xFF451A03)],
+        'icon_gradient': const [Color(0xFFFBBF24), Color(0xFFF59E0B)],
         'action': () {
-          // Open restaurants
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const CategoryScreen()),
@@ -41,10 +44,12 @@ class AllineServicesGridWidget extends StatelessWidget {
       },
       {
         'title': 'السوبر ماركت',
+        'subtitle': 'توصيل فوري',
         'icon': Icons.shopping_basket_rounded,
         'badge': 'سريع ⚡',
-        'bg_color': const Color(0xFF1E293B),
-        'icon_color': const Color(0xFF10B981),
+        'badge_color': const Color(0xFF10B981),
+        'gradient': const [Color(0xFF064E3B), Color(0xFF022C22)],
+        'icon_gradient': const [Color(0xFF34D399), Color(0xFF059669)],
         'action': () {
           Navigator.push(
             context,
@@ -54,10 +59,12 @@ class AllineServicesGridWidget extends StatelessWidget {
       },
       {
         'title': 'شي إن SHEIN',
+        'subtitle': 'موضة وأزياء',
         'icon': Icons.shopping_bag_rounded,
         'badge': 'عالمي ✈️',
-        'bg_color': const Color(0xFF1E293B),
-        'icon_color': const Color(0xFFEC4899),
+        'badge_color': const Color(0xFFEC4899),
+        'gradient': const [Color(0xFF831843), Color(0xFF500724)],
+        'icon_gradient': const [Color(0xFFF472B6), Color(0xFFDB2777)],
         'action': () {
           Navigator.push(
             context,
@@ -72,10 +79,12 @@ class AllineServicesGridWidget extends StatelessWidget {
       },
       {
         'title': 'استلم بنفسك',
+        'subtitle': 'وفر التوصيل',
         'icon': Icons.takeout_dining_rounded,
-        'badge': 'توفير',
-        'bg_color': const Color(0xFF1E293B),
-        'icon_color': const Color(0xFF38BDF8),
+        'badge': 'توفير ⭐',
+        'badge_color': const Color(0xFF0284C7),
+        'gradient': const [Color(0xFF0C4A6E), Color(0xFF082F49)],
+        'icon_gradient': const [Color(0xFF38BDF8), Color(0xFF0284C7)],
         'action': () {
           Navigator.push(
             context,
@@ -85,10 +94,12 @@ class AllineServicesGridWidget extends StatelessWidget {
       },
       {
         'title': 'شراء عالمي',
+        'subtitle': 'أمازون وعلي',
         'icon': Icons.language_rounded,
-        'badge': 'أمازون/علي',
-        'bg_color': const Color(0xFF1E293B),
-        'icon_color': const Color(0xFF8B5CF6),
+        'badge': 'طلب خاص 🌐',
+        'badge_color': const Color(0xFF8B5CF6),
+        'gradient': const [Color(0xFF4C1D95), Color(0xFF2E1065)],
+        'icon_gradient': const [Color(0xFFA78BFA), Color(0xFF7C3AED)],
         'action': () {
           Navigator.push(
             context,
@@ -100,53 +111,121 @@ class AllineServicesGridWidget extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
-      height: 86,
+      height: 106,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         scrollDirection: Axis.horizontal,
         itemCount: services.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final s = services[index];
+          final gradientColors = s['gradient'] as List<Color>;
+          final iconColors = s['icon_gradient'] as List<Color>;
+
           return InkWell(
             onTap: s['action'] as VoidCallback,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             child: Container(
-              width: 82,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              width: 88,
+              padding: const EdgeInsets.fromLTRB(6, 6, 6, 8),
               decoration: BoxDecoration(
-                color: s['bg_color'] as Color,
-                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: gradientColors,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: (s['icon_color'] as Color).withValues(alpha: 0.3),
-                  width: 1,
+                  color: iconColors[0].withValues(alpha: 0.35),
+                  width: 1.2,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    color: gradientColors[0].withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Stack(
+                clipBehavior: Clip.none,
                 children: [
-                  Icon(
-                    s['icon'] as IconData,
-                    size: 28,
-                    color: s['icon_color'] as Color,
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    s['title'] as String,
-                    style: textBold.copyWith(
-                      color: Colors.white,
-                      fontSize: Dimensions.fontSizeExtraSmall,
+                  // Top Mini Badge
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: s['badge_color'] as Color,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        s['badge'] as String,
+                        style: textBold.copyWith(
+                          fontSize: 8,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  ),
+
+                  // Main Content
+                  Align(
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(height: 10),
+                        // 3D-like Glowing Icon Container
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: iconColors,
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: iconColors[0].withValues(alpha: 0.5),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            s['icon'] as IconData,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          s['title'] as String,
+                          style: textBold.copyWith(
+                            color: Colors.white,
+                            fontSize: Dimensions.fontSizeExtraSmall,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          s['subtitle'] as String,
+                          style: textRegular.copyWith(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 8,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

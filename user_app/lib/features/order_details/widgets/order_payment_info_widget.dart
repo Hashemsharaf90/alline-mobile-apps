@@ -30,34 +30,78 @@ class OrderPaymentInfoWidget extends StatelessWidget {
               children: [
                 const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                if(configModel?.orderVerification == 1 && orderProvider.orders!.orderType != 'POS')...[
+                if ((configModel?.orderVerification == 1 || (orderProvider.orders?.verificationCode != null && orderProvider.orders!.verificationCode!.isNotEmpty)) && orderProvider.orders!.orderType != 'POS')...[
                   Container(
-                    color: Theme.of(context).cardColor,
+                    margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall),
+                    padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), width: 1.2),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          getTranslated('order_verification_code', context) ?? '',
-                          style: textRegular.copyWith(color: Theme.of(context).textTheme.titleMedium?.color)
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.shield_outlined, color: Colors.white, size: 18),
+                            ),
+                            const SizedBox(width: Dimensions.paddingSizeSmall),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  getTranslated('order_verification_code', context) ?? 'رمز تأكيد الاستلام (OTP)',
+                                  style: robotoBold.copyWith(
+                                    fontSize: Dimensions.fontSizeSmall,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  getTranslated('give_code_to_delivery_man', context) ?? 'أعطِ هذا الرمز للمندوب عند الاستلام',
+                                  style: titilliumRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeExtraSmall,
+                                    color: Theme.of(context).hintColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-
-                        Text(
-                          orderProvider.orders?.verificationCode ?? '',
-                          style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
+                          ),
+                          child: Text(
+                            orderProvider.orders?.verificationCode ?? '------',
+                            style: robotoBold.copyWith(
+                              color: Colors.white,
+                              fontSize: Dimensions.fontSizeLarge,
+                              letterSpacing: 2,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-
-                  if(configModel?.orderVerification == 1 && orderProvider.orders!.orderType != 'POS')
-                    const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                  SizedBox(height: 1, child: Divider(thickness: .200, color: Theme.of(context).hintColor.withValues(alpha: 0.45))),
-                ],
-
-
-                if(configModel?.orderVerification == 1 && orderProvider.orders!.orderType != 'POS')
                   const SizedBox(height: Dimensions.paddingSizeSmall),
+                ],
 
 
                 Row(
