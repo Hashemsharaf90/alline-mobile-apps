@@ -76,7 +76,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       child: Column(
         children: [
           SizedBox(
-            height: 140,
+            height: 132,
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) {
@@ -87,111 +87,120 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
               itemCount: _slides.length,
               itemBuilder: (context, index) {
                 final slide = _slides[index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(
-                      image: AssetImage(slide['image'] as String),
-                      fit: BoxFit.cover,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: (slide['gradient'][0] as Color).withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(slide['image'] as String),
+                        fit: BoxFit.cover,
                       ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            gradient: LinearGradient(
-                              colors: [
-                                (slide['gradient'][0] as Color)
-                                    .withOpacity(.96),
-                                (slide['gradient'][1] as Color)
-                                    .withOpacity(.64),
-                                Colors.black.withOpacity(.1),
-                              ],
-                              begin: AlignmentDirectional.centerStart,
-                              end: AlignmentDirectional.centerEnd,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (slide['gradient'][0] as Color)
+                              .withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  (slide['gradient'][0] as Color)
+                                      .withValues(alpha: .96),
+                                  (slide['gradient'][1] as Color)
+                                      .withValues(alpha: .64),
+                                  Colors.black.withValues(alpha: .1),
+                                ],
+                                begin: AlignmentDirectional.centerStart,
+                                end: AlignmentDirectional.centerEnd,
+                              ),
                             ),
                           ),
                         ),
-                      ),
 
-                      // Text Content
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.22),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              slide['tag'] as String,
-                              style: textBold.copyWith(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            slide['title'] as String,
-                            style: titilliumBold.copyWith(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            slide['subtitle'] as String,
-                            style: textRegular.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 11,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 10),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                        // Text Content
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: SingleChildScrollView(
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.22),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    slide['tag'] as String,
+                                    style: textBold.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  slide['title'] as String,
+                                  style: titilliumBold.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  slide['subtitle'] as String,
+                                  style: textRegular.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 10.5,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 11, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Colors.black.withValues(alpha: 0.1),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    '${slide['cta']} ←',
+                                    style: textBold.copyWith(
+                                      color: slide['gradient'][0] as Color,
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            child: Text(
-                              '${slide['cta']} ←',
-                              style: textBold.copyWith(
-                                color: slide['gradient'][0] as Color,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
