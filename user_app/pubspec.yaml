@@ -109,6 +109,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/alline/
     - assets/language/
     - assets/svg/
 

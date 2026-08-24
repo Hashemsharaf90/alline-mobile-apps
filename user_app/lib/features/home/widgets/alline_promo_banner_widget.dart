@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
+import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 
 class AllinePromoBannerWidget extends StatefulWidget {
   const AllinePromoBannerWidget({super.key});
 
   @override
-  State<AllinePromoBannerWidget> createState() => _AllinePromoBannerWidgetState();
+  State<AllinePromoBannerWidget> createState() =>
+      _AllinePromoBannerWidgetState();
 }
 
 class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
@@ -22,6 +24,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       'cta': 'تسوق الآن',
       'gradient': [const Color(0xFF1E40AF), const Color(0xFF2563EB)],
       'icon': Icons.local_offer_rounded,
+      'image': Images.allineGroceryOffersRealistic,
     },
     {
       'tag': 'توصيل فوري ⚡',
@@ -30,6 +33,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       'cta': 'استكشف المتاجر',
       'gradient': [const Color(0xFF0F766E), const Color(0xFF0D9488)],
       'icon': Icons.delivery_dining_rounded,
+      'image': Images.allineSupermarketHeroRealistic,
     },
     {
       'tag': 'محفظة Alline 💳',
@@ -38,6 +42,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       'cta': 'اشحن الآن',
       'gradient': [const Color(0xFF4338CA), const Color(0xFF6366F1)],
       'icon': Icons.account_balance_wallet_rounded,
+      'image': Images.allineGroceryOffersRealistic,
     },
   ];
 
@@ -86,12 +91,11 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: slide['gradient'] as List<Color>,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
                     borderRadius: BorderRadius.circular(20),
+                    image: DecorationImage(
+                      image: AssetImage(slide['image'] as String),
+                      fit: BoxFit.cover,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: (slide['gradient'][0] as Color).withOpacity(0.3),
@@ -102,14 +106,22 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                   ),
                   child: Stack(
                     children: [
-                      // Decorative background icon
-                      Positioned(
-                        left: -10,
-                        bottom: -15,
-                        child: Icon(
-                          slide['icon'] as IconData,
-                          size: 110,
-                          color: Colors.white.withOpacity(0.12),
+                      Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            gradient: LinearGradient(
+                              colors: [
+                                (slide['gradient'][0] as Color)
+                                    .withOpacity(.96),
+                                (slide['gradient'][1] as Color)
+                                    .withOpacity(.64),
+                                Colors.black.withOpacity(.1),
+                              ],
+                              begin: AlignmentDirectional.centerStart,
+                              end: AlignmentDirectional.centerEnd,
+                            ),
+                          ),
                         ),
                       ),
 
@@ -119,7 +131,8 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.22),
                               borderRadius: BorderRadius.circular(8),
@@ -154,7 +167,8 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                           ),
                           const SizedBox(height: 10),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 5),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(10),

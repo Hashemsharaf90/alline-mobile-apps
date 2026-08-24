@@ -166,7 +166,7 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
                     borderRadius:
                         BorderRadius.circular(Dimensions.radiusDefault),
                     image: const DecorationImage(
-                      image: AssetImage(Images.allineSupermarketBanner),
+                      image: AssetImage(Images.allineSupermarketHeroRealistic),
                       fit: BoxFit.cover,
                     ),
                     boxShadow: ThemeShadow.getShadow(context),
@@ -340,7 +340,8 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
           image: _storeString(store, 'image'),
           address: _storeString(store, 'address'),
           distanceKm: _storeDouble(store, 'distance_km'),
-          estimatedDeliveryMinutes: _storeInt(store, 'estimated_delivery_minutes'),
+          estimatedDeliveryMinutes:
+              _storeInt(store, 'estimated_delivery_minutes'),
         ),
       ),
     );

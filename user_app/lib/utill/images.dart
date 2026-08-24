@@ -193,6 +193,10 @@ class Images {
   static const String mailIconSvg = 'assets/svg/mail_icon.svg';
   static const String allineSupermarketBanner =
       'assets/images/alline_supermarket_banner.png';
+  static const String allineSupermarketHeroRealistic =
+      'assets/images/alline/supermarket_hero_realistic.png';
+  static const String allineGroceryOffersRealistic =
+      'assets/images/alline/grocery_offers_realistic.png';
   static const String logoSvg = 'assets/svg/6valley_logo.svg';
   static const String mailOtpSvg = 'assets/svg/mail_otp.svg';
   static const String phoneOtpSvg = 'assets/svg/phone_otp.svg';
