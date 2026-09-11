@@ -39,7 +39,7 @@ class AllineSearchFieldWidget extends StatelessWidget {
             children: [
               const Icon(
                 Icons.search_rounded,
-                color: Color(0xFF0D9488),
+                color: Color(0xFF1455AC),
                 size: 22,
               ),
               const SizedBox(width: 10),
@@ -61,7 +61,7 @@ class AllineSearchFieldWidget extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.tune_rounded,
-                  color: Color(0xFF0D9488),
+                  color: Color(0xFF1455AC),
                   size: 16,
                 ),
               ),

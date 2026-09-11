@@ -59,10 +59,10 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: isDark
-                                ? const Color(0xFF0F766E).withOpacity(0.3)
-                                : const Color(0xFFF0FDFA),
+                                ? const Color(0xFF1455AC).withOpacity(0.2)
+                                : const Color(0xFFEFF6FF),
                             border: Border.all(
-                              color: const Color(0xFF0D9488).withOpacity(isDark ? 0.4 : 0.2),
+                              color: const Color(0xFF1455AC).withOpacity(isDark ? 0.4 : 0.2),
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -70,7 +70,7 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                             '${sellers.length} متاجر',
                             style: textBold.copyWith(
                               fontSize: 10.5,
-                              color: const Color(0xFF0D9488),
+                              color: const Color(0xFF1455AC),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -91,12 +91,12 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                             'عرض الكل',
                             style: textBold.copyWith(
                               fontSize: 12,
-                              color: const Color(0xFF0D9488),
+                              color: const Color(0xFF1455AC),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(width: 2),
-                          const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF0D9488)),
+                          const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF1455AC)),
                         ],
                       ),
                     ),
@@ -349,7 +349,7 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF0D9488)),
+                                        const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF1455AC)),
                                         const SizedBox(width: 4),
                                         Text(
                                           dTime,

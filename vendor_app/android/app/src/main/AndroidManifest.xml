@@ -28,7 +28,7 @@
 
 
    <application
-       android:label="vendor alline"
+       android:label="Alline Vendor"
        android:name="${applicationName}"
        android:extractNativeLibs="true"
        android:icon="@mipmap/ic_launcher"
@@ -48,7 +48,7 @@
                android:resource="@xml/provider_paths"/>
        </provider>
 
-       <meta-data android:name="com.google.android.geo.API_KEY" android:value="${MAPS_API_KEY}" />
+       <meta-data android:name="com.google.android.geo.API_KEY" android:value="map_api_key_here" />
 
 
         <activity

@@ -110,7 +110,7 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                             gradient: LinearGradient(
                               colors: [
                                 Theme.of(context).primaryColor,
-                                const Color(0xFF0F5B38),
+                                const Color(0xFF0F3A7A),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,

@@ -22,7 +22,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       'title': 'خصومات تصل إلى 50%',
       'subtitle': 'تسوّق من أفضل المتاجر القريبة منك بأفضل الأسعار',
       'cta': 'تسوق الآن',
-      'gradient': [const Color(0xFF0F766E), const Color(0xFF0D9488)],
+      'gradient': [const Color(0xFF0F3A7A), const Color(0xFF1455AC)],
       'icon': Icons.local_offer_rounded,
       'image': Images.allineOffersHeroHd,
     },
@@ -31,7 +31,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       'title': 'طلبك يوصلك لباب بيتك',
       'subtitle': 'تتبع مباشر لمندوب التوصيل خطوة بخطوة',
       'cta': 'استكشف المتاجر',
-      'gradient': [const Color(0xFF115E59), const Color(0xFF047857)],
+      'gradient': [const Color(0xFF1E3A8A), const Color(0xFF2563EB)],
       'icon': Icons.delivery_dining_rounded,
       'image': Images.offerFreeDeliveryHd,
     },
@@ -40,7 +40,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
       'title': 'وفر أكثر كل يوم مع Alline',
       'subtitle': 'عروض مميزة وحصرية على آلاف المنتجات المختارة',
       'cta': 'استكشف العروض',
-      'gradient': [const Color(0xFF047857), const Color(0xFF0F766E)],
+      'gradient': [const Color(0xFF0F3A7A), const Color(0xFF1D4ED8)],
       'icon': Icons.flash_on_rounded,
       'image': Images.offerFlashDealsHd,
     },
@@ -207,7 +207,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                                   child: Text(
                                     '${slide['cta']} ←',
                                     style: textBold.copyWith(
-                                      color: const Color(0xFF0F766E),
+                                      color: const Color(0xFF0F3A7A),
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -239,7 +239,7 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                 height: 6,
                 decoration: BoxDecoration(
                   color: _currentPage == index
-                      ? const Color(0xFF0D9488)
+                      ? const Color(0xFF1455AC)
                       : (isDark
                           ? const Color(0xFF475569)
                           : const Color(0xFFCBD5E1)),

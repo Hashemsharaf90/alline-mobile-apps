@@ -3,7 +3,7 @@ import 'package:sixvalley_vendor_app/utill/images.dart';
 import '../features/shop/domain/models/guideline_model.dart';
 
 class AppConstants {
-  static const String appName = 'vendor alline';
+  static const String appName = 'Alline Vendor';
 
   ///Flutter SDK 3.41.4
   static const String appVersion = '16.2';

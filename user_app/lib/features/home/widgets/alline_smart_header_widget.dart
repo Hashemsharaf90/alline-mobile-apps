@@ -28,11 +28,11 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF0D9488),
+                  color: const Color(0xFF1455AC),
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF0D9488).withOpacity(0.22),
+                      color: const Color(0xFF1455AC).withOpacity(0.22),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -65,7 +65,7 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_rounded, size: 12, color: Color(0xFF0D9488)),
+                      const Icon(Icons.location_on_rounded, size: 12, color: Color(0xFF1455AC)),
                       const SizedBox(width: 2),
                       Text(
                         'صنعاء، اليمن',
@@ -101,10 +101,10 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF0D9488).withOpacity(0.18) : const Color(0xFFECFDF5),
+                    color: isDark ? const Color(0xFF1455AC).withOpacity(0.18) : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF0D9488).withOpacity(0.35) : const Color(0xFFA7F3D0),
+                      color: isDark ? const Color(0xFF1455AC).withOpacity(0.35) : const Color(0xFFDBEAFE),
                       width: 1.1,
                     ),
                   ),
@@ -115,7 +115,7 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                         width: 20,
                         height: 20,
                         decoration: const BoxDecoration(
-                          color: Color(0xFF0D9488),
+                          color: Color(0xFF1455AC),
                           shape: BoxShape.circle,
                         ),
                         child: const Center(
@@ -123,16 +123,21 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 5),
-                      Text(
-                        PriceConverter.convertPrice(context, balance),
-                        style: titilliumBold.copyWith(
-                          fontSize: 11.5,
-                          color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E),
-                          fontWeight: FontWeight.w800,
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 75),
+                        child: Text(
+                          PriceConverter.convertPrice(context, balance),
+                          style: titilliumBold.copyWith(
+                            fontSize: 11.5,
+                            color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF0F3A7A),
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       const SizedBox(width: 3),
-                      Icon(Icons.add_circle_outline_rounded, size: 13, color: isDark ? const Color(0xFF2DD4BF) : const Color(0xFF0F766E)),
+                      Icon(Icons.add_circle_outline_rounded, size: 13, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF0F3A7A)),
                     ],
                   ),
                 ),
@@ -158,7 +163,7 @@ class AllineSmartHeaderWidget extends StatelessWidget {
                   ),
                   child: Icon(
                     isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                    color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF0D9488),
+                    color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF1455AC),
                     size: 19,
                   ),
                 ),

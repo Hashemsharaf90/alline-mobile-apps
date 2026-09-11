@@ -36,8 +36,8 @@ class FloatingSmartCartBar extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFF0F766E), // Deep Teal
-                    Color(0xFF0D9488), // Primary Emerald Teal
+                    Color(0xFF0F3A7A), // Deep Blue
+                    Color(0xFF1455AC), // Primary Alline Blue
                   ],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
@@ -45,7 +45,7 @@ class FloatingSmartCartBar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F766E).withOpacity(0.38),
+                    color: const Color(0xFF0F3A7A).withOpacity(0.38),
                     blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
@@ -114,13 +114,13 @@ class FloatingSmartCartBar extends StatelessWidget {
                         Text(
                           'عرض السلة',
                           style: textBold.copyWith(
-                            color: const Color(0xFF0F766E),
+                            color: const Color(0xFF1455AC),
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward_rounded, color: Color(0xFF0F766E), size: 14),
+                        const Icon(Icons.arrow_forward_rounded, color: Color(0xFF1455AC), size: 14),
                       ],
                     ),
                   ),

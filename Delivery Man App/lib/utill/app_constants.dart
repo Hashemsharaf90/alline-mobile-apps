@@ -2,11 +2,12 @@ import 'package:sixvalley_delivery_boy/features/language/domain/models/language_
 import 'images.dart';
 
 class AppConstants {
-  static const String companyName = 'alline';
-  static const String appName = 'alline Delivery';
+  static const String companyName = 'Alline';
+  static const String appName = 'Alline Delivery';
   static const bool demo = false;
   static const int imageQuality = 100;
   static const String appVersion = '5.1'; ///flutter SDK : 3.44.2
+  static const String polylineMapKey = 'YOUR_MAP_KEY_HERE';
 
   static const String baseUrl = 'https://new.allinye.com';
 

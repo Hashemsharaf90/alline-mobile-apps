@@ -77,12 +77,12 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                             'عرض الكل',
                             style: textBold.copyWith(
                               fontSize: 12,
-                              color: const Color(0xFF0D9488),
+                              color: const Color(0xFF1455AC),
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(width: 2),
-                          const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF0D9488)),
+                          const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF1455AC)),
                         ],
                       ),
                     ),
@@ -154,13 +154,13 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                             fit: BoxFit.contain,
                                             errorBuilder: (_, __, ___) => const Icon(
                                               Icons.shopping_bag_outlined,
-                                              color: Color(0xFF0D9488),
+                                              color: Color(0xFF1455AC),
                                               size: 32,
                                             ),
                                           )
                                         : const Icon(
                                             Icons.shopping_bag_outlined,
-                                            color: Color(0xFF0D9488),
+                                            color: Color(0xFF1455AC),
                                             size: 32,
                                           ),
                                   ),
@@ -214,7 +214,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                           PriceConverter.convertPrice(context, price),
                                           style: titilliumBold.copyWith(
                                             fontSize: 13,
-                                            color: const Color(0xFF0D9488),
+                                            color: const Color(0xFF1455AC),
                                             fontWeight: FontWeight.w900,
                                           ),
                                           maxLines: 1,
@@ -227,17 +227,17 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                         height: 26,
                                         decoration: BoxDecoration(
                                           color: isDark
-                                              ? const Color(0xFF0F766E).withOpacity(0.3)
-                                              : const Color(0xFFF0FDFA),
+                                              ? const Color(0xFF1455AC).withOpacity(0.2)
+                                              : const Color(0xFFEFF6FF),
                                           borderRadius: BorderRadius.circular(8),
                                           border: Border.all(
-                                            color: const Color(0xFF0D9488).withOpacity(isDark ? 0.4 : 0.2),
+                                            color: const Color(0xFF1455AC).withOpacity(isDark ? 0.4 : 0.2),
                                           ),
                                         ),
                                         child: const Icon(
                                           Icons.add_rounded,
                                           size: 16,
-                                          color: Color(0xFF0D9488),
+                                          color: Color(0xFF1455AC),
                                         ),
                                       ),
                                     ],

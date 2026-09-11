@@ -57,20 +57,20 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? const LinearGradient(
-                            colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+                            colors: [Color(0xFF0F3A7A), Color(0xFF1455AC)],
                           )
                         : null,
                     color: isSelected ? null : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFF0D9488)
+                          ? const Color(0xFF1455AC)
                           : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF0D9488).withValues(alpha: 0.35),
+                              color: const Color(0xFF1455AC).withValues(alpha: 0.35),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -317,7 +317,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                                           child: Icon(
                                             Icons.storefront_rounded,
                                             size: 28,
-                                            color: const Color(0xFF0D9488),
+                                            color: const Color(0xFF1455AC),
                                           ),
                                         ),
                                       ),
