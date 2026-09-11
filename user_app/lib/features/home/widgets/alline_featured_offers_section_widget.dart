@@ -11,6 +11,8 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Consumer<ProductController>(
       builder: (context, productController, _) {
         final products = productController.featuredProductModel?.products ??
@@ -22,7 +24,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
         }
 
         return Container(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           padding: const EdgeInsets.only(top: 14, bottom: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,13 +41,13 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                           'عروض مميزة 💥',
                           style: titilliumBold.copyWith(
                             fontSize: 16,
-                            color: const Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFEF2F2),
                             borderRadius: BorderRadius.circular(6),
@@ -55,6 +57,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                             style: textBold.copyWith(
                               fontSize: 10,
                               color: const Color(0xFFDC2626),
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -67,13 +70,20 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                           action: RouteAction.push,
                         );
                       },
-                      child: Text(
-                        'عرض الكل',
-                        style: textBold.copyWith(
-                          fontSize: 12,
-                          color: const Color(0xFF2563EB),
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'عرض الكل',
+                            style: textBold.copyWith(
+                              fontSize: 12,
+                              color: const Color(0xFF0D9488),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF0D9488)),
+                        ],
                       ),
                     ),
                   ],
@@ -84,7 +94,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
 
               // Horizontal Products List
               SizedBox(
-                height: 220,
+                height: 224,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -109,14 +119,18 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                       },
                       borderRadius: BorderRadius.circular(16),
                       child: Container(
-                        width: 145,
+                        width: 148,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.03),
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.25)
+                                  : Colors.black.withOpacity(0.04),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -131,22 +145,22 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                 ClipRRect(
                                   borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
                                   child: Container(
-                                    height: 110,
-                                    width: 145,
-                                    color: const Color(0xFFF8FAFC),
+                                    height: 112,
+                                    width: 148,
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC),
                                     child: (imgUrl != null && imgUrl.isNotEmpty)
                                         ? Image.network(
                                             imgUrl,
                                             fit: BoxFit.contain,
                                             errorBuilder: (_, __, ___) => const Icon(
                                               Icons.shopping_bag_outlined,
-                                              color: Color(0xFF2563EB),
+                                              color: Color(0xFF0D9488),
                                               size: 32,
                                             ),
                                           )
                                         : const Icon(
                                             Icons.shopping_bag_outlined,
-                                            color: Color(0xFF2563EB),
+                                            color: Color(0xFF0D9488),
                                             size: 32,
                                           ),
                                   ),
@@ -158,7 +172,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                     top: 6,
                                     right: 6,
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFDC2626),
                                         borderRadius: BorderRadius.circular(6),
@@ -186,7 +200,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                     p.name ?? '',
                                     style: textBold.copyWith(
                                       fontSize: 11.5,
-                                      color: const Color(0xFF1E293B),
+                                      color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
                                       height: 1.2,
                                     ),
                                     maxLines: 2,
@@ -200,7 +214,7 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                           PriceConverter.convertPrice(context, price),
                                           style: titilliumBold.copyWith(
                                             fontSize: 13,
-                                            color: const Color(0xFF2563EB),
+                                            color: const Color(0xFF0D9488),
                                             fontWeight: FontWeight.w900,
                                           ),
                                           maxLines: 1,
@@ -209,17 +223,21 @@ class AllineFeaturedOffersSectionWidget extends StatelessWidget {
                                       ),
                                       // Quick Add Icon Button
                                       Container(
-                                        width: 24,
-                                        height: 24,
+                                        width: 26,
+                                        height: 26,
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFFEFF6FF),
-                                          borderRadius: BorderRadius.circular(6),
-                                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                                          color: isDark
+                                              ? const Color(0xFF0F766E).withOpacity(0.3)
+                                              : const Color(0xFFF0FDFA),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: const Color(0xFF0D9488).withOpacity(isDark ? 0.4 : 0.2),
+                                          ),
                                         ),
                                         child: const Icon(
                                           Icons.add_rounded,
                                           size: 16,
-                                          color: Color(0xFF2563EB),
+                                          color: Color(0xFF0D9488),
                                         ),
                                       ),
                                     ],

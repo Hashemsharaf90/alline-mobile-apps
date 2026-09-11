@@ -130,10 +130,11 @@ class CartRepository extends DataSyncService implements CartRepositoryInterface 
   @override
   Future<ApiResponseModel> delete(int? key) async {
     try {
-      final response = await dioClient.post(AppConstants.removeFromCartUri,
-          data: {'_method': 'delete',
+      final response = await dioClient.delete(AppConstants.removeFromCartUri,
+          data: {
             'guest_id' : Provider.of<AuthController>(Get.context!, listen: false).getGuestToken(),
-            'key': key});
+            'key': key
+          });
       return ApiResponseModel.withSuccess(response);
     } catch (e) {
       return ApiResponseModel.withError(ApiErrorHandler.getMessage(e));

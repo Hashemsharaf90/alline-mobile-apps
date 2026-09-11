@@ -7,7 +7,6 @@ class AppConstants {
   static const bool demo = false;
   static const int imageQuality = 100;
   static const String appVersion = '5.1'; ///flutter SDK : 3.44.2
-  static const String polylineMapKey = 'YOUR_MAP_KEY_HERE';
 
   static const String baseUrl = 'https://new.allinye.com';
 
@@ -46,6 +45,7 @@ class AppConstants {
   static const String reviewListUri = '/api/v2/delivery-man/review-list';
   static const String updateBankInfo = '/api/v2/delivery-man/bank-info';
   static const String distanceApi = '/api/v2/delivery-man/distance-api';
+  static const String routePolylineApi = '/api/v1/mapapi/route-polyline';
   static const String chatSearch = '/api/v2/delivery-man/messages/search/';
   static const String addToSavedReviewList = '/api/v2/delivery-man/save-review';
   static const String deliveryVerificationImage = '/api/v2/delivery-man/order-delivery-verification';

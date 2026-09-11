@@ -25,9 +25,8 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_app_bar_wid
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/success_dialog_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_textfield_widget.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:latlong2/latlong.dart' as osm;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 class AddNewAddressScreen extends StatefulWidget {
@@ -64,7 +63,8 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
   final FocusNode _zipNode = FocusNode();
   Address? _address;
   String zip = '', country = 'YE';
-  late osm.LatLng _defaut;
+  late LatLng _defaut;
+  GoogleMapController? _mapController;
 
   final GlobalKey<FormState> _addressFormKey = GlobalKey();
 
@@ -76,7 +76,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
         Provider.of<SplashController>(context, listen: false)
             .configModel
             ?.defaultLocation;
-    _defaut = osm.LatLng(
+    _defaut = LatLng(
       double.tryParse(dLocation?.lat ?? '') ?? 15.3694,
       double.tryParse(dLocation?.lng ?? '') ?? 44.1910,
     );
@@ -180,9 +180,9 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
     return double.tryParse(value) ?? fallback;
   }
 
-  osm.LatLng _addressMapCenter(LocationController locationController) {
+  LatLng _addressMapCenter(LocationController locationController) {
     if (widget.isEnableUpdate) {
-      return osm.LatLng(
+      return LatLng(
         _parseCoordinate(widget.address?.latitude, _defaut.latitude),
         _parseCoordinate(widget.address?.longitude, _defaut.longitude),
       );
@@ -195,7 +195,7 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
       return _defaut;
     }
 
-    return osm.LatLng(latitude, longitude);
+    return LatLng(latitude, longitude);
   }
 
   @override
@@ -307,40 +307,28 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                                     child: Stack(
                                         clipBehavior: Clip.none,
                                         children: [
-                                          FlutterMap(
+                                          GoogleMap(
                                             key: ValueKey(
                                                 '${locationController.position.latitude}_${locationController.position.longitude}'),
-                                            options: MapOptions(
-                                              initialCenter: _addressMapCenter(
+                                            initialCameraPosition:
+                                                CameraPosition(
+                                              target: _addressMapCenter(
                                                   locationController),
-                                              initialZoom: 16,
-                                              onTap: (_, __) => RouterHelper
-                                                  .getSelectLocationScreen(
-                                                action: RouteAction.push,
-                                              ),
-                                              interactionOptions:
-                                                  const InteractionOptions(
-                                                flags: InteractiveFlag.drag |
-                                                    InteractiveFlag.pinchZoom |
-                                                    InteractiveFlag
-                                                        .doubleTapZoom,
-                                              ),
+                                              zoom: 16,
                                             ),
-                                            children: [
-                                              TileLayer(
-                                                urlTemplate:
-                                                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                                userAgentPackageName:
-                                                    'com.sixamtech.sixvalley',
-                                                maxZoom: 19,
-                                              ),
-                                              const RichAttributionWidget(
-                                                attributions: [
-                                                  TextSourceAttribution(
-                                                      'OpenStreetMap contributors'),
-                                                ],
-                                              ),
-                                            ],
+                                            mapType: MapType.normal,
+                                            compassEnabled: false,
+                                            myLocationButtonEnabled: false,
+                                            zoomControlsEnabled: false,
+                                            mapToolbarEnabled: false,
+                                            onMapCreated: (controller) =>
+                                                _mapController = controller,
+                                            onTap: (_) => RouterHelper
+                                                .getSelectLocationScreen(
+                                              googleMapController:
+                                                  _mapController,
+                                              action: RouteAction.push,
+                                            ),
                                           ),
                                           if (locationController.loading)
                                             Center(
@@ -370,6 +358,8 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                                               child: InkWell(
                                                   onTap: () => RouterHelper
                                                           .getSelectLocationScreen(
+                                                        googleMapController:
+                                                            _mapController,
                                                         action:
                                                             RouteAction.push,
                                                       ),

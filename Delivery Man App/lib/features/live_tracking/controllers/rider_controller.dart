@@ -7,7 +7,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:sixvalley_delivery_boy/features/order/controllers/order_controller.dart';
 import 'package:sixvalley_delivery_boy/data/repository/rider_repository.dart';
 import 'package:sixvalley_delivery_boy/features/live_tracking/domain/models/distance_model.dart';
-import 'package:sixvalley_delivery_boy/utill/app_constants.dart';
 import 'package:sixvalley_delivery_boy/utill/images.dart';
 
 class RiderController extends GetxController implements GetxService {
@@ -30,7 +29,6 @@ class RiderController extends GetxController implements GetxService {
   LatLng get initialPosition => _initialPosition;
   final List<MarkerData> _customMarkers = [];
   List<MarkerData> get customMarkers => _customMarkers;
-  PolylinePoints polylinePoints = PolylinePoints(apiKey: AppConstants.polylineMapKey);
   Map<PolylineId, Polyline> polylines = {};
   List<LatLng> polylineCoordinates = [];
 
@@ -111,11 +109,6 @@ class RiderController extends GetxController implements GetxService {
   Future<void> getPolyline({LatLng? from, LatLng? to}) async {
     final List<LatLng> polylineCoordinates = [];
 
-    // Create with your API key (reuse this instance as a field for better perf)
-    final PolylinePoints polylinePoints =
-    PolylinePoints(apiKey: AppConstants.polylineMapKey);
-
-    // Resolve origin / destination
     final LatLng origin = from ?? _initialPosition;
     final LatLng destination = to ??
         LatLng(
@@ -123,80 +116,25 @@ class RiderController extends GetxController implements GetxService {
           double.parse(Get.find<OrderController>().selectedOrderLng!),
         );
 
-    // Build Routes API request
-    final RoutesApiRequest request = RoutesApiRequest(
-      origin: PointLatLng(origin.latitude, origin.longitude),
-      destination: PointLatLng(destination.latitude, destination.longitude),
-      travelMode: TravelMode.driving,
-      // Optional extras:
-      // routingPreference: RoutingPreference.trafficAware,
-      // polylineQuality: PolylineQuality.highQuality,
-    );
-
     try {
-      // Call the Routes API variant
-      final RoutesApiResponse response =
-      await polylinePoints.getRouteBetweenCoordinatesV2(request: request);
+      final Response response = await riderRepo.getRoutePolyline(origin, destination);
+      final dynamic routes = response.body is Map ? response.body['routes'] : null;
+      final dynamic firstRoute = routes is List && routes.isNotEmpty ? routes.first : null;
+      final dynamic polyline = firstRoute is Map ? firstRoute['polyline'] : null;
+      final dynamic encodedPolyline = polyline is Map ? polyline['encodedPolyline'] : null;
 
-
-      if (response.routes.isEmpty) {
-        debugPrint('getPolyline: no routes found. error=${response.errorMessage}');
-        _addPolyLine(polylineCoordinates);
-        return;
-      }
-
-      final route = response.routes.first;
-
-      // Prefer decoded list of points (Routes API may provide this)
-      final List<PointLatLng>? routePoints = route.polylinePoints;
-      if (routePoints != null && routePoints.isNotEmpty) {
-        polylineCoordinates
-            .addAll(routePoints.map((p) => LatLng(p.latitude, p.longitude)));
-      } else if (route.polylineEncoded != null &&
-          route.polylineEncoded!.isNotEmpty) {
-        // If only encoded string is present, decode it
-        final decoded = PolylinePoints.decodePolyline(route.polylineEncoded!);
-        polylineCoordinates
-            .addAll(decoded.map((p) => LatLng(p.latitude, p.longitude)));
+      if (response.statusCode == 200 && encodedPolyline is String && encodedPolyline.isNotEmpty) {
+        final decoded = PolylinePoints.decodePolyline(encodedPolyline);
+        polylineCoordinates.addAll(decoded.map((point) => LatLng(point.latitude, point.longitude)));
       } else {
-        // Last-resort: convert RoutesApiResponse to legacy PolylineResult
-        final PolylineResult legacy = polylinePoints.convertToLegacyResult(response);
-        if (legacy.points.isNotEmpty) {
-          polylineCoordinates
-              .addAll(legacy.points.map((p) => LatLng(p.latitude, p.longitude)));
-        } else {
-          debugPrint('getPolyline: no polyline points available after fallbacks.');
-        }
+        debugPrint('getPolyline: backend did not return a route. status=${response.statusCode}');
       }
     } catch (e, st) {
       debugPrint('getPolyline exception: $e\n$st');
     }
-
-    // Use your existing method to add polyline to the map
-
-
     _addPolyLine(polylineCoordinates);
   }
-
-
-  // void getPolyline({LatLng? from, LatLng? to}) async {
-  //   List<LatLng> polylineCoordinates = [];
-  //
-  //   PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-  //     AppConstants.polylineMapKey,
-  //     PointLatLng(_initialPosition.latitude, _initialPosition.longitude),
-  //     PointLatLng(double.parse(Get.find<OrderController>().selectedOrderLat!), double.parse(Get.find<OrderController>().selectedOrderLng!)),
-  //     travelMode: TravelMode.driving,
-  //   );
-  //   if (result.points.isNotEmpty) {
-  //     for (var point in result.points) {
-  //       polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-  //     }
-  //   }
-  //   _addPolyLine(polylineCoordinates);
-  // }
-
-  _addPolyLine(List<LatLng> polylineCoordinates) {
+  void _addPolyLine(List<LatLng> polylineCoordinates) {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
       polylineId: id,

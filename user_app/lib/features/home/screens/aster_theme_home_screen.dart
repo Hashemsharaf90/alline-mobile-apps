@@ -1,80 +1,149 @@
-import 'package:flutter_sixvalley_ecommerce/features/splash/domain/models/config_model.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_search_field_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_categories_grid_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_banner_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
-import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_operation_status_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_services_grid_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_store_tabs_section_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/title_row_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/address/domain/models/address_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/banners_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/footer_banner_slider_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/single_banner_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/brand/controllers/brand_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/widgets/category_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/clearance_sale/widgets/clearance_sale_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/featured_deal_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/flash_deal_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/deal/widgets/featured_deal_list_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/deal/widgets/flash_deals_list_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_shopping_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_categories_grid_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_banner_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_search_field_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_supermarket_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/shimmers/flash_deal_shimmer.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/shimmers/order_again_shimmer.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/shimmers/top_store_shimmer.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/announcement_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/aster_theme/find_what_you_need_shimmer.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/aster_theme/find_what_you_need_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/aster_theme/more_store_list_view_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/aster_theme/order_again_list_view_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/featured_product_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/just_for_you/just_for_you_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/product_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/product_type_popup_menu_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/search_home_page_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/notification/controllers/notification_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order/controllers/order_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/seller_product_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/enums/product_type.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/widgets/home_category_product_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/widgets/latest_product_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/widgets/recommended_product_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/shop/widgets/more_store_list_view.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/top_seller_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/helper/responsive_helper.dart';
-import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
-import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 class AsterThemeHomeScreen extends StatefulWidget {
   const AsterThemeHomeScreen({super.key});
 
+  static bool _locationServicePromptShowing = false;
+  static bool _locationServicePromptDismissed = false;
+  static bool _locationSettingsOpened = false;
+
   @override
   State<AsterThemeHomeScreen> createState() => _AsterThemeHomeScreenState();
+
+  static bool _hasUsableCoordinates(AddressModel address) {
+    return (address.latitude?.trim().isNotEmpty ?? false) &&
+        (address.longitude?.trim().isNotEmpty ?? false);
+  }
+
+  static Future<List<String>?> _getCurrentLocationCoordinates() async {
+    try {
+      final serviceEnabled = await _ensureLocationServiceEnabled();
+      if (!serviceEnabled) {
+        return null;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return null;
+      }
+
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+      } catch (_) {
+        position = await Geolocator.getLastKnownPosition();
+      }
+
+      if (position == null ||
+          (position.latitude == 0 && position.longitude == 0)) {
+        return null;
+      }
+
+      return [position.latitude.toString(), position.longitude.toString()];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<bool> _ensureLocationServiceEnabled() async {
+    if (await Geolocator.isLocationServiceEnabled()) {
+      return true;
+    }
+
+    await _showEnableLocationServiceDialog();
+    return Geolocator.isLocationServiceEnabled();
+  }
+
+  static Future<void> _showEnableLocationServiceDialog() async {
+    final context = Get.context;
+    if (context == null ||
+        _locationServicePromptShowing ||
+        _locationServicePromptDismissed) {
+      return;
+    }
+
+    _locationServicePromptShowing = true;
+    final isLtr = Directionality.of(context) == TextDirection.ltr;
+    final openSettings = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(isLtr ? 'Enable location' : 'تشغيل الموقع'),
+        content: Text(
+          isLtr
+              ? 'Turn on GPS so we can show nearby supermarkets on the map.'
+              : 'فعّل GPS حتى نعرض لك السوبرماركت الأقرب على الخريطة حسب موقعك الحالي.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(isLtr ? 'Later' : 'لاحقًا'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(isLtr ? 'Open settings' : 'فتح الإعدادات'),
+          ),
+        ],
+      ),
+    );
+
+    _locationServicePromptShowing = false;
+    if (openSettings == true) {
+      _locationSettingsOpened = true;
+      await Geolocator.openLocationSettings();
+      return;
+    }
+
+    _locationServicePromptDismissed = true;
+  }
 
   static Future<void> loadData(bool reload) async {
     final shopController =
         Provider.of<ShopController>(Get.context!, listen: false);
+    final addressController =
+        Provider.of<AddressController>(Get.context!, listen: false);
     final categoryController =
         Provider.of<CategoryController>(Get.context!, listen: false);
     final bannerController =
@@ -108,6 +177,31 @@ class AsterThemeHomeScreen extends StatefulWidget {
 
     categoryController.getCategoryList(reload);
 
+    final addresses = await addressController.getAddressList();
+    AddressModel? locationAddress;
+    for (final address in addresses ?? []) {
+      if (_hasUsableCoordinates(address) && address.isBilling != true) {
+        locationAddress = address;
+        break;
+      }
+    }
+    for (final address in addresses ?? []) {
+      if (locationAddress == null && _hasUsableCoordinates(address)) {
+        locationAddress = address;
+        break;
+      }
+    }
+    final currentLocationCoordinates = await _getCurrentLocationCoordinates();
+    final supermarketLatitude =
+        currentLocationCoordinates?[0] ?? locationAddress?.latitude;
+    final supermarketLongitude =
+        currentLocationCoordinates?[1] ?? locationAddress?.longitude;
+    productController.setSupermarketLocationSource(
+      latitude: supermarketLatitude,
+      longitude: supermarketLongitude,
+      usingCurrentLocation: currentLocationCoordinates != null,
+    );
+
     productController.getHomeCategoryProductList(reload);
 
     shopController.getTopSellerList(offset: 1, isUpdate: reload);
@@ -115,6 +209,17 @@ class AsterThemeHomeScreen extends StatefulWidget {
     brandController.getBrandList(offset: 1, isUpdate: reload);
 
     productController.getLatestProductList(1, isUpdate: false);
+    productController.getSupermarketProductList(
+      1,
+      isUpdate: reload,
+      latitude: supermarketLatitude,
+      longitude: supermarketLongitude,
+    );
+    productController.getNearbySupermarkets(
+      isUpdate: reload,
+      latitude: supermarketLatitude,
+      longitude: supermarketLongitude,
+    );
     productController.getSelectedProductModel(1, isUpdate: false);
 
     productController.getFeaturedProductModel(1, isUpdate: reload);
@@ -157,30 +262,34 @@ class AsterThemeHomeScreen extends StatefulWidget {
   }
 }
 
-class _AsterThemeHomeScreenState extends State<AsterThemeHomeScreen> {
+class _AsterThemeHomeScreenState extends State<AsterThemeHomeScreen>
+    with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
-
-  void passData(int index, String title) {
-    index = index;
-    title = title;
-  }
-
-  bool singleVendor = false;
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-    singleVendor = Provider.of<SplashController>(context, listen: false)
-            .configModel
-            ?.businessMode ==
-        "single";
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        AsterThemeHomeScreen._locationSettingsOpened) {
+      AsterThemeHomeScreen._locationSettingsOpened = false;
+      AsterThemeHomeScreen._locationServicePromptDismissed = false;
+      AsterThemeHomeScreen.loadData(true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final ConfigModel? configModel =
-        Provider.of<SplashController>(context, listen: false).configModel;
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -200,7 +309,6 @@ class _AsterThemeHomeScreenState extends State<AsterThemeHomeScreen> {
               const SliverToBoxAdapter(child: AllineNearbyStoresSectionWidget()),
               const SliverToBoxAdapter(child: AllineFeaturedOffersSectionWidget()),
               const SliverToBoxAdapter(child: AllineSupermarketSectionWidget()),
-              const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
               const SliverToBoxAdapter(child: ClearanceListWidget()),
               SliverToBoxAdapter(
                 child: Padding(

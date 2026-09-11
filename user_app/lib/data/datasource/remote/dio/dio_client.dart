@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/dio/logging_interceptor.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,9 +22,6 @@ class DioClient {
       }) {
     token = sharedPreferences.getString(AppConstants.userLoginToken);
     countryCode = sharedPreferences.getString(AppConstants.countryCode) ?? AppConstants.languages[0].countryCode;
-    if (kDebugMode) {
-      print("NNNN $token");
-    }
     dio = dioC ?? Dio();
     dio
       ?..options.baseUrl = baseUrl
@@ -179,5 +175,3 @@ class DioClient {
 
 
 }
-
-

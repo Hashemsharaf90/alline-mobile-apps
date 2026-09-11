@@ -4,12 +4,24 @@ import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_contr
 import 'package:flutter_sixvalley_ecommerce/features/shop/screens/all_shop_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/screens/shop_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
+import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 
 class AllineNearbyStoresSectionWidget extends StatelessWidget {
   const AllineNearbyStoresSectionWidget({super.key});
 
+  static const List<String> _realStoreCovers = [
+    Images.storeHypermarketHd,
+    Images.storeFreshMarketHd,
+    Images.storeBakeryHd,
+    Images.storeButcheryHd,
+    Images.storePharmacyHd,
+    Images.storeElectronicsHd,
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Consumer<ShopController>(
       builder: (context, shopController, _) {
         final sellers = shopController.topSellerModel?.sellers ??
@@ -21,8 +33,8 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
         }
 
         return Container(
-          color: Colors.white,
-          padding: const EdgeInsets.only(top: 14, bottom: 10),
+          color: Theme.of(context).cardColor,
+          padding: const EdgeInsets.only(top: 14, bottom: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -35,25 +47,31 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          'متاجر قريبة منك 🏬',
+                          'متاجر قريبة منك',
                           style: titilliumBold.copyWith(
                             fontSize: 16,
-                            color: const Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(6),
+                            color: isDark
+                                ? const Color(0xFF0F766E).withOpacity(0.3)
+                                : const Color(0xFFF0FDFA),
+                            border: Border.all(
+                              color: const Color(0xFF0D9488).withOpacity(isDark ? 0.4 : 0.2),
+                            ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '${sellers.length}',
+                            '${sellers.length} متاجر',
                             style: textBold.copyWith(
-                              fontSize: 11,
-                              color: const Color(0xFF2563EB),
+                              fontSize: 10.5,
+                              color: const Color(0xFF0D9488),
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
@@ -66,13 +84,20 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                           MaterialPageRoute(builder: (_) => const AllTopSellerScreen(title: 'جميع المتاجر')),
                         );
                       },
-                      child: Text(
-                        'عرض الكل',
-                        style: textBold.copyWith(
-                          fontSize: 12,
-                          color: const Color(0xFF2563EB),
-                          fontWeight: FontWeight.w700,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'عرض الكل',
+                            style: textBold.copyWith(
+                              fontSize: 12,
+                              color: const Color(0xFF0D9488),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(width: 2),
+                          const Icon(Icons.arrow_forward_ios_rounded, size: 10, color: Color(0xFF0D9488)),
+                        ],
                       ),
                     ),
                   ],
@@ -83,7 +108,7 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
 
               // Horizontal Stores List
               SizedBox(
-                height: 205,
+                height: 206,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -127,12 +152,16 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                       child: Container(
                         width: 220,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1E293B) : Colors.white,
                           borderRadius: BorderRadius.circular(18),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.25)
+                                  : Colors.black.withOpacity(0.04),
                               blurRadius: 10,
                               offset: const Offset(0, 3),
                             ),
@@ -149,14 +178,14 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                                   child: Container(
                                     height: 98,
                                     width: 220,
-                                    color: const Color(0xFFEFF6FF),
-                                    child: (bannerUrl != null && bannerUrl.isNotEmpty)
+                                    color: isDark ? const Color(0xFF334155) : const Color(0xFFEFF6FF),
+                                    child: (bannerUrl != null && bannerUrl.isNotEmpty && !bannerUrl.contains('placeholder'))
                                         ? Image.network(
                                             bannerUrl,
                                             fit: BoxFit.cover,
-                                            errorBuilder: (_, __, ___) => _buildFallbackCover(index),
+                                            errorBuilder: (_, __, ___) => _buildRealisticCover(index),
                                           )
-                                        : _buildFallbackCover(index),
+                                        : _buildRealisticCover(index),
                                   ),
                                 ),
 
@@ -238,7 +267,7 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                                     shop?.name ?? 'متجر Alline المعتمد',
                                     style: titilliumBold.copyWith(
                                       fontSize: 13,
-                                      color: const Color(0xFF0F172A),
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                                       fontWeight: FontWeight.w800,
                                     ),
                                     maxLines: 1,
@@ -247,36 +276,59 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
 
                                   const SizedBox(height: 5),
 
-                                  // Rating & Reviews Row
+                                  // Rating & Reviews Row (shows 'جديد' if no rating)
                                   Row(
                                     children: [
-                                      const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 15),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        rating.toStringAsFixed(1),
-                                        style: textBold.copyWith(
-                                          fontSize: 11.5,
-                                          color: const Color(0xFF1E293B),
-                                          fontWeight: FontWeight.w800,
+                                      if (rating > 0) ...[
+                                        const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 15),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          rating.toStringAsFixed(1),
+                                          style: textBold.copyWith(
+                                            fontSize: 11.5,
+                                            color: isDark ? const Color(0xFFF1F5F9) : const Color(0xFF1E293B),
+                                            fontWeight: FontWeight.w800,
+                                          ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        '($reviewCount)',
-                                        style: textRegular.copyWith(
-                                          fontSize: 10.5,
-                                          color: const Color(0xFF94A3B8),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          '($reviewCount)',
+                                          style: textRegular.copyWith(
+                                            fontSize: 10.5,
+                                            color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                          ),
                                         ),
-                                      ),
+                                      ] else ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF0FDF4),
+                                            borderRadius: BorderRadius.circular(6),
+                                            border: Border.all(color: const Color(0xFF86EFAC)),
+                                          ),
+                                          child: Text(
+                                            'جديد',
+                                            style: textBold.copyWith(
+                                              fontSize: 10,
+                                              color: const Color(0xFF166534),
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                       const Spacer(),
                                       // Distance
-                                      const Icon(Icons.location_on_outlined, size: 12, color: Color(0xFF64748B)),
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        size: 12,
+                                        color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                      ),
                                       const SizedBox(width: 2),
                                       Text(
                                         dist,
                                         style: textMedium.copyWith(
                                           fontSize: 10.5,
-                                          color: const Color(0xFF64748B),
+                                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                         ),
                                       ),
                                     ],
@@ -288,20 +340,22 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFF8FAFC),
+                                      color: isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                                      border: Border.all(
+                                        color: isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF2563EB)),
+                                        const Icon(Icons.timer_outlined, size: 12, color: Color(0xFF0D9488)),
                                         const SizedBox(width: 4),
                                         Text(
                                           dTime,
                                           style: textMedium.copyWith(
                                             fontSize: 10,
-                                            color: const Color(0xFF334155),
+                                            color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF334155),
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -325,34 +379,13 @@ class AllineNearbyStoresSectionWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildFallbackCover(int index) {
-    final gradients = [
-      [const Color(0xFF1E40AF), const Color(0xFF3B82F6)],
-      [const Color(0xFF065F46), const Color(0xFF10B981)],
-      [const Color(0xFF7C2D12), const Color(0xFFF97316)],
-      [const Color(0xFF4C1D95), const Color(0xFF8B5CF6)],
-    ];
-    final icons = [
-      Icons.storefront_rounded,
-      Icons.shopping_basket_rounded,
-      Icons.devices_other_rounded,
-      Icons.checkroom_rounded,
-    ];
-
-    final grad = gradients[index % gradients.length];
-    final icon = icons[index % icons.length];
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: grad,
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Center(
-        child: Icon(icon, color: Colors.white.withOpacity(0.85), size: 36),
-      ),
+  Widget _buildRealisticCover(int index) {
+    final assetPath = _realStoreCovers[index % _realStoreCovers.length];
+    return Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      width: 220,
+      height: 98,
     );
   }
 }

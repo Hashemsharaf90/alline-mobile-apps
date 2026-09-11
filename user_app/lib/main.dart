@@ -242,8 +242,8 @@ class _MyAppState extends State<MyApp> {
               data: themeController.darkTheme
                   ? dark
                   : light(
-                      primaryColor: Theme.of(context).primaryColor,
-                      secondaryColor: Theme.of(context).colorScheme.secondary,
+                      primaryColor: themeController.selectedPrimaryColor,
+                      secondaryColor: themeController.selectedSecondaryColor,
                     ),
               child: Directionality(
                   textDirection: TextDirection.ltr,
@@ -258,8 +258,8 @@ class _MyAppState extends State<MyApp> {
             theme: themeController.darkTheme
                 ? dark
                 : light(
-                    primaryColor: Theme.of(context).primaryColor,
-                    secondaryColor: Theme.of(context).colorScheme.secondary,
+                    primaryColor: themeController.selectedPrimaryColor,
+                    secondaryColor: themeController.selectedSecondaryColor,
                   ),
             locale: Provider.of<LocalizationController>(context).locale,
             localizationsDelegates: [

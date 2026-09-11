@@ -17,4 +17,13 @@ class RiderRepository {
     });
   }
 
+  Future<Response> getRoutePolyline(LatLng from, LatLng to) async {
+    return await apiClient.postData(AppConstants.routePolylineApi, {
+      'origin_lat': from.latitude,
+      'origin_lng': from.longitude,
+      'destination_lat': to.latitude,
+      'destination_lng': to.longitude,
+    });
+  }
+
 }

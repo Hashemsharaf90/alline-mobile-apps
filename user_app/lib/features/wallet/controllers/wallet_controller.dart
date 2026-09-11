@@ -193,8 +193,15 @@ class WalletController extends ChangeNotifier {
   }
 
   Future<bool> createLocalWalletTopUpRequest(
-      String amount, BuildContext context) async {
-    if (_selectedLocalWalletMethod?.id == null) {
+    String amount,
+    BuildContext context, {
+    int? methodId,
+    String? transactionId,
+    String? payerPhone,
+    String? customerNote,
+  }) async {
+    final int? selectedMethodId = methodId ?? _selectedLocalWalletMethod?.id;
+    if (selectedMethodId == null) {
       showCustomSnackBarWidget('Please select a local wallet', context,
           snackBarType: SnackBarType.warning);
       return false;
@@ -205,8 +212,11 @@ class WalletController extends ChangeNotifier {
 
     ApiResponseModel apiResponse =
         await walletServiceInterface.createLocalWalletTopUpRequest(
-      methodId: _selectedLocalWalletMethod!.id!,
+      methodId: selectedMethodId,
       amount: amount,
+      transactionId: transactionId,
+      payerPhone: payerPhone,
+      customerNote: customerNote,
     );
 
     bool isSuccess = false;
@@ -217,7 +227,7 @@ class WalletController extends ChangeNotifier {
       isSuccess = true;
       if (context.mounted) {
         showCustomSnackBarWidget(
-            'Payment code generated successfully', context);
+            'تم إرسال طلب الشحن للمراجعة', context);
       }
       getLocalWalletTopUpRequests();
     } else {

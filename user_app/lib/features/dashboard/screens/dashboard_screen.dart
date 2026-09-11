@@ -115,14 +115,34 @@ class DashBoardScreenState extends State<DashBoardScreen> {
         key: _scaffoldKey,
 
         body: PageStorage(bucket: bucket, child: _screens[_pageIndex].screen),
-        bottomNavigationBar: Container(height: 68,
-          decoration: BoxDecoration(borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(Dimensions.paddingSizeLarge)),
-            color: Theme.of(context).cardColor,
-            boxShadow: [BoxShadow(offset: const Offset(1,1), blurRadius: 2, spreadRadius: 1,
-                color: Theme.of(context).primaryColor.withValues(alpha:.125))],),
-          child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: _getBottomWidget(singleVendor)))));
+        bottomNavigationBar: SafeArea(
+          top: false,
+          child: Container(
+            height: 72,
+            padding: const EdgeInsets.only(top: 5),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).dividerColor.withValues(alpha: .45),
+                ),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  offset: const Offset(0, -3),
+                  blurRadius: 14,
+                  color: Colors.black.withValues(alpha: .06),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: _getBottomWidget(singleVendor),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
 

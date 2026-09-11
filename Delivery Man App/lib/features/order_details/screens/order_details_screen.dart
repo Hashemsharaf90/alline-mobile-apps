@@ -342,7 +342,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 return (orderDetailsController.orderDetails != null && orderModel?.orderStatus != null) ?
 
                 SizedBox(
-                  height: (orderModel?.orderStatus == 'processing' || orderModel?.orderStatus == 'out_for_delivery') && !orderModel!.isPause! ? showCollectAmount() ? 90 : 70 : 0,
+                  height: (orderModel?.orderStatus == 'processing' || orderModel?.orderStatus == 'out_for_delivery') && !orderModel!.isPause! ? showCollectAmount() ? 94 : 74 : 0,
                   child : isEndOfPage || (imageUploadOff && isNotProcessing && !hasNoVerificationAndNoUpload) ?
                   Padding(padding: EdgeInsets.all(Dimensions.paddingSizeDefault),
                     child: orderDetailsController.uploading ? const Center(child: CircularProgressIndicator()) :
@@ -499,4 +499,3 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
 }
-

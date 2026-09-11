@@ -5,39 +5,20 @@ import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_b
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
-import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_smart_header_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_operation_status_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_services_grid_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_store_tabs_section_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/title_row_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/domain/models/address_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/banner/controllers/banner_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/banners_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/footer_banner_slider_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/banner/widgets/single_banner_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/brand/controllers/brand_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/brand/widgets/brand_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/widgets/category_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/clearance_sale/widgets/clearance_sale_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/featured_deal_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/flash_deal_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/deal/widgets/featured_deal_list_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/deal/widgets/flash_deals_list_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_shopping_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_supermarket_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/shimmers/flash_deal_shimmer.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/announcement_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/aster_theme/find_what_you_need_shimmer.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/featured_product_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/product_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/product_type_popup_menu_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/search_home_page_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/notification/controllers/notification_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/widgets/home_category_product_widget.dart';
@@ -45,17 +26,9 @@ import 'package:flutter_sixvalley_ecommerce/features/product/widgets/latest_prod
 import 'package:flutter_sixvalley_ecommerce/features/product/widgets/recommended_product_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/top_seller_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/domain/models/config_model.dart';
-import 'package:flutter_sixvalley_ecommerce/helper/responsive_helper.dart';
-import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
-import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
@@ -342,7 +315,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               const SliverToBoxAdapter(child: AllineNearbyStoresSectionWidget()),
               const SliverToBoxAdapter(child: AllineFeaturedOffersSectionWidget()),
               const SliverToBoxAdapter(child: AllineSupermarketSectionWidget()),
-              const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
               const SliverToBoxAdapter(child: ClearanceListWidget()),
               SliverToBoxAdapter(
                 child: Padding(

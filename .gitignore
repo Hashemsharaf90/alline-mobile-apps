@@ -19,3 +19,11 @@ key.properties
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
 **/.packages
+
+# Root screenshots & testing scratch files
+/*.png
+/window.xml
+/alline_ui_redesign/
+*.ps1
+
+

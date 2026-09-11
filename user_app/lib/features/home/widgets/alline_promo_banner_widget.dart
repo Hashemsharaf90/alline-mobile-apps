@@ -18,31 +18,31 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
 
   final List<Map<String, dynamic>> _slides = [
     {
-      'tag': 'عروض حصرية 🔥',
+      'tag': '🔥 عروض حصرية',
       'title': 'خصومات تصل إلى 50%',
-      'subtitle': 'تسوق من أفضل المتاجر القريبة منك بأفضل الأسعار',
+      'subtitle': 'تسوّق من أفضل المتاجر القريبة منك بأفضل الأسعار',
       'cta': 'تسوق الآن',
-      'gradient': [const Color(0xFF1E40AF), const Color(0xFF2563EB)],
+      'gradient': [const Color(0xFF0F766E), const Color(0xFF0D9488)],
       'icon': Icons.local_offer_rounded,
-      'image': Images.allineGroceryOffersRealistic,
+      'image': Images.allineOffersHeroHd,
     },
     {
-      'tag': 'توصيل فوري ⚡',
-      'title': 'طلبك يوصلك خلال دقائق',
+      'tag': '⚡ توصيل مجاني وسريع',
+      'title': 'طلبك يوصلك لباب بيتك',
       'subtitle': 'تتبع مباشر لمندوب التوصيل خطوة بخطوة',
       'cta': 'استكشف المتاجر',
-      'gradient': [const Color(0xFF0F766E), const Color(0xFF0D9488)],
+      'gradient': [const Color(0xFF115E59), const Color(0xFF047857)],
       'icon': Icons.delivery_dining_rounded,
-      'image': Images.allineSupermarketHeroRealistic,
+      'image': Images.offerFreeDeliveryHd,
     },
     {
-      'tag': 'محفظة Alline 💳',
-      'title': 'اشحن محفظتك واستمتع بالخصم',
-      'subtitle': 'شحن فوري عبر جيب، ون كاش، وكريمي حاسب',
-      'cta': 'اشحن الآن',
-      'gradient': [const Color(0xFF4338CA), const Color(0xFF6366F1)],
-      'icon': Icons.account_balance_wallet_rounded,
-      'image': Images.allineGroceryOffersRealistic,
+      'tag': '💥 أقوى التخفيضات',
+      'title': 'وفر أكثر كل يوم مع Alline',
+      'subtitle': 'عروض مميزة وحصرية على آلاف المنتجات المختارة',
+      'cta': 'استكشف العروض',
+      'gradient': [const Color(0xFF047857), const Color(0xFF0F766E)],
+      'icon': Icons.flash_on_rounded,
+      'image': Images.offerFlashDealsHd,
     },
   ];
 
@@ -70,13 +70,15 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: Column(
         children: [
           SizedBox(
-            height: 132,
+            height: 136,
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) {
@@ -114,10 +116,10 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                               gradient: LinearGradient(
                                 colors: [
                                   (slide['gradient'][0] as Color)
-                                      .withValues(alpha: .96),
+                                      .withValues(alpha: .95),
                                   (slide['gradient'][1] as Color)
-                                      .withValues(alpha: .64),
-                                  Colors.black.withValues(alpha: .1),
+                                      .withValues(alpha: .75),
+                                  Colors.black.withValues(alpha: .2),
                                 ],
                                 begin: AlignmentDirectional.centerStart,
                                 end: AlignmentDirectional.centerEnd,
@@ -140,56 +142,72 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                                       horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withValues(alpha: 0.22),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    slide['tag'] as String,
-                                    style: textBold.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 9.5,
-                                      fontWeight: FontWeight.w700,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color:
+                                          Colors.white.withValues(alpha: 0.35),
+                                      width: 0.8,
                                     ),
                                   ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        slide['icon'] as IconData,
+                                        color: Colors.white,
+                                        size: 11,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        slide['tag'] as String,
+                                        style: textBold.copyWith(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(height: 5),
+                                const SizedBox(height: 6),
                                 Text(
                                   slide['title'] as String,
                                   style: titilliumBold.copyWith(
                                     color: Colors.white,
-                                    fontSize: 15,
+                                    fontSize: 15.5,
                                     fontWeight: FontWeight.w900,
+                                    height: 1.2,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
+                                const SizedBox(height: 3),
                                 Text(
                                   slide['subtitle'] as String,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: textRegular.copyWith(
                                     color: Colors.white.withValues(alpha: 0.9),
                                     fontSize: 10.5,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 11, vertical: 4),
+                                      horizontal: 10, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(12),
                                     boxShadow: [
                                       BoxShadow(
-                                        color:
-                                            Colors.black.withValues(alpha: 0.1),
+                                        color: Colors.black.withValues(alpha: 0.15),
                                         blurRadius: 4,
-                                        offset: const Offset(0, 2),
+                                        offset: const Offset(0, 1),
                                       ),
                                     ],
                                   ),
                                   child: Text(
                                     '${slide['cta']} ←',
                                     style: textBold.copyWith(
-                                      color: slide['gradient'][0] as Color,
+                                      color: const Color(0xFF0F766E),
                                       fontSize: 10.5,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -221,8 +239,10 @@ class _AllinePromoBannerWidgetState extends State<AllinePromoBannerWidget> {
                 height: 6,
                 decoration: BoxDecoration(
                   color: _currentPage == index
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFFCBD5E1),
+                      ? const Color(0xFF0D9488)
+                      : (isDark
+                          ? const Color(0xFF475569)
+                          : const Color(0xFFCBD5E1)),
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),

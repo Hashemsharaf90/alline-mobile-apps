@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/wallet/controllers/wallet_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/wallet/domain/models/local_wallet_method_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
@@ -28,6 +29,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 1,
       'code': 'jeeb_cac',
+      'method_codes': ['jeeb', 'jeeb_cac'],
       'name': 'محفظة جيب',
       'bank': 'CAC Bank كاك بنك',
       'logo': 'assets/images/jeeb_wallet.png',
@@ -45,6 +47,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 2,
       'code': 'kuraimi_haseb',
+      'method_codes': ['kuraimi_money', 'kuraimi_haseb'],
       'name': 'الكريمي حاسب / جوال',
       'bank': 'Kuraimi Bank بنك الكريمي',
       'logo': 'assets/images/kuraimi_wallet.png',
@@ -62,6 +65,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 3,
       'code': 'one_cash',
+      'method_codes': ['one_cash'],
       'name': 'ون كاش ONE Cash',
       'bank': 'شركة ون كاش / القطيبي',
       'logo': 'assets/images/one_cash_wallet.png',
@@ -79,6 +83,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 4,
       'code': 'jawwali_wepay',
+      'method_codes': ['jawali', 'jawwali_wepay'],
       'name': 'محفظة جوالي WePay',
       'bank': 'بنك اليمن والكويت / الأمل',
       'logo': 'assets/images/jawwali_wallet.png',
@@ -96,6 +101,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 5,
       'code': 'tadhamon_cash',
+      'method_codes': ['tadhamon_cash', 'yemen_wallet'],
       'name': 'كاش التضامن',
       'bank': 'بنك التضامن الإسلامي',
       'logo': 'assets/images/tadhamon_wallet.png',
@@ -113,6 +119,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 6,
       'code': 'floosak_ykb',
+      'method_codes': ['floosak_ykb', 'yemen_wallet'],
       'name': 'محفظة فلوسك',
       'bank': 'بنك اليمن والكويت YKB',
       'logo': 'assets/images/floosak_wallet.png',
@@ -130,6 +137,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 7,
       'code': 'pyes_saba',
+      'method_codes': ['pyes_saba', 'yemen_wallet'],
       'name': 'محفظة بيس P-Yes',
       'bank': 'بنك سبأ الإسلامي',
       'logo': 'assets/images/pyes_wallet.png',
@@ -147,6 +155,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     {
       'id': 8,
       'code': 'exchange_networks',
+      'method_codes': ['exchange_networks', 'yemen_wallet'],
       'name': 'شبكات الصرافة والحوالات',
       'bank': 'النجم / الامتياز / يمن إكسبرس',
       'logo': 'assets/images/exchange_hawala.png',
@@ -165,10 +174,51 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
 
   final List<int> _quickAmounts = [1000, 3000, 5000, 10000, 20000, 50000];
 
+  LocalWalletMethodModel? _activeMethodForWallet(
+      WalletController walletController, Map<String, dynamic> wallet) {
+    final methodCodes = ((wallet['method_codes'] as List<dynamic>?) ?? [])
+        .map((code) => code.toString().toLowerCase())
+        .toSet();
+
+    for (final method in walletController.localWalletMethods) {
+      final code = method.code?.toLowerCase();
+      if (code != null && methodCodes.contains(code)) {
+        return method;
+      }
+    }
+    return null;
+  }
+
+  String _walletValue(String? backendValue, dynamic fallback) {
+    final value = backendValue?.trim();
+    if (value != null && value.isNotEmpty) {
+      return value;
+    }
+    return fallback?.toString() ?? '';
+  }
+
+  List<String> _walletSteps(LocalWalletMethodModel? method, Map<String, dynamic> wallet) {
+    final instructions = method?.instructions?.trim();
+    if (instructions != null && instructions.isNotEmpty) {
+      return instructions
+          .split(RegExp(r'\r?\n'))
+          .map((line) => line.trim())
+          .where((line) => line.isNotEmpty)
+          .toList();
+    }
+    return ((wallet['steps'] as List<dynamic>?) ?? [])
+        .map((step) => step.toString())
+        .toList();
+  }
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<WalletController>(context, listen: false)
+          .getLocalWalletMethods();
+    });
   }
 
   @override
@@ -249,27 +299,71 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     try {
       final walletController = Provider.of<WalletController>(context, listen: false);
       final profileController = Provider.of<ProfileController>(context, listen: false);
+      if (walletController.localWalletMethods.isEmpty) {
+        await walletController.getLocalWalletMethods(reload: true);
+      }
 
-      // Attempt direct local wallet topup with voucher code
-      bool success = await walletController.createLocalWalletTopUpRequest(
+      final methodId =
+          _activeMethodForWallet(walletController, currentWallet)?.id;
+
+      if (methodId == null) {
+        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'طريقة الدفع هذه غير مفعلة حالياً من لوحة التحكم',
+              style: textRegular.copyWith(color: Colors.white),
+            ),
+            backgroundColor: const Color(0xFFDC2626),
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+        return;
+      }
+
+      final bool success = await walletController.createLocalWalletTopUpRequest(
         amountText,
         context,
+        methodId: methodId,
+        transactionId: voucherCode,
+        payerPhone: _payerPhoneController.text.trim(),
+        customerNote:
+            'Submitted from ${currentWallet['name']} (${currentWallet['code']})',
       );
-
-      // Refresh balance in header & profile
-      await profileController.getUserInfo(context);
 
       setState(() => _isSubmitting = false);
 
-      if (mounted) {
+      if (mounted && success) {
+        await profileController.getUserInfo(context);
         Navigator.pop(context);
         _showSuccessDialog(amount, currentWallet['name']);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('تعذر إرسال طلب الشحن، تحقق من البيانات ثم حاول مرة أخرى',
+                style: textRegular.copyWith(color: Colors.white)),
+            backgroundColor: const Color(0xFFDC2626),
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
       if (mounted) {
-        Navigator.pop(context);
-        _showSuccessDialog(amount, currentWallet['name']);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('حدث خطأ أثناء إرسال طلب الشحن',
+                style: textRegular.copyWith(color: Colors.white)),
+            backgroundColor: const Color(0xFFDC2626),
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
       }
     }
   }
@@ -293,13 +387,13 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
             ),
             const SizedBox(height: 16),
             Text(
-              'تم شحن الرصيد بنجاح! ⚡',
+              'تم إرسال طلب الشحن بنجاح',
               style: textBold.copyWith(fontSize: 18, color: const Color(0xFF0F172A)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              'تم تسجيل كود الشحن بمبلغ ${PriceConverter.convertPrice(ctx, amount)} عبر $walletName وتحديث رصيد محفظتك فوراً.',
+              'تم تسجيل كود الشحن بمبلغ ${PriceConverter.convertPrice(ctx, amount)} عبر $walletName. سيظهر الرصيد في محفظتك بعد مطابقة العملية واعتمادها من المسؤول.',
               style: textRegular.copyWith(fontSize: 13, color: const Color(0xFF64748B), height: 1.4),
               textAlign: TextAlign.center,
             ),
@@ -318,7 +412,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
-                child: Text('ممتاز، شكراً لك', style: textBold.copyWith(fontSize: 15, color: Colors.white)),
+                child: Text('تم، متابعة المحفظة', style: textBold.copyWith(fontSize: 15, color: Colors.white)),
               ),
             ),
           ],
@@ -520,16 +614,26 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                   const SizedBox(height: 18),
 
                   // Selected Wallet Info & Merchant Details Card
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  Consumer<WalletController>(
+                    builder: (context, walletController, _) {
+                      final activeMethod =
+                          _activeMethodForWallet(walletController, currentWallet);
+                      final merchantAccount = _walletValue(
+                          activeMethod?.merchantAccount, currentWallet['account_num']);
+                      final merchantName = _walletValue(
+                          activeMethod?.merchantName, currentWallet['account_name']);
+                      final steps = _walletSteps(activeMethod, currentWallet);
+
+                      return Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                         Row(
                           children: [
                             ClipRRect(
@@ -552,10 +656,10 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    currentWallet['name'],
-                                    style: textBold.copyWith(fontSize: 14, color: const Color(0xFF0F172A)),
-                                  ),
-                                  Text(
+                                  activeMethod?.name ?? currentWallet['name'],
+                                  style: textBold.copyWith(fontSize: 14, color: const Color(0xFF0F172A)),
+                                ),
+                                Text(
                                     currentWallet['bank'],
                                     style: textRegular.copyWith(fontSize: 11, color: const Color(0xFF64748B)),
                                   ),
@@ -573,19 +677,35 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
+                            Expanded(
+                              child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('رقم الحساب / رمز التاجر:', style: textRegular.copyWith(fontSize: 11, color: const Color(0xFF64748B))),
                                 const SizedBox(height: 2),
                                 Text(
-                                  currentWallet['account_num'],
+                                  merchantAccount,
                                   style: textBold.copyWith(fontSize: 14, color: const Color(0xFF0F172A), letterSpacing: 1),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
+                                if (merchantName.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    merchantName,
+                                    style: textRegular.copyWith(fontSize: 11, color: const Color(0xFF64748B)),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ],
                             ),
+                            ),
+                            const SizedBox(width: 8),
                             ElevatedButton.icon(
-                              onPressed: () => _copyToClipboard(currentWallet['account_num'], 'رقم الحساب'),
+                              onPressed: merchantAccount.isEmpty
+                                  ? null
+                                  : () => _copyToClipboard(merchantAccount, 'رقم الحساب'),
                               icon: const Icon(Icons.copy_rounded, size: 14),
                               label: Text('نسخ', style: textBold.copyWith(fontSize: 12)),
                               style: ElevatedButton.styleFrom(
@@ -611,7 +731,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: (currentWallet['steps'] as List<String>).map((step) {
+                            children: steps.map((step) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 4),
                                 child: Row(
@@ -632,6 +752,8 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                         ),
                       ],
                     ),
+                  );
+                    },
                   ),
 
                   const SizedBox(height: 18),

@@ -12,6 +12,9 @@ abstract class WalletRepositoryInterface<T> extends RepositoryInterface {
   Future<dynamic> createLocalWalletTopUpRequest({
     required int methodId,
     required String amount,
+    String? transactionId,
+    String? payerPhone,
+    String? customerNote,
   });
 
   Future<dynamic> confirmLocalWalletTopUpRequest({

@@ -27,9 +27,17 @@ class WalletService implements WalletServiceInterface {
   Future createLocalWalletTopUpRequest({
     required int methodId,
     required String amount,
+    String? transactionId,
+    String? payerPhone,
+    String? customerNote,
   }) async {
     return await walletRepositoryInterface.createLocalWalletTopUpRequest(
-        methodId: methodId, amount: amount);
+      methodId: methodId,
+      amount: amount,
+      transactionId: transactionId,
+      payerPhone: payerPhone,
+      customerNote: customerNote,
+    );
   }
 
   @override

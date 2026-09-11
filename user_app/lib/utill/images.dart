@@ -197,6 +197,48 @@ class Images {
       'assets/images/alline/supermarket_hero_realistic.png';
   static const String allineGroceryOffersRealistic =
       'assets/images/alline/grocery_offers_realistic.png';
+  static const String allineHeroBannerHd =
+      'assets/images/alline/alline_hero_banner_hd.jpg';
+  static const String allineOffersHeroHd =
+      'assets/images/alline/alline_offers_hero_hd.jpg';
+  static const String storeHypermarketHd =
+      'assets/images/alline/store_hypermarket_hd.jpg';
+  static const String storeFreshMarketHd =
+      'assets/images/alline/store_fresh_market.jpg';
+  static const String storeButcheryHd =
+      'assets/images/alline/store_butchery.jpg';
+  static const String storeBakeryHd =
+      'assets/images/alline/store_bakery.jpg';
+  static const String storeElectronicsHd =
+      'assets/images/alline/store_electronics.jpg';
+  static const String storePharmacyHd =
+      'assets/images/alline/store_pharmacy.jpg';
+  static const String offerFlashDealsHd =
+      'assets/images/alline/offer_flash_deals.jpg';
+  static const String offerFreeDeliveryHd =
+      'assets/images/alline/offer_free_delivery.jpg';
+  static const String offerMegaGroceryHd =
+      'assets/images/alline/offer_mega_grocery.jpg';
+  static const String catSupermarketHd =
+      'assets/images/alline/cat_supermarket.jpg';
+  static const String catFruitsVegHd =
+      'assets/images/alline/cat_fruits_veg.jpg';
+  static const String catMeatHd =
+      'assets/images/alline/cat_meat.jpg';
+  static const String catBakeryHd =
+      'assets/images/alline/cat_bakery.jpg';
+  static const String catDairyHd =
+      'assets/images/alline/cat_dairy.jpg';
+  static const String catElectronicsHd =
+      'assets/images/alline/cat_electronics.jpg';
+  static const String catHomeKitchenHd =
+      'assets/images/alline/cat_home_kitchen.jpg';
+  static const String catPersonalCareHd =
+      'assets/images/alline/cat_personal_care.jpg';
+  static const String catBabyHd =
+      'assets/images/alline/cat_baby.jpg';
+  static const String catRestaurantsHd =
+      'assets/images/alline/cat_restaurants.jpg';
   static const String logoSvg = 'assets/svg/6valley_logo.svg';
   static const String mailOtpSvg = 'assets/svg/mail_otp.svg';
   static const String phoneOtpSvg = 'assets/svg/phone_otp.svg';

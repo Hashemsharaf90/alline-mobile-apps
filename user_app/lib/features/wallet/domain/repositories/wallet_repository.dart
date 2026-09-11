@@ -106,6 +106,9 @@ class WalletRepository implements WalletRepositoryInterface {
   Future<ApiResponseModel> createLocalWalletTopUpRequest({
     required int methodId,
     required String amount,
+    String? transactionId,
+    String? payerPhone,
+    String? customerNote,
   }) async {
     try {
       Response response = await dioClient!.post(
@@ -113,6 +116,12 @@ class WalletRepository implements WalletRepositoryInterface {
         data: {
           'local_wallet_method_id': methodId,
           'amount': amount,
+          if (transactionId != null && transactionId.trim().isNotEmpty)
+            'provider_transaction_id': transactionId.trim(),
+          if (payerPhone != null && payerPhone.trim().isNotEmpty)
+            'payer_phone': payerPhone.trim(),
+          if (customerNote != null && customerNote.trim().isNotEmpty)
+            'customer_note': customerNote.trim(),
         },
       );
       return ApiResponseModel.withSuccess(response);
