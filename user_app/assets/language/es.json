@@ -978,5 +978,9 @@
   "return_order_amount_by_admin": "Devolución del importe del pedido por el administrador",
   "return_order_amount_by_seller": "Devolución del importe del pedido por el vendedor",
   "update_cart": "Actualizar carrito",
-  "ai_assistant": "Asistente IA"
+  "ai_assistant": "Asistente IA",
+  "email_optional": "Correo electrónico (opcional)",
+  "login_with_password": "Iniciar sesión con contraseña",
+  "create_account": "Crear cuenta",
+  "full_name_is_required": "El nombre completo es obligatorio"
 }

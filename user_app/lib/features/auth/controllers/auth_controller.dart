@@ -70,6 +70,29 @@ class AuthController with ChangeNotifier {
   set setForgetPasswordLoading(bool value) => _isForgotPasswordLoading = value;
 
   String countryDialCode = '+967';
+  String? _pendingRegistrationName;
+  String? _pendingRegistrationEmail;
+  String? _pendingRegistrationReferralCode;
+
+  bool get hasPendingOtpRegistration =>
+      _pendingRegistrationName?.isNotEmpty ?? false;
+
+  void prepareOtpRegistration({
+    required String name,
+    String? email,
+    String? referralCode,
+  }) {
+    _pendingRegistrationName = name.trim();
+    _pendingRegistrationEmail = email?.trim();
+    _pendingRegistrationReferralCode = referralCode?.trim();
+  }
+
+  void clearPendingOtpRegistration() {
+    _pendingRegistrationName = null;
+    _pendingRegistrationEmail = null;
+    _pendingRegistrationReferralCode = null;
+  }
+
   void setCountryCode(String countryCode, {bool notify = true}) {
     countryDialCode = countryCode;
     if (notify) {
@@ -223,8 +246,11 @@ class AuthController with ChangeNotifier {
         await authServiceInterface.updateDeviceToken();
         navigateToHome(fromPage, onLoginSuccess);
       } else if (tempToken != null && tempToken.isNotEmpty) {
-        String type;
-        if (config.customerVerification?.firebase == 1) {
+        final verificationType = map['verification_type']?.toString();
+        late String type;
+        if (verificationType == 'phone' || verificationType == 'email') {
+          type = verificationType!;
+        } else if (config.customerVerification?.firebase == 1) {
           type = 'phone';
         } else if (config.customerVerification?.phone == 1) {
           type = 'phone';
@@ -403,13 +429,11 @@ class AuthController with ChangeNotifier {
     _isPhoneNumberVerificationButtonLoading = false;
     notifyListeners();
     final customerVerification = config.customerVerification;
-    if (customerVerification?.status == 1) {
-      if (type == 'email' &&
-          customerVerification?.email == 1 &&
-          (signUpModel.email?.isNotEmpty ?? false)) {
-        await checkEmail(signUpModel.email!, fromPage,
-            toNavigateScreen: toNavigateScreen, onLoginSuccess: onLoginSuccess);
-      } else if (type == 'phone' &&
+    if (type == 'email' && (signUpModel.email?.isNotEmpty ?? false)) {
+      await checkEmail(signUpModel.email!, fromPage,
+          toNavigateScreen: toNavigateScreen, onLoginSuccess: onLoginSuccess);
+    } else if (customerVerification?.status == 1) {
+      if (type == 'phone' &&
           customerVerification?.firebase == 1 &&
           (signUpModel.phone?.isNotEmpty ?? false)) {
         await firebaseVerifyPhoneNumber(
@@ -492,7 +516,8 @@ class AuthController with ChangeNotifier {
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) {},
       verificationFailed: (FirebaseAuthException e) {
-        debugPrint('Firebase phone verification failed: ${e.code} - ${e.message}');
+        debugPrint(
+            'Firebase phone verification failed: ${e.code} - ${e.message}');
         _isPhoneNumberVerificationButtonLoading = false;
         _resendButtonLoading = true;
         notifyListeners();
@@ -724,17 +749,28 @@ class AuthController with ChangeNotifier {
               password: null));
         }
         if (token != null) {
+          clearPendingOtpRegistration();
           await authServiceInterface.saveUserToken(token);
           await authServiceInterface.updateDeviceToken();
           navigateToHome(toNavigateScreen, onLoginSuccess);
         } else if (tempToken != null) {
-          RouterHelper.getOtpRegistrationRoute(
-            tempToken: tempToken,
-            userInput: phoneNumber,
-            action: RouteAction.push,
-            toNavigateScreen: toNavigateScreen,
-            onLoginSuccess: onLoginSuccess,
-          );
+          if (hasPendingOtpRegistration) {
+            final registrationResponse = await completePendingOtpRegistration(
+              temporaryToken: tempToken,
+              phone: phoneNumber,
+            );
+            if (registrationResponse.isSuccess) {
+              navigateToHome(toNavigateScreen, onLoginSuccess);
+            }
+          } else {
+            RouterHelper.getOtpRegistrationRoute(
+              tempToken: tempToken,
+              userInput: phoneNumber,
+              action: RouteAction.push,
+              toNavigateScreen: toNavigateScreen,
+              onLoginSuccess: onLoginSuccess,
+            );
+          }
         }
       }
     } else {
@@ -746,12 +782,19 @@ class AuthController with ChangeNotifier {
   }
 
   Future<ResponseModel> registerWithOtp(String name,
-      {String? email, required String phone}) async {
+      {String? email,
+      required String phone,
+      required String temporaryToken,
+      String? referralCode}) async {
     _isPhoneNumberVerificationButtonLoading = true;
     _loginErrorMessage = '';
     notifyListeners();
-    ApiResponseModel apiResponse = await authServiceInterface
-        .registerWithOtp(name, email: email, phone: phone);
+    ApiResponseModel apiResponse = await authServiceInterface.registerWithOtp(
+        name,
+        email: email,
+        phone: phone,
+        temporaryToken: temporaryToken,
+        referralCode: referralCode);
     ResponseModel responseModel;
     if (apiResponse.response != null &&
         apiResponse.response!.statusCode == 200) {
@@ -767,13 +810,36 @@ class AuthController with ChangeNotifier {
       responseModel = ResponseModel('verification', token != null);
     } else {
       _loginErrorMessage = ApiChecker.getError(apiResponse).errors![0].message;
-      showCustomSnackBarWidget(_verificationMsg, Get.context!,
+      showCustomSnackBarWidget(_loginErrorMessage, Get.context!,
           snackBarType: SnackBarType.error);
       responseModel = ResponseModel(_loginErrorMessage, false);
     }
     _isPhoneNumberVerificationButtonLoading = false;
     notifyListeners();
     return responseModel;
+  }
+
+  Future<ResponseModel> completePendingOtpRegistration({
+    required String temporaryToken,
+    required String phone,
+  }) async {
+    final name = _pendingRegistrationName;
+    if (name == null || name.isEmpty) {
+      return ResponseModel('Registration details are missing', false);
+    }
+
+    final response = await registerWithOtp(
+      name,
+      email: _pendingRegistrationEmail,
+      phone: phone,
+      temporaryToken: temporaryToken,
+      referralCode: _pendingRegistrationReferralCode,
+    );
+    if (response.isSuccess) {
+      clearPendingOtpRegistration();
+    }
+
+    return response;
   }
 
   Future<(ResponseModel?, String?)> verifyPhoneForOtp(String phone) async {
@@ -1096,8 +1162,7 @@ class AuthController with ChangeNotifier {
     if (type == 'phone' && config.customerVerification?.firebase == 1) {
       final bool firebaseSent = await firebaseVerifyPhoneNumber(phoneOrEmail,
           isResend ? FromPage.verification : FromPage.forgetPassword,
-          isForgetPassword: true,
-          showFailureMessage: false);
+          isForgetPassword: true, showFailureMessage: false);
       if (!firebaseSent) {
         responseModel = await _forgetPassword(phoneOrEmail, type);
       }

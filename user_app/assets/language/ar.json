@@ -260,7 +260,7 @@
   "reset_password": "إعادة تعيين كلمة المرور",
   "password_reset": "إعادة تعيين كلمة المرور",
   "enter_phone_number_for_password_reset": "أدخل رقم الهاتف لإعادة تعيين كلمة المرور",
-  "send_otp": "إرسال مكتب المدعي العام",
+  "send_otp": "إرسال رمز التحقق",
   "password_reset_successfully": "تمت إعادة تعيين كلمة المرور بنجاح",
   "input_valid_phone_number": "أدخل رقم هاتف صالحًا",
   "input_valid_otp": "إدخال Otp صالح",
@@ -978,5 +978,9 @@
   "return_order_amount_by_admin": "إرجاع مبلغ الطلب بواسطة المشرف",
   "return_order_amount_by_seller": "إرجاع مبلغ الطلب بواسطة البائع",
   "update_cart": "تحديث السلة",
-  "ai_assistant": "المساعد الذكي"
+  "ai_assistant": "المساعد الذكي",
+  "email_optional": "البريد الإلكتروني (اختياري)",
+  "login_with_password": "الدخول بكلمة المرور",
+  "create_account": "إنشاء حساب",
+  "full_name_is_required": "الاسم مطلوب"
 }

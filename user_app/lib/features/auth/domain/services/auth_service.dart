@@ -1,7 +1,7 @@
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/repositories/auth_repository_interface.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/services/auth_service_interface.dart';
 
-class AuthService implements AuthServiceInterface{
+class AuthService implements AuthServiceInterface {
   AuthRepoInterface authRepoInterface;
   AuthService({required this.authRepoInterface});
 
@@ -86,8 +86,10 @@ class AuthService implements AuthServiceInterface{
   }
 
   @override
-  Future resetPassword(String otp, String identity, String password, String confirmPassword) {
-    return authRepoInterface.resetPassword(otp, identity, password, confirmPassword);
+  Future resetPassword(
+      String otp, String identity, String password, String confirmPassword) {
+    return authRepoInterface.resetPassword(
+        otp, identity, password, confirmPassword);
   }
 
   @override
@@ -156,39 +158,63 @@ class AuthService implements AuthServiceInterface{
   }
 
   @override
-  Future firebaseAuthVerify({required String phoneNumber, required String session, required String otp, required bool isForgetPassword}){
-    return authRepoInterface.firebaseAuthVerify(phoneNumber: phoneNumber, session: session, otp: otp, isForgetPassword: isForgetPassword);
+  Future firebaseAuthVerify(
+      {required String phoneNumber,
+      required String session,
+      required String otp,
+      required bool isForgetPassword}) {
+    return authRepoInterface.firebaseAuthVerify(
+        phoneNumber: phoneNumber,
+        session: session,
+        otp: otp,
+        isForgetPassword: isForgetPassword);
   }
 
   @override
-  Future registerWithOtp(String name, {String? email, required String phone}) {
-    return authRepoInterface.registerWithOtp(name, email: email, phone: phone);
+  Future registerWithOtp(String name,
+      {String? email,
+      required String phone,
+      required String temporaryToken,
+      String? referralCode}) {
+    return authRepoInterface.registerWithOtp(name,
+        email: email,
+        phone: phone,
+        temporaryToken: temporaryToken,
+        referralCode: referralCode);
   }
 
-
   @override
-  Future registerWithSocialMedia(String name, {required String email,String? phone})  {
-    return authRepoInterface.registerWithSocialMedia(name, email: email, phone: phone);
+  Future registerWithSocialMedia(String name,
+      {required String email, String? phone}) {
+    return authRepoInterface.registerWithSocialMedia(name,
+        email: email, phone: phone);
   }
 
   @override
   Future verifyToken(String email, String token) {
-    return  authRepoInterface.verifyToken(email, token);
+    return authRepoInterface.verifyToken(email, token);
   }
 
   @override
-  Future existingAccountCheck({required String email, required int userResponse, required String medium}) {
-    return authRepoInterface.existingAccountCheck(email: email, userResponse: userResponse, medium: medium);
+  Future existingAccountCheck(
+      {required String email,
+      required int userResponse,
+      required String medium}) {
+    return authRepoInterface.existingAccountCheck(
+        email: email, userResponse: userResponse, medium: medium);
   }
 
   @override
-  Future verifyProfileInfo({required String userInput, required String token, required String type}) {
+  Future verifyProfileInfo(
+      {required String userInput,
+      required String token,
+      required String type}) {
     return authRepoInterface.verifyProfileInfo(userInput, token, type);
   }
 
-
   @override
-  Future firebaseAuthTokenStore({required String userInput, required String token}) {
+  Future firebaseAuthTokenStore(
+      {required String userInput, required String token}) {
     return authRepoInterface.firebaseAuthTokenStore(userInput, token);
   }
 
@@ -202,7 +228,6 @@ class AuthService implements AuthServiceInterface{
     return authRepoInterface.getAppleLoginEmail();
   }
 
-
   @override
   Future<void> saveGuestCartId(String id) {
     return authRepoInterface.saveGuestCartId(id);
@@ -210,7 +235,6 @@ class AuthService implements AuthServiceInterface{
 
   @override
   String? getGuestCartId() {
-   return authRepoInterface.getGuestCartId();
+    return authRepoInterface.getGuestCartId();
   }
-
 }

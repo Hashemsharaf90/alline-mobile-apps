@@ -978,5 +978,9 @@
   "return_order_amount_by_admin": "Return order amount by admin",
   "return_order_amount_by_seller": "Return order amount by seller",
   "update_cart": "Update Cart",
-  "ai_assistant": "AI Assistant"
+  "ai_assistant": "AI Assistant",
+  "email_optional": "Email (optional)",
+  "login_with_password": "Login with password",
+  "create_account": "Create account",
+  "full_name_is_required": "Full name is required"
 }
