@@ -27,6 +27,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   String? _countryCode;
+  bool _usePhone = true;
 
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _numberController = TextEditingController();
@@ -35,132 +36,224 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    _countryCode = CountryCode.fromCountryCode(Provider.of<SplashController>(context, listen: false).configModel!.countryCode!).dialCode;
-    Provider.of<AuthController>(context,listen: false).setCountryDialCode(_countryCode);
-
+    final configuredCountry =
+        Provider.of<SplashController>(context, listen: false)
+            .configModel
+            ?.countryCode;
+    _countryCode = CountryCode.fromCountryCode(
+            (configuredCountry?.isNotEmpty ?? false) ? configuredCountry! : 'YE')
+        .dialCode;
+    Provider.of<AuthController>(context, listen: false)
+        .setCountryDialCode(_countryCode);
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    _numberController.dispose();
+    _numberFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final ConfigModel configModel =  Provider.of<SplashController>(context, listen: false).configModel!;
+    final ConfigModel configModel =
+        Provider.of<SplashController>(context, listen: false).configModel!;
 
     return Scaffold(
-      appBar: CustomAppBarWidget(isBackButtonExist: true,title: getTranslated('forget_password', context),),
-
+      appBar: CustomAppBarWidget(
+        isBackButtonExist: true,
+        title: getTranslated('forget_password', context),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
         child: SingleChildScrollView(
-          child: Column( crossAxisAlignment: CrossAxisAlignment.center, children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
               const SizedBox(height: 95),
-
               Image.asset(Images.forgotPasswordIcon, height: 100, width: 100),
-
               Padding(
                 padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                child: Text('${getTranslated('forget_password', context)}?', style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color)),
+                child: Text('${getTranslated('forget_password', context)}?',
+                    style: robotoMedium.copyWith(
+                        color: Theme.of(context).textTheme.bodyLarge?.color)),
               ),
-
-              Provider.of<SplashController>(context,listen: false).configModel!.forgotPasswordVerification == "phone"?
-              Text(getTranslated('enter_phone_number_for_password_reset', context)!,
-                  style: titilliumRegular.copyWith(color: Theme.of(context).hintColor,
-                      fontSize: Dimensions.fontSizeExtraSmall)):
-              Text(getTranslated('enter_email_for_password_reset', context)!,
-                  style: titilliumRegular.copyWith(color: Theme.of(context).hintColor,
-                      fontSize: Dimensions.fontSizeDefault)),
+              Row(children: [
+                _resetModeButton(context, phone: true),
+                const SizedBox(width: Dimensions.paddingSizeSmall),
+                _resetModeButton(context, phone: false),
+              ]),
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              _usePhone
+                  ? Text(
+                      getTranslated(
+                          'enter_phone_number_for_password_reset', context)!,
+                      style: titilliumRegular.copyWith(
+                          color: Theme.of(context).hintColor,
+                          fontSize: Dimensions.fontSizeExtraSmall))
+                  : Text(
+                      getTranslated('enter_email_for_password_reset', context)!,
+                      style: titilliumRegular.copyWith(
+                          color: Theme.of(context).hintColor,
+                          fontSize: Dimensions.fontSizeDefault)),
               const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-
-              Provider.of<SplashController>(context,listen: false).configModel!.forgotPasswordVerification == "phone" ?
-              Consumer<AuthController>(
-                builder: (context, authProvider,_) {
-                  return CustomTextFieldWidget(
-                    border: true,
-                    hintText: getTranslated('number_hint', context),
-                    controller: _numberController,
-                    focusNode: _numberFocus,
-                    isPhoneNumber: true,
-                    textInputAction: TextInputAction.done,
-                    textInputType: TextInputType.phone,
-                    showCodePicker: true,
-                    countryDialCode: _countryCode,
-                    onCountryChanged: (CountryCode countryCode) {
-                      _countryCode = countryCode.dialCode!;
-                      authProvider.setCountryDialCode(countryCode.dialCode!);
-                    },
-                  );
-                }
-              ) :
-              CustomTextFieldWidget(
-                border: true,
-                prefixIconImage: Images.emailIcon,
-                controller: _controller,
-                hintText: getTranslated('ENTER_YOUR_EMAIL', context),
-                textInputAction: TextInputAction.done,
-                textInputType: TextInputType.emailAddress,),
+              _usePhone
+                  ? Consumer<AuthController>(
+                      builder: (context, authProvider, _) {
+                      return CustomTextFieldWidget(
+                        border: true,
+                        hintText: getTranslated('number_hint', context),
+                        controller: _numberController,
+                        focusNode: _numberFocus,
+                        isPhoneNumber: true,
+                        textInputAction: TextInputAction.done,
+                        textInputType: TextInputType.phone,
+                        showCodePicker: true,
+                        countryDialCode: _countryCode,
+                        onCountryChanged: (CountryCode countryCode) {
+                          _countryCode = countryCode.dialCode!;
+                          authProvider
+                              .setCountryDialCode(countryCode.dialCode!);
+                        },
+                      );
+                    })
+                  : CustomTextFieldWidget(
+                      border: true,
+                      prefixIconImage: Images.emailIcon,
+                      controller: _controller,
+                      hintText: getTranslated('ENTER_YOUR_EMAIL', context),
+                      textInputAction: TextInputAction.done,
+                      textInputType: TextInputType.emailAddress,
+                    ),
               const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+              Consumer<AuthController>(builder: (context, authProvider, _) {
+                return !authProvider.isLoading
+                    ? CustomButtonWidget(
+                        borderRadius: 10,
+                        btnTxt: _usePhone
+                            ? getTranslated('send_otp', context)
+                            : getTranslated('send_email', context),
+                        onTap: () {
+                          if (_usePhone) {
+                            bool isNumber = NumberCheckerHelper.isNumber(
+                                (_countryCode ?? '') + _numberController.text);
 
-              Consumer<AuthController>(
-                builder: (context, authProvider, _) {
-                  return !authProvider.isLoading ?
-                  CustomButtonWidget( borderRadius: 10,
-                    btnTxt: Provider.of<SplashController>(context,listen: false).configModel!.forgotPasswordVerification == "phone"?
-                    getTranslated('send_otp', context):getTranslated('send_email', context),
-                    onTap: () {
-                      if(Provider.of<SplashController>(context,listen: false).configModel!.forgotPasswordVerification == "phone") {
-
-                        bool isNumber = NumberCheckerHelper.isNumber((_countryCode ?? '') + _numberController.text);
-
-                        if(_numberController.text.isEmpty) {
-                          showCustomSnackBarWidget(getTranslated('PHONE_MUST_BE_REQUIRED', context), context, sanckBarType: SnackBarType.warning);
-                        }
-                        else{
-                          authProvider.forgotPassword((_countryCode ?? '') + _numberController.text.trim(), isNumber, configModel).then((value) {
-                            if(value != null) {
-                              if(value.isSuccess) {
-                                Navigator.push(Get.context!, MaterialPageRoute(builder: (_) => VerificationScreen((_countryCode ?? '') +_numberController.text.trim())));
-                              } else {
-                                showCustomSnackBarWidget(getTranslated('input_valid_phone_number', Get.context!), Get.context!,  sanckBarType: SnackBarType.warning);
-                              }
+                            if (_numberController.text.isEmpty) {
+                              showCustomSnackBarWidget(
+                                  getTranslated(
+                                      'PHONE_MUST_BE_REQUIRED', context),
+                                  context,
+                                  sanckBarType: SnackBarType.warning);
+                            } else {
+                              authProvider
+                                  .forgotPassword(
+                                      (_countryCode ?? '') +
+                                          _numberController.text.trim(),
+                                      isNumber,
+                                      configModel)
+                                  .then((value) {
+                                if (value != null) {
+                                  if (value.isSuccess) {
+                                    Navigator.push(
+                                        Get.context!,
+                                        MaterialPageRoute(
+                                            builder: (_) => VerificationScreen(
+                                                (_countryCode ?? '') +
+                                                    _numberController.text
+                                                        .trim())));
+                                  } else {
+                                    showCustomSnackBarWidget(
+                                        getTranslated(
+                                            'input_valid_phone_number',
+                                            Get.context!),
+                                        Get.context!,
+                                        sanckBarType: SnackBarType.warning);
+                                  }
+                                }
+                              });
                             }
-                          });
-                        }
-
-
-                      } else {
-                        if(_controller.text.isEmpty) {
-                          showCustomSnackBarWidget(getTranslated('EMAIL_MUST_BE_REQUIRED', context), context,  sanckBarType: SnackBarType.warning);
-                        }
-                        else {
-                          Provider.of<AuthController>(context, listen: false).forgotPassword(_controller.text, false, configModel).then((value) {
-                            if(value != null && value.isSuccess) {
-                              FocusScopeNode currentFocus = FocusScope.of(Get.context!);
-                              if (!currentFocus.hasPrimaryFocus) {
-                                currentFocus.unfocus();
-                              }
-                              _controller.clear();
-                              showAnimatedDialogWidget(Get.context!, MyDialogWidget(
-                                icon: Icons.send,
-                                title: getTranslated('sent', Get.context!),
-                                description: getTranslated('recovery_link_sent', Get.context!),
-                                rotateAngle: 5.5,
-                              ), dismissible: false);
-                            }else if (value != null) {
-                              showCustomSnackBarWidget(value.message, Get.context!,  sanckBarType: SnackBarType.success);
+                          } else {
+                            if (_controller.text.isEmpty) {
+                              showCustomSnackBarWidget(
+                                  getTranslated(
+                                      'EMAIL_MUST_BE_REQUIRED', context),
+                                  context,
+                                  sanckBarType: SnackBarType.warning);
+                            } else if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+                                .hasMatch(_controller.text.trim())) {
+                              showCustomSnackBarWidget(
+                                  getTranslated('enter_valid_email', context),
+                                  context,
+                                  sanckBarType: SnackBarType.warning);
+                            } else {
+                              Provider.of<AuthController>(context,
+                                      listen: false)
+                                  .forgotPassword(
+                                      _controller.text, false, configModel)
+                                  .then((value) {
+                                if (value != null && value.isSuccess) {
+                                  FocusScopeNode currentFocus =
+                                      FocusScope.of(Get.context!);
+                                  if (!currentFocus.hasPrimaryFocus) {
+                                    currentFocus.unfocus();
+                                  }
+                                  _controller.clear();
+                                  showAnimatedDialogWidget(
+                                      Get.context!,
+                                      MyDialogWidget(
+                                        icon: Icons.send,
+                                        title:
+                                            getTranslated('sent', Get.context!),
+                                        description: getTranslated(
+                                            'recovery_link_sent', Get.context!),
+                                        rotateAngle: 5.5,
+                                      ),
+                                      dismissible: false);
+                                } else if (value != null) {
+                                  showCustomSnackBarWidget(
+                                      value.message, Get.context!,
+                                      sanckBarType: SnackBarType.success);
+                                }
+                              });
                             }
-                          });
-                        }
-                      }
-                    },
-                  ) :
-                  Center(child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)));
-                }
-              ),
+                          }
+                        },
+                      )
+                    : Center(
+                        child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).primaryColor)));
+              }),
             ],
           ),
         ),
       ),
     );
   }
-}
 
+  Widget _resetModeButton(BuildContext context, {required bool phone}) {
+    final selected = _usePhone == phone;
+    return Expanded(
+      child: OutlinedButton.icon(
+        onPressed: () => setState(() => _usePhone = phone),
+        icon: Icon(phone ? Icons.phone_android_rounded : Icons.email_outlined,
+            size: 18),
+        label: Text(getTranslated(phone ? 'phone' : 'email', context) ?? ''),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: selected
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).hintColor,
+          backgroundColor: selected
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.08)
+              : null,
+          side: BorderSide(
+              color: selected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).hintColor.withValues(alpha: 0.35)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    );
+  }
+}

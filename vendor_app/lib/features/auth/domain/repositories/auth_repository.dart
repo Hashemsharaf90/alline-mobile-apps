@@ -44,8 +44,9 @@ class AuthRepository implements AuthRepositoryInterface {
   @override
   Future<ApiResponse> forgotPassword(String identity) async {
     try {
-      Response response = await dioClient!
-          .post(AppConstants.forgotPasswordUri, data: {"identity": identity});
+      final type = identity.contains('@') ? 'email' : 'phone';
+      Response response = await dioClient!.post(AppConstants.forgotPasswordUri,
+          data: {"identity": identity, "type": type});
       return ApiResponse.withSuccess(response);
     } catch (e) {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));

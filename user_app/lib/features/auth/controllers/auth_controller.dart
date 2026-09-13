@@ -223,8 +223,11 @@ class AuthController with ChangeNotifier {
         await authServiceInterface.updateDeviceToken();
         navigateToHome(fromPage, onLoginSuccess);
       } else if (tempToken != null && tempToken.isNotEmpty) {
-        String type;
-        if (config.customerVerification?.firebase == 1) {
+        final verificationType = map['verification_type']?.toString();
+        late String type;
+        if (verificationType == 'phone' || verificationType == 'email') {
+          type = verificationType!;
+        } else if (config.customerVerification?.firebase == 1) {
           type = 'phone';
         } else if (config.customerVerification?.phone == 1) {
           type = 'phone';
@@ -403,13 +406,11 @@ class AuthController with ChangeNotifier {
     _isPhoneNumberVerificationButtonLoading = false;
     notifyListeners();
     final customerVerification = config.customerVerification;
-    if (customerVerification?.status == 1) {
-      if (type == 'email' &&
-          customerVerification?.email == 1 &&
-          (signUpModel.email?.isNotEmpty ?? false)) {
-        await checkEmail(signUpModel.email!, fromPage,
-            toNavigateScreen: toNavigateScreen, onLoginSuccess: onLoginSuccess);
-      } else if (type == 'phone' &&
+    if (type == 'email' && (signUpModel.email?.isNotEmpty ?? false)) {
+      await checkEmail(signUpModel.email!, fromPage,
+          toNavigateScreen: toNavigateScreen, onLoginSuccess: onLoginSuccess);
+    } else if (customerVerification?.status == 1) {
+      if (type == 'phone' &&
           customerVerification?.firebase == 1 &&
           (signUpModel.phone?.isNotEmpty ?? false)) {
         await firebaseVerifyPhoneNumber(
@@ -492,7 +493,8 @@ class AuthController with ChangeNotifier {
       phoneNumber: phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) {},
       verificationFailed: (FirebaseAuthException e) {
-        debugPrint('Firebase phone verification failed: ${e.code} - ${e.message}');
+        debugPrint(
+            'Firebase phone verification failed: ${e.code} - ${e.message}');
         _isPhoneNumberVerificationButtonLoading = false;
         _resendButtonLoading = true;
         notifyListeners();
@@ -746,12 +748,12 @@ class AuthController with ChangeNotifier {
   }
 
   Future<ResponseModel> registerWithOtp(String name,
-      {String? email, required String phone}) async {
+      {String? email, required String phone, String? password}) async {
     _isPhoneNumberVerificationButtonLoading = true;
     _loginErrorMessage = '';
     notifyListeners();
     ApiResponseModel apiResponse = await authServiceInterface
-        .registerWithOtp(name, email: email, phone: phone);
+        .registerWithOtp(name, email: email, phone: phone, password: password);
     ResponseModel responseModel;
     if (apiResponse.response != null &&
         apiResponse.response!.statusCode == 200) {
@@ -1096,8 +1098,7 @@ class AuthController with ChangeNotifier {
     if (type == 'phone' && config.customerVerification?.firebase == 1) {
       final bool firebaseSent = await firebaseVerifyPhoneNumber(phoneOrEmail,
           isResend ? FromPage.verification : FromPage.forgetPassword,
-          isForgetPassword: true,
-          showFailureMessage: false);
+          isForgetPassword: true, showFailureMessage: false);
       if (!firebaseSent) {
         responseModel = await _forgetPassword(phoneOrEmail, type);
       }

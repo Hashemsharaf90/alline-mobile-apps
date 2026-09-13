@@ -20,7 +20,14 @@ class SignUpWidget extends StatefulWidget {
   final String? fromPage;
   final VoidCallback? onLoginSuccess;
   final String? referCode;
-  const SignUpWidget({super.key, required this.fromLogout, this.fromPage, this.onLoginSuccess, this.referCode});
+  final bool emailOnly;
+  const SignUpWidget(
+      {super.key,
+      required this.fromLogout,
+      this.fromPage,
+      this.onLoginSuccess,
+      this.referCode,
+      this.emailOnly = false});
 
   @override
   SignUpWidgetState createState() => SignUpWidgetState();
@@ -32,7 +39,8 @@ class SignUpWidgetState extends State<SignUpWidget> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _referController = TextEditingController();
 
   final FocusNode _fNameFocus = FocusNode();
@@ -46,39 +54,41 @@ class SignUpWidgetState extends State<SignUpWidget> {
   RegisterModel register = RegisterModel();
   final GlobalKey<FormState> signUpFormKey = GlobalKey<FormState>();
 
-
-
-  Future<void> route(bool isRoute, String? token, String? tempToken, String? errorMessage) async {
-    var splashController = Provider.of<SplashController>(context,listen: false);
+  Future<void> route(bool isRoute, String? token, String? tempToken,
+      String? errorMessage) async {
+    var splashController =
+        Provider.of<SplashController>(context, listen: false);
     var authController = Provider.of<AuthController>(context, listen: false);
-    var profileController = Provider.of<ProfileController>(context, listen: false);
-    String phone = authController.countryDialCode +_phoneController.text.trim();
+    var profileController =
+        Provider.of<ProfileController>(context, listen: false);
+    String phone = widget.emailOnly
+        ? ''
+        : authController.countryDialCode + _phoneController.text.trim();
     if (isRoute) {
       final configModel = splashController.configModel;
       final emailVerification = configModel?.emailVerification ?? false;
       final phoneVerification = configModel?.phoneVerification ?? false;
 
-      if(emailVerification && tempToken != null){
-        authController.sendOtpToEmail(_emailController.text.toString(), tempToken).then((value) async {
+      if (emailVerification && tempToken != null) {
+        authController
+            .sendOtpToEmail(_emailController.text.toString(), tempToken)
+            .then((value) async {
           if (value.response?.statusCode == 200) {
             authController.updateEmail(_emailController.text.toString());
             // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) =>
             //     VerificationScreen(tempToken,'',_emailController.text.toString())), (route) => false);
-
           }
         });
-      }else if(phoneVerification && tempToken != null){
-        authController.sendOtpToPhone(phone,tempToken).then((value) async {
+      } else if (phoneVerification && tempToken != null) {
+        authController.sendOtpToPhone(phone, tempToken).then((value) async {
           if (value.isSuccess) {
             authController.updatePhone(phone);
             // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) =>
             //     VerificationScreen(tempToken,phone,'')), (route) => false);
-
           }
         });
-      }else{
+      } else {
         await profileController.getUserInfo(context);
-
 
         _emailController.clear();
         _passwordController.clear();
@@ -88,216 +98,299 @@ class SignUpWidgetState extends State<SignUpWidget> {
         _confirmPasswordController.clear();
         _referController.clear();
       }
-    }
-    else {
-      showCustomSnackBarWidget(errorMessage, context, snackBarType: SnackBarType.error);
+    } else {
+      showCustomSnackBarWidget(errorMessage, context,
+          snackBarType: SnackBarType.error);
     }
   }
-
 
   @override
   void initState() {
     super.initState();
-    final countryCode = Provider.of<SplashController>(context, listen: false).configModel?.countryCode ?? 'YE';
-    final dialCode = CountryCode.fromCountryCode(countryCode).dialCode ?? '+967';
-    Provider.of<AuthController>(context, listen: false).setCountryCode(dialCode, notify: false);
+    final countryCode = Provider.of<SplashController>(context, listen: false)
+            .configModel
+            ?.countryCode ??
+        'YE';
+    final dialCode =
+        CountryCode.fromCountryCode(countryCode).dialCode ?? '+967';
+    Provider.of<AuthController>(context, listen: false)
+        .setCountryCode(dialCode, notify: false);
 
-    if(widget.referCode != null) {
+    if (widget.referCode != null) {
       _referController.text = widget.referCode ?? '';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final config =  Provider.of<SplashController>(context, listen: false).configModel;
+    final config =
+        Provider.of<SplashController>(context, listen: false).configModel;
     return Column(children: [
-      Consumer<AuthController>(
-          builder: (context, authProvider, _) {
-            return Consumer<SplashController>(
-                builder: (context, splashProvider,_) {
-                  return Form(
-                    key: signUpFormKey,
-                    child: Column(children: [
-                      const SizedBox(height: Dimensions.paddingSizeExtraSmall,),
-                      Container(
-                          margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault, right: Dimensions.marginSizeDefault),
-                          child: CustomTextFieldWidget(
-                              hintText: getTranslated('first_name', context),
-                              labelText: getTranslated('first_name', context),
-                              labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                              inputType: TextInputType.name,
-                              required: true,
-                              focusNode: _fNameFocus,
-                              nextFocus: _lNameFocus,
-                              prefixIcon: Images.username,
-                              capitalization: TextCapitalization.words,
-                              controller: _firstNameController,
-                              validator: (value)  => ValidateCheck.validateEmptyText(value, "first_name_field_is_required"))),
+      Consumer<AuthController>(builder: (context, authProvider, _) {
+        return Consumer<SplashController>(
+            builder: (context, splashProvider, _) {
+          return Form(
+            key: signUpFormKey,
+            child: Column(children: [
+              const SizedBox(
+                height: Dimensions.paddingSizeExtraSmall,
+              ),
+              Container(
+                  margin: const EdgeInsets.only(
+                      left: Dimensions.marginSizeDefault,
+                      right: Dimensions.marginSizeDefault),
+                  child: CustomTextFieldWidget(
+                      hintText: getTranslated('first_name', context),
+                      labelText: getTranslated('first_name', context),
+                      labelTextStyle: textRegular.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyLarge!.color),
+                      inputType: TextInputType.name,
+                      required: true,
+                      focusNode: _fNameFocus,
+                      nextFocus: _lNameFocus,
+                      prefixIcon: Images.username,
+                      capitalization: TextCapitalization.words,
+                      controller: _firstNameController,
+                      validator: (value) => ValidateCheck.validateEmptyText(
+                          value, "first_name_field_is_required"))),
 
+              Container(
+                  margin: const EdgeInsets.only(
+                      left: Dimensions.marginSizeDefault,
+                      right: Dimensions.marginSizeDefault,
+                      top: Dimensions.marginSizeSmall),
+                  child: CustomTextFieldWidget(
+                      hintText: getTranslated('last_name', context),
+                      labelText: getTranslated('last_name', context),
+                      labelTextStyle: textRegular.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyLarge!.color),
+                      focusNode: _lNameFocus,
+                      prefixIcon: Images.username,
+                      nextFocus: _emailFocus,
+                      required: true,
+                      capitalization: TextCapitalization.words,
+                      controller: _lastNameController,
+                      validator: (value) => ValidateCheck.validateEmptyText(
+                          value, "last_name_field_is_required"))),
 
-                      Container(margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault, right: Dimensions.marginSizeDefault,
+              Container(
+                  margin: const EdgeInsets.only(
+                      left: Dimensions.marginSizeDefault,
+                      right: Dimensions.marginSizeDefault,
+                      top: Dimensions.marginSizeSmall),
+                  child: CustomTextFieldWidget(
+                      hintText: getTranslated('enter_your_email', context),
+                      labelText: getTranslated('enter_your_email', context),
+                      labelTextStyle: textRegular.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyLarge!.color),
+                      focusNode: _emailFocus,
+                      nextFocus:
+                          widget.emailOnly ? _passwordFocus : _phoneFocus,
+                      required: true,
+                      inputType: TextInputType.emailAddress,
+                      controller: _emailController,
+                      prefixIcon: Images.email,
+                      validator: (value) =>
+                          ValidateCheck.validateEmail(value))),
+
+              if (!widget.emailOnly)
+                Container(
+                    margin: const EdgeInsets.only(
+                        left: Dimensions.marginSizeDefault,
+                        right: Dimensions.marginSizeDefault,
+                        top: Dimensions.marginSizeSmall),
+                    child: CustomTextFieldWidget(
+                        hintText: getTranslated('enter_mobile_number', context),
+                        labelText:
+                            getTranslated('enter_mobile_number', context),
+                        labelTextStyle: textRegular.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                            color:
+                                Theme.of(context).textTheme.bodyLarge!.color),
+                        controller: _phoneController,
+                        focusNode: _phoneFocus,
+                        nextFocus: _passwordFocus,
+                        required: true,
+                        showCodePicker: true,
+                        countryDialCode: authProvider.countryDialCode,
+                        onCountryChanged: (CountryCode countryCode) {
+                          _phoneFocus.requestFocus();
+                          authProvider.countryDialCode = countryCode.dialCode!;
+                          authProvider.setCountryCode(countryCode.dialCode!);
+                        },
+                        isAmount: true,
+                        validator: (value) => ValidateCheck.validatePhoneNoText(
+                            value,
+                            authProvider.countryDialCode,
+                            "phone_must_be_required"),
+                        inputAction: TextInputAction.next,
+                        inputType: TextInputType.phone)),
+
+              Container(
+                  margin: const EdgeInsets.only(
+                      left: Dimensions.marginSizeDefault,
+                      right: Dimensions.marginSizeDefault,
+                      top: Dimensions.marginSizeSmall),
+                  child: CustomTextFieldWidget(
+                      hintText:
+                          getTranslated('minimum_password_length', context),
+                      labelText: getTranslated('password', context),
+                      labelTextStyle: textRegular.copyWith(
+                          fontSize: Dimensions.fontSizeDefault,
+                          color: Theme.of(context).textTheme.bodyLarge!.color),
+                      controller: _passwordController,
+                      focusNode: _passwordFocus,
+                      isPassword: true,
+                      required: true,
+                      nextFocus: _confirmPasswordFocus,
+                      inputAction: TextInputAction.next,
+                      validator: (value) => ValidateCheck.validatePassword(
+                          value, "password_must_be_required"),
+                      prefixIcon: Images.pass)),
+
+              Hero(
+                  tag: 'user',
+                  child: Container(
+                      margin: const EdgeInsets.only(
+                          left: Dimensions.marginSizeDefault,
+                          right: Dimensions.marginSizeDefault,
                           top: Dimensions.marginSizeSmall),
-                          child: CustomTextFieldWidget(
-                              hintText: getTranslated('last_name', context),
-                              labelText: getTranslated('last_name', context),
-                              labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                              focusNode: _lNameFocus,
-                              prefixIcon: Images.username,
-                              nextFocus: _emailFocus,
-                              required: true,
-                              capitalization: TextCapitalization.words,
-                              controller: _lastNameController,
-                              validator: (value)  => ValidateCheck.validateEmptyText(value, "last_name_field_is_required"))),
-
-                      Container(margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault, right: Dimensions.marginSizeDefault,
-                          top: Dimensions.marginSizeSmall),
-                          child: CustomTextFieldWidget(
-                              hintText: getTranslated('enter_your_email', context),
-                              labelText: getTranslated('enter_your_email', context),
-                              labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                              focusNode: _emailFocus,
-                              nextFocus: _phoneFocus,
-                              required: true,
-                              inputType: TextInputType.emailAddress,
-                              controller: _emailController,
-                              prefixIcon: Images.email,
-                              validator: (value) => ValidateCheck.validateEmail(value))),
-
-
-
-                      Container(margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault,
-                        right: Dimensions.marginSizeDefault, top: Dimensions.marginSizeSmall),
-                        child: CustomTextFieldWidget(
-                          hintText: getTranslated('enter_mobile_number', context),
-                          labelText: getTranslated('enter_mobile_number', context),
-                          labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                          controller: _phoneController,
-                          focusNode: _phoneFocus,
-                          nextFocus: _passwordFocus,
+                      child: CustomTextFieldWidget(
+                          isPassword: true,
                           required: true,
-                          showCodePicker: true,
-                          countryDialCode: authProvider.countryDialCode,
-                          onCountryChanged: (CountryCode countryCode) {
-                            _phoneFocus.requestFocus();
-                            authProvider.countryDialCode = countryCode.dialCode!;
-                            authProvider.setCountryCode(countryCode.dialCode!);
-                          },
-                          isAmount: true,
-                          validator: (value)=> ValidateCheck.validatePhoneNoText(value, authProvider.countryDialCode, "phone_must_be_required"),
-                          inputAction: TextInputAction.next,
-                          inputType: TextInputType.phone)),
+                          hintText: getTranslated('re_enter_password', context),
+                          labelText:
+                              getTranslated('re_enter_password', context),
+                          labelTextStyle: textRegular.copyWith(
+                              fontSize: Dimensions.fontSizeDefault,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge!.color),
+                          controller: _confirmPasswordController,
+                          focusNode: _confirmPasswordFocus,
+                          inputAction: TextInputAction.done,
+                          validator: (value) =>
+                              ValidateCheck.validateConfirmPassword(
+                                  value, _passwordController.text.trim()),
+                          prefixIcon: Images.pass))),
 
+              //if(splashProvider.configModel!.refEarningStatus != null && splashProvider.configModel!.refEarningStatus == "1")
+              // Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, left: Dimensions.paddingSizeDefault),
+              //   child: Row(children: [Text(getTranslated('refer_code', context)??'')])),
+              if (splashProvider.configModel?.refEarningStatus != null &&
+                  splashProvider.configModel?.refEarningStatus == "1")
+                Container(
+                    margin: const EdgeInsets.only(
+                        left: Dimensions.marginSizeDefault,
+                        right: Dimensions.marginSizeDefault,
+                        top: Dimensions.marginSizeSmall),
+                    child: CustomTextFieldWidget(
+                        hintText: getTranslated('enter_refer_code', context),
+                        labelText: getTranslated('referral_code', context),
+                        labelTextStyle: textRegular.copyWith(
+                            fontSize: Dimensions.fontSizeDefault,
+                            color:
+                                Theme.of(context).textTheme.bodyLarge!.color),
+                        controller: _referController,
+                        focusNode: _referFocus,
+                        prefixIcon: Images.referImage,
+                        prefixColor: Theme.of(context).primaryColor,
+                        inputAction: TextInputAction.done)),
 
+              const SizedBox(height: Dimensions.paddingSizeDefault),
+              const ConditionCheckBox(),
 
+              Container(
+                  margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+                  child: Hero(
+                    tag: 'onTap',
+                    child: CustomButton(
+                      isLoading: authProvider.isLoading,
+                      onTap: authProvider.isAcceptTerms
+                          ? () {
+                              String firstName =
+                                  _firstNameController.text.trim();
+                              String lastName = _lastNameController.text.trim();
+                              String email = _emailController.text.trim();
+                              String phoneNumber =
+                                  authProvider.countryDialCode +
+                                      _phoneController.text.trim();
+                              String password = _passwordController.text.trim();
 
-                      Container(margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault,
-                          right: Dimensions.marginSizeDefault, top: Dimensions.marginSizeSmall),
-                          child: CustomTextFieldWidget(
-                              hintText: getTranslated('minimum_password_length', context),
-                              labelText: getTranslated('password', context),
-                              labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                              controller: _passwordController,
-                              focusNode: _passwordFocus,
-                              isPassword: true,required: true,
-                              nextFocus: _confirmPasswordFocus,
-                              inputAction: TextInputAction.next,
-                              validator: (value)=> ValidateCheck.validatePassword(value, "password_must_be_required"),
-                              prefixIcon: Images.pass)),
+                              if (signUpFormKey.currentState?.validate() ??
+                                  false) {
+                                final configModel =
+                                    config ?? splashProvider.configModel;
+                                if (configModel == null) {
+                                  showCustomSnackBarWidget(
+                                      getTranslated('server_connection_failed',
+                                              context) ??
+                                          'Server connection failed',
+                                      context,
+                                      snackBarType: SnackBarType.error);
+                                  return;
+                                }
 
-
-
-                      Hero(tag: 'user',
-                          child: Container(margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault,
-                              right: Dimensions.marginSizeDefault, top: Dimensions.marginSizeSmall),
-                              child: CustomTextFieldWidget(
-                                  isPassword: true,required: true,
-                                  hintText: getTranslated('re_enter_password', context),
-                                  labelText: getTranslated('re_enter_password', context),
-                                  labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                                  controller: _confirmPasswordController,
-                                  focusNode: _confirmPasswordFocus,
-                                  inputAction: TextInputAction.done,
-                                  validator: (value)=> ValidateCheck.validateConfirmPassword(value, _passwordController.text.trim()),
-                                  prefixIcon: Images.pass))),
-
-
-                      //if(splashProvider.configModel!.refEarningStatus != null && splashProvider.configModel!.refEarningStatus == "1")
-                      // Padding(padding: const EdgeInsets.only(top: Dimensions.paddingSizeDefault, left: Dimensions.paddingSizeDefault),
-                      //   child: Row(children: [Text(getTranslated('refer_code', context)??'')])),
-                        if(splashProvider.configModel?.refEarningStatus != null && splashProvider.configModel?.refEarningStatus == "1")
-                          Container(margin: const EdgeInsets.only(left: Dimensions.marginSizeDefault,
-                              right: Dimensions.marginSizeDefault, top: Dimensions.marginSizeSmall),
-                              child: CustomTextFieldWidget(
-                                  hintText: getTranslated('enter_refer_code', context),
-                                  labelText: getTranslated('referral_code', context),
-                                  labelTextStyle: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge!.color),
-                                  controller: _referController,
-                                  focusNode: _referFocus,
-                                  prefixIcon: Images.referImage,
-                                  prefixColor: Theme.of(context).primaryColor,
-                                  inputAction: TextInputAction.done)),
-
-                      const SizedBox(height: Dimensions.paddingSizeDefault),
-                      const ConditionCheckBox(),
-
-                      Container(margin: const EdgeInsets.all(Dimensions.paddingSizeDefault), child: Hero(
-                        tag: 'onTap',
-                        child: CustomButton(
-                          isLoading: authProvider.isLoading,
-                          onTap: authProvider.isAcceptTerms ?  () {
-                            String firstName = _firstNameController.text.trim();
-                            String lastName = _lastNameController.text.trim();
-                            String email = _emailController.text.trim();
-                            String phoneNumber = authProvider.countryDialCode +_phoneController.text.trim();
-                            String password = _passwordController.text.trim();
-
-                            if (signUpFormKey.currentState?.validate() ?? false) {
-                              final configModel = config ?? splashProvider.configModel;
-                              if (configModel == null) {
-                                showCustomSnackBarWidget(getTranslated('server_connection_failed', context) ?? 'Server connection failed', context, snackBarType: SnackBarType.error);
-                                return;
+                                register.fName = firstName;
+                                register.lName = lastName;
+                                register.email = email;
+                                register.phone =
+                                    widget.emailOnly ? null : phoneNumber;
+                                register.password = password;
+                                register.registrationType =
+                                    widget.emailOnly ? 'email' : 'phone';
+                                register.referCode =
+                                    _referController.text.trim();
+                                authProvider.registration(
+                                    register,
+                                    route,
+                                    configModel,
+                                    widget.fromPage,
+                                    widget.onLoginSuccess);
                               }
-
-                              register.fName = firstName;
-                              register.lName = lastName;
-                              register.email = email;
-                              register.phone = phoneNumber;
-                              register.password = password;
-                              register.referCode = _referController.text.trim();
-                              authProvider.registration(register, route, configModel, widget.fromPage, widget.onLoginSuccess);
                             }
+                          : null,
+                      buttonText: getTranslated('sign_up', context),
+                    ),
+                  )),
 
-                          } : null, buttonText: getTranslated('sign_up', context),
-                        ),
-                      )),
-
-
-                      authProvider.isLoading ? const SizedBox() :
-                      Center(child: Padding(padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraLarge),
-                        child: InkWell(onTap: () {
+              authProvider.isLoading
+                  ? const SizedBox()
+                  : Center(
+                      child: Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: Dimensions.paddingSizeExtraLarge),
+                      child: InkWell(
+                        onTap: () {
                           authProvider.getGuestIdUrl();
                           Navigator.pop(context);
                         },
-                          child: Column(children: [
-                            Text(getTranslated('already_have_account', context)!, style: titleRegular.copyWith(fontSize: Dimensions.fontSizeDefault)),
-
-                            Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                              Text(getTranslated('sign_in', context)!, style: titilliumRegular.copyWith(
-                                fontSize: Dimensions.fontSizeDefault,
-                                color: Theme.of(context).primaryColor,
-                              )),
-
-                              Icon(Icons.arrow_forward, size: Dimensions.iconSizeExtraSmall, color: Theme.of(context).primaryColor)
-                            ]),
-                          ]),
-                        ),
-                      )),
-                    ]),
-                  );
-                }
-            );
-          }
-      ),
+                        child: Column(children: [
+                          Text(getTranslated('already_have_account', context)!,
+                              style: titleRegular.copyWith(
+                                  fontSize: Dimensions.fontSizeDefault)),
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(getTranslated('sign_in', context)!,
+                                    style: titilliumRegular.copyWith(
+                                      fontSize: Dimensions.fontSizeDefault,
+                                      color: Theme.of(context).primaryColor,
+                                    )),
+                                Icon(Icons.arrow_forward,
+                                    size: Dimensions.iconSizeExtraSmall,
+                                    color: Theme.of(context).primaryColor)
+                              ]),
+                        ]),
+                      ),
+                    )),
+            ]),
+          );
+        });
+      }),
     ]);
   }
 }
