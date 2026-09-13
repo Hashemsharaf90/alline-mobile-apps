@@ -50,11 +50,11 @@ class ProfileRepository implements ProfileRepositoryInterface{
      Map<String, String> fields = {};
     if(pass.isEmpty) {
       fields.addAll(<String, String>{
-        '_method': 'put', 'f_name': userInfoModel.fName!, 'l_name': userInfoModel.lName!, 'phone': userInfoModel.phone!, 'email': userInfoModel.email!
+        '_method': 'put', 'f_name': userInfoModel.fName!, 'l_name': userInfoModel.lName!, 'phone': userInfoModel.phone ?? '', 'email': userInfoModel.email ?? ''
       });
     }else {
       fields.addAll(<String, String>{
-        '_method': 'put', 'f_name': userInfoModel.fName!, 'l_name': userInfoModel.lName!, 'phone': userInfoModel.phone!, 'password': pass, 'email': userInfoModel.email!
+        '_method': 'put', 'f_name': userInfoModel.fName!, 'l_name': userInfoModel.lName!, 'phone': userInfoModel.phone ?? '', 'password': pass, 'email': userInfoModel.email ?? ''
       });
     }
     request.fields.addAll(fields);

@@ -333,11 +333,19 @@ class AuthRepository implements AuthRepoInterface {
 
   @override
   Future<ApiResponseModel> registerWithOtp(String name,
-      {String? email, required String phone}) async {
+      {String? email, required String phone, String? password}) async {
     try {
+      final data = <String, dynamic>{
+        "name": name,
+        "email": email,
+        "phone": _normalizePhone(phone),
+      };
+      if (password != null && password.isNotEmpty) {
+        data['password'] = password;
+      }
       Response response = await dioClient!.post(
         AppConstants.registerWithOtp,
-        data: {"name": name, "email": email, "phone": _normalizePhone(phone)},
+        data: data,
       );
       return ApiResponseModel.withSuccess(response);
     } catch (e) {
