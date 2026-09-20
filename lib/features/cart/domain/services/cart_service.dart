@@ -120,8 +120,8 @@ class CartService implements CartServiceInterface{
   }
 
   @override
-  Future getCartList({String? couponCode}) async{
-    return await cartRepositoryInterface.getCartList(couponCode: couponCode);
+  Future getCartList({String? couponCode, String? addressId}) async{
+    return await cartRepositoryInterface.getCartList(couponCode: couponCode, addressId: addressId);
   }
 
   @override

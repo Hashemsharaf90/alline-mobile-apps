@@ -69,7 +69,10 @@ abstract class AuthServiceInterface {
       required bool isForgetPassword});
 
   Future<dynamic> registerWithOtp(String name,
-      {String? email, required String phone, String? password});
+      {String? email,
+      required String phone,
+      required String temporaryToken,
+      String? referralCode});
 
   Future<dynamic> registerWithSocialMedia(String name,
       {required String email, String? phone});

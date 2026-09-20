@@ -978,5 +978,9 @@
   "return_order_amount_by_admin": "অ্যাডমিন কর্তৃক অর্ডারের অর্থ ফেরত",
   "return_order_amount_by_seller": "বিক্রেতা কর্তৃক অর্ডারের অর্থ ফেরত",
   "update_cart": "কার্ট আপডেট করুন",
-  "ai_assistant": "AI Assistant"
+  "ai_assistant": "AI Assistant",
+  "email_optional": "ইমেইল (ঐচ্ছিক)",
+  "login_with_password": "পাসওয়ার্ড দিয়ে লগইন",
+  "create_account": "অ্যাকাউন্ট তৈরি করুন",
+  "full_name_is_required": "পুরো নাম আবশ্যক"
 }

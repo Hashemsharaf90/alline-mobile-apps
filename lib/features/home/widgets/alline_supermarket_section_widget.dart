@@ -2,7 +2,6 @@ import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/superma
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_store_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_sixvalley_ecommerce/localization/controllers/localizatio
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
-import 'package:latlong2/latlong.dart' as osm;
 import 'package:provider/provider.dart';
 
 class AllineSupermarketSectionWidget extends StatelessWidget {
@@ -33,15 +31,7 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
         )..sort(_compareProductsWithRealImagesFirst);
         final stores =
             productController.nearbySupermarkets.whereType<Map>().toList();
-        final userLocation = _latLngFromStrings(
-          productController.supermarketLatitude,
-          productController.supermarketLongitude,
-        );
-        final storeLocations = stores
-            .map(_storeLatLng)
-            .whereType<_StoreMapPoint>()
-            .toList(growable: false);
-        final hasKnownLocation = userLocation != null ||
+        final hasKnownLocation = (productController.supermarketLatitude?.trim().isNotEmpty ?? false) ||
             (addressController.addressList ?? []).any(
               (address) =>
                   (address.latitude?.trim().isNotEmpty ?? false) &&
@@ -122,16 +112,7 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
                 const SizedBox(height: Dimensions.paddingSizeDefault),
               ],
               if (stores.isNotEmpty) ...[
-                if (userLocation != null && storeLocations.isNotEmpty) ...[
-                  _NearbyStoresMap(
-                    userLocation: userLocation,
-                    stores: storeLocations,
-                    isLtr: isLtr,
-                    onStoreTap: (store) =>
-                        _openStore(context, store.data, category, isLtr),
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeDefault),
-                ],
+
                 SizedBox(
                   height: 102,
                   child: ListView.separated(
@@ -264,10 +245,10 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
       'مواد غذائية',
       'أغذية',
       'تموينات',
-      'ط³ظˆط¨ط±ظ…ط§ط±ظƒطھ',
+      'سوبرماركت',
       'ط³ظˆط¨ط± ظ…ط§ط±ظƒطھ',
-      'ط§ظ„ط³ظˆط¨ط± ظ…ط§ط±ظƒطھ',
-      'ط¨ظ‚ط§ظ„ط©',
+      'السوبر ماركت',
+      'بقالة',
       'supermarket',
       'super market',
       'grocery',
@@ -371,207 +352,7 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
     return double.tryParse(value.toString());
   }
 
-  osm.LatLng? _latLngFromStrings(String? latitude, String? longitude) {
-    final lat = double.tryParse(latitude?.trim() ?? '');
-    final lng = double.tryParse(longitude?.trim() ?? '');
-    if (lat == null || lng == null) {
-      return null;
-    }
-    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-      return null;
-    }
-    return osm.LatLng(lat, lng);
   }
-
-  _StoreMapPoint? _storeLatLng(Map store) {
-    final point = _latLngFromStrings(
-      _storeString(store, 'latitude'),
-      _storeString(store, 'longitude'),
-    );
-    if (point == null) {
-      return null;
-    }
-
-    return _StoreMapPoint(
-      point: point,
-      name: _storeString(store, 'name'),
-      distanceKm: _storeDouble(store, 'distance_km'),
-      data: store,
-    );
-  }
-}
-
-class _StoreMapPoint {
-  final osm.LatLng point;
-  final String name;
-  final double? distanceKm;
-  final Map data;
-
-  const _StoreMapPoint({
-    required this.point,
-    required this.name,
-    required this.distanceKm,
-    required this.data,
-  });
-}
-
-class _NearbyStoresMap extends StatelessWidget {
-  final osm.LatLng userLocation;
-  final List<_StoreMapPoint> stores;
-  final bool isLtr;
-  final ValueChanged<_StoreMapPoint> onStoreTap;
-
-  const _NearbyStoresMap({
-    required this.userLocation,
-    required this.stores,
-    required this.isLtr,
-    required this.onStoreTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final firstStore = stores.first;
-    final center = osm.LatLng(
-      (userLocation.latitude + firstStore.point.latitude) / 2,
-      (userLocation.longitude + firstStore.point.longitude) / 2,
-    );
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-      child: SizedBox(
-        height: 178,
-        child: Stack(
-          children: [
-            FlutterMap(
-              options: MapOptions(
-                initialCenter: center,
-                initialZoom: _initialZoom(firstStore.distanceKm),
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.drag |
-                      InteractiveFlag.pinchZoom |
-                      InteractiveFlag.doubleTapZoom,
-                ),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.sixamtech.sixvalley',
-                  maxZoom: 19,
-                ),
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: userLocation,
-                      width: 42,
-                      height: 42,
-                      child: _MapMarker(
-                        color: Theme.of(context).primaryColor,
-                        icon: Icons.my_location,
-                        tooltip: isLtr ? 'Your location' : 'موقعك',
-                      ),
-                    ),
-                    ...stores.map(
-                      (store) => Marker(
-                        point: store.point,
-                        width: 46,
-                        height: 46,
-                        child: GestureDetector(
-                          onTap: () => onStoreTap(store),
-                          child: _MapMarker(
-                            color: const Color(0xFF168B4A),
-                            icon: Icons.storefront,
-                            tooltip: store.name.isEmpty
-                                ? (isLtr ? 'Supermarket' : 'سوبرماركت')
-                                : store.name,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const RichAttributionWidget(
-                  attributions: [
-                    TextSourceAttribution('OpenStreetMap contributors'),
-                  ],
-                ),
-              ],
-            ),
-            PositionedDirectional(
-              start: Dimensions.paddingSizeSmall,
-              top: Dimensions.paddingSizeSmall,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Dimensions.paddingSizeSmall,
-                  vertical: Dimensions.paddingSizeExtraSmall,
-                ),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor.withValues(alpha: .92),
-                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                  boxShadow: ThemeShadow.getShadow(context),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.near_me,
-                        size: 16, color: Theme.of(context).primaryColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      isLtr ? 'Nearest supermarkets' : 'أقرب سوبرماركت',
-                      style: textMedium.copyWith(
-                        fontSize: Dimensions.fontSizeExtraSmall,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  double _initialZoom(double? distanceKm) {
-    if (distanceKm == null || distanceKm <= .6) {
-      return 15;
-    }
-    if (distanceKm <= 2) {
-      return 14;
-    }
-    if (distanceKm <= 6) {
-      return 12;
-    }
-    return 11;
-  }
-}
-
-class _MapMarker extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String tooltip;
-
-  const _MapMarker({
-    required this.color,
-    required this.icon,
-    required this.tooltip,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 3),
-          boxShadow: ThemeShadow.getShadow(context),
-        ),
-        child: Icon(icon, color: Colors.white, size: 20),
-      ),
-    );
-  }
-}
 
 class _NearbyStoreCard extends StatelessWidget {
   final String name;

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_app_bar_widget.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as google_maps;
-import 'package:latlong2/latlong.dart' as osm;
 import 'package:provider/provider.dart';
 
 class SelectLocationScreen extends StatefulWidget {
@@ -18,9 +16,9 @@ class SelectLocationScreen extends StatefulWidget {
 }
 
 class SelectLocationScreenState extends State<SelectLocationScreen> {
-  final MapController _mapController = MapController();
+  google_maps.GoogleMapController? _mapController;
   final TextEditingController _locationController = TextEditingController();
-  osm.LatLng? _cameraCenter;
+  google_maps.CameraPosition? _cameraPosition;
 
   @override
   void initState() {
@@ -31,13 +29,14 @@ class SelectLocationScreenState extends State<SelectLocationScreen> {
   @override
   void dispose() {
     _locationController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final locationProvider = Provider.of<LocationController>(context);
-    final initialCenter = osm.LatLng(
+    final initialCenter = google_maps.LatLng(
       locationProvider.pickPosition.latitude == 0
           ? 15.3694
           : locationProvider.pickPosition.latitude,
@@ -58,27 +57,17 @@ class SelectLocationScreenState extends State<SelectLocationScreen> {
         builder: (context, locationController, child) => Stack(
           clipBehavior: Clip.none,
           children: [
-            FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                initialCenter: initialCenter,
-                initialZoom: 16,
-                onPositionChanged: (camera, hasGesture) {
-                  _cameraCenter = camera.center;
-                },
+            google_maps.GoogleMap(
+              initialCameraPosition: google_maps.CameraPosition(
+                target: initialCenter,
+                zoom: 16,
               ),
-              children: [
-                TileLayer(
-                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.sixamtech.sixvalley',
-                  maxZoom: 19,
-                ),
-                const RichAttributionWidget(
-                  attributions: [
-                    TextSourceAttribution('OpenStreetMap contributors'),
-                  ],
-                ),
-              ],
+              mapType: google_maps.MapType.normal,
+              compassEnabled: false,
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
+              onMapCreated: (controller) => _mapController = controller,
+              onCameraMove: (position) => _cameraPosition = position,
             ),
             if (locationController.pickAddress != null)
               Container(
@@ -114,12 +103,17 @@ class SelectLocationScreenState extends State<SelectLocationScreen> {
                     onTap: () async {
                       await locationController.getCurrentLocation(
                           context, false);
-                      final current = osm.LatLng(
+                      final current = google_maps.LatLng(
                         locationController.pickPosition.latitude,
                         locationController.pickPosition.longitude,
                       );
-                      _cameraCenter = current;
-                      _mapController.move(current, 17);
+                      _cameraPosition = google_maps.CameraPosition(
+                        target: current,
+                        zoom: 17,
+                      );
+                      await _mapController?.animateCamera(
+                        google_maps.CameraUpdate.newLatLngZoom(current, 17),
+                      );
                     },
                     child: Container(
                       width: 50,
@@ -143,7 +137,8 @@ class SelectLocationScreenState extends State<SelectLocationScreen> {
                       child: CustomButton(
                         buttonText: getTranslated('select_location', context),
                         onTap: () async {
-                          final selected = _cameraCenter ?? initialCenter;
+                          final selected =
+                              _cameraPosition?.target ?? initialCenter;
                           await locationController.setPickedCoordinates(
                             latitude: selected.latitude,
                             longitude: selected.longitude,
@@ -151,6 +146,10 @@ class SelectLocationScreenState extends State<SelectLocationScreen> {
                             context: context,
                           );
                           locationController.setAddAddressData();
+                          await widget.googleMapController?.animateCamera(
+                            google_maps.CameraUpdate.newLatLngZoom(
+                                selected, 16),
+                          );
                           if (context.mounted) {
                             Navigator.of(context).pop();
                           }

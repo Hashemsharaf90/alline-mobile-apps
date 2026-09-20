@@ -8,13 +8,14 @@ import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:provider/provider.dart';
 
 class MenuButtonWidget extends StatelessWidget {
-  final String image;
+  final String? image;
+  final IconData? icon;
   final String? title;
   final Widget? navigateTo;
   final bool isNotification;
   final bool isProfile;
   final Function? onTap;
-  const MenuButtonWidget({super.key, required this.image, required this.title, this.navigateTo,
+  const MenuButtonWidget({super.key, this.image, this.icon, required this.title, this.navigateTo,
     this.isNotification = false, this.isProfile = false, this.onTap});
 
   @override
@@ -36,8 +37,12 @@ class MenuButtonWidget extends StatelessWidget {
       const SizedBox(),
 
 
-      leading: CustomAssetImageWidget(image, width: 25, height: 25, fit: BoxFit.fill,
-      color: Theme.of(context).primaryColor.withValues(alpha:.6),),
+      leading: icon != null
+          ? Icon(icon, size: 25, color: Theme.of(context).primaryColor.withValues(alpha: .8))
+          : (image != null
+              ? CustomAssetImageWidget(image!, width: 25, height: 25, fit: BoxFit.fill,
+                  color: Theme.of(context).primaryColor.withValues(alpha: .6))
+              : const SizedBox()),
       title: Text(title!, style: titilliumRegular.copyWith(fontSize: Dimensions.fontSizeLarge)),
       onTap: onTap != null ? () => onTap!() : () {
 

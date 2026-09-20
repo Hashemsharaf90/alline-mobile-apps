@@ -15,6 +15,8 @@ import 'package:flutter_sixvalley_ecommerce/features/more/widgets/profile_info_s
 import 'package:flutter_sixvalley_ecommerce/features/more/widgets/more_horizontal_section_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/more/widgets/title_button_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/global_shopping_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
 
 
 class MoreScreen extends StatefulWidget {
@@ -112,6 +114,29 @@ class _MoreScreenState extends State<MoreScreen> {
                                   RouterHelper.getCouponListScreenRoute();
                                 },
                               ),
+
+                              MenuButtonWidget(
+                                icon: Icons.public_rounded,
+                                title: getTranslated('global_shopping', context),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const GlobalShoppingScreen()),
+                                  );
+                                },
+                              ),
+
+                              if(authController.isLoggedIn())
+                                MenuButtonWidget(
+                                  icon: Icons.history_edu_rounded,
+                                  title: getTranslated('my_global_orders', context),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const MyGlobalOrdersScreen()),
+                                    );
+                                  },
+                                ),
 
                               if(authController.isLoggedIn())
                                 if(splashController.configModel?.refEarningStatus == "1")

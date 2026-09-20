@@ -193,6 +193,100 @@ class Images {
   static const String mailIconSvg = 'assets/svg/mail_icon.svg';
   static const String allineSupermarketBanner =
       'assets/images/alline_supermarket_banner.png';
+  static const String allineSupermarketHeroRealistic =
+      'assets/images/alline/supermarket_hero_realistic.png';
+  static const String allineGroceryOffersRealistic =
+      'assets/images/alline/grocery_offers_realistic.png';
+  static const String allineHeroBannerHd =
+      'assets/images/alline/alline_hero_banner_hd.jpg';
+  static const String allineOffersHeroHd =
+      'assets/images/alline/alline_offers_hero_hd.jpg';
+  static const String storeHypermarketHd =
+      'assets/images/alline/store_hypermarket_hd.jpg';
+  static const String storeFreshMarketHd =
+      'assets/images/alline/store_fresh_market.jpg';
+  static const String storeButcheryHd =
+      'assets/images/alline/store_butchery.jpg';
+  static const String storeBakeryHd =
+      'assets/images/alline/store_bakery.jpg';
+  static const String storeElectronicsHd =
+      'assets/images/alline/store_electronics.jpg';
+  static const String storePharmacyHd =
+      'assets/images/alline/store_pharmacy.jpg';
+  static const String offerFlashDealsHd =
+      'assets/images/alline/offer_flash_deals.jpg';
+  static const String offerFreeDeliveryHd =
+      'assets/images/alline/offer_free_delivery.jpg';
+  static const String offerMegaGroceryHd =
+      'assets/images/alline/offer_mega_grocery.jpg';
+  static const String catSupermarketHd =
+      'assets/images/alline/cat_supermarket.jpg';
+  static const String catFruitsVegHd =
+      'assets/images/alline/cat_fruits_veg.jpg';
+  static const String catMeatHd =
+      'assets/images/alline/cat_meat.jpg';
+  static const String catBakeryHd =
+      'assets/images/alline/cat_bakery.jpg';
+  static const String catDairyHd =
+      'assets/images/alline/cat_dairy.jpg';
+  static const String catElectronicsHd =
+      'assets/images/alline/cat_electronics.jpg';
+  static const String catHomeKitchenHd =
+      'assets/images/alline/cat_home_kitchen.jpg';
+  static const String catPersonalCareHd =
+      'assets/images/alline/cat_personal_care.jpg';
+  static const String catBabyHd =
+      'assets/images/alline/cat_baby.jpg';
+  static const String catRestaurantsHd =
+      'assets/images/alline/cat_restaurants.jpg';
+
+  // 13 New Professional Category Images (Categoires folder)
+  static const String catKitchenAccessories =
+      'assets/images/Categoires/cat_kitchen_accessories.png';
+  static const String catCarAccessories =
+      'assets/images/Categoires/cat_car_accessories.png';
+  static const String catFurnitureDecor =
+      'assets/images/Categoires/cat_furniture_decor.png';
+  static const String catHomeAppliances =
+      'assets/images/Categoires/cat_home_appliances.png';
+  static const String catLightingElectrical =
+      'assets/images/Categoires/cat_lighting_electrical.png';
+  static const String catElectronics =
+      'assets/images/Categoires/cat_electronics.png';
+  static const String catSportsFitness =
+      'assets/images/Categoires/cat_sports_fitness.png';
+  static const String catHealthPersonalCare =
+      'assets/images/Categoires/cat_health_personal_care.png';
+  static const String catHomeMaintenance =
+      'assets/images/Categoires/cat_home_maintenance.png';
+  static const String catPerfumes =
+      'assets/images/Categoires/cat_perfumes.png';
+  static const String catBabyCare =
+      'assets/images/Categoires/cat_baby_care.png';
+  static const String catSchoolOffice =
+      'assets/images/Categoires/cat_school_office.png';
+  static const String catCosmetics =
+      'assets/images/Categoires/cat_cosmetics.png';
+
+  // 5 New Professional Promotional Banners (panner folder)
+  static const String bannerFeaturedOffers =
+      'assets/images/panner/banner_featured_offers.png';
+  static const String bannerFurnitureHome =
+      'assets/images/panner/banner_furniture_home.png';
+  static const String bannerFashionNew =
+      'assets/images/panner/banner_fashion_new.png';
+  static const String bannerKitchenAppliances =
+      'assets/images/panner/banner_kitchen_appliances.png';
+  static const String bannerTechElectronics =
+      'assets/images/panner/banner_tech_electronics.png';
+
+  // Numbered promotional banners
+  static const String banner1 = 'assets/images/panner/banner_1.png';
+  static const String banner2 = 'assets/images/panner/banner_2.png';
+  static const String banner3 = 'assets/images/panner/banner_3.png';
+  static const String banner4 = 'assets/images/panner/banner_4.png';
+  static const String banner5 = 'assets/images/panner/banner_5.png';
+
   static const String logoSvg = 'assets/svg/6valley_logo.svg';
   static const String mailOtpSvg = 'assets/svg/mail_otp.svg';
   static const String phoneOtpSvg = 'assets/svg/phone_otp.svg';

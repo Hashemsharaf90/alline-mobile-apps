@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
@@ -26,17 +25,7 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen>
-    with SingleTickerProviderStateMixin {
-  bool _phoneRegistration = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _phoneRegistration = widget.referCode == null;
-  }
-
-  bool scrolled = false;
+class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -147,98 +136,20 @@ class _AuthScreenState extends State<AuthScreen>
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: Dimensions.paddingSizeLarge),
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color:
-                      Theme.of(context).disabledColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(children: [
-                  _registrationModeButton(context, phone: true),
-                  _registrationModeButton(context, phone: false),
-                ]),
-              ),
-            ),
-            const SizedBox(height: Dimensions.paddingSizeSmall),
             Expanded(
-              child: _phoneRegistration
-                  ? SingleChildScrollView(
-                      padding:
-                          const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                      child: Column(children: [
-                        const SizedBox(
-                            height: Dimensions.paddingSizeExtraLarge),
-                        Icon(Icons.phone_android_rounded,
-                            size: 64, color: Theme.of(context).primaryColor),
-                        const SizedBox(height: Dimensions.paddingSizeLarge),
-                        Text(
-                          getTranslated('enter_mobile_number', context) ?? '',
-                          textAlign: TextAlign.center,
-                          style: titleRegular.copyWith(
-                              fontSize: Dimensions.fontSizeLarge),
-                        ),
-                        const SizedBox(
-                            height: Dimensions.paddingSizeExtraLarge),
-                        CustomButton(
-                          buttonText: getTranslated('continue', context),
-                          onTap: () => RouterHelper.getOtpLoginRoute(
-                            fromLogout: widget.fromLogout,
-                            toNavigateScreen: widget.fromPage,
-                            onLoginSuccess: widget.onLoginSuccess,
-                          ),
-                        ),
-                      ]),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: Dimensions.paddingSizeSmall),
-                      child: SignUpWidget(
-                        fromLogout: widget.fromLogout,
-                        fromPage: widget.fromPage,
-                        onLoginSuccess: widget.onLoginSuccess,
-                        referCode: widget.referCode,
-                        emailOnly: true,
-                      ),
-                    ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: Dimensions.paddingSizeSmall),
+                child: SignUpWidget(
+                  fromLogout: widget.fromLogout,
+                  fromPage: widget.fromPage,
+                  onLoginSuccess: widget.onLoginSuccess,
+                  referCode: widget.referCode,
+                ),
+              ),
             ),
           ]);
         }),
-      ),
-    );
-  }
-
-  Widget _registrationModeButton(BuildContext context, {required bool phone}) {
-    final selected = _phoneRegistration == phone;
-    return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(6),
-        onTap: () => setState(() => _phoneRegistration = phone),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding:
-              const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-          decoration: BoxDecoration(
-            color: selected ? Theme.of(context).cardColor : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            Icon(phone ? Icons.phone_android_rounded : Icons.email_outlined,
-                size: 18,
-                color: selected
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).hintColor),
-            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-            Text(getTranslated(phone ? 'phone' : 'email', context) ?? '',
-                style: titleRegular.copyWith(
-                    color: selected
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).hintColor)),
-          ]),
-        ),
       ),
     );
   }

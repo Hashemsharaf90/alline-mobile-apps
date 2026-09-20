@@ -30,11 +30,11 @@
 .pub-cache/
 .pub/
 /build/
+android/build/
 /android/app/.cxx/
 get_changed_files.sh
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
@@ -46,3 +46,5 @@ app.*.map.json
 pubspec.lock
 macos
 linux
+*.ps1
+

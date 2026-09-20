@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/widgets/address_shimmer.dart';
+import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
@@ -55,6 +56,9 @@ class _SavedAddressListScreenState extends State<SavedAddressListScreen> {
                                     Provider.of<CheckoutController>(context,
                                             listen: false)
                                         .setAddressIndex(index);
+                                    final addressId = locationProvider.addressList?[index].id?.toString();
+                                    Provider.of<CartController>(context, listen: false)
+                                        .getCartData(context, reload: false, addressId: addressId);
                                     Navigator.pop(context);
                                   },
                                   child: Padding(

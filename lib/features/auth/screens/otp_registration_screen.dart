@@ -39,10 +39,7 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
   TextEditingController? _emailController;
   TextEditingController? _nameController;
   TextEditingController? _phoneNumberController;
-  TextEditingController? _passwordController;
-  TextEditingController? _confirmPasswordController;
   String? countryCode;
-  bool _addPassword = false;
 
   @override
   void initState() {
@@ -50,15 +47,15 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
     _emailController = TextEditingController();
     _nameController = TextEditingController();
     _phoneNumberController = TextEditingController();
-    _passwordController = TextEditingController();
-    _confirmPasswordController = TextEditingController();
 
     final configuredCountry =
         Provider.of<SplashController>(context, listen: false)
             .configModel
             ?.countryCode;
     countryCode ??= CountryCode.fromCountryCode(
-            (configuredCountry?.isNotEmpty ?? false) ? configuredCountry! : 'YE')
+            (configuredCountry?.isNotEmpty ?? false)
+                ? configuredCountry!
+                : 'YE')
         .dialCode;
 
     if (widget.userName != null && widget.userName!.isNotEmpty) {
@@ -71,8 +68,6 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
     _emailController?.dispose();
     _nameController?.dispose();
     _phoneNumberController?.dispose();
-    _passwordController?.dispose();
-    _confirmPasswordController?.dispose();
     super.dispose();
   }
 
@@ -158,7 +153,7 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                 CustomTextFieldWidget(
                                   isShowBorder: true,
                                   controller: _nameController,
-                                  inputType: TextInputType.emailAddress,
+                                  inputType: TextInputType.name,
                                   showLabelText: true,
                                   labelText: getTranslated('name', context)!,
                                   required: true,
@@ -174,8 +169,8 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                         hintText: '',
                                         controller: _emailController,
                                         inputType: TextInputType.emailAddress,
-                                        labelText:
-                                            getTranslated('email', context)!,
+                                        labelText: getTranslated(
+                                            'email_optional', context)!,
                                         prefixIcon: Images.mailIconSvg,
                                         prefixColor:
                                             Theme.of(context).primaryColor,
@@ -198,46 +193,6 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                       ),
                                 const SizedBox(
                                     height: Dimensions.paddingSizeLarge),
-                                SwitchListTile.adaptive(
-                                  contentPadding: EdgeInsets.zero,
-                                  title: Text(
-                                      getTranslated('password', context) ?? ''),
-                                  subtitle: Text(
-                                      getTranslated('password_hint', context) ??
-                                          ''),
-                                  value: _addPassword,
-                                  activeColor: Theme.of(context).primaryColor,
-                                  onChanged: (value) =>
-                                      setState(() => _addPassword = value),
-                                ),
-                                if (_addPassword) ...[
-                                  CustomTextFieldWidget(
-                                    isShowBorder: true,
-                                    controller: _passwordController,
-                                    inputType: TextInputType.visiblePassword,
-                                    labelText:
-                                        getTranslated('password', context),
-                                    isPassword: true,
-                                    required: true,
-                                    prefixIcon: Images.lockSvg,
-                                    prefixColor: Theme.of(context).primaryColor,
-                                  ),
-                                  const SizedBox(
-                                      height: Dimensions.paddingSizeLarge),
-                                  CustomTextFieldWidget(
-                                    isShowBorder: true,
-                                    controller: _confirmPasswordController,
-                                    inputType: TextInputType.visiblePassword,
-                                    labelText: getTranslated(
-                                        'confirm_password', context),
-                                    isPassword: true,
-                                    required: true,
-                                    prefixIcon: Images.lockSvg,
-                                    prefixColor: Theme.of(context).primaryColor,
-                                  ),
-                                  const SizedBox(
-                                      height: Dimensions.paddingSizeLarge),
-                                ],
                                 Consumer<AuthController>(
                                     builder: (context, authProvider, child) {
                                   return CustomButton(
@@ -253,12 +208,6 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                           _emailController!.text.trim();
                                       String phone =
                                           _phoneNumberController!.text.trim();
-                                      String password =
-                                          _passwordController!.text.trim();
-                                      String confirmPassword =
-                                          _confirmPasswordController!.text
-                                              .trim();
-
                                       if (_nameController!.text.isEmpty) {
                                         showCustomSnackBarWidget(
                                             getTranslated(
@@ -272,31 +221,14 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                                 'enter_phone_number', context),
                                             context,
                                             snackBarType: SnackBarType.warning);
-                                      } else if (_addPassword &&
-                                          password.length < 8) {
-                                        showCustomSnackBarWidget(
-                                            getTranslated(
-                                                'minimum_password_length',
-                                                context),
-                                            context,
-                                            snackBarType: SnackBarType.warning);
-                                      } else if (_addPassword &&
-                                          password != confirmPassword) {
-                                        showCustomSnackBarWidget(
-                                            getTranslated(
-                                                'password_did_not_match',
-                                                context),
-                                            context,
-                                            snackBarType: SnackBarType.warning);
                                       } else {
                                         if (isNumber) {
                                           authProvider
                                               .registerWithOtp(name,
                                                   email: email,
                                                   phone: widget.userInput,
-                                                  password: _addPassword
-                                                      ? password
-                                                      : null)
+                                                  temporaryToken:
+                                                      widget.tempToken)
                                               .then((value) {
                                             if (value.isSuccess) {
                                               if (authProvider
@@ -313,9 +245,7 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                                       .substring(userCountryCode
                                                           .length),
                                                   email: email,
-                                                  password: _addPassword
-                                                      ? password
-                                                      : null,
+                                                  password: null,
                                                 ));
                                               } else {
                                                 authProvider
@@ -324,7 +254,8 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                               if (context.mounted) {
                                                 authProvider.navigateToHome(
                                                     widget.toNavigateScreen,
-                                                    widget.onLoginSuccess);
+                                                    widget.onLoginSuccess,
+                                                    isNewUser: true);
                                               }
                                             }
                                           });
@@ -352,7 +283,8 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                               if (context.mounted) {
                                                 authProvider.navigateToHome(
                                                     widget.toNavigateScreen,
-                                                    widget.onLoginSuccess);
+                                                    widget.onLoginSuccess,
+                                                    isNewUser: true);
                                               }
                                             } else if (responseModel
                                                     .isSuccess &&

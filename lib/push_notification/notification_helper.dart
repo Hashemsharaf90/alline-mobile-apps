@@ -230,12 +230,12 @@ class NotificationHelper {
       body, htmlFormatBigText: true,
       contentTitle: title, htmlFormatContentTitle: true,
     );
-    AndroidNotificationDetails androidPlatformChannelSpecifics = const AndroidNotificationDetails(
+    AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
       'alline_customer_channel', 'Alline Notifications',
       channelDescription: 'Order and delivery updates for Alline Customer',
       importance: Importance.max,
       styleInformation: bigTextStyleInformation, priority: Priority.max, playSound: true,
-      sound: RawResourceAndroidNotificationSound('notification'),
+      sound: const RawResourceAndroidNotificationSound('notification'),
     );
     NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
     await fln.show(id: 0, title: title, body:  body, notificationDetails: platformChannelSpecifics, payload: notificationBody != null ? jsonEncode(notificationBody.toJson()) : null);

@@ -1,192 +1,128 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/screens/cart_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:provider/provider.dart';
 
 class FloatingSmartCartBar extends StatelessWidget {
-  final double bottomPadding;
-  const FloatingSmartCartBar({super.key, this.bottomPadding = 12});
+  const FloatingSmartCartBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<CartController>(
-      builder: (context, cartCtrl, _) {
-        final cartList = cartCtrl.cartList;
-        if (cartList.isEmpty) {
-          return const SizedBox.shrink();
-        }
+      builder: (context, cartController, _) {
+        final cartList = cartController.cartList;
+        if (cartList.isEmpty) return const SizedBox.shrink();
 
-        int totalCount = 0;
-        double totalAmount = 0.0;
-        for (var item in cartList) {
-          totalCount += item.quantity ?? 1;
-          totalAmount += (item.price ?? 0.0) * (item.quantity ?? 1);
-        }
+        final totalAmount = cartController.amount;
+        final totalItems = cartList.length;
 
         return Positioned(
+          bottom: 12,
           left: 14,
           right: 14,
-          bottom: bottomPadding,
           child: InkWell(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const CartScreen(showBackButton: true, fromDashboard: false),
-                ),
+                MaterialPageRoute(builder: (_) => const CartScreen()),
               );
             },
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              height: 52,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF0F3A7A), // Deep Blue
+                    Color(0xFF1455AC), // Primary Alline Blue
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: const Color(0xFFF7931A).withValues(alpha: 0.5),
-                  width: 1.5,
-                ),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    blurRadius: 16,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 6),
+                    color: const Color(0xFF0F3A7A).withOpacity(0.38),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Row(
                 children: [
-                  // Action button on left
+                  // Item Count Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFF7931A), Color(0xFFE85D04)],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFF7931A).withValues(alpha: 0.4),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                      color: Colors.white.withOpacity(0.22),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.shopping_bag_rounded, color: Colors.white, size: 15),
+                        const SizedBox(width: 4),
+                        Text(
+                          '$totalItems',
+                          style: titilliumBold.copyWith(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // Total Amount
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Text(
+                          'الإجمالي: ',
+                          style: textRegular.copyWith(
+                            color: Colors.white.withOpacity(0.85),
+                            fontSize: 11.5,
+                          ),
+                        ),
+                        Text(
+                          PriceConverter.convertPrice(context, totalAmount),
+                          style: titilliumBold.copyWith(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // View Cart CTA Button
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.arrow_back_rounded,
-                          size: 16,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 6),
                         Text(
-                          'إتمام الطلب ⚡',
+                          'عرض السلة',
                           style: textBold.copyWith(
-                            fontSize: Dimensions.fontSizeSmall,
-                            color: Colors.white,
+                            color: const Color(0xFF1455AC),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.arrow_forward_rounded, color: Color(0xFF1455AC), size: 14),
                       ],
                     ),
-                  ),
-
-                  const Spacer(),
-
-                  // Count & Total on right
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'المجموع: ${PriceConverter.convertPrice(context, totalAmount)}',
-                            style: textBold.copyWith(
-                              fontSize: Dimensions.fontSizeDefault,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '$totalCount منتجات في السلة',
-                            style: textRegular.copyWith(
-                              fontSize: Dimensions.fontSizeExtraSmall,
-                              color: const Color(0xFF94A3B8),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF10B981),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 10),
-
-                  // Cart Icon Badge
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF334155),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-                      Positioned(
-                        top: -3,
-                        right: -3,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFEF4444),
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
-                          child: Center(
-                            child: Text(
-                              '$totalCount',
-                              style: textBold.copyWith(
-                                color: Colors.white,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

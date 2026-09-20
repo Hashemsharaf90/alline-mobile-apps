@@ -39,11 +39,11 @@ class CartController extends ChangeNotifier {
     _getData = false;
   }
 
-  Future<ApiResponseModel> getCartData(BuildContext context, {bool reload = true, String? couponCode}) async {
+  Future<ApiResponseModel> getCartData(BuildContext context, {bool reload = true, String? couponCode, String? addressId}) async {
     if(reload){
       _cartLoading = true;
     }
-    ApiResponseModel apiResponse = await cartServiceInterface!.getCartList(couponCode: couponCode);
+    ApiResponseModel apiResponse = await cartServiceInterface!.getCartList(couponCode: couponCode, addressId: addressId);
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _cartList = [];
       apiResponse.response!.data.forEach((cart) => _cartList.add(CartModel.fromJson(cart)));

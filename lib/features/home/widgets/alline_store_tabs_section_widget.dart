@@ -4,6 +4,7 @@ import 'package:flutter_sixvalley_ecommerce/features/shop/domain/models/seller_m
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:provider/provider.dart';
 
 class AllineStoreTabsSectionWidget extends StatefulWidget {
@@ -17,8 +18,19 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
   int _selectedTabIndex = 0;
   final List<String> _tabs = ['الكل 🔥', 'الأقرب 📍', 'الجديدة ⭐', 'المفضلة ❤️'];
 
+  static const List<String> _realCovers = [
+    Images.storeHypermarketHd,
+    Images.storeFreshMarketHd,
+    Images.storeBakeryHd,
+    Images.storeButcheryHd,
+    Images.storePharmacyHd,
+    Images.storeElectronicsHd,
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -45,20 +57,20 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                   decoration: BoxDecoration(
                     gradient: isSelected
                         ? const LinearGradient(
-                            colors: [Color(0xFFE8115B), Color(0xFFF43F5E)],
+                            colors: [Color(0xFF0F3A7A), Color(0xFF1455AC)],
                           )
                         : null,
                     color: isSelected ? null : Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFFE8115B)
-                          : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                          ? const Color(0xFF1455AC)
+                          : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: const Color(0xFFE8115B).withValues(alpha: 0.35),
+                              color: const Color(0xFF1455AC).withValues(alpha: 0.35),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -71,7 +83,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                       style: textBold.copyWith(
                         color: isSelected
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge?.color,
+                            : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155)),
                         fontSize: Dimensions.fontSizeSmall,
                       ),
                     ),
@@ -104,6 +116,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                 final double distance = 0.5 + (index * 0.85);
                 final int eta = 20 + (index * 5);
                 final double rating = 4.7 + ((index % 3) * 0.1);
+                final fallbackCover = _realCovers[index % _realCovers.length];
 
                 return InkWell(
                   onTap: () {
@@ -126,11 +139,13 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: isDark
+                              ? Colors.black.withOpacity(0.3)
+                              : Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -145,37 +160,38 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                               height: 110,
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Theme.of(context).primaryColor.withValues(alpha: 0.85),
-                                    const Color(0xFF0F172A),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                               ),
-                              child: shop?.bannerFullUrl?.path != null && shop!.bannerFullUrl!.path!.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                      child: Image.network(
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                                child: (shop?.bannerFullUrl?.path != null &&
+                                        shop!.bannerFullUrl!.path!.isNotEmpty &&
+                                        !shop.bannerFullUrl!.path!.contains('placeholder'))
+                                    ? Image.network(
                                         shop.bannerFullUrl!.path!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => const SizedBox(),
+                                        errorBuilder: (_, __, ___) => Image.asset(
+                                          fallbackCover,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        fallbackCover,
+                                        fit: BoxFit.cover,
                                       ),
-                                    )
-                                  : null,
+                              ),
                             ),
 
                             // Overlay gradient
                             Positioned.fill(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
                                   gradient: LinearGradient(
                                     colors: [
                                       Colors.transparent,
-                                      Colors.black.withValues(alpha: 0.6),
+                                      Colors.black.withValues(alpha: 0.65),
                                     ],
                                     begin: Alignment.topCenter,
                                     end: Alignment.bottomCenter,
@@ -278,9 +294,12 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                                     width: 52,
                                     height: 52,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                                       borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(color: Colors.white, width: 2),
+                                      border: Border.all(
+                                        color: isDark ? const Color(0xFF475569) : Colors.white,
+                                        width: 2,
+                                      ),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withValues(alpha: 0.2),
@@ -298,7 +317,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                                           child: Icon(
                                             Icons.storefront_rounded,
                                             size: 28,
-                                            color: Theme.of(context).primaryColor,
+                                            color: const Color(0xFF1455AC),
                                           ),
                                         ),
                                       ),

@@ -19,7 +19,11 @@ class ThemeController with ChangeNotifier {
   }
 
   void _loadCurrentTheme() async {
-    _darkTheme = sharedPreferences!.getBool(AppConstants.theme) ?? false;
+    if (sharedPreferences != null && sharedPreferences!.containsKey(AppConstants.theme)) {
+      _darkTheme = sharedPreferences!.getBool(AppConstants.theme)!;
+    } else {
+      _darkTheme = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+    }
     notifyListeners();
   }
 
@@ -30,7 +34,7 @@ class ThemeController with ChangeNotifier {
 
   void setThemeColor({Color? primaryColor, Color? secondaryColor}) {
     selectedPrimaryColor = primaryColor;
-    selectedPrimaryColor = secondaryColor;
+    selectedSecondaryColor = secondaryColor;
 
     notifyListeners();
   }

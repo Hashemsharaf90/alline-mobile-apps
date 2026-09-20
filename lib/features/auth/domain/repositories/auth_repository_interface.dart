@@ -71,7 +71,10 @@ abstract class AuthRepoInterface<T> implements RepositoryInterface {
       required bool isForgetPassword});
 
   Future<ApiResponseModel> registerWithOtp(String name,
-      {String? email, required String phone, String? password});
+      {String? email,
+      required String phone,
+      required String temporaryToken,
+      String? referralCode});
 
   Future<ApiResponseModel> registerWithSocialMedia(String name,
       {required String email, String? phone});

@@ -980,5 +980,9 @@
   "return_order_amount_by_admin": "एडमिन द्वारा ऑर्डर राशि वापसी",
   "return_order_amount_by_seller": "विक्रेता द्वारा ऑर्डर राशि वापसी",
   "update_cart": "कार्ट अपडेट करें",
-  "ai_assistant": "AI Assistant"
+  "ai_assistant": "AI Assistant",
+  "email_optional": "ईमेल (वैकल्पिक)",
+  "login_with_password": "पासवर्ड से लॉग इन करें",
+  "create_account": "खाता बनाएं",
+  "full_name_is_required": "पूरा नाम आवश्यक है"
 }

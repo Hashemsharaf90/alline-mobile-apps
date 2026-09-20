@@ -1,3 +1,4 @@
+import 'package:flutter_sixvalley_ecommerce/helper/category_asset_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
@@ -72,6 +73,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     child: CategoryItem(
                       title: category.name,
                       icon: category.imageFullUrl?.path,
+                      category: category,
                       isSelected: categoryProvider.categorySelectedIndex == index,
                     ),
                   );
@@ -243,39 +245,64 @@ class CategoryItem extends StatelessWidget {
   final String? title;
   final String? icon;
   final bool isSelected;
-  const CategoryItem({super.key, required this.title, required this.icon, required this.isSelected});
+  final CategoryModel? category;
+  const CategoryItem({
+    super.key,
+    required this.title,
+    required this.icon,
+    required this.isSelected,
+    this.category,
+  });
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, boxConstraints) {
         return Container(
-          height: boxConstraints.maxWidth,
-          padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-          margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: 2),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          margin: const EdgeInsets.symmetric(vertical: 3, horizontal: 2),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Dimensions.paddingSizeExtraSmall),
-            color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : Theme.of(context).hintColor.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+            color: isSelected
+                ? Theme.of(context).primaryColor.withValues(alpha: 0.12)
+                : Theme.of(context).hintColor.withValues(alpha: 0.05),
+            border: Border.all(
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Colors.transparent,
+              width: 1.5,
+            ),
           ),
-          child: Center(child: Column(children: [
-
-            ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: CustomImageWidget(fit: BoxFit.cover, image: '$icon', height: 40, width: 40),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CategoryAssetHelper.buildCircularCategoryAvatar(
+                  category: category,
+                  size: 42,
+                ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: Text(
+                    title ?? '',
+                    maxLines: 2,
+                    style: (isSelected ? textBold : textMedium).copyWith(
+                      fontSize: 10.5,
+                      height: 1.15,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
-              child: Text(title!, maxLines: 2, style: textBold.copyWith(
-                fontSize: Dimensions.fontSizeSmall,
-                height: 1.0,
-                color: isSelected ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge?.color,
-              ), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
-            ),
-          ])),
+          ),
         );
-      }
+      },
     );
   }
 }

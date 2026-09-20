@@ -1,5 +1,6 @@
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -62,6 +63,14 @@ import 'features/splash/domain/models/config_model.dart';
 import 'helper/custom_delegate.dart';
 import 'localization/app_localization.dart';
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -70,6 +79,7 @@ final database = AppDatabase();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
 
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp();
@@ -242,8 +252,8 @@ class _MyAppState extends State<MyApp> {
               data: themeController.darkTheme
                   ? dark
                   : light(
-                      primaryColor: Theme.of(context).primaryColor,
-                      secondaryColor: Theme.of(context).colorScheme.secondary,
+                      primaryColor: themeController.selectedPrimaryColor,
+                      secondaryColor: themeController.selectedSecondaryColor,
                     ),
               child: Directionality(
                   textDirection: TextDirection.ltr,
@@ -258,8 +268,8 @@ class _MyAppState extends State<MyApp> {
             theme: themeController.darkTheme
                 ? dark
                 : light(
-                    primaryColor: Theme.of(context).primaryColor,
-                    secondaryColor: Theme.of(context).colorScheme.secondary,
+                    primaryColor: themeController.selectedPrimaryColor,
+                    secondaryColor: themeController.selectedSecondaryColor,
                   ),
             locale: Provider.of<LocalizationController>(context).locale,
             localizationsDelegates: [

@@ -172,9 +172,15 @@ class AuthService implements AuthServiceInterface {
 
   @override
   Future registerWithOtp(String name,
-      {String? email, required String phone, String? password}) {
+      {String? email,
+      required String phone,
+      required String temporaryToken,
+      String? referralCode}) {
     return authRepoInterface.registerWithOtp(name,
-        email: email, phone: phone, password: password);
+        email: email,
+        phone: phone,
+        temporaryToken: temporaryToken,
+        referralCode: referralCode);
   }
 
   @override

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,12 +7,19 @@ class GoogleSignInController with ChangeNotifier {
   GoogleSignInAccount? googleAccount;
   GoogleSignInClientAuthorization? auth;
   String errorMessage = '';
+  late final Future<void> _initialization;
 
   GoogleSignInController() {
-    _initialize();
+    _initialization = _initialize();
   }
 
   Future<void> _initialize() async {
+    if (AppConstants.googleServerClientId.trim().isEmpty) {
+      errorMessage = 'Google Sign-In is not configured for this build.';
+      notifyListeners();
+      return;
+    }
+
     await _googleSignIn.initialize(
       serverClientId: AppConstants.googleServerClientId,
     );
@@ -22,7 +28,8 @@ class GoogleSignInController with ChangeNotifier {
     _googleSignIn.authenticationEvents.listen(_handleAuthenticationEvent);
   }
 
-  Future<void> _handleAuthenticationEvent(GoogleSignInAuthenticationEvent event) async {
+  Future<void> _handleAuthenticationEvent(
+      GoogleSignInAuthenticationEvent event) async {
     googleAccount = switch (event) {
       GoogleSignInAuthenticationEventSignIn() => event.user,
       GoogleSignInAuthenticationEventSignOut() => null,
@@ -30,11 +37,14 @@ class GoogleSignInController with ChangeNotifier {
 
     if (googleAccount != null) {
       const List<String> scopes = <String>['email'];
-      auth = await googleAccount?.authorizationClient.authorizationForScopes(scopes);
+      final existingAuthorization = await googleAccount?.authorizationClient
+          .authorizationForScopes(scopes);
+      if (existingAuthorization != null) {
+        auth = existingAuthorization;
+      }
     } else {
       auth = null;
     }
-
 
     notifyListeners();
   }
@@ -42,18 +52,28 @@ class GoogleSignInController with ChangeNotifier {
   Future<void> login() async {
     try {
       errorMessage = '';
+      await _initialization;
+      if (AppConstants.googleServerClientId.trim().isEmpty) {
+        throw StateError('Google Sign-In is not configured for this build.');
+      }
 
-      final completer = Completer<void>();
+      const List<String> scopes = <String>['email'];
+      final GoogleSignInAccount account = await _googleSignIn.authenticate(
+        scopeHint: scopes,
+      );
+      googleAccount = account;
 
-      // Temporary subscription to wait for event
-      final sub = _googleSignIn.authenticationEvents.listen((event) async {
-        await _handleAuthenticationEvent(event);
-        if (!completer.isCompleted) completer.complete();
-      });
+      // authorizationForScopes is intentionally non-interactive and can
+      // return null on a first sign-in. This call originates from the Google
+      // button, so authorizeScopes can safely request the required consent.
+      auth = await account.authorizationClient.authorizationForScopes(scopes) ??
+          await account.authorizationClient.authorizeScopes(scopes);
 
-      await _googleSignIn.authenticate();
-      await completer.future; // Wait for the event
-      await sub.cancel();
+      if (auth?.accessToken.isEmpty ?? true) {
+        throw StateError('Google did not return an access token.');
+      }
+
+      notifyListeners();
     } catch (e) {
       errorMessage = _errorMessageFromSignInException(e);
       notifyListeners();

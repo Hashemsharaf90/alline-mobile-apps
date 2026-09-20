@@ -6,6 +6,7 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakba
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/models/user_log_data.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/enums/from_page.dart';
+import 'package:flutter_sixvalley_ecommerce/features/auth/screens/otp_login_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/only_social_login_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/social_login_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/screens/aster_theme_home_screen.dart';
@@ -76,8 +77,17 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailPhoneController?.text = userData.email ?? '';
       } else if (userData.phoneNumber != null) {
         authController.toggleIsNumberLoginScreenText(isUpdate: false);
-        countryCode = userData.countryCode ?? '';
-        _emailPhoneController?.text = userData.phoneNumber ?? '';
+        final String savedPhone = userData.phoneNumber!.trim();
+        final String savedCountryCode =
+            (userData.countryCode?.isNotEmpty ?? false)
+                ? userData.countryCode!
+                : NumberCheckerHelper.getCountryCode(savedPhone) ??
+                    countryCode ??
+                    '+967';
+        countryCode = savedCountryCode;
+        _emailPhoneController?.text = savedPhone.startsWith(savedCountryCode)
+            ? savedPhone.substring(savedCountryCode.length)
+            : savedPhone;
       }
       _passwordController!.text = userData.password ?? '';
     }
@@ -96,8 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.of(context).size;
     final configModel =
         Provider.of<SplashController>(context, listen: false).configModel;
-    final LocalizationController localizationProvider =
-        Provider.of<LocalizationController>(context, listen: false);
     // final socialStatus = configModel.customerLogin?.socialMediaLoginOptions;
 
     final loginOption = configModel?.customerLogin?.loginOption;
@@ -110,6 +118,13 @@ class _LoginScreenState extends State<LoginScreen> {
           fromLogout: widget.fromLogout,
           fromPage: widget.fromPage,
           onLoginSuccess: widget.onLoginSuccess);
+    }
+    if (otpLogin == 1 || manualLogin == 1) {
+      return OtpLoginScreen(
+        fromLogout: widget.fromLogout,
+        fromPage: widget.fromPage,
+        onLoginSuccess: widget.onLoginSuccess,
+      );
     }
     if (manualLogin == 0) {}
 
@@ -435,31 +450,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   ),
                                                 ]),
                                               ),
-                                              InkWell(
-                                                onTap: () {
-                                                  RouterHelper
-                                                      .getForgetPasswordScreenRoute();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    localizationProvider.isLtr
-                                                        ? "${getTranslated('forget_password', context)!}?"
-                                                        : "${getTranslated('forget_password', context)!}؟",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .displayMedium!
-                                                        .copyWith(
-                                                          fontSize: Dimensions
-                                                              .fontSizeSmall,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .primaryColor,
-                                                        ),
-                                                  ),
-                                                ),
-                                              ),
                                             ]),
 
                                         // const SizedBox(height: 22),
@@ -574,10 +564,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                                                   UserLogData(
                                                             countryCode:
                                                                 countryCode,
-                                                            phoneNumber:
-                                                                isNumber
-                                                                    ? userInput
-                                                                    : null,
+                                                            phoneNumber: isNumber
+                                                                ? ((countryCode
+                                                                            ?.isNotEmpty ??
+                                                                        false)
+                                                                    ? NumberCheckerHelper.getPhoneNumber(
+                                                                        userInput,
+                                                                        countryCode!)
+                                                                    : userInput)
+                                                                : null,
                                                             email: isNumber
                                                                 ? null
                                                                 : userInput,

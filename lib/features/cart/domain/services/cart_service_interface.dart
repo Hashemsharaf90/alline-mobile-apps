@@ -5,7 +5,7 @@ import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/produ
 
 abstract class CartServiceInterface{
 
-  Future<dynamic> getCartList({String? couponCode});
+  Future<dynamic> getCartList({String? couponCode, String? addressId});
 
   Future<dynamic> delete(int id);
 
