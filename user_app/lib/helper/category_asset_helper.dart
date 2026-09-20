@@ -1,48 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
+import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 
 class CategoryAssetHelper {
   static const String _folder = 'assets/images/Categoires';
 
+  // 13 Primary Professional Category Assets (from assets/images/Categoires)
+  static const String kitchenAccessories = Images.catKitchenAccessories;
+  static const String carAccessories = Images.catCarAccessories;
+  static const String furniture = Images.catFurnitureDecor;
+  static const String appliances = Images.catHomeAppliances;
+  static const String lighting = Images.catLightingElectrical;
+  static const String electronics = Images.catElectronics;
+  static const String sports = Images.catSportsFitness;
+  static const String healthPersonalCare = Images.catHealthPersonalCare;
+  static const String homeMaintenance = Images.catHomeMaintenance;
+  static const String perfumes = Images.catPerfumes;
+  static const String baby = Images.catBabyCare;
+  static const String schoolOffice = Images.catSchoolOffice;
+  static const String cosmetics = Images.catCosmetics;
+
+  // Realistic HD Supermarket Assets (from assets/images/alline)
+  static const String supermarket = Images.catSupermarketHd;
+  static const String fruitsVeg = Images.catFruitsVegHd;
+  static const String meat = Images.catMeatHd;
+  static const String bakery = Images.catBakeryHd;
+  static const String dairy = Images.catDairyHd;
+  static const String restaurants = Images.catRestaurantsHd;
+
+  // Fallbacks
+  static const String personalCare = Images.catHealthPersonalCare;
+  static const String kitchen = Images.catKitchenAccessories;
   static const String clothing = '$_folder/a2359c40-b8e1-4d16-8142-fb36ff4ddb8e.jpg';
-  static const String cleaners = '$_folder/istockphoto-2169450161-612x612.jpg';
-  static const String electronics = '$_folder/istockphoto-934679404-612x612.jpg';
-  static const String furniture = '$_folder/pexels-artbovich-8082211.jpg';
-  static const String cosmetics = '$_folder/pexels-bule-2127348686-34689878.jpg';
-  static const String supermarket = '$_folder/pexels-eduschadesoares-5498233.jpg';
-  static const String lighting = '$_folder/pexels-esther-234072-746496.jpg';
-  static const String schoolOffice = '$_folder/pexels-giovanna-kamimura-399616174-30663291.jpg';
-  static const String carAccessories = '$_folder/pexels-hilal-diken-2153971208-38712727.jpg';
-  static const String perfumes = '$_folder/pexels-ivandesignx-29611647.jpg';
-  static const String appliances = '$_folder/pexels-jaycee300s-3059779-18071814.jpg';
-  static const String sports = '$_folder/pexels-jdgromov-4716814.jpg';
-  static const String personalCare = '$_folder/pexels-karola-g-4202924.jpg';
-  static const String baby = '$_folder/pexels-olia-danilevich-6213645.jpg';
-  static const String kitchen = '$_folder/pexels-pnw-prod-8251820.jpg';
-  static const String giftsOffers = '$_folder/pexels-shkrabaanthony-6187610.jpg';
-  static const String healthCare = '$_folder/pexels-thefullonmonet-28994644.jpg';
+  static const String cleaners = Images.catHomeMaintenance;
+  static const String healthCare = Images.catHealthPersonalCare;
+  static const String giftsOffers = Images.catPerfumes;
+  static const String general = Images.category;
 
   /// Maps a category to its designated primary asset image
   static String? getAssetForCategory({int? id, String? name, String? slug}) {
     // 1. Direct ID matching based on the store taxonomy
     switch (id) {
       case 1:
-        return personalCare;
+        return healthPersonalCare;
       case 2:
         return perfumes;
       case 3:
         return cosmetics;
       case 4:
-        return kitchen;
+        return kitchenAccessories;
       case 5:
-        return cleaners;
+        return homeMaintenance;
       case 6:
         return appliances;
       case 7:
         return electronics;
       case 8:
-        return healthCare;
+        return healthPersonalCare;
       case 9:
         return clothing;
       case 10:
@@ -56,11 +71,11 @@ class CategoryAssetHelper {
       case 12083:
         return lighting;
       case 12099:
-        return kitchen; // Home maintenance / tools
+        return kitchenAccessories;
       case 12117:
         return baby;
       case 12122:
-        return kitchen; // Plastic & travel supplies
+        return kitchenAccessories;
       case 12124:
         return sports;
       case 12137:
@@ -70,53 +85,209 @@ class CategoryAssetHelper {
     // 2. Keyword matching on name & slug for dynamic or newly added categories
     final text = '${name ?? ''} ${slug ?? ''}'.toLowerCase();
 
-    if (text.contains('عطر') || text.contains('عطور') || text.contains('perfume')) {
-      return perfumes;
+    // 1. اكسسوارات البيت والمطبخ
+    if (text.contains('مطبخ') ||
+        text.contains('بيت') ||
+        text.contains('منزل') ||
+        text.contains('أواني') ||
+        text.contains('اواني') ||
+        text.contains('طهي') ||
+        text.contains('أدوات منزلية') ||
+        text.contains('ادوات منزلية') ||
+        text.contains('kitchen') ||
+        text.contains('cook') ||
+        text.contains('home accessories') ||
+        text.contains('houseware')) {
+      return kitchenAccessories;
     }
-    if (text.contains('ملابس') || text.contains('ازياء') || text.contains('أزياء') || text.contains('cloth') || text.contains('fashion')) {
-      return clothing;
-    }
-    if (text.contains('سوبر') || text.contains('بقالة') || text.contains('تموين') || text.contains('supermarket') || text.contains('grocery')) {
-      return supermarket;
-    }
-    if (text.contains('مكياج') || text.contains('مستحضر') || text.contains('تجميل') || text.contains('cosmetic') || text.contains('makeup')) {
-      return cosmetics;
-    }
-    if (text.contains('تنظيف') || text.contains('منظف') || text.contains('clean')) {
-      return cleaners;
-    }
-    if (text.contains('إلكترون') || text.contains('الكترون') || text.contains('جوال') || text.contains('هاتف') || text.contains('سماعة') || text.contains('electronic') || text.contains('tech')) {
-      return electronics;
-    }
-    if (text.contains('أثاث') || text.contains('اثاث') || text.contains('ديكور') || text.contains('furniture') || text.contains('decor')) {
-      return furniture;
-    }
-    if (text.contains('طفل') || text.contains('أطفال') || text.contains('اطفال') || text.contains('رضيع') || text.contains('baby') || text.contains('kid')) {
-      return baby;
-    }
-    if (text.contains('رياض') || text.contains('لياقة') || text.contains('جيم') || text.contains('sport') || text.contains('fitness')) {
-      return sports;
-    }
-    if (text.contains('سيار') || text.contains('مركبة') || text.contains('car') || text.contains('auto')) {
+
+    // 2. اكسسوارات السيارات
+    if (text.contains('سيار') ||
+        text.contains('سيارات') ||
+        text.contains('مركبة') ||
+        text.contains('car') ||
+        text.contains('auto') ||
+        text.contains('vehicle')) {
       return carAccessories;
     }
-    if (text.contains('مطبخ') || text.contains('بيت') || text.contains('منزل') || text.contains('أواني') || text.contains('kitchen') || text.contains('home')) {
-      return kitchen;
+
+    // 3. الاثاث والديكور
+    if (text.contains('أثاث') ||
+        text.contains('اثاث') ||
+        text.contains('ديكور') ||
+        text.contains('مفروشات') ||
+        text.contains('furniture') ||
+        text.contains('decor')) {
+      return furniture;
     }
-    if (text.contains('جهاز') || text.contains('أجهزة') || text.contains('اجهزة') || text.contains('appliance')) {
+
+    // 4. الاجهزة المنزلية
+    if (text.contains('أجهزة منزلية') ||
+        text.contains('اجهزة منزلية') ||
+        text.contains('أجهزة') ||
+        text.contains('اجهزة') ||
+        text.contains('غسال') ||
+        text.contains('ثلاج') ||
+        text.contains('مكوا') ||
+        text.contains('مكنس') ||
+        text.contains('ميكرويف') ||
+        text.contains('appliance')) {
       return appliances;
     }
-    if (text.contains('إضاءة') || text.contains('اضاءة') || text.contains('كهرباء') || text.contains('light')) {
+
+    // 5. الاضاءة والكهربائيات
+    if (text.contains('إضاءة') ||
+        text.contains('اضاءة') ||
+        text.contains('كهرباء') ||
+        text.contains('كهربائ') ||
+        text.contains('لمب') ||
+        text.contains('إنارة') ||
+        text.contains('light') ||
+        text.contains('lamp') ||
+        text.contains('electrical')) {
       return lighting;
     }
-    if (text.contains('مكتب') || text.contains('دراس') || text.contains('قرطاس') || text.contains('school') || text.contains('office')) {
+
+    // 6. الالكترونيات
+    if (text.contains('إلكترون') ||
+        text.contains('الكترون') ||
+        text.contains('جوال') ||
+        text.contains('هاتف') ||
+        text.contains('شاحن') ||
+        text.contains('سماعة') ||
+        text.contains('كمبيوتر') ||
+        text.contains('لابتوب') ||
+        text.contains('تابلت') ||
+        text.contains('electronic') ||
+        text.contains('phone') ||
+        text.contains('mobile') ||
+        text.contains('tech')) {
+      return electronics;
+    }
+
+    // 7. الرياضة واللياقة
+    if (text.contains('رياض') ||
+        text.contains('لياقة') ||
+        text.contains('جيم') ||
+        text.contains('تمارين') ||
+        text.contains('بدني') ||
+        text.contains('sport') ||
+        text.contains('fitness') ||
+        text.contains('gym')) {
+      return sports;
+    }
+
+    // 8. الصحة والعناية الشخصية
+    if (text.contains('صحة') ||
+        text.contains('عناية شخصية') ||
+        text.contains('عناية بالبشرة') ||
+        text.contains('شعر') ||
+        text.contains('شامبو') ||
+        text.contains('غسول') ||
+        text.contains('فيتامين') ||
+        text.contains('طبي') ||
+        text.contains('صيدل') ||
+        text.contains('health') ||
+        text.contains('personal') ||
+        text.contains('care') ||
+        text.contains('pharmacy') ||
+        text.contains('wellness')) {
+      return healthPersonalCare;
+    }
+
+    // 9. الصيانة المنزلية والعدد
+    if (text.contains('صيانة') ||
+        text.contains('عدد') ||
+        text.contains('أدوات') ||
+        text.contains('ادوات') ||
+        text.contains('تصليح') ||
+        text.contains('ورشة') ||
+        text.contains('مفك') ||
+        text.contains('صيانة منزلية') ||
+        text.contains('tools') ||
+        text.contains('maintenance') ||
+        text.contains('repair') ||
+        text.contains('hardware')) {
+      return homeMaintenance;
+    }
+
+    // 10. العطور
+    if (text.contains('عطر') ||
+        text.contains('عطور') ||
+        text.contains('بخور') ||
+        text.contains('عود') ||
+        text.contains('مسك') ||
+        text.contains('perfume') ||
+        text.contains('fragrance') ||
+        text.contains('scent')) {
+      return perfumes;
+    }
+
+    // 11. العناية بالاطفال
+    if (text.contains('طفل') ||
+        text.contains('أطفال') ||
+        text.contains('اطفال') ||
+        text.contains('رضيع') ||
+        text.contains('حفاض') ||
+        text.contains('مواليد') ||
+        text.contains('baby') ||
+        text.contains('kid') ||
+        text.contains('infant') ||
+        text.contains('toddler')) {
+      return baby;
+    }
+
+    // 12. المستلزمات المدرسية والمكتبية
+    if (text.contains('مكتب') ||
+        text.contains('مكتبي') ||
+        text.contains('دراس') ||
+        text.contains('مدرس') ||
+        text.contains('قرطاس') ||
+        text.contains('قرطاسية') ||
+        text.contains('دفاتر') ||
+        text.contains('أقلام') ||
+        text.contains('اقلام') ||
+        text.contains('school') ||
+        text.contains('office') ||
+        text.contains('stationery')) {
       return schoolOffice;
     }
-    if (text.contains('صحة') || text.contains('عناية') || text.contains('health') || text.contains('care')) {
-      return healthCare;
+
+    // 13. مستحضرات التجميل
+    if (text.contains('مكياج') ||
+        text.contains('مستحضر') ||
+        text.contains('تجميل') ||
+        text.contains('ميك اب') ||
+        text.contains('روج') ||
+        text.contains('cosmetic') ||
+        text.contains('makeup') ||
+        text.contains('beauty')) {
+      return cosmetics;
     }
-    if (text.contains('هدية') || text.contains('هدايا') || text.contains('عرض') || text.contains('عروض') || text.contains('gift') || text.contains('offer')) {
-      return giftsOffers;
+
+    // Supermarket & Fresh Foods
+    if (text.contains('خضار') || text.contains('فواك') || text.contains('ثمار') || text.contains('طازج') || text.contains('veg') || text.contains('fruit')) {
+      return fruitsVeg;
+    }
+    if (text.contains('لحم') || text.contains('لحوم') || text.contains('دجاج') || text.contains('دواجن') || text.contains('meat') || text.contains('poultry') || text.contains('butcher')) {
+      return meat;
+    }
+    if (text.contains('مخبز') || text.contains('مخابز') || text.contains('خبز') || text.contains('معجنات') || text.contains('حلويات') || text.contains('حلى') || text.contains('كيك') || text.contains('bakery') || text.contains('bread') || text.contains('sweet')) {
+      return bakery;
+    }
+    if (text.contains('ألبان') || text.contains('البان') || text.contains('حليب') || text.contains('أجبان') || text.contains('اجبان') || text.contains('جبن') || text.contains('زبادي') || text.contains('بيض') || text.contains('dairy') || text.contains('milk') || text.contains('cheese')) {
+      return dairy;
+    }
+    if (text.contains('مطعم') || text.contains('مطاعم') || text.contains('وجب') || text.contains('أكل') || text.contains('برجر') || text.contains('بيتزا') || text.contains('restaurant') || text.contains('food') || text.contains('meal')) {
+      return restaurants;
+    }
+    if (text.contains('سوبر') || text.contains('بقالة') || text.contains('تموين') || text.contains('غذائ') || text.contains('supermarket') || text.contains('grocery') || text.contains('market')) {
+      return supermarket;
+    }
+
+    // Apparel
+    if (text.contains('ملابس') || text.contains('ازياء') || text.contains('أزياء') || text.contains('رجالي') || text.contains('نسائي') || text.contains('cloth') || text.contains('fashion')) {
+      return clothing;
     }
 
     return null;
@@ -173,7 +344,7 @@ class CategoryAssetHelper {
       );
     } else {
       imageWidget = Image.asset(
-        supermarket,
+        general,
         width: size,
         height: size,
         fit: BoxFit.cover,

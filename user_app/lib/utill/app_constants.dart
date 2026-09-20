@@ -13,9 +13,16 @@ class AppConstants {
   static const int imageQuality = 100;
   static const LocalCachesTypeEnum cachesType = LocalCachesTypeEnum.all;
 
-  static const String baseUrl = 'https://new.allinye.com';
+  static const String baseUrl = 'https://allinye.com';
+  // static const String baseUrl = 'http://192.168.1.100/6valley';
 
-  static const String googleServerClientId = 'client_id here';
+  // Public Web OAuth client ID. This must never be replaced with an Android,
+  // iOS, or client-secret value.
+  static const String googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue:
+        '266849829646-jon90ot8j8s6j7455nbbdkqr1urod4on.apps.googleusercontent.com',
+  );
   static const String userId = 'userId';
 
   static const String name = 'name';

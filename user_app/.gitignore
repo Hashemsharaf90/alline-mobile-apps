@@ -30,6 +30,7 @@
 .pub-cache/
 .pub/
 /build/
+android/build/
 /android/app/.cxx/
 get_changed_files.sh
 
@@ -45,3 +46,5 @@ app.*.map.json
 pubspec.lock
 macos
 linux
+*.ps1
+

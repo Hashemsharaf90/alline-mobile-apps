@@ -352,6 +352,19 @@ class _VerificationScreenState extends State<VerificationScreen> {
                                                     authProvider.navigateToHome(
                                                       widget.toNavigateScreen,
                                                       widget.onLoginSuccess,
+                                                      isNewUser: true,
+                                                    );
+                                                  } else if (context.mounted) {
+                                                    RouterHelper
+                                                        .getOtpRegistrationRoute(
+                                                      tempToken: tempToken,
+                                                      userInput:
+                                                          widget.userInput ?? '',
+                                                      action: RouteAction.push,
+                                                      toNavigateScreen:
+                                                          widget.toNavigateScreen,
+                                                      onLoginSuccess:
+                                                          widget.onLoginSuccess,
                                                     );
                                                   }
                                                 });

@@ -28,13 +28,11 @@ class LoginScreen extends StatefulWidget {
   final bool showBackButton;
   final String? fromPage;
   final VoidCallback? onLoginSuccess;
-  final bool passwordOnly;
   const LoginScreen(
       {super.key,
       this.fromLogout = false,
       this.fromPage,
       this.onLoginSuccess,
-      this.passwordOnly = false,
       this.showBackButton = true});
 
   @override
@@ -108,8 +106,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.of(context).size;
     final configModel =
         Provider.of<SplashController>(context, listen: false).configModel;
-    final LocalizationController localizationProvider =
-        Provider.of<LocalizationController>(context, listen: false);
     // final socialStatus = configModel.customerLogin?.socialMediaLoginOptions;
 
     final loginOption = configModel?.customerLogin?.loginOption;
@@ -123,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
           fromPage: widget.fromPage,
           onLoginSuccess: widget.onLoginSuccess);
     }
-    if (otpLogin == 1 && !widget.passwordOnly) {
+    if (otpLogin == 1 || manualLogin == 1) {
       return OtpLoginScreen(
         fromLogout: widget.fromLogout,
         fromPage: widget.fromPage,
@@ -278,8 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                                         const SizedBox(height: 35),
 
-                                        if (otpLogin == 1 &&
-                                            !widget.passwordOnly) ...[
+                                        if (otpLogin == 1) ...[
                                           Text(
                                               getTranslated('phone', context) ??
                                                   '',
@@ -454,31 +449,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         ),
                                                   ),
                                                 ]),
-                                              ),
-                                              InkWell(
-                                                onTap: () {
-                                                  RouterHelper
-                                                      .getForgetPasswordScreenRoute();
-                                                },
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    localizationProvider.isLtr
-                                                        ? "${getTranslated('forget_password', context)!}?"
-                                                        : "${getTranslated('forget_password', context)!}؟",
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .displayMedium!
-                                                        .copyWith(
-                                                          fontSize: Dimensions
-                                                              .fontSizeSmall,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .primaryColor,
-                                                        ),
-                                                  ),
-                                                ),
                                               ),
                                             ]),
 

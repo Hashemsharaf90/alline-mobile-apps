@@ -254,7 +254,8 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                               if (context.mounted) {
                                                 authProvider.navigateToHome(
                                                     widget.toNavigateScreen,
-                                                    widget.onLoginSuccess);
+                                                    widget.onLoginSuccess,
+                                                    isNewUser: true);
                                               }
                                             }
                                           });
@@ -282,7 +283,8 @@ class _OtpRegistrationScreenState extends State<OtpRegistrationScreen> {
                                               if (context.mounted) {
                                                 authProvider.navigateToHome(
                                                     widget.toNavigateScreen,
-                                                    widget.onLoginSuccess);
+                                                    widget.onLoginSuccess,
+                                                    isNewUser: true);
                                               }
                                             } else if (responseModel
                                                     .isSuccess &&

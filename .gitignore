@@ -25,5 +25,7 @@ key.properties
 /window.xml
 /alline_ui_redesign/
 *.ps1
+/built_apks/
+
 
 

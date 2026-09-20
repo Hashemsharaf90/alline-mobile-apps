@@ -13,6 +13,7 @@ import 'package:sixvalley_delivery_boy/features/home/widgets/earn_statement_widg
 import 'package:sixvalley_delivery_boy/features/home/widgets/ongoing_order_card_widget.dart';
 import 'package:sixvalley_delivery_boy/features/home/widgets/trip_status_widget.dart';
 import 'package:sixvalley_delivery_boy/features/home/widgets/permission_dialog_widget.dart';
+import 'package:sixvalley_delivery_boy/utill/styles.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int index) onTap;
@@ -51,6 +52,74 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: Dimensions.paddingSizeDefault),
 
               TripStatusWidget(onTap: (int index) => widget.onTap(index)),
+
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: Dimensions.paddingSizeExtraLarge,
+                  vertical: Dimensions.paddingSizeSmall,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: const Color(0xFFF7931A).withValues(alpha: 0.35),
+                      width: 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.navigation_rounded,
+                          color: Color(0xFF10B981),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'نظام الملاحة والتوجيه الفوري 🛰️',
+                              style: rubikMedium.copyWith(
+                                color: Colors.white,
+                                fontSize: Dimensions.fontSizeDefault,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'التتبع التلقائي نشط لضمان سرعة التوصيل ودقة المسار',
+                              style: rubikRegular.copyWith(
+                                color: const Color(0xFF94A3B8),
+                                fontSize: Dimensions.fontSizeExtraSmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
               Padding(padding:  EdgeInsets.fromLTRB(Dimensions.paddingSizeExtraLarge,
                   Dimensions.paddingSizeDefault, Dimensions.paddingSizeExtraLarge, Dimensions.paddingSizeExtraSmall),

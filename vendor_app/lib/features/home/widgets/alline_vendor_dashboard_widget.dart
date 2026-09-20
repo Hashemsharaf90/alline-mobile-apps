@@ -11,6 +11,7 @@ import 'package:sixvalley_vendor_app/features/shop/screens/shop_screen.dart';
 import 'package:sixvalley_vendor_app/features/wallet/screens/wallet_screen.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
+import 'package:sixvalley_vendor_app/helper/price_converter.dart';
 
 class AllineVendorDashboardWidget extends StatelessWidget {
   final Function? callback;
@@ -143,6 +144,104 @@ class AllineVendorDashboardWidget extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // 1.5 Quick Wallet & Earnings Ribbon
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const WalletScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF065F46), Color(0xFF047857)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF059669).withValues(alpha: 0.25),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'رصيد المحفظة والأرباح 💰',
+                              style: robotoRegular.copyWith(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                fontSize: Dimensions.fontSizeExtraSmall,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              PriceConverter.convertPrice(
+                                context,
+                                sellerInfo?.wallet?.totalEarning ?? 0,
+                              ),
+                              style: robotoBold.copyWith(
+                                color: Colors.white,
+                                fontSize: Dimensions.fontSizeLarge,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'سحب أرباح',
+                              style: robotoBold.copyWith(
+                                color: const Color(0xFF065F46),
+                                fontSize: Dimensions.fontSizeSmall,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 11,
+                              color: Color(0xFF065F46),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 

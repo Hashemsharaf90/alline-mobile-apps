@@ -1,4 +1,5 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_textfield_widget.dart';
@@ -6,7 +7,9 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakba
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/enums/from_page.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/condition_check_box_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/social_login_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/splash/domain/models/config_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/velidate_check.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
@@ -112,6 +115,16 @@ class SignUpWidgetState extends State<SignUpWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final ConfigModel? configModel =
+        Provider.of<SplashController>(context, listen: false).configModel;
+    final SocialMediaLoginOptions? socialStatus =
+        configModel?.customerLogin?.socialMediaLoginOptions;
+    final bool showSocial =
+        (configModel?.customerLogin?.loginOption?.socialMediaLogin == 1) &&
+            ((socialStatus?.apple == 1 &&
+                    defaultTargetPlatform == TargetPlatform.iOS) ||
+                socialStatus?.google == 1);
+
     return Consumer<AuthController>(builder: (context, authController, _) {
       return Form(
         key: _formKey,
@@ -214,6 +227,28 @@ class SignUpWidgetState extends State<SignUpWidget> {
               buttonText: getTranslated('send_otp', context),
             ),
           ),
+          if (showSocial) ...[
+            Center(
+              child: Text(
+                getTranslated('or', context)!,
+                style: titilliumRegular.copyWith(
+                  fontSize: Dimensions.fontSizeDefault,
+                  color: Theme.of(context).hintColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Dimensions.paddingSizeDefault,
+              ),
+              child: SocialLoginWidget(
+                fromPage: widget.fromPage,
+                onLoginSuccess: widget.onLoginSuccess,
+              ),
+            ),
+            const SizedBox(height: Dimensions.paddingSizeDefault),
+          ],
           if (!authController.isPhoneNumberVerificationButtonLoading)
             Padding(
               padding: const EdgeInsets.only(

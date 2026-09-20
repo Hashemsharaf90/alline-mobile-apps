@@ -106,14 +106,26 @@ class AuthRepository implements AuthRepoInterface {
         return ApiResponseModel.withError('Firebase device token is empty');
       }
 
-      await FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic);
-      await FirebaseMessaging.instance.subscribeToTopic(AppConstants.demoTopic);
+      FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic).catchError((e) {
+        log('Failed to subscribe to topic ${AppConstants.topic}: $e');
+      });
+      FirebaseMessaging.instance.subscribeToTopic(AppConstants.demoTopic).catchError((e) {
+        log('Failed to subscribe to topic ${AppConstants.demoTopic}: $e');
+      });
+
+      String? guestId;
+      try {
+        if (Get.context != null) {
+          guestId = Provider.of<AuthController>(Get.context!, listen: false)
+              .getGuestToken();
+        }
+      } catch (_) {}
+
       Response response = await dioClient!.post(
         AppConstants.tokenUri,
         data: {
           "_method": "put",
-          'guest_id': Provider.of<AuthController>(Get.context!, listen: false)
-              .getGuestToken(),
+          'guest_id': guestId,
           "cm_firebase_token": deviceToken
         },
       );
@@ -124,16 +136,18 @@ class AuthRepository implements AuthRepoInterface {
   }
 
   Future<String?> _getDeviceToken() async {
-    String? deviceToken;
-    if (Platform.isIOS) {
-      deviceToken = await FirebaseMessaging.instance.getToken();
-    } else {
-      deviceToken = await FirebaseMessaging.instance.getToken();
+    try {
+      final String? deviceToken = await FirebaseMessaging.instance
+          .getToken()
+          .timeout(const Duration(seconds: 3), onTimeout: () => null);
+      if (deviceToken != null) {
+        log('--------Device Token---------- $deviceToken--');
+      }
+      return deviceToken;
+    } catch (e) {
+      log('--------Device Token Error---------- $e--');
+      return null;
     }
-    if (deviceToken != null) {
-      log('--------Device Token---------- $deviceToken--');
-    }
-    return deviceToken;
   }
 
   @override

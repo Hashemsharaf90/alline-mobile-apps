@@ -67,6 +67,7 @@ import 'package:flutter_sixvalley_ecommerce/features/dashboard/screens/dashboard
 import 'package:flutter_sixvalley_ecommerce/features/maintenance/maintenance_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/screens/splash_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/screens/login_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/auth/screens/reset_password_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/screens/profile_screen1.dart';
 import 'package:flutter_sixvalley_ecommerce/features/blog/screens/blog_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/screens/brand_and_category_product_screen.dart';
@@ -74,8 +75,6 @@ import 'package:flutter_sixvalley_ecommerce/features/product_details/screens/pro
 import 'package:flutter_sixvalley_ecommerce/features/shop/screens/shop_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/onboarding/screens/onboarding_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/screens/auth_screen.dart';
-import 'package:flutter_sixvalley_ecommerce/features/auth/screens/forget_password_screen.dart';
-import 'package:flutter_sixvalley_ecommerce/features/auth/screens/reset_password_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/screens/cart_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/chat/screens/chat_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/chat/screens/inbox_screen.dart';
@@ -110,7 +109,6 @@ class RouterHelper {
   static const String savedBillingAddressListScreen =
       '/saved-billing-address-list';
   static const String authScreen = '/auth';
-  static const String forgetPasswordScreen = '/forget-password';
   static const String otpLoginScreen = '/otp-login';
   static const String otpRegistrationScreen = '/otp-registration';
   static const String verificationScreen = '/verification';
@@ -176,11 +174,9 @@ class RouterHelper {
       {RouteAction? action,
       bool isFromLogout = false,
       String? fromPage,
-      bool passwordOnly = false,
       VoidCallback? onLoginSuccess}) {
     final query = 'formLogout=${isFromLogout ? 'true' : 'false'}'
-        '&fromPage=${fromPage ?? ''}'
-        '&passwordOnly=$passwordOnly';
+        '&fromPage=${fromPage ?? ''}';
     return _navigateRoute(
       '$loginScreen?$query',
       route: action,
@@ -192,6 +188,20 @@ class RouterHelper {
 
   static String getProfileScreen1Route({RouteAction? action}) =>
       _navigateRoute(profileScreen1, route: action);
+
+  static String getResetPasswordRoute({
+    required String mobileNumber,
+    required String otp,
+    RouteAction? action,
+  }) {
+    final params = <String, String>{
+      'mobileNumber': Uri.encodeComponent(mobileNumber),
+      'otp': Uri.encodeComponent(otp),
+    };
+    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
+    return _navigateRoute('$resetPasswordScreen?$query', route: action);
+  }
+
   static String getBlogScreenRoute(
           {RouteAction? action, required String url}) =>
       _navigateRoute('$blogScreen?url=${Uri.encodeComponent(url)}',
@@ -375,8 +385,6 @@ class RouterHelper {
     );
   }
 
-  static String getForgetPasswordScreenRoute({RouteAction? action}) =>
-      _navigateRoute(forgetPasswordScreen, route: action);
   static String getOtpLoginRoute({
     bool fromLogout = false,
     String? toNavigateScreen,
@@ -449,19 +457,6 @@ class RouterHelper {
         'onLoginSuccess': onLoginSuccess,
       },
     );
-  }
-
-  static String getResetPasswordRoute({
-    required String mobileNumber,
-    required String otp,
-    RouteAction? action,
-  }) {
-    final params = <String, String>{
-      'mobileNumber': Uri.encodeComponent(mobileNumber),
-      'otp': Uri.encodeComponent(otp),
-    };
-    final query = params.entries.map((e) => '${e.key}=${e.value}').join('&');
-    return _navigateRoute('$resetPasswordScreen?$query', route: action);
   }
 
   static String getOfferProductListScreenRoute(
@@ -1112,8 +1107,6 @@ class RouterHelper {
               return LoginScreen(
                 fromLogout: state.uri.queryParameters['formLogout'] == 'true',
                 fromPage: state.uri.queryParameters['fromPage'],
-                passwordOnly:
-                    state.uri.queryParameters['passwordOnly'] == 'true',
                 onLoginSuccess: extra?['onLoginSuccess'] as VoidCallback?,
               );
             }),
@@ -1274,9 +1267,6 @@ class RouterHelper {
                 onLoginSuccess: extra?['onLoginSuccess'] as VoidCallback?,
               );
             }),
-        GoRoute(
-            path: forgetPasswordScreen,
-            builder: (context, state) => const ForgetPasswordScreen()),
         GoRoute(
           path: otpLoginScreen,
           builder: (context, state) {

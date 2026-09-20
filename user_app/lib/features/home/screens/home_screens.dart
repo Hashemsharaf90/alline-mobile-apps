@@ -4,6 +4,7 @@ import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_categor
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_banner_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_shopping_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
@@ -310,18 +311,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         slivers: [
               const SliverToBoxAdapter(child: AllineSmartHeaderWidget()),
               const SliverToBoxAdapter(child: AllineSearchFieldWidget()),
-              const SliverToBoxAdapter(child: AllineCategoriesGridWidget()),
               const SliverToBoxAdapter(child: AllinePromoBannerWidget()),
-              const SliverToBoxAdapter(child: AllineNearbyStoresSectionWidget()),
+              const SliverToBoxAdapter(child: AllineCategoriesGridWidget()),
               const SliverToBoxAdapter(child: AllineFeaturedOffersSectionWidget()),
               const SliverToBoxAdapter(child: AllineSupermarketSectionWidget()),
-              const SliverToBoxAdapter(child: ClearanceListWidget()),
+              const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
+              const SliverToBoxAdapter(child: AllineNearbyStoresSectionWidget()),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   child: RecommendedProductWidget(),
                 ),
               ),
+              const SliverToBoxAdapter(child: ClearanceListWidget()),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),

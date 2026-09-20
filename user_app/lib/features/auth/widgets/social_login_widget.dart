@@ -37,19 +37,18 @@ class SocialLoginWidgetState extends State<SocialLoginWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final ConfigModel? configModel = Provider.of<SplashController>(context, listen: false).configModel;
-    final socialLoginConfig = configModel?.customerLogin?.socialMediaLoginOptions;
+    final ConfigModel? configModel =
+        Provider.of<SplashController>(context, listen: false).configModel;
+    final socialLoginConfig =
+        configModel?.customerLogin?.socialMediaLoginOptions;
     List<String> socialLoginList = [];
-
-    if(socialLoginConfig?.facebook == 1) {
-      socialLoginList.add("facebook");
-    }
 
     if (socialLoginConfig?.google == 1) {
       socialLoginList.add("google");
     }
 
-    if (socialLoginConfig?.apple == 1) {
+    if (socialLoginConfig?.apple == 1 &&
+        defaultTargetPlatform == TargetPlatform.iOS) {
       socialLoginList.add("apple");
     }
 
@@ -59,122 +58,61 @@ class SocialLoginWidgetState extends State<SocialLoginWidget> {
           if (socialLoginConfig?.google == 1)
             Expanded(
                 child: InkWell(
-                  onTap: () => googleLogin(context, widget.fromPage, widget.onLoginSuccess),
-                  child: SocialLoginButtonWidget(
-                    text: getTranslated('continue_with_google', context)!,
-                    image: Images.google,
-                  ),
-                )),
-           if (socialLoginConfig?.facebook == 1)
+              onTap: () =>
+                  googleLogin(context, widget.fromPage, widget.onLoginSuccess),
+              child: SocialLoginButtonWidget(
+                text: getTranslated('continue_with_google', context)!,
+                image: Images.google,
+              ),
+            )),
+          if (socialLoginConfig?.apple == 1 &&
+              defaultTargetPlatform == TargetPlatform.iOS)
             Expanded(
               child: InkWell(
-                onTap: () => facebookLogin(context, widget.fromPage, widget.onLoginSuccess),
+                onTap: () =>
+                    appleLogin(context, widget.fromPage, widget.onLoginSuccess),
                 child: SocialLoginButtonWidget(
-                  text: getTranslated('continue_with_facebook', context)!,
-                  image: Images.facebook,
-                ),
-              ),),
-
-            if(socialLoginConfig?.apple == 1 && defaultTargetPlatform == TargetPlatform.iOS)
-              Expanded(
-                child: InkWell(
-                  onTap: () => appleLogin(context, widget.fromPage, widget.onLoginSuccess),
-                  child: SocialLoginButtonWidget(
-                    text: getTranslated('continue_with_apple', context)!,
-                    image: Images.appleLogo,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                  ),
+                  text: getTranslated('continue_with_apple', context)!,
+                  image: Images.appleLogo,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
-          ]);
-        } else if(socialLoginList.length == 2){
-          return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-
-            if(socialLoginConfig?.google == 1)...[
-              Expanded(child: InkWell(
-                onTap: () => googleLogin(context, widget.fromPage, widget.onLoginSuccess),
-                child: SocialLoginButtonWidget(
-                  text: getTranslated('google', context)!,
-                  image: Images.google,
-                ),
-
-              )),
-              const SizedBox(width: Dimensions.paddingSizeDefault),
-            ],
-
-
-            if(socialLoginConfig?.facebook == 1)...[
-
-              Expanded(child: InkWell(
-                onTap: () => facebookLogin(context, widget.fromPage, widget.onLoginSuccess),
-                child: SocialLoginButtonWidget(
-                  text: getTranslated('facebook', context)!,
-                  image: Images.facebook,
-                ),
-              )),
-              socialLoginConfig?.apple == 1 ? const SizedBox(width: Dimensions.paddingSizeDefault)
-                  : const SizedBox.shrink(),
-            ],
-
-            if(socialLoginConfig?.apple == 1 && defaultTargetPlatform == TargetPlatform.iOS)...[
-              Expanded(
-                child: InkWell(
-                  onTap: () => appleLogin(context, widget.fromPage, widget.onLoginSuccess),
-                  child: SocialLoginButtonWidget(
-                    text: getTranslated('continue_with_apple', context)!,
-                    image: Images.appleLogo,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                  ),
-                ),
-              ),
-            ],
-
-          ]);
-        }   else if(socialLoginList.length == 3){
+            ),
+        ]);
+      } else if (socialLoginList.length == 2) {
         return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           if (socialLoginConfig?.google == 1) ...[
-            InkWell(
-              onTap: () => googleLogin(context, widget.fromPage, widget.onLoginSuccess),
-              child: const SocialLoginButtonWidget(
+            Expanded(
+                child: InkWell(
+              onTap: () =>
+                  googleLogin(context, widget.fromPage, widget.onLoginSuccess),
+              child: SocialLoginButtonWidget(
+                text: getTranslated('google', context)!,
                 image: Images.google,
-                padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
               ),
-            ),
-            const SizedBox(width: Dimensions.paddingSizeLarge),
-          ],
-          if (socialLoginConfig?.facebook == 1) ...[
-            InkWell(
-              onTap: () => facebookLogin(context, widget.fromPage, widget.onLoginSuccess),
-              child: const SocialLoginButtonWidget(
-                image: Images.facebook,
-                padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
-              ),
-            ),
-            const SizedBox(width: Dimensions.paddingSizeLarge),
+            )),
+            const SizedBox(width: Dimensions.paddingSizeDefault),
           ],
           if (socialLoginConfig?.apple == 1 &&
               defaultTargetPlatform == TargetPlatform.iOS) ...[
-            InkWell(
-              onTap: () => appleLogin(context, widget.fromPage, widget.onLoginSuccess),
-              child: SocialLoginButtonWidget(
-                image: Images.appleLogo,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+            Expanded(
+              child: InkWell(
+                onTap: () =>
+                    appleLogin(context, widget.fromPage, widget.onLoginSuccess),
+                child: SocialLoginButtonWidget(
+                  text: getTranslated('continue_with_apple', context)!,
+                  image: Images.appleLogo,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
               ),
             ),
           ],
         ]);
       } else {
-        return Container(
-          height: 50,
-          width: 50,
-          color: Colors.red,
-        );
+        return const SizedBox.shrink();
       }
     });
-
   }
-
 }
 
 Future<void> route(
@@ -188,99 +126,132 @@ Future<void> route(
     String? email,
     String? name,
     String? fromPage,
-    VoidCallback? onLoginSuccess
-    ) async {
-  final AuthController authProvider = Provider.of<AuthController>(Get.context!, listen: false);
+    VoidCallback? onLoginSuccess) async {
+  final AuthController authProvider =
+      Provider.of<AuthController>(Get.context!, listen: false);
 
   if (isRoute) {
     if (phone != null) {
-
-      await authProvider.sendVerificationCode(Provider.of<SplashController>(Get.context!, listen: false).configModel!,
+      await authProvider.sendVerificationCode(
+          Provider.of<SplashController>(Get.context!, listen: false)
+              .configModel!,
           SignUpModel(email: null, phone: phone),
-          type: 'phone', fromPage: FromPage.login, toNavigateScreen: fromPage, onLoginSuccess: onLoginSuccess
-      );
+          type: 'phone',
+          fromPage: FromPage.login,
+          toNavigateScreen: fromPage,
+          onLoginSuccess: onLoginSuccess);
     } else if (token != null) {
       authProvider.navigateToHome(fromPage, onLoginSuccess);
     } else if (temporaryToken != null && temporaryToken.isNotEmpty) {
       RouterHelper.getOtpRegistrationRoute(
-        tempToken: temporaryToken,
-        userInput: email ?? '',
-        userName: name ?? '',
-        action: RouteAction.pushNamedAndRemoveUntil,
-        toNavigateScreen: fromPage,
-        onLoginSuccess: onLoginSuccess
-      );
+          tempToken: temporaryToken,
+          userInput: email ?? '',
+          userName: name ?? '',
+          action: RouteAction.pushNamedAndRemoveUntil,
+          toNavigateScreen: fromPage,
+          onLoginSuccess: onLoginSuccess);
     } else if (profileModel != null) {
       showModalBottomSheet(
-        context: Get.context!,
-        isScrollControlled: true,
-        backgroundColor:
-        Theme.of(Get.context!).primaryColor.withValues(alpha: 0),
-        builder: (con) => ExistingAccountBottomSheet(
-          profileModel: profileModel,
-          socialLoginMedium: loginMedium!,
-          con: con,
-        ));
+          context: Get.context!,
+          isScrollControlled: true,
+          backgroundColor:
+              Theme.of(Get.context!).primaryColor.withValues(alpha: 0),
+          builder: (con) => ExistingAccountBottomSheet(
+                profileModel: profileModel,
+                socialLoginMedium: loginMedium!,
+                con: con,
+              ));
     } else {
-      showCustomSnackBarWidget(errorMessage, Get.context!, snackBarType: SnackBarType.error);
+      showCustomSnackBarWidget(errorMessage, Get.context!,
+          snackBarType: SnackBarType.error);
     }
   } else {
-    showCustomSnackBarWidget(errorMessage, Get.context!, snackBarType: SnackBarType.error);
+    showCustomSnackBarWidget(errorMessage, Get.context!,
+        snackBarType: SnackBarType.error);
   }
 }
 
-Future<void> googleLogin(BuildContext context, String? fromPage, VoidCallback? onLoginSuccess) async {
+Future<void> googleLogin(BuildContext context, String? fromPage,
+    VoidCallback? onLoginSuccess) async {
   SocialLoginModel socialLogin = SocialLoginModel();
 
   try {
     await Provider.of<GoogleSignInController>(context, listen: false).login();
     String? id, token, email, medium, name;
     if (context.mounted) {}
-    if (Provider.of<GoogleSignInController>(Get.context!, listen: false).googleAccount != null) {
-      id = Provider.of<GoogleSignInController>(Get.context!, listen: false).googleAccount!.id;
-      email = Provider.of<GoogleSignInController>(Get.context!, listen: false).googleAccount!.email;
-      token = Provider.of<GoogleSignInController>(Get.context!, listen: false).auth?.accessToken;
-      name =  Provider.of<GoogleSignInController>(Get.context!, listen: false).googleAccount!.displayName;
+    if (Provider.of<GoogleSignInController>(Get.context!, listen: false)
+            .googleAccount !=
+        null) {
+      id = Provider.of<GoogleSignInController>(Get.context!, listen: false)
+          .googleAccount!
+          .id;
+      email = Provider.of<GoogleSignInController>(Get.context!, listen: false)
+          .googleAccount!
+          .email;
+      token = Provider.of<GoogleSignInController>(Get.context!, listen: false)
+          .auth
+          ?.accessToken;
+      name = Provider.of<GoogleSignInController>(Get.context!, listen: false)
+          .googleAccount!
+          .displayName;
       medium = 'google';
-      log('eemail =>$email token =>$token');
-
       socialLogin.email = email;
       socialLogin.medium = medium;
       socialLogin.token = token;
       socialLogin.uniqueId = id;
       socialLogin.name = name;
 
-      await Provider.of<AuthController>(Get.context!, listen: false).socialLogin(socialLogin, route, fromPage, onLoginSuccess);
+      await Provider.of<AuthController>(Get.context!, listen: false)
+          .socialLogin(socialLogin, route, fromPage, onLoginSuccess);
     }
   } catch (er) {
-    debugPrint('access token error is : $er');
+    final message = Provider.of<GoogleSignInController>(context, listen: false)
+        .errorMessage;
+    showCustomSnackBarWidget(
+      message.isNotEmpty ? message : 'Unable to sign in with Google.',
+      context,
+      snackBarType: SnackBarType.error,
+    );
   }
 }
 
-Future<void> facebookLogin(BuildContext context, String? fromPage, VoidCallback? onLoginSuccess) async {
+Future<void> facebookLogin(BuildContext context, String? fromPage,
+    VoidCallback? onLoginSuccess) async {
   SocialLoginModel socialLogin = SocialLoginModel();
 
   try {
     await Provider.of<FacebookLoginController>(context, listen: false).login();
     String? id, token, email, medium, name;
-    if (Provider.of<FacebookLoginController>(Get.context!, listen: false).userData != null) {
-      id = Provider.of<FacebookLoginController>(Get.context!, listen: false).userData?['id'];
-      email = Provider.of<FacebookLoginController>(Get.context!, listen: false).userData?['email'];
-      token = Provider.of<FacebookLoginController>(Get.context!, listen: false).result.accessToken?.tokenString;
-      name = Provider.of<FacebookLoginController>(Get.context!, listen: false).userData?['name'] ?? '';
+    if (Provider.of<FacebookLoginController>(Get.context!, listen: false)
+            .userData !=
+        null) {
+      id = Provider.of<FacebookLoginController>(Get.context!, listen: false)
+          .userData?['id'];
+      email = Provider.of<FacebookLoginController>(Get.context!, listen: false)
+          .userData?['email'];
+      token = Provider.of<FacebookLoginController>(Get.context!, listen: false)
+          .result
+          .accessToken
+          ?.tokenString;
+      name = Provider.of<FacebookLoginController>(Get.context!, listen: false)
+              .userData?['name'] ??
+          '';
       medium = 'facebook';
       socialLogin.email = email;
       socialLogin.medium = medium;
       socialLogin.token = token;
       socialLogin.uniqueId = id;
-      await Provider.of<AuthController>(Get.context!, listen: false).socialLogin(socialLogin, route, fromPage, onLoginSuccess);
+      socialLogin.name = name;
+      await Provider.of<AuthController>(Get.context!, listen: false)
+          .socialLogin(socialLogin, route, fromPage, onLoginSuccess);
     }
   } catch (er) {
     debugPrint('access token error is : $er');
   }
 }
 
-Future<void> appleLogin(BuildContext context, String? fromPage, VoidCallback? onLoginSuccess) async {
+Future<void> appleLogin(BuildContext context, String? fromPage,
+    VoidCallback? onLoginSuccess) async {
   SocialLoginModel socialLogin = SocialLoginModel();
   try {
     String? id, token, email, medium;
@@ -289,10 +260,9 @@ Future<void> appleLogin(BuildContext context, String? fromPage, VoidCallback? on
       AppleIDAuthorizationScopes.fullName
     ]);
 
-
-
     id = credential.authorizationCode;
-    email = await Provider.of<AuthController>(Get.context!, listen: false).onConfigurationAppleEmail(credential);
+    email = await Provider.of<AuthController>(Get.context!, listen: false)
+        .onConfigurationAppleEmail(credential);
 
     token = credential.authorizationCode;
     medium = 'apple';
@@ -301,7 +271,8 @@ Future<void> appleLogin(BuildContext context, String? fromPage, VoidCallback? on
     socialLogin.token = token;
     socialLogin.uniqueId = id;
     socialLogin.name = credential.givenName ?? '';
-    await Provider.of<AuthController>(Get.context!, listen: false).socialLogin(socialLogin, route, fromPage, onLoginSuccess);
+    await Provider.of<AuthController>(Get.context!, listen: false)
+        .socialLogin(socialLogin, route, fromPage, onLoginSuccess);
 
     log('id token =>${credential.identityToken}\n===> Identifier${credential.userIdentifier}\n==>Given Name ${credential.familyName}');
   } catch (er) {
@@ -315,16 +286,24 @@ class SocialLoginButtonWidget extends StatelessWidget {
   final Color? color;
   final EdgeInsetsGeometry? padding;
   final SocialLoginOption? option;
-  const SocialLoginButtonWidget({super.key, this.text, required this.image, this.color, this.padding, this.option});
+  const SocialLoginButtonWidget(
+      {super.key,
+      this.text,
+      required this.image,
+      this.color,
+      this.padding,
+      this.option});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: padding ?? const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
+      padding: padding ??
+          const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
       decoration: BoxDecoration(
         color: Theme.of(context).hintColor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-        border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.1)),
+        border: Border.all(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -337,8 +316,10 @@ class SocialLoginButtonWidget extends StatelessWidget {
           ),
           if (text != null) ...[
             const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-            Text(text!,
-              style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault,
+            Text(
+              text!,
+              style: robotoBold.copyWith(
+                fontSize: Dimensions.fontSizeDefault,
                 color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
             )

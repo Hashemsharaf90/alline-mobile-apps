@@ -109,10 +109,10 @@ class SplashController extends ChangeNotifier {
 
       String? currencyCode = splashServiceInterface!.getCurrency();
 
-      try{
-        await FirebaseMessaging.instance.getToken();
-        await FirebaseMessaging.instance.subscribeToTopic(AppConstants.maintenanceModeTopic);
-      }catch (e) {
+      try {
+        FirebaseMessaging.instance.getToken().timeout(const Duration(seconds: 3), onTimeout: () => null).catchError((_) => null);
+        FirebaseMessaging.instance.subscribeToTopic(AppConstants.maintenanceModeTopic).catchError((_) {});
+      } catch (e) {
         debugPrint("====FirebaseException===>>$e");
       }
 

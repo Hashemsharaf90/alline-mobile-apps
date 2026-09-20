@@ -982,5 +982,7 @@
   "email_optional": "Email (optional)",
   "login_with_password": "Login with password",
   "create_account": "Create account",
-  "full_name_is_required": "Full name is required"
+  "full_name_is_required": "Full name is required",
+  "global_shopping": "Global Shopping",
+  "my_global_orders": "My Global Orders"
 }

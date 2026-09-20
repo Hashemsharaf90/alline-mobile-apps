@@ -325,24 +325,6 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                     const SizedBox(
                                         height: Dimensions.paddingSizeLarge),
                                   ],
-                                  if (configModel.customerLogin?.loginOption
-                                          ?.manualLogin ==
-                                      1)
-                                    TextButton(
-                                      onPressed: () =>
-                                          RouterHelper.getLoginRoute(
-                                        action: RouteAction.push,
-                                        isFromLogout: widget.fromLogout,
-                                        fromPage: widget.fromPage,
-                                        passwordOnly: true,
-                                        onLoginSuccess: widget.onLoginSuccess,
-                                      ),
-                                      child: Text(
-                                        getTranslated('login_with_password',
-                                                context) ??
-                                            '',
-                                      ),
-                                    ),
                                   TextButton(
                                     onPressed: () =>
                                         RouterHelper.getAuthScreenRoute(
@@ -411,9 +393,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
 bool _isShowSocialLoginButton(
     ConfigModel configModel, SocialMediaLoginOptions? socialStatus) {
   return (configModel.customerLogin?.loginOption?.socialMediaLogin == 1) &&
-      (configModel.customerLogin?.loginOption?.manualLogin != 1) &&
       ((socialStatus?.apple == 1 &&
               defaultTargetPlatform == TargetPlatform.iOS) ||
-          socialStatus?.google == 1 ||
-          socialStatus?.facebook == 1);
+          socialStatus?.google == 1);
 }

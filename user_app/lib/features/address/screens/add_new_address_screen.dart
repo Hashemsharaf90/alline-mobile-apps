@@ -204,7 +204,14 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
       appBar: CustomAppBar(
           title: widget.isEnableUpdate
               ? getTranslated('update_address', context)
-              : getTranslated('add_new_address', context)),
+              : getTranslated('add_new_address', context),
+          onBackPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              RouterHelper.getDashboardRoute(action: RouteAction.pushReplacement);
+            }
+          }),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -942,7 +949,12 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                                                     }
                                                   }
                                                 } else if (context.mounted) {
-                                                  Navigator.pop(context);
+                                                  if (Navigator.canPop(context)) {
+                                                    Navigator.pop(context);
+                                                  } else {
+                                                    RouterHelper.getDashboardRoute(
+                                                        action: RouteAction.pushReplacement);
+                                                  }
                                                 }
                                               }
                                             });
