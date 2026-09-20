@@ -124,6 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
         fromLogout: widget.fromLogout,
         fromPage: widget.fromPage,
         onLoginSuccess: widget.onLoginSuccess,
+        showBackButton: widget.showBackButton,
       );
     }
     if (manualLogin == 0) {}

@@ -58,6 +58,11 @@ class Images {
   static const String sevenDayEasyReturn = 'assets/images/seven_day_return.png';
   static const String safePayment = 'assets/images/safe_payment.png';
   static const String hundredParAuthentic = 'assets/images/authentic.png';
+  static const String loginBottomBag = 'assets/images/alline/login_bottom_bag.png';
+  static const String loginTopSlogan = 'assets/images/alline/login_top_slogan.png';
+  static const String loginBottomTagline = 'assets/images/alline/login_bottom_tagline.png';
+  static const String loginBottomBadges = 'assets/images/alline/login_bottom_badges.png';
+
   static const String address = 'assets/images/address.png';
   static const String dropdown = 'assets/images/dropdown.png';
   static const String placeholder_1x1 = 'assets/images/placeholder_1x1.png';
