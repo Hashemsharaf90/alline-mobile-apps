@@ -7,7 +7,6 @@ import 'package:flutter_sixvalley_ecommerce/features/wallet/widgets/top_up_walle
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 
 class AllineSmartHeaderWidget extends StatelessWidget {
   const AllineSmartHeaderWidget({super.key});
@@ -26,27 +25,29 @@ class AllineSmartHeaderWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 44,
-                height: 44,
-                padding: const EdgeInsets.all(4),
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isDark ? Colors.white10 : const Color(0xFFE5EBF4),
-                    width: 1,
-                  ),
+                  color: const Color(0xFF1455AC),
+                  borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF1455AC).withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: const Color(0xFF1455AC).withOpacity(0.22),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Image.asset(
-                  Images.logo,
-                  fit: BoxFit.contain,
+                child: const Center(
+                  child: Text(
+                    'A',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 23,
+                      fontWeight: FontWeight.w900,
+                      fontFamily: 'SF Pro Display',
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
