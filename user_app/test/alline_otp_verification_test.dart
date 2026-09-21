@@ -88,9 +88,5 @@ void main() {
     expect(
         find.text('رمز التحقق صالح لفترة محدودة ولا تشاركه مع أي شخص.'),
         findsOneWidget);
-
-    // Verify Footer
-    expect(find.text('Alline'), findsOneWidget);
-    expect(find.text('تسوق بسهولة .. حياة أسهل'), findsOneWidget);
   });
 }

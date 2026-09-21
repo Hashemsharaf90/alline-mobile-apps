@@ -724,28 +724,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         textAlign: TextAlign.center,
                       ),
 
-                      const SizedBox(height: 36),
-
-                      // Subtle Brand Footer
-                      const Text(
-                        'Alline',
-                        style: TextStyle(
-                          fontFamily: 'AllineTajawal',
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: secondaryText,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      const Text(
-                        'تسوق بسهولة .. حياة أسهل',
-                        style: TextStyle(
-                          fontFamily: 'AllineTajawal',
-                          fontSize: 12,
-                          color: secondaryText,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 );
