@@ -105,8 +105,8 @@ class _OnlySocialLoginWidgetState extends State<OnlySocialLoginWidget> {
                   child: CustomAssetImageWidget(
                     Images.logoWithNameImage,
                     height: 100,
-                    width: 150,
-                    // fit: BoxFit.scaleDown,
+                    width: 100,
+                    fit: BoxFit.contain,
                   ),
                 ),
 

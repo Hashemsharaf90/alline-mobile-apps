@@ -284,8 +284,25 @@ class SplashWidget extends StatelessWidget {
         Row(children: []),
         BouncyWidget(
           duration: const Duration(milliseconds: 2000), lift: 50, ratio: 0.5, pause: 0.25,
-          child: SizedBox(width: 150, child: Image.asset(Images.logo, width: 150.0))
+          child: Container(
+            width: 140,
+            height: 140,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.18),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Image.asset(Images.logo, fit: BoxFit.contain),
+          ),
         ),
+        const SizedBox(height: Dimensions.paddingSizeDefault),
         Text(AppConstants.appName,style: textRegular.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Colors.white)),
         Padding(
           padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),

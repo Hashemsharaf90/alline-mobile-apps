@@ -266,10 +266,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                             child: Directionality(
                                                 textDirection:
                                                     TextDirection.ltr,
-                                                child: Image.asset(
-                                                    Images.logoWithNameImage,
-                                                    width: 140,
-                                                    height: 50)),
+                                                 child: Image.asset(
+                                                     Images.logoWithNameImage,
+                                                     width: 90,
+                                                     height: 90,
+                                                     fit: BoxFit.contain)),
                                           ),
                                         ),
 

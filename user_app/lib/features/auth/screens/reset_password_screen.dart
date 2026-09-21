@@ -57,8 +57,8 @@ class ResetPasswordScreenState extends State<ResetPasswordScreen> {
           child: ListView(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall), children: [
               const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-              Padding(padding: const EdgeInsets.all(50),
-                child: Image.asset(Images.logoWithNameImage, height: 50, width: 140),),
+              Padding(padding: const EdgeInsets.all(20),
+                child: Image.asset(Images.logoWithNameImage, height: 100, width: 100),),
 
               Padding(padding: const EdgeInsets.all(Dimensions.marginSizeLarge),
                 child: Text(getTranslated('password_reset', context)!, style: titilliumSemiBold)),
