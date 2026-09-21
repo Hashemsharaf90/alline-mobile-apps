@@ -63,6 +63,8 @@ import 'features/splash/domain/models/config_model.dart';
 import 'helper/custom_delegate.dart';
 import 'localization/app_localization.dart';
 
+import 'package:flutter/foundation.dart';
+
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
@@ -79,36 +81,62 @@ final database = AppDatabase();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = MyHttpOverrides();
 
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp();
+  if (!kIsWeb) {
+    HttpOverrides.global = MyHttpOverrides();
   }
 
-  await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
+  if (Firebase.apps.isEmpty) {
+    if (kIsWeb) {
+      try {
+        await Firebase.initializeApp(
+          options: const FirebaseOptions(
+            apiKey: "AIzaSyBtKZiFUjtspJKvoYRq8xPMQjLajRnkhos",
+            appId: "1:974823733639:web:c96d77d5c68dd222c8fb22",
+            messagingSenderId: "974823733639",
+            projectId: "thgi4-1da1f",
+            authDomain: "thgi4-1da1f.firebaseapp.com",
+            storageBucket: "thgi4-1da1f.firebasestorage.app",
+          ),
+        );
+      } catch (e) {
+        debugPrint('Web Firebase init notice: $e');
+      }
+    } else {
+      await Firebase.initializeApp();
+    }
+  }
+
+  if (!kIsWeb) {
+    await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
+  }
   await di.init();
 
-  await FirebaseMessaging.instance
-      .requestPermission(alert: true, badge: true, sound: true);
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.requestNotificationsPermission();
   String? path;
   NotificationBody? body;
 
-  try {
-    final RemoteMessage? remoteMessage =
-        await FirebaseMessaging.instance.getInitialMessage();
-    if (remoteMessage != null) {
-      body = NotificationHelper.convertNotification(remoteMessage.data);
-    }
-    await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
-    FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
-    path = await initDynamicLinks();
-  } catch (_) {}
+  if (!kIsWeb) {
+    await FirebaseMessaging.instance
+        .requestPermission(alert: true, badge: true, sound: true);
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
+
+    try {
+      final RemoteMessage? remoteMessage =
+          await FirebaseMessaging.instance.getInitialMessage();
+      if (remoteMessage != null) {
+        body = NotificationHelper.convertNotification(remoteMessage.data);
+      }
+      await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
+      FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+      path = await initDynamicLinks();
+    } catch (_) {}
+  }
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
+
 
   runApp(MultiProvider(
     providers: [
