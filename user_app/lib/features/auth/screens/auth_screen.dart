@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
-import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
-import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/sign_up_widget.dart';
-import 'package:provider/provider.dart';
 
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends StatelessWidget {
   final bool fromLogout;
   final String? fromPage;
   final VoidCallback? onLoginSuccess;
@@ -21,135 +16,121 @@ class AuthScreen extends StatefulWidget {
       this.onLoginSuccess,
       this.referCode});
 
-  @override
-  State<AuthScreen> createState() => _AuthScreenState();
-}
+  void _back(BuildContext context) {
+    if (referCode != null) {
+      RouterHelper.getDashboardRoute(
+          action: RouteAction.pushNamedAndRemoveUntil);
+    } else if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      RouterHelper.getLoginRoute(
+          action: RouteAction.pushReplacement,
+          isFromLogout: fromLogout,
+          fromPage: fromPage,
+          onLoginSuccess: onLoginSuccess);
+    }
+  }
 
-class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (didPop, _) async {
-        if (didPop) return;
-        if (widget.referCode != null) {
-          RouterHelper.getDashboardRoute(
-              action: RouteAction.pushNamedAndRemoveUntil);
-        } else {
-          Navigator.pop(context);
-        }
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _back(context);
       },
-      child: Scaffold(
-        body: Consumer<AuthController>(builder: (context, _, __) {
-          return Column(children: [
-            Stack(children: [
-              Container(
-                  height: 150,
-                  decoration:
-                      BoxDecoration(color: Theme.of(context).primaryColor)),
-              Image.asset(Images.loginBg,
-                  fit: BoxFit.cover,
-                  height: 150,
-                  opacity: const AlwaysStoppedAnimation(.15)),
-              if (widget.referCode != null)
-                Positioned(
-                    top: Dimensions.paddingSizeButton,
-                    left: Provider.of<LocalizationController>(context,
-                                listen: false)
-                            .isLtr
-                        ? Dimensions.paddingSizeLarge
-                        : null,
-                    right: Provider.of<LocalizationController>(context,
-                                listen: false)
-                            .isLtr
-                        ? null
-                        : Dimensions.paddingSizeLarge,
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios,
-                          size: 20, color: Theme.of(context).cardColor),
-                      onPressed: () {
-                        if (widget.referCode != null) {
-                          RouterHelper.getDashboardRoute(
-                              action: RouteAction.pushNamedAndRemoveUntil);
-                        } else {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                    )),
-              Padding(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * .03),
-                child: Column(
-                  children: [
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Image.asset(Images.logoWithNameImageWhite,
-                          width: 130, height: 80)
-                    ]),
-                    Text(getTranslated('sign_up', context)!,
-                        style: titilliumRegular.copyWith(
-                          color: Theme.of(context).highlightColor,
-                          fontSize: Dimensions.fontSizeLarge,
-                        )),
-                  ],
-                ),
-              ),
-            ]),
-            AnimatedContainer(
-              transform: Matrix4.translationValues(0, -12, 0),
-              curve: Curves.fastOutSlowIn,
-              decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(Dimensions.radiusExtraLarge))),
-              duration: const Duration(seconds: 2),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    bottom: Dimensions.paddingSizeExtraSmall),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: Dimensions.marginSizeLarge),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            InkWell(
-                              onTap: () {},
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                        height: 0,
-                                        width: 25,
-                                        margin: const EdgeInsets.only(top: 8),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                                Dimensions.paddingSizeSmall),
-                                            color:
-                                                Theme.of(context).primaryColor))
-                                  ]),
-                            ),
-                          ]),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: const Color(0xFFF5F9FF)),
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF5F9FF),
+          body: DecoratedBox(
+            decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                  Color(0xFFEAF2FF),
+                  Color(0xFFF8FAFF),
+                  Color(0xFFF5F9FF)
+                ])),
+            child: SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: Dimensions.paddingSizeSmall),
-                child: SignUpWidget(
-                  fromLogout: widget.fromLogout,
-                  fromPage: widget.fromPage,
-                  onLoginSuccess: widget.onLoginSuccess,
-                  referCode: widget.referCode,
-                ),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+                child: Center(
+                    child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 460),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: IconButton.filledTonal(
+                                onPressed: () => _back(context),
+                                tooltip: MaterialLocalizations.of(context)
+                                    .backButtonTooltip,
+                                style: IconButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: const Color(0xFF10244A),
+                                    side: const BorderSide(
+                                        color: Color(0xFFDFE8F5))),
+                                icon: const Icon(Icons.arrow_back_rounded,
+                                    size: 22))),
+                        Image.asset(
+                            'assets/images/alline/login_logo_transparent.png',
+                            width: 92,
+                            height: 92,
+                            semanticLabel: 'Alline',
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.high),
+                        const SizedBox(height: 12),
+                        Text(getTranslated('sign_up', context) ?? '',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontFamily: 'AllineTajawal',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 28,
+                                color: Color(0xFF10244A))),
+                        const SizedBox(height: 6),
+                        Text(
+                            isArabic
+                                ? 'انضم إلى Alline وابدأ التسوّق بسهولة'
+                                : 'Join Alline for an easier shopping experience',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontFamily: 'AllineTajawal',
+                                fontSize: 14,
+                                height: 1.5,
+                                color: Color(0xFF6B7D99))),
+                        const SizedBox(height: 24),
+                        Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(26),
+                                border:
+                                    Border.all(color: const Color(0xFFE4ECF7)),
+                                boxShadow: [
+                                  BoxShadow(
+                                      color: const Color(0xFF164989)
+                                          .withValues(alpha: .06),
+                                      blurRadius: 28,
+                                      offset: const Offset(0, 10))
+                                ]),
+                            child: SignUpWidget(
+                                fromLogout: fromLogout,
+                                fromPage: fromPage,
+                                onLoginSuccess: onLoginSuccess,
+                                referCode: referCode)),
+                      ]),
+                )),
               ),
             ),
-          ]);
-        }),
+          ),
+        ),
       ),
     );
   }

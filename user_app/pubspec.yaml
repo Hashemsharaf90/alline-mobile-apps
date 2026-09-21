@@ -114,6 +114,12 @@ flutter:
     - assets/svg/
 
   fonts:
+    - family: AllineTajawal
+      fonts:
+        - asset: assets/fonts/tajawal/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/tajawal/Tajawal-Bold.ttf
+          weight: 700
     - family: SF-Pro-Rounded-Regular
       fonts:
         - asset: assets/fonts/ubuntu/SF-Pro-Rounded-Regular.ttf
