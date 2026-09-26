@@ -10,6 +10,8 @@ abstract class CheckoutRepositoryInterface implements RepositoryInterface{
     String? orderNote,
     bool? isCheckCreateAccount,
     String? password,
+    String? idempotencyKey,
+    String? idempotencyKey,
     double? cashChangeAmount,
     String? currentCurrencyCode,
   });
