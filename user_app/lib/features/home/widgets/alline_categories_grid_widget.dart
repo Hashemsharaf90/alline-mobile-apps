@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/screens/category_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/screens/brand_and_category_product_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/category_asset_helper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 
 class AllineCategoriesGridWidget extends StatelessWidget {
@@ -13,8 +13,10 @@ class AllineCategoriesGridWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
 
     return Consumer<CategoryController>(
       builder: (context, categoryController, _) {
@@ -26,12 +28,11 @@ class AllineCategoriesGridWidget extends StatelessWidget {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
-          color: Theme.of(context).cardColor,
+          color: colors.surface,
           padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -41,38 +42,35 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                       isLtr ? 'Categories' : 'التصنيفات السريعة',
                       style: textBold.copyWith(
                         fontSize: 17,
-                        color: isDark ? Colors.white : const Color(0xFF071B49),
+                        color: colors.textPrimary,
                       ),
                     ),
                     InkWell(
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CategoryScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const CategoryScreen(),
+                        ),
                       ),
                       borderRadius: BorderRadius.circular(20),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: Row(
-                          children: [
-                            Text(
-                              isLtr ? 'View all' : 'عرض الكل',
-                              style: textBold.copyWith(
-                                fontSize: 13,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            const SizedBox(width: 2),
-                          ],
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          isLtr ? 'View all' : 'عرض الكل',
+                          style: textBold.copyWith(
+                            fontSize: 13,
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 12),
-
-              // Horizontal Scrollable Categories
               SizedBox(
                 height: 116,
                 child: ListView.separated(
@@ -108,26 +106,25 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF4F5F7),
+                                    ? colors.surfaceElevated
+                                    : colors.background,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: isDark
-                                        ? Colors.black.withValues(alpha: .16)
-                                        : Colors.black.withValues(alpha: .03),
+                                    color: Colors.black.withValues(
+                                      alpha: isDark ? .16 : .03,
+                                    ),
                                     blurRadius: 12,
                                     offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: CategoryAssetHelper.buildContainedCategoryArtwork(
+                              child:
+                                  CategoryAssetHelper.buildContainedCategoryArtwork(
                                 category: category,
                                 size: 54,
                               ),
                             ),
-
                             const SizedBox(height: 7),
-
                             SizedBox(
                               height: 34,
                               child: Center(
@@ -138,9 +135,7 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                   style: textMedium.copyWith(
                                     fontSize: 11.5,
-                                    color: isDark
-                                        ? const Color(0xFFE2E8F0)
-                                        : const Color(0xFF071B49),
+                                    color: colors.textPrimary,
                                     fontWeight: FontWeight.w600,
                                     height: 1.18,
                                   ),
