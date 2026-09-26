@@ -17,6 +17,7 @@ class CheckoutService implements CheckoutServiceInterface{
     String? password,
     double? cashChangeAmount,
     String? currentCurrencyCode,
+    String? idempotencyKey,
   }) async{
     return await checkoutRepositoryInterface.cashOnDeliveryPlaceOrder(
      addressID: addressID,
@@ -34,7 +35,7 @@ class CheckoutService implements CheckoutServiceInterface{
 
   @override
   Future digitalPaymentPlaceOrder(String? orderNote, String? customerId, String? addressId, String? billingAddressId, String? couponCode, String? couponDiscount, String? paymentMethod, bool? isCheckCreateAccount, String? password) async {
-    return await checkoutRepositoryInterface.digitalPaymentPlaceOrder(orderNote, customerId, addressId, billingAddressId, couponCode, couponDiscount, paymentMethod, isCheckCreateAccount, password);
+    return await checkoutRepositoryInterface.digitalPaymentPlaceOrder(orderNote, customerId, addressId, billingAddressId, couponCode, couponDiscount, paymentMethod, isCheckCreateAccount, password, idempotencyKey);
   }
 
   @override
