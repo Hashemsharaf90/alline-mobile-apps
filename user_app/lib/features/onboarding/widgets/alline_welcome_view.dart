@@ -144,7 +144,7 @@ class AllineWelcomeView extends StatelessWidget {
         _benefit(Icons.shopping_bag_outlined,
             tr('منتجات متنوعة', 'More to discover')),
         _benefit(
-            Icons.local_shipping_outlined, tr('توصيل سريع', 'Fast delivery')),
+            Icons.two_wheeler_rounded, tr('توصيل سريع', 'Fast delivery')),
         _benefit(
             Icons.verified_user_outlined, tr('تسوّق آمن', 'Secure shopping')),
       ]);

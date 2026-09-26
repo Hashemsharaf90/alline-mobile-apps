@@ -11,7 +11,7 @@ class AppConstants {
   static const bool demo = false;
   static const int imageQuality = 100;
 
-  static const String baseUrl = 'https://new.allinye.com';
+  static const String baseUrl = 'https://allinye.com';
 
   static const String loginUri = '/api/v3/seller/auth/login';
   static const String configUri = '/api/v1/config';

@@ -4,9 +4,10 @@ import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_categor
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_banner_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_shopping_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/floating_smart_cart_bar.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_services_grid_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_home_all_products_section_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/domain/models/address_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
@@ -14,31 +15,19 @@ import 'package:flutter_sixvalley_ecommerce/features/banner/controllers/banner_c
 import 'package:flutter_sixvalley_ecommerce/features/brand/controllers/brand_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/clearance_sale/widgets/clearance_sale_list_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/featured_deal_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/flash_deal_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_supermarket_section_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/product_list_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/widgets/product_type_popup_menu_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/notification/controllers/notification_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/widgets/home_category_product_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/widgets/latest_product_list_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/widgets/recommended_product_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/splash/domain/models/config_model.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
-  static bool _locationServicePromptShowing = false;
-  static bool _locationServicePromptDismissed = false;
-  static bool _locationSettingsOpened = false;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -46,105 +35,6 @@ class HomePage extends StatefulWidget {
   static bool _hasUsableCoordinates(AddressModel address) {
     return (address.latitude?.trim().isNotEmpty ?? false) &&
         (address.longitude?.trim().isNotEmpty ?? false);
-  }
-
-  static Future<List<String>?> _getCurrentLocationCoordinates() async {
-    try {
-      final serviceEnabled = await _ensureLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return null;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
-
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return null;
-      }
-
-      Position? position;
-      try {
-        position = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-            timeLimit: Duration(seconds: 10),
-          ),
-        );
-      } catch (_) {
-        position = await Geolocator.getLastKnownPosition();
-      }
-
-      if (position == null) {
-        return null;
-      }
-
-      if (position.latitude == 0 && position.longitude == 0) {
-        return null;
-      }
-
-      return [
-        position.latitude.toString(),
-        position.longitude.toString(),
-      ];
-    } catch (_) {
-      return null;
-    }
-  }
-
-  static Future<bool> _ensureLocationServiceEnabled() async {
-    if (await Geolocator.isLocationServiceEnabled()) {
-      return true;
-    }
-
-    await _showEnableLocationServiceDialog();
-    return Geolocator.isLocationServiceEnabled();
-  }
-
-  static Future<void> _showEnableLocationServiceDialog() async {
-    final context = Get.context;
-    if (context == null ||
-        _locationServicePromptShowing ||
-        _locationServicePromptDismissed) {
-      return;
-    }
-
-    _locationServicePromptShowing = true;
-    final isLtr = Directionality.of(context) == TextDirection.ltr;
-
-    final openSettings = await showDialog<bool>(
-      context: context,
-      barrierDismissible: true,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(isLtr ? 'Enable location' : 'تشغيل الموقع'),
-        content: Text(
-          isLtr
-              ? 'Turn on GPS so we can show nearby supermarkets on the map.'
-              : 'فعّل GPS حتى نعرض لك السوبرماركت الأقرب على الخريطة حسب موقعك الحالي.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(isLtr ? 'Later' : 'لاحقًا'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(isLtr ? 'Open settings' : 'فتح الإعدادات'),
-          ),
-        ],
-      ),
-    );
-
-    _locationServicePromptShowing = false;
-    if (openSettings == true) {
-      _locationSettingsOpened = true;
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    _locationServicePromptDismissed = true;
   }
 
   static Future<void> loadData(bool reload) async {
@@ -200,15 +90,30 @@ class HomePage extends StatefulWidget {
         break;
       }
     }
-    final currentLocationCoordinates = await _getCurrentLocationCoordinates();
-    final supermarketLatitude =
-        currentLocationCoordinates?[0] ?? locationAddress?.latitude;
-    final supermarketLongitude =
-        currentLocationCoordinates?[1] ?? locationAddress?.longitude;
+    final location =
+        Provider.of<LocationController>(Get.context!, listen: false);
+    await location.restoreDeliveryLocation();
+    if (location.deliveryLatitude == null && locationAddress != null) {
+      final lat = double.tryParse(locationAddress.latitude ?? '');
+      final lng = double.tryParse(locationAddress.longitude ?? '');
+      if (lat != null && lng != null) {
+        await location.setPickedCoordinates(
+            latitude: lat,
+            longitude: lng,
+            fromAddress: true,
+            address: locationAddress.address?.isNotEmpty == true
+                ? locationAddress.address
+                : 'موقع التوصيل المحدد',
+            context: Get.context!);
+        await location.confirmDeliveryLocation();
+      }
+    }
+    final supermarketLatitude = location.deliveryLatitude?.toString();
+    final supermarketLongitude = location.deliveryLongitude?.toString();
     productController.setSupermarketLocationSource(
       latitude: supermarketLatitude,
       longitude: supermarketLongitude,
-      usingCurrentLocation: currentLocationCoordinates != null,
+      usingCurrentLocation: false,
     );
 
     cartController.getCartData(Get.context!);
@@ -222,6 +127,8 @@ class HomePage extends StatefulWidget {
     // productController.getLProductList('1', reload: reload);
 
     productController.getLatestProductList(1, isUpdate: reload);
+    productController.getHomeBestSellingProducts(reload: reload);
+    productController.getDiscountedProductList(1, reload);
     productController.getSupermarketProductList(
       1,
       isUpdate: reload,
@@ -240,6 +147,8 @@ class HomePage extends StatefulWidget {
     productController.getRecommendedProduct();
 
     productController.getClearanceAllProductList(1, isUpdate: reload);
+
+    productController.getHomeAllProductList(1, reload: reload);
 
     if (notificationController.notificationModel == null ||
         (notificationController.notificationModel != null &&
@@ -268,92 +177,85 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scrollController.addListener(_onScroll);
 
     singleVendor = Provider.of<SplashController>(context, listen: false)
             .configModel
             ?.businessMode ==
         "single";
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final productController =
+          Provider.of<ProductController>(context, listen: false);
+      if (productController.homeAllProductModel == null) {
+        productController.getHomeAllProductList(1);
+      }
+    });
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= 600) {
+      final productController =
+          Provider.of<ProductController>(context, listen: false);
+      final model = productController.homeAllProductModel;
+      if (model != null &&
+          !productController.isHomeAllProductLoading &&
+          !productController.isHomeAllProductLoadingMore) {
+        final totalSize = model.totalSize;
+        final currentLength = model.products?.length ?? 0;
+        if (totalSize == null || currentLength < totalSize) {
+          final nextOffset = (model.offset ?? 1) + 1;
+          productController.getHomeAllProductList(nextOffset);
+        }
+      }
+    }
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     WidgetsBinding.instance.removeObserver(this);
     _scrollController.dispose();
     super.dispose();
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        HomePage._locationSettingsOpened) {
-      HomePage._locationSettingsOpened = false;
-      HomePage._locationServicePromptDismissed = false;
-      HomePage.loadData(true);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final ConfigModel? configModel =
-        Provider.of<SplashController>(context, listen: false).configModel;
-
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? context.allineColors.background
+          : context.allineColors.surface,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Stack(
-          children: [
-            RefreshIndicator(
+        bottom: false,
+        child: RefreshIndicator(
           onRefresh: () async {
             await HomePage.loadData(true);
           },
           child: CustomScrollView(
+            key: const PageStorageKey<String>('home_screen_scroll_key'),
             controller: _scrollController,
-                        slivers: [
+            cacheExtent: 900,
+            slivers: [
               const SliverToBoxAdapter(child: AllineSmartHeaderWidget()),
               const SliverToBoxAdapter(child: AllineSearchFieldWidget()),
-              const SliverToBoxAdapter(child: AllinePromoBannerWidget()),
+              const SliverToBoxAdapter(child: AllineServicesGridWidget()),
               const SliverToBoxAdapter(child: AllineCategoriesGridWidget()),
-              const SliverToBoxAdapter(child: AllineFeaturedOffersSectionWidget()),
-              const SliverToBoxAdapter(child: AllineSupermarketSectionWidget()),
-              const SliverToBoxAdapter(child: GlobalShoppingSectionWidget()),
-              const SliverToBoxAdapter(child: AllineNearbyStoresSectionWidget()),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: RecommendedProductWidget(),
-                ),
-              ),
-              const SliverToBoxAdapter(child: ClearanceListWidget()),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: LatestProductListWidget(),
-                ),
-              ),
-              const HomeCategoryProductWidget(isHomePage: true),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: SliverDelegate(
-                  height: 50,
-                  child: Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      child: const ProductPopupFilterWidget(),
-                    ),
-                  ),
-                ),
-              ),
-              HomeProductListWidget(scrollController: _scrollController),
-              const SliverToBoxAdapter(child: SizedBox(height: 90)),
+              const SliverToBoxAdapter(child: AllinePromoBannerWidget()),
+              const SliverToBoxAdapter(
+                  child: AllineNearbyStoresSectionWidget()),
+              const SliverToBoxAdapter(child: AllineHomeProductDiscovery()),
+              const AllineHomeAllProductsSectionWidget(),
+              const SliverToBoxAdapter(child: SizedBox(height: 104)),
             ],
           ),
         ),
-        const FloatingSmartCartBar(),
-      ],
-    ),
-  ),
-);
+      ),
+    );
   }
 }
 

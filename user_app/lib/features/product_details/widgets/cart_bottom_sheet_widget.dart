@@ -741,10 +741,13 @@ class CartBottomSheetWidgetState extends State<CartBottomSheetWidget> {
 
 
                         Expanded(child: Consumer<SplashController>(builder: (context, configProvider,_) {
+                          final cartCtrl = Provider.of<CartController>(context);
                           return CustomButton(
+                            isLoading: cartCtrl.addToCartLoading,
                             isBuy:true, radius: 6,
                             buttonText: getTranslated(stock == 0  && widget.product!.productType == "physical" ? 'out_of_stock' : 'buy_now', context),
                             onTap:() async {
+                              if (Provider.of<CartController>(context, listen: false).addToCartLoading) return;
                               final bool isLoggedIn = Provider.of<AuthController>(context, listen: false).isLoggedIn();
 
                               if(configProvider.configModel?.guestCheckOut == 0 && !isLoggedIn){
@@ -769,10 +772,12 @@ class CartBottomSheetWidgetState extends State<CartBottomSheetWidget> {
                         const SizedBox(width: Dimensions.paddingSizeDefault),
 
                         Expanded(child: CustomButton(
+                          isLoading: Provider.of<CartController>(context).addToCartLoading,
                           radius: 6,
                           buttonText: getTranslated(stock == 0 && widget.product!.productType == "physical"? 'out_of_stock' :
                           isExistInCart ? 'update_cart' : 'add_to_cart', context),
                           onTap: () {
+                            if (Provider.of<CartController>(context, listen: false).addToCartLoading) return;
                             if((productDetailsController.quantity ?? 0) < (widget.product?.minimumOrderQty ?? 1) ) {
                               showCustomSnackBarWidget(getTranslated('to_order_this_item_minimum_order_quantity_is', context), context, snackBarType: SnackBarType.warning);
                               return;

@@ -36,23 +36,25 @@ class GlobalProductPreviewModel {
   });
 
   factory GlobalProductPreviewModel.fromJson(Map<String, dynamic> json) {
+    double? number(String key) =>
+        json[key] == null ? null : double.tryParse(json[key].toString());
     return GlobalProductPreviewModel(
       storeName: json['store_name'],
       productUrl: json['product_url'],
       title: json['title'],
       thumbnail: json['thumbnail'],
       images: json['images'] != null ? List<String>.from(json['images']) : [],
-      originalPrice: double.tryParse(json['original_price']?.toString() ?? '0') ?? 0.0,
-      originalCurrency: json['original_currency'] ?? 'USD',
-      estimatedWeightKg: double.tryParse(json['estimated_weight_kg']?.toString() ?? '0.5') ?? 0.5,
-      airShippingCost: double.tryParse(json['air_shipping_cost']?.toString() ?? '0') ?? 0.0,
-      seaShippingCost: double.tryParse(json['sea_shipping_cost']?.toString() ?? '0') ?? 0.0,
-      customsFee: double.tryParse(json['customs_fee']?.toString() ?? '0') ?? 0.0,
-      serviceFee: double.tryParse(json['service_fee']?.toString() ?? '0') ?? 0.0,
-      totalEstimatedUsd: double.tryParse(json['total_estimated_usd']?.toString() ?? '0') ?? 0.0,
-      totalEstimatedYer: double.tryParse(json['total_estimated_yer']?.toString() ?? '0') ?? 0.0,
-      deliveryTimeAir: json['delivery_time_air'] ?? '7 - 12 days',
-      deliveryTimeSea: json['delivery_time_sea'] ?? '25 - 35 days',
+      originalPrice: number('original_price'),
+      originalCurrency: json['original_currency'],
+      estimatedWeightKg: number('estimated_weight_kg'),
+      airShippingCost: number('air_shipping_cost'),
+      seaShippingCost: number('sea_shipping_cost'),
+      customsFee: number('customs_fee'),
+      serviceFee: number('service_fee'),
+      totalEstimatedUsd: number('total_estimated_usd'),
+      totalEstimatedYer: number('total_estimated_yer'),
+      deliveryTimeAir: json['delivery_time_air'],
+      deliveryTimeSea: json['delivery_time_sea'],
     );
   }
 }

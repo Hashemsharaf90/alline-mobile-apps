@@ -4,6 +4,8 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/no_internet_screen
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/models/global_shopping_request_model.dart';
+import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/cart/domain/models/cart_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
@@ -174,7 +176,9 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
                   fontSize: 11, fontStyle: FontStyle.italic),
             ),
           ],
-          if (req.approvedPrice != null && req.approvedPrice! > 0) ...[
+          if (req.approvedPrice != null &&
+              req.approvedPrice! > 0 &&
+              req.approvedProductId != null) ...[
             const Divider(height: 18),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -200,15 +204,23 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   ),
                   onPressed: () async {
-                    final globalCtrl = Provider.of<GlobalShoppingController>(
-                        context,
-                        listen: false);
-                    final success = await globalCtrl.submitRequest(
-                      productUrl: req.productUrl ?? '',
-                      storeName: req.storeName,
-                      quantity: req.quantity ?? 1,
-                      customerNotes: req.customerNotes,
+                    if (req.approvedProductId == null) return;
+                    final cartController = context.read<CartController>();
+                    if (cartController.addToCartLoading) return;
+                    final response =
+                        await cartController.addToCartAPISilent(
+                      CartModelBody(
+                        productId: req.approvedProductId,
+                        quantity: req.quantity ?? 1,
+                        variant: '',
+                        color: '',
+                      ),
+                      context,
+                      [],
+                      [],
                     );
+                    final success = response.response?.statusCode == 200 ||
+                        response.response?.statusCode == 201;
 
                     if (!context.mounted) {
                       return;
@@ -243,7 +255,7 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
     final price = req.approvedPrice ?? 0;
 
     if (currency == 'USD') {
-      return '${(price * 535.0).toStringAsFixed(0)} YER (\$${price.toStringAsFixed(2)})';
+      return '\$${price.toStringAsFixed(2)} USD';
     }
 
     return '${price.toStringAsFixed(0)} $currency';

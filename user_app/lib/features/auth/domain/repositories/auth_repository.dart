@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/dio/dio_client.dart';
@@ -9,13 +8,24 @@ import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_contr
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/repositories/auth_repository_interface.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthRepository implements AuthRepoInterface {
   final DioClient? dioClient;
   final SharedPreferences? sharedPreferences;
-  AuthRepository({required this.dioClient, required this.sharedPreferences});
+  final FlutterSecureStorage? secureStorage;
+  String? _cachedToken;
+
+  AuthRepository({
+    required this.dioClient,
+    required this.sharedPreferences,
+    this.secureStorage,
+    String? initialToken,
+  }) {
+    _cachedToken = initialToken ?? sharedPreferences?.getString(AppConstants.userLoginToken);
+  }
 
   @override
   Future<ApiResponseModel> socialLogin(Map<String, dynamic> socialLogin) async {
@@ -152,11 +162,15 @@ class AuthRepository implements AuthRepoInterface {
 
   @override
   Future<void> saveUserToken(String token) async {
+    _cachedToken = token;
     dioClient!.updateHeader(token, null);
     try {
-      await sharedPreferences!.setString(AppConstants.userLoginToken, token);
+      if (secureStorage != null) {
+        await secureStorage!.write(key: AppConstants.userLoginToken, value: token);
+      }
+      await sharedPreferences?.remove(AppConstants.userLoginToken);
     } catch (e) {
-      rethrow;
+      await sharedPreferences?.setString(AppConstants.userLoginToken, token);
     }
   }
 
@@ -173,7 +187,7 @@ class AuthRepository implements AuthRepoInterface {
 
   @override
   String getUserToken() {
-    return sharedPreferences!.getString(AppConstants.userLoginToken) ?? "";
+    return _cachedToken ?? sharedPreferences?.getString(AppConstants.userLoginToken) ?? "";
   }
 
   @override
@@ -203,11 +217,19 @@ class AuthRepository implements AuthRepoInterface {
 
   @override
   bool isLoggedIn() {
-    return sharedPreferences!.containsKey(AppConstants.userLoginToken);
+    final token = getUserToken();
+    return token.isNotEmpty;
   }
 
   @override
   Future<bool> clearSharedData() async {
+    _cachedToken = null;
+    dioClient?.updateHeader('', null);
+    try {
+      if (secureStorage != null) {
+        await secureStorage!.delete(key: AppConstants.userLoginToken);
+      }
+    } catch (_) {}
     sharedPreferences?.remove(AppConstants.userLoginToken);
     sharedPreferences?.remove(AppConstants.guestId);
     return true;

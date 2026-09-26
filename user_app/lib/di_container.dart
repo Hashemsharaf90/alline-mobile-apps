@@ -182,6 +182,7 @@ import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address
 import 'package:flutter_sixvalley_ecommerce/features/search_product/controllers/search_product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -195,11 +196,29 @@ Future<void> init() async {
   // Core
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
+  const secureStorage = FlutterSecureStorage();
+  sl.registerLazySingleton(() => secureStorage);
+
+  String? secureToken;
+  try {
+    secureToken = await secureStorage.read(key: AppConstants.userLoginToken);
+    if ((secureToken == null || secureToken.isEmpty) && sharedPreferences.containsKey(AppConstants.userLoginToken)) {
+      final oldToken = sharedPreferences.getString(AppConstants.userLoginToken);
+      if (oldToken != null && oldToken.isNotEmpty) {
+        secureToken = oldToken;
+        await secureStorage.write(key: AppConstants.userLoginToken, value: oldToken);
+        await sharedPreferences.remove(AppConstants.userLoginToken);
+      }
+    }
+  } catch (e) {
+    secureToken = sharedPreferences.getString(AppConstants.userLoginToken);
+  }
+
   sl.registerLazySingleton(() => Dio());
   sl.registerLazySingleton(() => LoggingInterceptor());
   sl.registerLazySingleton(() => Connectivity());
   sl.registerLazySingleton(() => NetworkInfo(sl()));
-  sl.registerLazySingleton(() => DioClient(AppConstants.baseUrl, sl(), loggingInterceptor: sl(), sharedPreferences: sl()));
+  sl.registerLazySingleton(() => DioClient(AppConstants.baseUrl, sl(), loggingInterceptor: sl(), sharedPreferences: sl(), initialToken: secureToken));
 
 
   DataSyncRepoInterface dataSyncRepoInterface = DataSyncRepo(dioClient: sl(), sharedPreferences: sl());
@@ -217,7 +236,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ProductRepository(dioClient: sl(), dataSyncRepoInterface: sl()));
   sl.registerLazySingleton(() => BannerRepository(dioClient: sl(), dataSyncRepoInterface: sl()));
   sl.registerLazySingleton(() => OnBoardingRepository(dioClient: sl()));
-  sl.registerLazySingleton(() => AuthRepository(dioClient: sl(), sharedPreferences: sl()));
+  sl.registerLazySingleton(() => AuthRepository(dioClient: sl(), sharedPreferences: sl(), secureStorage: sl(), initialToken: secureToken));
   sl.registerLazySingleton(() => ProductDetailsRepository(dioClient: sl()));
   sl.registerLazySingleton(() => SearchProductRepository(dioClient: sl(), sharedPreferences: sl()));
   sl.registerLazySingleton(() => OrderRepository(dioClient: sl()));
@@ -294,7 +313,7 @@ Future<void> init() async {
   AddressServiceInterface addressServiceInterface = AddressService(addressRepoInterface: sl());
   sl.registerLazySingleton(() => addressServiceInterface);
 
-  AuthRepoInterface authRepoInterface = AuthRepository(dioClient: sl(), sharedPreferences: sl());
+  AuthRepoInterface authRepoInterface = AuthRepository(dioClient: sl(), sharedPreferences: sl(), secureStorage: sl(), initialToken: secureToken);
   sl.registerLazySingleton(() => authRepoInterface);
   AuthServiceInterface authServiceInterface = AuthService(authRepoInterface: sl());
   sl.registerLazySingleton(() => authServiceInterface);

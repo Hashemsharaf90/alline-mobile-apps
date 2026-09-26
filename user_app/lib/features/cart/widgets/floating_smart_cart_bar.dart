@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/screens/cart_screen.dart';
@@ -34,18 +35,11 @@ class FloatingSmartCartBar extends StatelessWidget {
               height: 52,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF0F3A7A), // Deep Blue
-                    Color(0xFF1455AC), // Primary Alline Blue
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F3A7A).withOpacity(0.38),
+                    color: AllineColors.primaryDark.withValues(alpha: .22),
                     blurRadius: 14,
                     offset: const Offset(0, 4),
                   ),
@@ -55,14 +49,16 @@ class FloatingSmartCartBar extends StatelessWidget {
                 children: [
                   // Item Count Badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.22),
+                      color: Colors.white.withValues(alpha: .22),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.shopping_bag_rounded, color: Colors.white, size: 15),
+                        const Icon(Icons.shopping_bag_rounded,
+                            color: Colors.white, size: 15),
                         const SizedBox(width: 4),
                         Text(
                           '$totalItems',
@@ -85,7 +81,7 @@ class FloatingSmartCartBar extends StatelessWidget {
                         Text(
                           'الإجمالي: ',
                           style: textRegular.copyWith(
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: .85),
                             fontSize: 11.5,
                           ),
                         ),
@@ -103,7 +99,8 @@ class FloatingSmartCartBar extends StatelessWidget {
 
                   // View Cart CTA Button
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -114,13 +111,14 @@ class FloatingSmartCartBar extends StatelessWidget {
                         Text(
                           'عرض السلة',
                           style: textBold.copyWith(
-                            color: const Color(0xFF1455AC),
+                            color: AllineColors.primary,
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward_rounded, color: Color(0xFF1455AC), size: 14),
+                        const Icon(Icons.arrow_forward_rounded,
+                            color: AllineColors.primary, size: 14),
                       ],
                     ),
                   ),

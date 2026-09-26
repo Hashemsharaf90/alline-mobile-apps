@@ -8,64 +8,61 @@ class AllineSearchFieldWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final background =
+        isDark ? const Color(0xFF17243B) : const Color(0xFFF4F5F7);
 
-    return Container(
-      color: Theme.of(context).cardColor,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const SearchScreen()),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 15),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(isDark ? .15 : .025),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.search_rounded,
-                color: Color(0xFF1455AC),
-                size: 22,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'ابحث عن منتج، متجر، أو تصنيف...',
-                  style: textRegular.copyWith(
-                    fontSize: 13,
-                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                  ),
+    return ColoredBox(
+      color: isDark ? const Color(0xFF101A2E) : Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+        child: Material(
+          color: background,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SearchScreen()),
+            ),
+            borderRadius: BorderRadius.circular(14),
+            child: SizedBox(
+              height: 52,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF015FC9),
+                      size: 23,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'ابحث عن منتج أو متجر...',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textRegular.copyWith(
+                          fontSize: 13.5,
+                          color: const Color(0xFF6D85AF),
+                        ),
+                      ),
+                    ),
+                    Semantics(
+                      label: 'فلترة البحث',
+                      child: const SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: Icon(
+                          Icons.tune_rounded,
+                          size: 21,
+                          color: Color(0xFF015FC9),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                ),
-                child: const Icon(
-                  Icons.tune_rounded,
-                  color: Color(0xFF1455AC),
-                  size: 16,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

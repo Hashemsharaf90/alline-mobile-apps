@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/order_place_bottomsheet_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
@@ -139,34 +138,21 @@ class DigitalPaymentScreenState extends State<DigitalPaymentScreen> {
   }
 
   void _handlePaymentResult(bool isSuccess, bool isFailed, bool isCancel, bool isNewUser, String? orderIds) {
-    bool isLoggedIn = Provider.of<AuthController>(context, listen: false).isLoggedIn();
-
-    // if (Navigator.canPop(context)) {
-    //   Navigator.pop(context);
-    // }
-
     if (isSuccess) {
-      if (widget.orderId.trim().isNotEmpty &&  orderIds == null) {
-        RouterHelper.getOrderDetailsScreenRoute(
-          orderId: int .parse(widget.orderId),
+      final validOrderId = (orderIds != null && orderIds.isNotEmpty)
+          ? orderIds
+          : (widget.orderId.trim().isNotEmpty && widget.orderId.trim() != 'null')
+              ? widget.orderId.trim()
+              : null;
+
+      if (validOrderId != null) {
+        RouterHelper.getOrderConfirmationRoute(
+          orderId: validOrderId,
+          isNewUser: isNewUser,
           action: RouteAction.pushReplacement,
-          isNotification: true
         );
-      } else if (isLoggedIn && orderIds != null && orderIds.isNotEmpty) {
-        RouterHelper.getOrderScreenRoute(isBackButtonExist: true, action: RouteAction.push, fromPlaceOrder: true);
       } else {
         RouterHelper.getDashboardRoute(action: RouteAction.pushReplacement, page: 'home');
-      }
-
-      if(widget.orderId.trim() == 'null') {
-        _showResultUI(
-          isBottomSheet: true,
-          orderIds: orderIds,
-          isNewUser: isNewUser,
-          icon: Icons.check,
-          titleKey: isNewUser ? 'order_placed_Account_Created' : 'order_placed',
-          descKey: 'your_order_placed'
-        );
       }
     } else {
       RouterHelper.getDashboardRoute(action: RouteAction.pushReplacement, page: 'home');
@@ -184,7 +170,6 @@ class DigitalPaymentScreenState extends State<DigitalPaymentScreen> {
   void _showResultUI({
     required bool isBottomSheet,
     String? orderIds,
-    bool isNewUser = false,
     required IconData icon,
     required String titleKey,
     required String descKey,

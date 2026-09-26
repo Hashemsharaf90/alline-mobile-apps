@@ -69,7 +69,8 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
 
@@ -137,7 +138,6 @@ Future<void> main() async {
 
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => di.sl<CategoryController>()),
@@ -191,7 +191,8 @@ Future<void> main() async {
       ChangeNotifierProvider(
           create: (context) => di.sl<SellerProductController>()),
       ChangeNotifierProvider(create: (context) => di.sl<RestockController>()),
-      ChangeNotifierProvider(create: (context) => di.sl<GlobalShoppingController>()),
+      ChangeNotifierProvider(
+          create: (context) => di.sl<GlobalShoppingController>()),
     ],
     child: MyApp(body: body, route: path),
   ));
@@ -293,12 +294,10 @@ class _MyAppState extends State<MyApp> {
             routerConfig: RouterHelper.goRoutes,
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
-            theme: themeController.darkTheme
-                ? dark
-                : light(
-                    primaryColor: themeController.selectedPrimaryColor,
-                    secondaryColor: themeController.selectedSecondaryColor,
-                  ),
+            theme: light(),
+            darkTheme: dark,
+            themeMode:
+                themeController.darkTheme ? ThemeMode.dark : ThemeMode.light,
             locale: Provider.of<LocalizationController>(context).locale,
             localizationsDelegates: [
               AppLocalization.delegate,
@@ -308,10 +307,7 @@ class _MyAppState extends State<MyApp> {
               FallbackLocalizationDelegate()
             ],
             builder: (context, child) {
-              return MediaQuery(
-                  data: MediaQuery.of(context)
-                      .copyWith(textScaler: TextScaler.noScaling),
-                  child: SafeArea(top: false, child: child!));
+              return SafeArea(top: false, child: child!);
             },
             supportedLocales: locals,
           );

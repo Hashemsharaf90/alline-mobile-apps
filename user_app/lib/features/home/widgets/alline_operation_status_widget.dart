@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 
@@ -7,15 +9,18 @@ class AllineOperationStatusWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
+        color: colors.surfaceElevated,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(
+                alpha:
+                    Theme.of(context).brightness == Brightness.dark ? 0 : 0.06),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -27,9 +32,7 @@ class AllineOperationStatusWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFF59E0B), Color(0xFFD97706)],
-              ),
+              color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -65,7 +68,7 @@ class AllineOperationStatusWidget extends StatelessWidget {
                   child: Text(
                     'أوقات الدوام والتوصيل السريع من 7:30 ص حتى 11:30 م',
                     style: textRegular.copyWith(
-                      color: const Color(0xFFE2E8F0),
+                      color: colors.textSecondary,
                       fontSize: Dimensions.fontSizeExtraSmall,
                     ),
                     maxLines: 1,
@@ -76,7 +79,7 @@ class AllineOperationStatusWidget extends StatelessWidget {
                 const Icon(
                   Icons.access_time_filled_rounded,
                   size: 13,
-                  color: Color(0xFFF59E0B),
+                  color: AllineColors.warning,
                 ),
               ],
             ),

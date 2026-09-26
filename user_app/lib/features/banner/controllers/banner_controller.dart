@@ -36,41 +36,45 @@ class BannerController extends ChangeNotifier {
   BannerModel? promoBannerBottom;
   BannerModel? sideBarBannerBottom;
   BannerModel? topSideBarBannerBottom;
+  BannerModel? globalShoppingBanner;
+  BannerModel? supermarketBanner;
 
   Future<void> getBannerList() async {
-
     DataSyncHelper.fetchAndSyncData(
-      fetchFromLocal: ()=> bannerServiceInterface!.getList(source: DataSourceEnum.local),
-      fetchFromClient: ()=> bannerServiceInterface!.getList(source: DataSourceEnum.client),
-      onResponse: (data, _){
+      fetchFromLocal: () =>
+          bannerServiceInterface!.getList(source: DataSourceEnum.local),
+      fetchFromClient: () =>
+          bannerServiceInterface!.getList(source: DataSourceEnum.client),
+      onResponse: (data, _) {
         _mainBannerList = [];
         _footerBannerList = [];
 
         data.forEach((bannerModel) {
-          if(bannerModel['banner_type'] == 'Main Banner'){
+          if (bannerModel['banner_type'] == 'Main Banner') {
             _mainBannerList!.add(BannerModel.fromJson(bannerModel));
-          }
-          else if(bannerModel['banner_type'] == 'Promo Banner Middle Top'){
+          } else if (bannerModel['banner_type'] == 'Promo Banner Middle Top') {
             promoBannerMiddleTop = BannerModel.fromJson(bannerModel);
-          }
-          else if(bannerModel['banner_type'] == 'Promo Banner Right'){
+          } else if (bannerModel['banner_type'] == 'Promo Banner Right') {
             promoBannerRight = BannerModel.fromJson(bannerModel);
-          }else if(bannerModel['banner_type'] == 'Promo Banner Middle Bottom'){
+          } else if (bannerModel['banner_type'] ==
+              'Promo Banner Middle Bottom') {
             promoBannerMiddleBottom = BannerModel.fromJson(bannerModel);
-          }
-          else if(bannerModel['banner_type'] == 'Promo Banner Bottom'){
+          } else if (bannerModel['banner_type'] == 'Promo Banner Bottom') {
             promoBannerBottom = BannerModel.fromJson(bannerModel);
-          }
-          else if(bannerModel['banner_type'] == 'Promo Banner Left'){
+          } else if (bannerModel['banner_type'] == 'Promo Banner Left') {
             promoBannerLeft = BannerModel.fromJson(bannerModel);
-          }else if(bannerModel['banner_type'] == 'Sidebar Banner'){
+          } else if (bannerModel['banner_type'] == 'Sidebar Banner') {
             sideBarBanner = BannerModel.fromJson(bannerModel);
-          }else if(bannerModel['banner_type'] == 'Top Side Banner'){
+          } else if (bannerModel['banner_type'] == 'Top Side Banner') {
             topSideBarBannerBottom = BannerModel.fromJson(bannerModel);
-          }else if(bannerModel['banner_type'] == 'Footer Banner'){
+          } else if (bannerModel['banner_type'] == 'Footer Banner') {
             _footerBannerList?.add(BannerModel.fromJson(bannerModel));
-          }else if(bannerModel['banner_type'] == 'Main Section Banner'){
+          } else if (bannerModel['banner_type'] == 'Main Section Banner') {
             mainSectionBanner = BannerModel.fromJson(bannerModel);
+          } else if (bannerModel['banner_type'] == 'Global Shopping Banner') {
+            globalShoppingBanner = BannerModel.fromJson(bannerModel);
+          } else if (bannerModel['banner_type'] == 'Supermarket Banner') {
+            supermarketBanner = BannerModel.fromJson(bannerModel);
           }
         });
 
@@ -91,34 +95,69 @@ class BannerController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clickBannerRedirect(
+      BuildContext context, int? id, Product? product, String? type,
+      {String? url}) {
+    if (type == 'custom' && url != null && url.isNotEmpty) {
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else if (type == 'category') {
+      final cIndex = Provider.of<CategoryController>(context, listen: false)
+          .categoryList
+          .indexWhere((element) => element.id == id);
 
-  void clickBannerRedirect(BuildContext context, int? id, Product? product,  String? type, {String? url}) {
-
-    if(type == 'custom' && url != null && url.isNotEmpty) {
-      launchUrl(Uri.parse(url),mode: LaunchMode.externalApplication);
-    } else if(type == 'category') {
-      final cIndex =  Provider.of<CategoryController>(context, listen: false).categoryList.indexWhere((element) => element.id == id);
-
-      if(Provider.of<CategoryController>(context, listen: false).categoryList[cIndex].name != null){
-        RouterHelper.getBrandCategoryRoute(action: RouteAction.push, isBrand: false, id: id ?? 1, name: '${Provider.of<CategoryController>(context, listen: false).categoryList[cIndex].name}');
+      if (cIndex >= 0 &&
+          Provider.of<CategoryController>(context, listen: false)
+                  .categoryList[cIndex]
+                  .name !=
+              null) {
+        RouterHelper.getBrandCategoryRoute(
+            action: RouteAction.push,
+            isBrand: false,
+            id: id ?? 1,
+            name:
+                '${Provider.of<CategoryController>(context, listen: false).categoryList[cIndex].name}');
       }
-
-    } else if(type == 'product') {
-      if(product != null  && product.status == 1) {
-        RouterHelper.getProductDetailsRoute(action: RouteAction.push, productId: product.id! , slug: product.slug!);
+    } else if (type == 'product') {
+      if (product != null && product.status == 1) {
+        RouterHelper.getProductDetailsRoute(
+            action: RouteAction.push,
+            productId: product.id!,
+            slug: product.slug!);
       }
-    } else if(type == 'brand') {
-      final bIndex =  Provider.of<BrandController>(context, listen: false).brandList.indexWhere((element) => element.id == id);
+    } else if (type == 'brand') {
+      final bIndex = Provider.of<BrandController>(context, listen: false)
+          .brandList
+          .indexWhere((element) => element.id == id);
 
-      if(Provider.of<BrandController>(context, listen: false).brandList[bIndex].name != null){
-        RouterHelper.getBrandCategoryRoute(action: RouteAction.push, isBrand: true, id: id!, name: '${Provider.of<BrandController>(context, listen: false).brandList[bIndex].name}');
+      if (bIndex >= 0 &&
+          Provider.of<BrandController>(context, listen: false)
+                  .brandList[bIndex]
+                  .name !=
+              null) {
+        RouterHelper.getBrandCategoryRoute(
+            action: RouteAction.push,
+            isBrand: true,
+            id: id!,
+            name:
+                '${Provider.of<BrandController>(context, listen: false).brandList[bIndex].name}');
       }
+    } else if (type == 'shop') {
+      final tIndex = Provider.of<ShopController>(context, listen: false)
+          .allSellerModel!
+          .sellers!
+          .indexWhere((element) => element.id == id);
 
-    }else if( type == 'shop'){
-      final tIndex =  Provider.of<ShopController>(context, listen: false).allSellerModel!.sellers!.indexWhere((element) => element.id == id);
-
-      if(Provider.of<ShopController>(context, listen: false).allSellerModel?.sellers?[tIndex].shop?.name != null){
-        final shop = Provider.of<ShopController>(context,listen: false).allSellerModel?.sellers?[tIndex].shop;
+      if (tIndex >= 0 &&
+          Provider.of<ShopController>(context, listen: false)
+                  .allSellerModel
+                  ?.sellers?[tIndex]
+                  .shop
+                  ?.name !=
+              null) {
+        final shop = Provider.of<ShopController>(context, listen: false)
+            .allSellerModel
+            ?.sellers?[tIndex]
+            .shop;
         RouterHelper.getTopSellerRoute(
           action: RouteAction.push,
           slug: shop?.slug ?? '',
@@ -133,8 +172,6 @@ class BannerController extends ChangeNotifier {
           image: shop?.imageFullUrl?.path,
         );
       }
-
     }
   }
-
 }

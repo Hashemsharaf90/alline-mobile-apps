@@ -59,7 +59,7 @@ class PromiseWidget extends StatelessWidget {
             }
             final index = i ~/ 2;
 
-            return SizedBox(width: itemWidth, child: PromiseItem(entry: entries[index]));
+            return SizedBox(width: itemWidth, child: _PromiseItem(entry: entries[index]));
           }),
         ),
       ),
@@ -67,10 +67,10 @@ class PromiseWidget extends StatelessWidget {
   }
 }
 
-class PromiseItem extends StatelessWidget {
+class _PromiseItem extends StatelessWidget {
   final _PromiseEntry entry;
 
-  const PromiseItem({super.key, required this.entry});
+  const _PromiseItem({required this.entry});
 
   static const double iconSize = 30;
 

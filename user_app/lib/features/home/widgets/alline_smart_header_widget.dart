@@ -1,203 +1,193 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/notification/screens/notification_screen.dart';
-import 'package:flutter_sixvalley_ecommerce/features/more/screens/more_screen_view.dart';
-import 'package:flutter_sixvalley_ecommerce/features/wallet/widgets/top_up_wallet_bottom_sheet.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
+import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
+import 'package:provider/provider.dart';
 
 class AllineSmartHeaderWidget extends StatelessWidget {
   const AllineSmartHeaderWidget({super.key});
 
+  static const _primary = Color(0xFF015FC9);
+  static const _text = Color(0xFF071B49);
+  static const _secondary = Color(0xFF6D85AF);
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface = isDark ? const Color(0xFF101A2E) : Colors.white;
+    final iconSurface =
+        isDark ? const Color(0xFF17243B) : const Color(0xFFF4F8FE);
 
-    return Container(
-      color: Theme.of(context).cardColor,
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-      child: Row(
-        children: [
-          // Alline Logo & Brand Name
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1455AC),
-                  borderRadius: BorderRadius.circular(14),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1455AC).withOpacity(0.22),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: const Center(
-                  child: Text(
-                    'A',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 23,
-                      fontWeight: FontWeight.w900,
-                      fontFamily: 'SF Pro Display',
-                    ),
+    return ColoredBox(
+      color: surface,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Semantics(
+                  label: 'Alline',
+                  image: true,
+                  child: Image.asset(
+                    'assets/images/alline/login_logo_transparent.png',
+                    width: 52,
+                    height: 44,
+                    fit: BoxFit.contain,
                   ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Alline',
-                    style: titilliumBold.copyWith(
-                      fontSize: 17,
-                      color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF0F172A),
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_rounded, size: 12, color: Color(0xFF1455AC)),
-                      const SizedBox(width: 2),
-                      Text(
-                        'صنعاء، اليمن',
-                        style: textRegular.copyWith(
-                          fontSize: 11,
-                          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          const Spacer(),
-
-          // Interactive Wallet Balance Pill
-          Consumer<ProfileController>(
-            builder: (context, profile, _) {
-              final balance = profile.userInfoModel?.walletBalance ?? 0.0;
-              return InkWell(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => const TopUpWalletBottomSheet(),
-                  );
-                },
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1455AC).withOpacity(0.18) : const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: isDark ? const Color(0xFF1455AC).withOpacity(0.35) : const Color(0xFFDBEAFE),
-                      width: 1.1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 20,
-                        height: 20,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF1455AC),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Center(
-                          child: Icon(Icons.account_balance_wallet_rounded, size: 12, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 75),
-                        child: Text(
-                          PriceConverter.convertPrice(context, balance),
-                          style: titilliumBold.copyWith(
-                            fontSize: 11.5,
-                            color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF0F3A7A),
-                            fontWeight: FontWeight.w800,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 3),
-                      Icon(Icons.add_circle_outline_rounded, size: 13, color: isDark ? const Color(0xFF60A5FA) : const Color(0xFF0F3A7A)),
-                    ],
+                const Spacer(),
+                _HeaderAction(
+                  tooltip: 'الدعم الفني',
+                  icon: Icons.headset_mic_rounded,
+                  surface: iconSurface,
+                  foreground: isDark ? Colors.white : _text,
+                  onTap: () => RouterHelper.getSupportTicketRoute(
+                    action: RouteAction.push,
                   ),
                 ),
-              );
-            },
-          ),
-
-          const SizedBox(width: 6),
-
-          // Theme Toggle Button (Light / Dark)
-          Consumer<ThemeController>(
-            builder: (context, themeCtrl, _) {
-              return InkWell(
-                onTap: () => themeCtrl.toggleTheme(),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                  ),
-                  child: Icon(
-                    isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
-                    color: isDark ? const Color(0xFFFBBF24) : const Color(0xFF1455AC),
-                    size: 19,
+                const SizedBox(width: 4),
+                _HeaderAction(
+                  tooltip: 'الإشعارات',
+                  icon: Icons.notifications_none_rounded,
+                  surface: iconSurface,
+                  foreground: isDark ? Colors.white : _text,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const NotificationScreen(),
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-
-          const SizedBox(width: 6),
-
-          // Notifications Button
-          InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NotificationScreen()),
-              );
-            },
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-              ),
-              child: Icon(
-                Icons.notifications_none_rounded,
-                color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155),
-                size: 19,
-              ),
+              ],
             ),
+            const SizedBox(height: 4),
+            Consumer<LocationController>(
+              builder: (context, location, _) {
+                final raw = location.deliveryLabel ?? location.address.name ?? '';
+                final label = _displayLocation(raw);
+                return Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => RouterHelper.getLocationSetupRoute(
+                        action: RouteAction.push,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(minHeight: 44),
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.only(end: 10),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: _primary.withValues(alpha: .09),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.location_on_rounded,
+                                  size: 18,
+                                  color: _primary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'التوصيل إلى',
+                                    style: textRegular.copyWith(
+                                      fontSize: 10.5,
+                                      color: _secondary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 1),
+                                  ConstrainedBox(
+                                    constraints:
+                                        const BoxConstraints(maxWidth: 220),
+                                    child: Text(
+                                      label,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textBold.copyWith(
+                                        fontSize: 13,
+                                        color: isDark ? Colors.white : _text,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(
+                                Icons.keyboard_arrow_down_rounded,
+                                size: 18,
+                                color: _secondary,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _displayLocation(String value) {
+    if (value.trim().isEmpty) return 'صنعاء، اليمن';
+    final parts = value
+        .split(RegExp(r'[,،]'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty && !part.contains('+'))
+        .toList();
+    if (parts.isEmpty) return 'صنعاء، اليمن';
+    return parts.take(2).join('، ');
+  }
+}
+
+class _HeaderAction extends StatelessWidget {
+  final String tooltip;
+  final IconData icon;
+  final Color surface;
+  final Color foreground;
+  final VoidCallback onTap;
+
+  const _HeaderAction({
+    required this.tooltip,
+    required this.icon,
+    required this.surface,
+    required this.foreground,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: surface,
+        borderRadius: BorderRadius.circular(13),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(13),
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Icon(icon, color: foreground, size: 22),
           ),
-        ],
+        ),
       ),
     );
   }

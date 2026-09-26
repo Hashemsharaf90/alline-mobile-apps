@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/wallet/controllers/wallet_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/wallet/domain/models/local_wallet_method_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:provider/provider.dart';
 
 class TopUpWalletBottomSheet extends StatefulWidget {
@@ -28,10 +28,10 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
   final List<Map<String, dynamic>> _wallets = [
     {
       'id': 1,
-      'code': 'jeeb_cac',
+      'code': 'jeeb',
       'method_codes': ['jeeb', 'jeeb_cac'],
       'name': 'محفظة جيب',
-      'bank': 'CAC Bank كاك بنك',
+      'bank': 'المحفظة المعتمدة',
       'logo': 'assets/images/jeeb_wallet.png',
       'color': Color(0xFFC8102E),
       'account_num': '771111111',
@@ -46,47 +46,11 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
     },
     {
       'id': 2,
-      'code': 'kuraimi_haseb',
-      'method_codes': ['kuraimi_money', 'kuraimi_haseb'],
-      'name': 'الكريمي حاسب / جوال',
-      'bank': 'Kuraimi Bank بنك الكريمي',
-      'logo': 'assets/images/kuraimi_wallet.png',
-      'color': Color(0xFF5B2C82),
-      'account_num': '123456789',
-      'merchant_code': 'ALLINE-YE',
-      'account_name': 'مؤسسة Alline للتجارة والتسوق',
-      'voucher_label': 'رمز عملية حاسب / رقم الإشعار',
-      'steps': [
-        'من تطبيق الكريمي جوال اختر (حاسب / دفع مشتريات) لرمز التاجر ALLINE-YE.',
-        'أو قم بالتحويل المباشر لحسابنا رقم 123456789.',
-        'الصق رقم العملية أو الرمز واضغط (شحن فوري ⚡).'
-      ]
-    },
-    {
-      'id': 3,
-      'code': 'one_cash',
-      'method_codes': ['one_cash'],
-      'name': 'ون كاش ONE Cash',
-      'bank': 'شركة ون كاش / القطيبي',
-      'logo': 'assets/images/one_cash_wallet.png',
-      'color': Color(0xFFE85D04),
-      'account_num': '772222222',
-      'merchant_code': 'ALLINE-ONE',
-      'account_name': 'متجر Alline الإلكتروني',
-      'voucher_label': 'كود قسيمة ون كاش',
-      'steps': [
-        'افتح تطبيق ون كاش واختر (قسيمة شراء / سداد تاجر).',
-        'حدد المبلغ وأنشئ رمز القسيمة الفوري.',
-        'الصق رمز القسيمة هنا واضغط (شحن فوري ⚡).'
-      ]
-    },
-    {
-      'id': 4,
-      'code': 'jawwali_wepay',
+      'code': 'jawali',
       'method_codes': ['jawali', 'jawwali_wepay'],
-      'name': 'محفظة جوالي WePay',
-      'bank': 'بنك اليمن والكويت / الأمل',
-      'logo': 'assets/images/jawwali_wallet.png',
+      'name': 'محفظة جوالي',
+      'bank': 'المحفظة المعتمدة',
+      'logo': 'assets/images/jawali_wallet.png',
       'color': Color(0xFFE88A1A),
       'account_num': '773333333',
       'merchant_code': 'ALLINE-JAWWAL',
@@ -99,75 +63,57 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
       ]
     },
     {
-      'id': 5,
-      'code': 'tadhamon_cash',
-      'method_codes': ['tadhamon_cash', 'yemen_wallet'],
-      'name': 'كاش التضامن',
-      'bank': 'بنك التضامن الإسلامي',
-      'logo': 'assets/images/tadhamon_wallet.png',
-      'color': Color(0xFF00875A),
+      'id': 3,
+      'code': 'one_cash',
+      'method_codes': ['one_cash', 'onecash'],
+      'name': 'محفظة ون كاش',
+      'bank': 'المحفظة المعتمدة',
+      'logo': 'assets/images/one_cash_wallet.png',
+      'color': Color(0xFFF37021),
       'account_num': '774444444',
-      'merchant_code': 'ALLINE-CACH',
+      'merchant_code': 'ALLINE-ONECASH',
       'account_name': 'Alline Store',
-      'voucher_label': 'رقم قسيمة كاش / رقم الإشعار',
+      'voucher_label': 'رمز تأكيد / عملية ون كاش',
       'steps': [
-        'افتح تطبيق كاش التضامن وأنشئ قسيمة مشتريات بالمبلغ المطلوب.',
-        'أو حول لحساب التاجر رقم 774444444.',
-        'الصق رقم القسيمة أو الإشعار واضغط (شحن فوري ⚡).'
+        'افتح تطبيق محفظة ون كاش واختر دفع مشتريات أو تحويل.',
+        'أدخل المبلغ المطلوب وتأكيد العملية.',
+        'الصق رمز العملية هنا واضغط (شحن فوري ⚡).'
       ]
     },
     {
-      'id': 6,
-      'code': 'floosak_ykb',
-      'method_codes': ['floosak_ykb', 'yemen_wallet'],
-      'name': 'محفظة فلوسك',
-      'bank': 'بنك اليمن والكويت YKB',
-      'logo': 'assets/images/floosak_wallet.png',
-      'color': Color(0xFF005696),
-      'account_num': '770000000',
-      'merchant_code': 'YKB-FLOOSAK',
-      'account_name': 'Alline Store',
-      'voucher_label': 'مرجع عملية فلوسك / رقم الإشعار',
-      'steps': [
-        'من تطبيق فلوسك اختر دفع مشتريات لتاجر أو تحويل لمشترك.',
-        'حول لحساب 770000000 وانسخ مرجع العملية.',
-        'الصق مرجع العملية هنا واضغط (شحن فوري ⚡).'
-      ]
-    },
-    {
-      'id': 7,
-      'code': 'pyes_saba',
-      'method_codes': ['pyes_saba', 'yemen_wallet'],
-      'name': 'محفظة بيس P-Yes',
-      'bank': 'بنك سبأ الإسلامي',
-      'logo': 'assets/images/pyes_wallet.png',
-      'color': Color(0xFF0C2340),
+      'id': 4,
+      'code': 'cash',
+      'method_codes': ['cash', 'cash_wallet'],
+      'name': 'محفظة كاش',
+      'bank': 'المحفظة المعتمدة',
+      'logo': 'assets/images/cash_wallet.png',
+      'color': Color(0xFF007E7A),
       'account_num': '775555555',
-      'merchant_code': 'PYES-ALLINE',
+      'merchant_code': 'ALLINE-CASH',
       'account_name': 'Alline Store',
-      'voucher_label': 'رقم عملية بيس / رقم الإشعار',
+      'voucher_label': 'رمز عملية كاش',
       'steps': [
-        'افتح محفظة بيس واختر سداد مشتريات أو تحويل.',
-        'حول للمحفظة 775555555 وانسخ رقم العملية.',
+        'افتح تطبيق محفظة كاش واختر دفع مشتريات أو إرسال حوالة.',
+        'أدخل المبلغ المطلوب واستخرج إشعار أو رقم العملية.',
         'الصق رقم العملية هنا واضغط (شحن فوري ⚡).'
       ]
     },
     {
-      'id': 8,
-      'code': 'exchange_networks',
-      'method_codes': ['exchange_networks', 'yemen_wallet'],
-      'name': 'شبكات الصرافة والحوالات',
-      'bank': 'النجم / الامتياز / يمن إكسبرس',
-      'logo': 'assets/images/exchange_hawala.png',
-      'color': Color(0xFF1E293B),
-      'account_num': '777000000',
-      'merchant_code': 'صنعاء - اليمن',
-      'account_name': 'هاشم شرف / مسؤول الحسابات',
-      'voucher_label': 'رقم الحوالة (السند)',
+      'id': 5,
+      'code': 'floosak',
+      'method_codes': ['floosak', 'flousak'],
+      'name': 'محفظة فلوسك',
+      'bank': 'المحفظة المعتمدة',
+      'logo': 'assets/images/floosak_wallet.png',
+      'color': Color(0xFF00A3E0),
+      'account_num': '776666666',
+      'merchant_code': 'ALLINE-FLOOSAK',
+      'account_name': 'Alline Store',
+      'voucher_label': 'رمز عملية فلوسك',
       'steps': [
-        'أرسل حوالة باسم المستلم (هاشم شرف) على هاتف 777000000.',
-        'عبر أي شبكة (النجم، الامتياز، يمن إكسبرس، الهتار، القطيبي).',
-        'أدخل رقم الحوالة هنا واضغط تأكيد.'
+        'افتح تطبيق محفظة فلوسك واختر دفع مشتريات أو تحويل.',
+        'أدخل المبلغ المطلوب واستخرج رقم العملية.',
+        'الصق رقم العملية هنا واضغط (شحن فوري ⚡).'
       ]
     },
   ];
@@ -406,7 +352,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                   Provider.of<ProfileController>(context, listen: false).getUserInfo(context);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: AllineColors.brightBlue,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -457,10 +403,10 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB).withOpacity(0.1),
+                    color: AllineColors.brightBlue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.account_balance_wallet_rounded, color: Color(0xFF2563EB), size: 24),
+                  child: const Icon(Icons.account_balance_wallet_rounded, color: AllineColors.brightBlue, size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -503,14 +449,14 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
+                            colors: [Color(0xFF1E3A8A), AllineColors.brightBlue],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF2563EB).withOpacity(0.25),
+                              color: AllineColors.brightBlue.withOpacity(0.25),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -543,7 +489,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
 
                   // Section Title: Select Wallet
                   Text(
-                    'اختر المحفظة أو البنك اليمني:',
+                    'المحافظ المحلية المعتمدة:',
                     style: textBold.copyWith(fontSize: 14, color: const Color(0xFF1E293B)),
                   ),
                   const SizedBox(height: 10),
@@ -572,7 +518,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                               color: isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                                color: isSelected ? AllineColors.brightBlue : const Color(0xFFE2E8F0),
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
@@ -709,7 +655,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                               icon: const Icon(Icons.copy_rounded, size: 14),
                               label: Text('نسخ', style: textBold.copyWith(fontSize: 12)),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
+                                backgroundColor: AllineColors.brightBlue,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -737,7 +683,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text('• ', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                                    const Text('• ', style: TextStyle(color: AllineColors.brightBlue, fontWeight: FontWeight.bold)),
                                     Expanded(
                                       child: Text(
                                         step,
@@ -769,7 +715,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                       return ChoiceChip(
                         label: Text('$amt ر.ي', style: isSelected ? textBold.copyWith(color: Colors.white, fontSize: 12) : textMedium.copyWith(color: const Color(0xFF334155), fontSize: 12)),
                         selected: isSelected,
-                        selectedColor: const Color(0xFF2563EB),
+                        selectedColor: AllineColors.brightBlue,
                         backgroundColor: const Color(0xFFF1F5F9),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         onSelected: (selected) {
@@ -792,15 +738,15 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                     decoration: InputDecoration(
                       hintText: 'أو اكتب المبلغ هنا...',
                       hintStyle: textRegular.copyWith(fontSize: 13, color: const Color(0xFF94A3B8)),
-                      prefixIcon: const Icon(Icons.payments_outlined, color: Color(0xFF2563EB)),
+                      prefixIcon: const Icon(Icons.payments_outlined, color: AllineColors.brightBlue),
                       suffixText: 'ر.ي',
-                      suffixStyle: textBold.copyWith(color: const Color(0xFF2563EB), fontSize: 13),
+                      suffixStyle: textBold.copyWith(color: AllineColors.brightBlue, fontSize: 13),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AllineColors.brightBlue, width: 2)),
                     ),
                   ),
 
@@ -815,9 +761,9 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                     decoration: InputDecoration(
                       hintText: 'الصق كود الشراء أو رقم الإشعار هنا...',
                       hintStyle: textRegular.copyWith(fontSize: 12, color: const Color(0xFF94A3B8)),
-                      prefixIcon: const Icon(Icons.confirmation_number_outlined, color: Color(0xFF2563EB)),
+                      prefixIcon: const Icon(Icons.confirmation_number_outlined, color: AllineColors.brightBlue),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.paste_rounded, color: Color(0xFF2563EB)),
+                        icon: const Icon(Icons.paste_rounded, color: AllineColors.brightBlue),
                         tooltip: 'لصق',
                         onPressed: () async {
                           final data = await Clipboard.getData('text/plain');
@@ -832,7 +778,7 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AllineColors.brightBlue, width: 2)),
                     ),
                   ),
 
@@ -845,11 +791,11 @@ class _TopUpWalletBottomSheetState extends State<TopUpWalletBottomSheet>
                     child: ElevatedButton(
                       onPressed: _isSubmitting ? null : _handleTopUp,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: AllineColors.brightBlue,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                         elevation: 4,
-                        shadowColor: const Color(0xFF2563EB).withOpacity(0.4),
+                        shadowColor: AllineColors.brightBlue.withOpacity(0.4),
                       ),
                       child: _isSubmitting
                           ? const SizedBox(

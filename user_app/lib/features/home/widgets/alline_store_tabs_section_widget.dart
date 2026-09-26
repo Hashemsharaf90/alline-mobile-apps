@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/shop/domain/models/seller_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
@@ -11,12 +12,19 @@ class AllineStoreTabsSectionWidget extends StatefulWidget {
   const AllineStoreTabsSectionWidget({super.key});
 
   @override
-  State<AllineStoreTabsSectionWidget> createState() => _AllineStoreTabsSectionWidgetState();
+  State<AllineStoreTabsSectionWidget> createState() =>
+      _AllineStoreTabsSectionWidgetState();
 }
 
-class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWidget> {
+class _AllineStoreTabsSectionWidgetState
+    extends State<AllineStoreTabsSectionWidget> {
   int _selectedTabIndex = 0;
-  final List<String> _tabs = ['الكل 🔥', 'الأقرب 📍', 'الجديدة ⭐', 'المفضلة ❤️'];
+  final List<String> _tabs = [
+    'الكل 🔥',
+    'الأقرب 📍',
+    'الجديدة ⭐',
+    'المفضلة ❤️'
+  ];
 
   static const List<String> _realCovers = [
     Images.storeHypermarketHd,
@@ -30,6 +38,8 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = context.allineColors;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,24 +63,19 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                 borderRadius: BorderRadius.circular(20),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    gradient: isSelected
-                        ? const LinearGradient(
-                            colors: [Color(0xFF0F3A7A), Color(0xFF1455AC)],
-                          )
-                        : null,
-                    color: isSelected ? null : Theme.of(context).cardColor,
+                    gradient: null,
+                    color: isSelected ? primary : colors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected
-                          ? const Color(0xFF1455AC)
-                          : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                      color: isSelected ? primary : colors.border,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: const Color(0xFF1455AC).withValues(alpha: 0.35),
+                              color: primary.withValues(alpha: 0.35),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
                             ),
@@ -81,9 +86,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                     child: Text(
                       _tabs[index],
                       style: textBold.copyWith(
-                        color: isSelected
-                            ? Colors.white
-                            : (isDark ? const Color(0xFFCBD5E1) : const Color(0xFF334155)),
+                        color: isSelected ? Colors.white : colors.textSecondary,
                         fontSize: Dimensions.fontSizeSmall,
                       ),
                     ),
@@ -98,7 +101,8 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
         // Hero Store Cards List
         Consumer<ShopController>(
           builder: (context, shopCtrl, _) {
-            final sellers = shopCtrl.allSellerModel?.sellers ?? shopCtrl.topSellerModel?.sellers;
+            final sellers = shopCtrl.allSellerModel?.sellers ??
+                shopCtrl.topSellerModel?.sellers;
             if (sellers == null || sellers.isEmpty) {
               return const SizedBox();
             }
@@ -139,12 +143,12 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                       color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                        color: colors.border,
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: isDark
-                              ? Colors.black.withOpacity(0.3)
+                              ? Colors.black.withValues(alpha: 0.3)
                               : Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
@@ -160,18 +164,22 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                               height: 110,
                               width: double.infinity,
                               decoration: BoxDecoration(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
-                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(19)),
+                                color: colors.surfaceElevated,
                               ),
                               child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(19)),
                                 child: (shop?.bannerFullUrl?.path != null &&
                                         shop!.bannerFullUrl!.path!.isNotEmpty &&
-                                        !shop.bannerFullUrl!.path!.contains('placeholder'))
+                                        !shop.bannerFullUrl!.path!
+                                            .contains('placeholder'))
                                     ? Image.network(
                                         shop.bannerFullUrl!.path!,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Image.asset(
+                                        errorBuilder: (_, __, ___) =>
+                                            Image.asset(
                                           fallbackCover,
                                           fit: BoxFit.cover,
                                         ),
@@ -187,7 +195,8 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                             Positioned.fill(
                               child: Container(
                                 decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(19)),
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(19)),
                                   gradient: LinearGradient(
                                     colors: [
                                       Colors.transparent,
@@ -205,13 +214,15 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                               top: 10,
                               left: 10,
                               child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF10B981),
                                   borderRadius: BorderRadius.circular(20),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.2),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.2),
                                       blurRadius: 4,
                                     ),
                                   ],
@@ -279,10 +290,13 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        shop?.address ?? 'صنعاء - الجمهورية اليمنية',
+                                        shop?.address ??
+                                            'صنعاء - الجمهورية اليمنية',
                                         style: textRegular.copyWith(
-                                          color: Colors.white.withValues(alpha: 0.85),
-                                          fontSize: Dimensions.fontSizeExtraSmall,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.85),
+                                          fontSize:
+                                              Dimensions.fontSizeExtraSmall,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -294,15 +308,18 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                                     width: 52,
                                     height: 52,
                                     decoration: BoxDecoration(
-                                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                                      color: colors.surface,
                                       borderRadius: BorderRadius.circular(14),
                                       border: Border.all(
-                                        color: isDark ? const Color(0xFF475569) : Colors.white,
+                                        color: isDark
+                                            ? colors.border
+                                            : Colors.white,
                                         width: 2,
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.2),
+                                          color: Colors.black
+                                              .withValues(alpha: 0.2),
                                           blurRadius: 6,
                                           offset: const Offset(0, 2),
                                         ),
@@ -317,7 +334,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                                           child: Icon(
                                             Icons.storefront_rounded,
                                             size: 28,
-                                            color: const Color(0xFF1455AC),
+                                            color: AllineColors.primary,
                                           ),
                                         ),
                                       ),
@@ -331,7 +348,8 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
 
                         // Bottom Metrics Pill Row
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -360,7 +378,7 @@ class _AllineStoreTabsSectionWidgetState extends State<AllineStoreTabsSectionWid
                               _buildMetricChip(
                                 icon: Icons.star_rounded,
                                 label: rating.toStringAsFixed(1),
-                                color: const Color(0xFFF59E0B),
+                                color: AllineColors.warning,
                               ),
                             ],
                           ),

@@ -32,9 +32,9 @@ class _AddProductTabViewState extends State<AddProductTabView>  with SingleTicke
   ProductCombinedData? productCombinedData;
 
   final List<Tab> productTabs = const <Tab>[
-    Tab(text: 'General Info', icon: Icon(Icons.info_outline)),
-    Tab(text: 'Variations', icon: Icon(Icons.color_lens_outlined)),
-    Tab(text: 'SEO', icon: Icon(Icons.search)),
+    Tab(text: 'المعلومات الأساسية', icon: Icon(Icons.info_outline)),
+    Tab(text: 'الخيارات والسعر والمخزون', icon: Icon(Icons.color_lens_outlined)),
+    Tab(text: 'الصور والنشر', icon: Icon(Icons.image_outlined)),
   ];
 
 
@@ -59,10 +59,6 @@ class _AddProductTabViewState extends State<AddProductTabView>  with SingleTicke
     setState(() {
       productGeneralInfoData = latestData;
     });
-
-    print("---->>${productCombinedData}");
-    print("---->>${productCombinedData?.title}");
-    print("---->>${productCombinedData?.description}");
   }
 
   void _fetchDataFromSecondTab() {

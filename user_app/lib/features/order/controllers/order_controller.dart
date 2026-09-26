@@ -78,21 +78,26 @@ class OrderController with ChangeNotifier {
   int _orderTypeIndex = 0;
   int get orderTypeIndex => _orderTypeIndex;
 
-  String selectedType = 'ongoing';
+  String selectedType = 'all';
   void setIndex(int index, {bool notify = true}) {
     _orderTypeIndex = index;
     if(notify) {
       notifyListeners();
     }
     if(_orderTypeIndex == 0){
+      selectedType = 'all';
+      getOrderList(1, 'all');
+    }else if(_orderTypeIndex == 1){
       selectedType = 'ongoing';
       getOrderList(1, 'ongoing');
-    }else if(_orderTypeIndex == 1){
+    }else if(_orderTypeIndex == 2){
       selectedType = 'delivered';
       getOrderList(1, 'delivered');
-    }else if(_orderTypeIndex == 2){
+    }else if(_orderTypeIndex == 3){
       selectedType = 'canceled';
       getOrderList(1, 'canceled');
+    }else if(_orderTypeIndex == 4){
+      selectedType = 'global';
     }
     if(notify) {
       notifyListeners();

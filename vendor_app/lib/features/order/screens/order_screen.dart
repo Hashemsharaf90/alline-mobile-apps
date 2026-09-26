@@ -9,6 +9,7 @@ import 'package:sixvalley_vendor_app/helper/color_helper.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
 import 'package:sixvalley_vendor_app/features/order/controllers/order_controller.dart';
 import 'package:sixvalley_vendor_app/theme/controllers/theme_controller.dart';
+import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
@@ -101,23 +102,23 @@ class _OrderScreenState extends State<OrderScreen> {
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   children: [
-                    OrderTypeButton(text: getTranslated('all', context), index: 0, ),
-                    const SizedBox(width: 5),
+                    OrderTypeButton(text: getTranslated('all', context), index: 0),
+                    const SizedBox(width: 8),
                     OrderTypeButton(text: getTranslated('pending', context), index: 1),
-                    const SizedBox(width: 5),
-                    OrderTypeButton(text: getTranslated('processing', context), index: 2),
-                    const SizedBox(width: 5),
-                    OrderTypeButton(text: getTranslated('delivered', context), index: 3),
-                    const SizedBox(width: 5),
-                    OrderTypeButton(text: getTranslated('returned', context), index: 4),
-                    const SizedBox(width: 5),
-                    OrderTypeButton(text: getTranslated('failed', context), index: 5),
-                    const SizedBox(width: 5),
-                    OrderTypeButton(text: getTranslated('cancelled', context), index: 6),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 8),
                     OrderTypeButton(text: getTranslated('confirmed', context), index: 7),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 8),
+                    OrderTypeButton(text: getTranslated('processing', context), index: 2),
+                    const SizedBox(width: 8),
                     OrderTypeButton(text: getTranslated('out_for_delivery', context), index: 8),
+                    const SizedBox(width: 8),
+                    OrderTypeButton(text: getTranslated('delivered', context), index: 3),
+                    const SizedBox(width: 8),
+                    OrderTypeButton(text: getTranslated('cancelled', context), index: 6),
+                    const SizedBox(width: 8),
+                    OrderTypeButton(text: getTranslated('returned', context), index: 4),
+                    const SizedBox(width: 8),
+                    OrderTypeButton(text: getTranslated('failed', context), index: 5),
                   ],
                 ),
               ),
@@ -225,26 +226,44 @@ class OrderTypeButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
+        borderRadius: BorderRadius.circular(20),
         onTap: () {
           Provider.of<OrderController>(context, listen: false).setIndex(context, index);
         },
-        child: Consumer<OrderController>(builder: (context, order, child) {
-          return Container(
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge,),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: order.orderTypeIndex == index ? Theme.of(context).primaryColor : Provider.of<ThemeController>(context).darkTheme ?
-              ColorHelper.blendColors(Colors.white, Theme.of(context).highlightColor, 0.9) :
-              Theme.of(context).colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(Dimensions.paddingSizeLarge),
-            ),
-            child: Text(text!, style: order.orderTypeIndex == index ? titilliumBold.copyWith(color: order.orderTypeIndex == index
-                    ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).textTheme.bodyLarge?.color):
-                robotoRegular.copyWith(color: order.orderTypeIndex == index
-                ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).textTheme.bodyLarge?.color)),
-          );
-        },
+        child: Consumer<OrderController>(
+          builder: (context, order, child) {
+            final isSelected = order.orderTypeIndex == index;
+            final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+
+            return Container(
+              height: 38,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AllineColors.primary
+                    : (isDark
+                        ? ColorHelper.blendColors(Colors.white, Theme.of(context).highlightColor, 0.9)
+                        : AllineColors.backgroundLight),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? AllineColors.primary
+                      : (isDark ? Theme.of(context).dividerColor : AllineColors.borderLight),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                text ?? '',
+                style: robotoMedium.copyWith(
+                  color: isSelected
+                      ? Colors.white
+                      : (isDark ? Colors.white70 : AllineColors.textDark),
+                  fontSize: 13,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/floating_cart_bar.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/no_internet_screen_widget.dart';
@@ -110,7 +111,7 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                             gradient: LinearGradient(
                               colors: [
                                 Theme.of(context).primaryColor,
-                                const Color(0xFF0F3A7A),
+                                AllineColors.primaryDark,
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,

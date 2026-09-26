@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 
 class CustomButton extends StatelessWidget {
   final Function()? onTap;
@@ -21,54 +18,104 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final double buttonHeight;
 
-
   const CustomButton({
-    super.key, this.onTap, required this.buttonText, this.isBuy= false,
-    this.isBorder = false, this.backgroundColor, this.radius, this.textColor,
-    this.fontSize, this.leftIcon, this.borderColor, this.loadingColor = Colors.white, this.borderWidth,
-    this.isLoading = false, this.buttonHeight = 45,
+    super.key,
+    this.onTap,
+    required this.buttonText,
+    this.isBuy = false,
+    this.isBorder = false,
+    this.backgroundColor,
+    this.radius,
+    this.textColor,
+    this.fontSize,
+    this.leftIcon,
+    this.borderColor,
+    this.loadingColor = Colors.white,
+    this.borderWidth,
+    this.isLoading = false,
+    this.buttonHeight = AllineTouchTarget.buttonHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: isLoading ? null : onTap as void Function()?,
-      style: TextButton.styleFrom(padding: const EdgeInsets.all(0)),
-      child: Container(height: buttonHeight,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: isBorder? Border.all(color: borderColor??Theme.of(context).primaryColor, width:  borderWidth ??1): null,
-          color: onTap == null ? Theme.of(context).disabledColor : backgroundColor ?? (isBuy? const Color(0xffFE961C) : Theme.of(context).primaryColor),
-            borderRadius: BorderRadius.circular(radius !=null ? radius! : isBorder? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeSmall)),
-        child: isLoading ? Center(child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+    final effectiveRadius = radius ?? AllineRadius.button;
+    final foreground = textColor ??
+        (isBorder
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onPrimary);
+    final content = isLoading
+        ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
-              height: 15, width: 15,
+              height: 18,
+              width: 18,
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(loadingColor!),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  loadingColor ?? foreground,
+                ),
                 strokeWidth: 2,
               ),
             ),
-            const SizedBox(width: Dimensions.paddingSizeSmall),
-
-            Text(getTranslated('loading', context)!, style: textBold.copyWith(color: loadingColor)),
-          ],
-        )) : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            if(leftIcon != null)
-            Padding(padding: const EdgeInsets.only(right: 5),
-              child: SizedBox(width: 30, child: Padding(
-                padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                child: Image.asset(leftIcon!),
-              )),
-            ),
+            const SizedBox(width: AllineSpacing.sm),
+            Text(getTranslated('loading', context) ?? '...'),
+          ])
+        : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            if (leftIcon != null) ...[
+              Image.asset(leftIcon!, width: 22, height: 22),
+              const SizedBox(width: AllineSpacing.xs),
+            ],
             Flexible(
-              child: Text(buttonText??"", style: titilliumSemiBold.copyWith(fontSize: fontSize?? 16,
-                    color: textColor ?? (Provider.of<ThemeController>(context, listen: false).darkTheme? Colors.white : Theme.of(context).highlightColor),
-                  )),
+              child: Text(
+                buttonText ?? '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
             ),
-          ],
-        ),
+          ]);
+
+    return Semantics(
+      button: true,
+      enabled: onTap != null && !isLoading,
+      child: SizedBox(
+        width: double.infinity,
+        height: buttonHeight < AllineTouchTarget.minimum
+            ? AllineTouchTarget.minimum
+            : buttonHeight,
+        child: isBorder
+            ? OutlinedButton(
+                onPressed: isLoading ? null : onTap,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: foreground,
+                  side: BorderSide(
+                    color: borderColor ?? Theme.of(context).colorScheme.outline,
+                    width: borderWidth ?? 1,
+                  ),
+                  textStyle: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(fontSize: fontSize),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(effectiveRadius),
+                  ),
+                ),
+                child: content,
+              )
+            : FilledButton(
+                onPressed: isLoading ? null : onTap,
+                style: FilledButton.styleFrom(
+                  backgroundColor:
+                      backgroundColor ?? Theme.of(context).colorScheme.primary,
+                  foregroundColor: foreground,
+                  textStyle: Theme.of(context)
+                      .textTheme
+                      .labelLarge
+                      ?.copyWith(fontSize: fontSize),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(effectiveRadius),
+                  ),
+                ),
+                child: content,
+              ),
       ),
     );
   }

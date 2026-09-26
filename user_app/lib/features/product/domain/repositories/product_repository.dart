@@ -52,6 +52,9 @@ class ProductRepository extends DataSyncService
 
   String _getApiEndUrlByType(ProductType type) {
     switch (type) {
+      case ProductType.allProduct:
+        return AppConstants.allProductUri;
+
       case ProductType.newArrival:
         return AppConstants.newArrivalProductUri;
 

@@ -1,6 +1,9 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
@@ -36,17 +39,19 @@ class SignUpWidgetState extends State<SignUpWidget> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _referController = TextEditingController();
 
   final FocusNode _nameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _phoneFocus = FocusNode();
-  final FocusNode _referFocus = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
 
   @override
   void initState() {
     super.initState();
+    _termsRecognizer = TapGestureRecognizer();
+    _privacyRecognizer = TapGestureRecognizer();
     final countryCode = Provider.of<SplashController>(context, listen: false)
             .configModel
             ?.countryCode ??
@@ -55,7 +60,6 @@ class SignUpWidgetState extends State<SignUpWidget> {
         CountryCode.fromCountryCode(countryCode).dialCode ?? '+967';
     Provider.of<AuthController>(context, listen: false)
         .setCountryCode(dialCode, notify: false);
-    _referController.text = widget.referCode ?? '';
   }
 
   @override
@@ -63,11 +67,11 @@ class SignUpWidgetState extends State<SignUpWidget> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _referController.dispose();
     _nameFocus.dispose();
     _emailFocus.dispose();
     _phoneFocus.dispose();
-    _referFocus.dispose();
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     super.dispose();
   }
 
@@ -90,7 +94,7 @@ class SignUpWidgetState extends State<SignUpWidget> {
     authController.prepareOtpRegistration(
       name: _nameController.text,
       email: _emailController.text,
-      referralCode: _referController.text,
+      referralCode: widget.referCode,
     );
 
     if (config.customerVerification?.firebase == 1) {
@@ -110,15 +114,15 @@ class SignUpWidgetState extends State<SignUpWidget> {
     }
   }
 
-  static const _blue = Color(0xFF0866F5),
-      _ink = Color(0xFF10244A),
-      _muted = Color(0xFF6B7D99);
-  TextStyle _text(double size, {Color color = _ink, bool bold = false}) =>
+  static const _blue = AllineColors.primary,
+      _brightBlue = AllineColors.brightBlue,
+      _error = AllineColors.error;
+  TextStyle _text(double size, {Color? color, bool bold = false}) =>
       TextStyle(
           fontFamily: 'AllineTajawal',
           fontSize: size,
           height: 1.4,
-          color: color,
+          color: color ?? context.allineColors.textPrimary,
           fontWeight: bold ? FontWeight.w700 : FontWeight.w400);
 
   @override
@@ -130,7 +134,7 @@ class SignUpWidgetState extends State<SignUpWidget> {
             ((socialStatus?.apple == 1 &&
                     defaultTargetPlatform == TargetPlatform.iOS) ||
                 socialStatus?.google == 1);
-    final showReferral = configModel?.refEarningStatus == '1';
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Consumer<AuthController>(builder: (context, auth, _) {
       final loading = auth.isPhoneNumberVerificationButtonLoading;
       return Form(
@@ -155,7 +159,8 @@ class SignUpWidgetState extends State<SignUpWidget> {
                         value, 'full_name_is_required')),
                 _field(
                     fieldKey: 'signup-phone',
-                    label: getTranslated('phone', context)!,
+                    label:
+                        isArabic ? 'الهاتف' : getTranslated('phone', context)!,
                     hint: '7XX XXX XXX',
                     required: true,
                     controller: _phoneController,
@@ -166,31 +171,38 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     ltr: true,
                     validator: (value) => ValidateCheck.validatePhoneNoText(
                         value, auth.countryDialCode, 'phone_must_be_required'),
+                    helper: isArabic
+                        ? 'سيتم إرسال رمز تحقق إلى هذا الرقم'
+                        : 'A verification code will be sent to this number',
                     prefix: SizedBox(
                         width: 116,
                         child: Directionality(
                             textDirection: TextDirection.ltr,
-                            child: CountryCodePicker(
-                              onChanged: (code) {
-                                _phoneFocus.requestFocus();
-                                auth.setCountryCode(code.dialCode!);
-                              },
-                              initialSelection: auth.countryDialCode,
-                              favorite: [auth.countryDialCode],
-                              padding: EdgeInsets.zero,
-                              showFlagMain: true,
-                              flagWidth: 20,
-                              showDropDownButton: false,
-                              dialogBackgroundColor: Colors.white,
-                              textStyle: _text(14, bold: true),
-                            )))),
+                            child: Row(children: [
+                              Expanded(
+                                  child: CountryCodePicker(
+                                onChanged: (code) {
+                                  _phoneFocus.requestFocus();
+                                  auth.setCountryCode(code.dialCode!);
+                                },
+                                initialSelection: auth.countryDialCode,
+                                favorite: [auth.countryDialCode],
+                                padding: EdgeInsets.zero,
+                                showFlagMain: true,
+                                flagWidth: 20,
+                                showDropDownButton: false,
+                                dialogBackgroundColor: context.allineColors.surface,
+                                textStyle: _text(14, bold: true),
+                              )),
+                              Container(width: 1, height: 24, color: context.allineColors.border),
+                              const SizedBox(width: 8),
+                            ])))),
                 _field(
                     fieldKey: 'signup-email',
                     label: getTranslated('email_optional', context)!,
                     hint: 'name@example.com',
                     controller: _emailController,
                     focus: _emailFocus,
-                    next: showReferral ? _referFocus : null,
                     type: TextInputType.emailAddress,
                     autofill: AutofillHints.email,
                     ltr: true,
@@ -198,16 +210,8 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     validator: (value) => (value?.trim().isEmpty ?? true)
                         ? null
                         : ValidateCheck.validateEmail(value)),
-                if (showReferral)
-                  _field(
-                      fieldKey: 'signup-referral',
-                      label: getTranslated('referral_code', context)!,
-                      hint: getTranslated('enter_refer_code', context)!,
-                      controller: _referController,
-                      focus: _referFocus,
-                      icon: Icons.card_giftcard_rounded),
                 _terms(auth),
-                const SizedBox(height: 18),
+                const SizedBox(height: 14),
                 ElevatedButton(
                     key: const ValueKey('signup-submit'),
                     onPressed: auth.isAcceptTerms && !loading
@@ -216,8 +220,10 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     style: ElevatedButton.styleFrom(
                         backgroundColor: _blue,
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: const Color(0xFFE7EFFA),
-                        disabledForegroundColor: const Color(0xFF7183A0),
+                        disabledBackgroundColor:
+                            loading ? _blue : Theme.of(context).disabledColor.withValues(alpha: 0.12),
+                        disabledForegroundColor: context.allineColors.textSecondary,
+                        overlayColor: _brightBlue,
                         elevation: 0,
                         minimumSize: const Size.fromHeight(54),
                         padding: const EdgeInsets.symmetric(
@@ -225,33 +231,46 @@ class SignUpWidgetState extends State<SignUpWidget> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16))),
                     child: loading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2.5, color: _blue))
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                const SizedBox(
+                                    width: 19,
+                                    height: 19,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2.2, color: Colors.white)),
+                                const SizedBox(width: 10),
+                                Text(
+                                    isArabic
+                                        ? 'جارٍ إرسال رمز التحقق...'
+                                        : 'Sending verification code...',
+                                    style: _text(15,
+                                        color: Colors.white, bold: true)),
+                              ])
                         : Text(getTranslated('send_otp', context)!,
                             textAlign: TextAlign.center,
                             style: _text(17,
                                 color: auth.isAcceptTerms
                                     ? Colors.white
-                                    : const Color(0xFF7183A0),
+                                    : context.allineColors.textSecondary,
                                 bold: true))),
                 if (showSocial) ...[
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
                   Row(children: [
-                    const Expanded(child: Divider(color: Color(0xFFE4ECF7))),
+                    Expanded(child: Divider(color: context.allineColors.border)),
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 14),
                         child: Text(getTranslated('OR', context)!,
-                            style: _text(13, color: _muted))),
-                    const Expanded(child: Divider(color: Color(0xFFE4ECF7))),
+                            style: _text(13, color: context.allineColors.textSecondary))),
+                    Expanded(child: Divider(color: context.allineColors.border)),
                   ]),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 14),
                   if (socialStatus?.google == 1)
                     _socialButton(
                         Images.google,
-                        'continue_with_google',
+                        isArabic
+                            ? 'تواصل مع Google'
+                            : getTranslated('continue_with_google', context)!,
                         () => googleLogin(
                             context, widget.fromPage, widget.onLoginSuccess)),
                   if (socialStatus?.apple == 1 &&
@@ -259,19 +278,19 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     if (socialStatus?.google == 1) const SizedBox(height: 12),
                     _socialButton(
                         Images.appleLogo,
-                        'continue_with_apple',
+                        getTranslated('continue_with_apple', context)!,
                         () => appleLogin(
                             context, widget.fromPage, widget.onLoginSuccess)),
                   ],
                 ],
                 if (!loading) ...[
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 14),
                   Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(getTranslated('already_have_account', context)!,
-                            style: _text(13, color: _muted)),
+                            style: _text(13, color: context.allineColors.textSecondary)),
                         TextButton(
                             onPressed: () {
                               auth.getGuestIdUrl();
@@ -301,16 +320,17 @@ class SignUpWidgetState extends State<SignUpWidget> {
       OutlinedButton(
           onPressed: onTap,
           style: OutlinedButton.styleFrom(
-              foregroundColor: _ink,
-              side: const BorderSide(color: Color(0xFFDEE7F3)),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 15),
+              foregroundColor: context.allineColors.textPrimary,
+              minimumSize: const Size.fromHeight(54),
+              side: BorderSide(color: context.allineColors.border),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14))),
+                  borderRadius: BorderRadius.circular(16))),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Image.asset(image, width: 21, height: 21),
             const SizedBox(width: 10),
             Flexible(
-                child: Text(getTranslated(label, context)!,
+                child: Text(label,
                     textAlign: TextAlign.center, style: _text(14, bold: true))),
           ]));
 
@@ -328,20 +348,20 @@ class SignUpWidgetState extends State<SignUpWidget> {
     TextCapitalization capitalization = TextCapitalization.none,
     IconData? icon,
     Widget? prefix,
+    String? helper,
     String? Function(String?)? validator,
   }) {
     final border = OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFDEE7F3)));
+        borderRadius: BorderRadius.circular(15),
+        borderSide: BorderSide(color: context.allineColors.border));
     return Padding(
-        padding: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.only(bottom: 16),
         child:
             Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Text.rich(
               TextSpan(text: label, children: [
                 if (required)
-                  const TextSpan(
-                      text: ' *', style: TextStyle(color: Color(0xFFC33C42))),
+                  const TextSpan(text: ' *', style: TextStyle(color: _error)),
               ]),
               style: _text(14, bold: true)),
           const SizedBox(height: 8),
@@ -368,69 +388,89 @@ class SignUpWidgetState extends State<SignUpWidget> {
                     : null,
                 decoration: InputDecoration(
                   hintText: hint,
-                  hintStyle: _text(14, color: const Color(0xFF98A7BB)),
+                  hintStyle: _text(14, color: context.allineColors.textSecondary),
                   filled: true,
-                  fillColor: const Color(0xFFFAFCFF),
+                  fillColor: context.allineColors.surface,
+                  constraints: const BoxConstraints(minHeight: 56),
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
                   prefixIcon: prefix ??
                       (icon != null
-                          ? Icon(icon, size: 21, color: _muted)
+                          ? Icon(icon, size: 21, color: context.allineColors.textSecondary)
                           : null),
                   border: border,
                   enabledBorder: border,
                   focusedBorder: border.copyWith(
                       borderSide: const BorderSide(color: _blue, width: 1.5)),
                   errorBorder: border.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFC33C42))),
+                      borderSide: const BorderSide(color: _error)),
                   focusedErrorBorder: border.copyWith(
-                      borderSide: const BorderSide(
-                          color: Color(0xFFC33C42), width: 1.5)),
-                  errorStyle: _text(12, color: const Color(0xFFC33C42)),
+                      borderSide: const BorderSide(color: _error, width: 1.5)),
+                  errorStyle: _text(12, color: _error),
                   errorMaxLines: 3,
                 ),
               )),
+          if (helper != null) ...[
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 4),
+              child: Text(helper,
+                  style: _text(12, color: context.allineColors.textSecondary)),
+            ),
+          ],
         ]));
   }
 
   Widget _terms(AuthController auth) {
     BusinessPageModel? terms;
+    BusinessPageModel? privacy;
     for (final page in context.read<SplashController>().defaultBusinessPages ??
         <BusinessPageModel>[]) {
       if (page.slug == 'terms-and-conditions') {
         terms = page;
-        break;
+      } else if (page.slug == 'privacy-policy') {
+        privacy = page;
       }
     }
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    _termsRecognizer.onTap = terms == null
+        ? null
+        : () => RouterHelper.getHtmlViewRoute(page: terms!);
+    _privacyRecognizer.onTap = privacy == null
+        ? null
+        : () => RouterHelper.getHtmlViewRoute(page: privacy!);
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       SizedBox(
-          width: 36,
+          width: 44,
           height: 44,
           child: Checkbox(
               value: auth.isAcceptTerms,
               onChanged: (_) => auth.toggleTermsCheck(),
               activeColor: _blue,
-              side: const BorderSide(color: Color(0xFFAABDD7)),
+              side: BorderSide(color: context.allineColors.textSecondary),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5)),
               semanticLabel: getTranslated('i_agree_with_the', context))),
-      const SizedBox(width: 4),
+      const SizedBox(width: 2),
       Expanded(
-          child: Wrap(crossAxisAlignment: WrapCrossAlignment.center, children: [
-        Text(getTranslated('i_agree_with_the', context)!,
-            style: _text(13, color: _muted)),
-        TextButton(
-            onPressed: terms == null
-                ? null
-                : () => RouterHelper.getHtmlViewRoute(page: terms!),
-            style: TextButton.styleFrom(
-                foregroundColor: _blue,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4, vertical: 10)),
-            child: Text(getTranslated('terms_condition', context)!,
-                style: _text(13, color: _blue, bold: true)
-                    .copyWith(decoration: TextDecoration.underline))),
-      ])),
+          child: Padding(
+        padding: const EdgeInsetsDirectional.only(top: 11),
+        child: Text.rich(
+          TextSpan(children: [
+            TextSpan(text: isArabic ? 'أوافق على ' : 'I agree to the '),
+            TextSpan(
+                text: getTranslated('terms_condition', context)!,
+                style: _text(13, color: _blue, bold: true),
+                recognizer: _termsRecognizer),
+            TextSpan(text: isArabic ? ' و' : ' and '),
+            TextSpan(
+                text: getTranslated('privacy_policy', context)!,
+                style: _text(13, color: _blue, bold: true),
+                recognizer: _privacyRecognizer),
+          ]),
+          style: _text(13, color: context.allineColors.textSecondary).copyWith(height: 1.65),
+        ),
+      )),
     ]);
   }
 }

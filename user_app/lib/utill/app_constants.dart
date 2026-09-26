@@ -37,6 +37,8 @@ class AppConstants {
   static const String logOut = '/api/v1/auth/logout';
   static const String latestProductUri =
       '/api/v1/products/latest?guest_id=1&limit=10&&offset=';
+  static const String allProductUri =
+      '/api/v1/products/latest?guest_id=1&limit=20&offset=';
   static const String newArrivalProductUri =
       '/api/v1/products/new-arrival?guest_id=1&limit=10&&offset=';
   static const String topProductUri =
@@ -297,15 +299,15 @@ class AppConstants {
 
   static List<LanguageModel> languages = [
     LanguageModel(
-        imageUrl: Images.en,
-        languageName: 'English',
-        countryCode: 'US',
-        languageCode: 'en'),
-    LanguageModel(
         imageUrl: Images.ar,
         languageName: 'Arabic',
         countryCode: 'SA',
         languageCode: 'ar'),
+    LanguageModel(
+        imageUrl: Images.en,
+        languageName: 'English',
+        countryCode: 'US',
+        languageCode: 'en'),
     LanguageModel(
         imageUrl: Images.hi,
         languageName: 'Hindi',

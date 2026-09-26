@@ -20,7 +20,8 @@ import 'package:sixvalley_vendor_app/features/product/widgets/product_widget.dar
 
 class ProductListMenuScreen extends StatefulWidget {
   final bool fromNotification;
-  const ProductListMenuScreen({super.key,  this.fromNotification = false});
+  final bool isBackButtonExist;
+  const ProductListMenuScreen({super.key, this.fromNotification = false, this.isBackButtonExist = true});
   @override
   State<ProductListMenuScreen> createState() => _ProductListMenuScreenState();
 }
@@ -74,6 +75,7 @@ class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
       child: Scaffold(
         appBar: CustomAppBarWidget(
           title: getTranslated('product_list', context),
+          isBackButtonExist: widget.isBackButtonExist,
           onBackPressed: () {
             if(widget.fromNotification) {
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => const DashboardScreen()), (route) => false);

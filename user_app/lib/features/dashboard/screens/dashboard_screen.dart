@@ -1,6 +1,5 @@
 import 'package:flutter_sixvalley_ecommerce/features/category/screens/category_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/features/ai_chat/screens/ai_chat_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/screens/cart_screen.dart';
@@ -14,16 +13,14 @@ import 'package:flutter_sixvalley_ecommerce/features/wishlist/controllers/wishli
 import 'package:flutter_sixvalley_ecommerce/helper/network_info.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/features/dashboard/widgets/app_exit_card_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/chat/screens/inbox_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/screens/aster_theme_home_screen.dart';
-import 'package:flutter_sixvalley_ecommerce/features/home/screens/fashion_theme_home_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/screens/home_screens.dart';
 import 'package:flutter_sixvalley_ecommerce/features/more/screens/more_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order/screens/order_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 
 class DashBoardScreen extends StatefulWidget {
   final int? pageIndex;
@@ -34,78 +31,101 @@ class DashBoardScreen extends StatefulWidget {
 
 class DashBoardScreenState extends State<DashBoardScreen> {
   int _pageIndex = 0;
-  late List<NavigationModel> _screens ;
+  late List<NavigationModel> _screens;
   final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey();
   final PageStorageBucket bucket = PageStorageBucket();
 
   bool singleVendor = false;
 
-
   @override
   void initState() {
     super.initState();
 
-    Provider.of<FlashDealController>(context, listen: false).getFlashDealList(true, true);
-    Provider.of<SplashController>(context, listen: false).getBusinessPagesList('default');
-    Provider.of<SplashController>(context, listen: false).getBusinessPagesList('pages');
-    if(Provider.of<AuthController>(context, listen: false).isLoggedIn()) {
+    Provider.of<FlashDealController>(context, listen: false)
+        .getFlashDealList(true, true);
+    Provider.of<SplashController>(context, listen: false)
+        .getBusinessPagesList('default');
+    Provider.of<SplashController>(context, listen: false)
+        .getBusinessPagesList('pages');
+    if (Provider.of<AuthController>(context, listen: false).isLoggedIn()) {
       Provider.of<CartController>(context, listen: false).mergeGuestCart();
       Provider.of<WishListController>(context, listen: false).getWishList('');
-      Provider.of<ChatController>(context, listen: false).getChatList(1, reload: false, userType: 0);
-      Provider.of<ChatController>(context, listen: false).getChatList(1, reload: false, userType: 1);
-      Provider.of<RestockController>(context, listen: false).getRestockProductList(1, getAll: true);
+      Provider.of<ChatController>(context, listen: false)
+          .getChatList(1, reload: false, userType: 0);
+      Provider.of<ChatController>(context, listen: false)
+          .getChatList(1, reload: false, userType: 1);
+      Provider.of<RestockController>(context, listen: false)
+          .getRestockProductList(1, getAll: true);
     }
 
-    final SplashController splashController = Provider.of<SplashController>(context, listen: false);
+    final SplashController splashController =
+        Provider.of<SplashController>(context, listen: false);
     singleVendor = splashController.configModel?.businessMode == "single";
-    Provider.of<SearchProductController>(context, listen: false).getAuthorList(null);
-    Provider.of<SearchProductController>(context, listen: false).getPublishingHouseList(null);
+    Provider.of<SearchProductController>(context, listen: false)
+        .getAuthorList(null);
+    Provider.of<SearchProductController>(context, listen: false)
+        .getPublishingHouseList(null);
 
-    if(widget.pageIndex != null) {
+    if (widget.pageIndex != null) {
       _pageIndex = widget.pageIndex!;
     }
 
-    if(splashController.configModel?.activeTheme == "default") {
-
+    if (splashController.configModel?.activeTheme == "default") {
       HomePage.loadData(false);
-
-    }else if(splashController.configModel?.activeTheme == "theme_aster") {
+    } else if (splashController.configModel?.activeTheme == "theme_aster") {
       AsterThemeHomeScreen.loadData(false);
-    }else{
-      FashionThemeHomePage.loadData(false);
+    } else {
+      HomePage.loadData(false);
     }
 
-      _screens = [
-        NavigationModel(
-          name: 'home',
-          icon: Images.homeImage,
-          screen: (splashController.configModel?.activeTheme == "default")
-            ? const HomePage() : (splashController.configModel?.activeTheme == "theme_aster")
-            ? const AsterThemeHomeScreen(): const HomePage(),
-        ),
-        NavigationModel(name: 'all_category', icon: Images.category, screen: const CategoryScreen()),
-        NavigationModel(name: 'cart', icon: Images.cartArrowDownImage, screen: const CartScreen(showBackButton: false, fromDashboard: true), showCartIcon: true),
-        NavigationModel(name: 'orders', icon: Images.shoppingImage, screen: const OrderScreen(isBacButtonExist: false, fromDashboard: true)),
-        NavigationModel(name: 'more', icon: Images.moreImage, screen: const MoreScreen()),
-      ];
-
+    _screens = [
+      NavigationModel(
+        name: 'home',
+        icon: Images.homeImage,
+        screen: (splashController.configModel?.activeTheme == "default")
+            ? const HomePage()
+            : (splashController.configModel?.activeTheme == "theme_aster")
+                ? const AsterThemeHomeScreen()
+                : const HomePage(),
+      ),
+      NavigationModel(
+          name: 'all_category',
+          icon: Images.category,
+          screen: const CategoryScreen()),
+      NavigationModel(
+          name: 'cart',
+          icon: Images.cartArrowDownImage,
+          screen: const CartScreen(showBackButton: false, fromDashboard: true),
+          showCartIcon: true),
+      NavigationModel(
+          name: 'orders',
+          icon: Images.shoppingImage,
+          screen:
+              const OrderScreen(isBacButtonExist: false, fromDashboard: true)),
+      NavigationModel(
+          name: 'more', icon: Images.moreImage, screen: const MoreScreen()),
+    ];
 
     NetworkInfo.checkConnectivity(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(canPop: false,
+    final colors = AllineThemeColors.of(context);
+    return PopScope(
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
-        if(_pageIndex != 0) {
+        if (_pageIndex != 0) {
           _setPage(0);
           return;
         } else {
           await Future.delayed(const Duration(milliseconds: 150));
-          if(context.mounted){
+          if (context.mounted) {
             if (_pageIndex == 0) {
-              showModalBottomSheet(backgroundColor: Colors.transparent,
-                context: Get.context!, builder: (_)=> const AppExitCard());
+              showModalBottomSheet(
+                  backgroundColor: Colors.transparent,
+                  context: Get.context!,
+                  builder: (_) => const AppExitCard());
             }
           }
         }
@@ -113,25 +133,26 @@ class DashBoardScreenState extends State<DashBoardScreen> {
       },
       child: Scaffold(
         key: _scaffoldKey,
-
         body: PageStorage(bucket: bucket, child: _screens[_pageIndex].screen),
         bottomNavigationBar: SafeArea(
           top: false,
           child: Container(
-            height: 72,
+            height: 72 + (MediaQuery.textScalerOf(context).scale(12) - 12),
             padding: const EdgeInsets.only(top: 5),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: colors.surface,
               border: Border(
                 top: BorderSide(
-                  color: Theme.of(context).dividerColor.withValues(alpha: .45),
+                  color: colors.border,
                 ),
               ),
               boxShadow: [
                 BoxShadow(
                   offset: const Offset(0, -3),
                   blurRadius: 14,
-                  color: Colors.black.withValues(alpha: .06),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.transparent
+                      : colors.textPrimary.withValues(alpha: .05),
                 ),
               ],
             ),
@@ -145,7 +166,6 @@ class DashBoardScreenState extends State<DashBoardScreen> {
     );
   }
 
-
   void _setPage(int pageIndex) {
     setState(() {
       _pageIndex = pageIndex;
@@ -154,15 +174,15 @@ class DashBoardScreenState extends State<DashBoardScreen> {
 
   List<Widget> _getBottomWidget(bool isSingleVendor) {
     List<Widget> list = [];
-    for(int index = 0; index < _screens.length; index++) {
-      list.add(Expanded(child: CustomMenuWidget(
-        isSelected: _pageIndex == index,
-        name: _screens[index].name,
-        icon: _screens[index].icon,
-        showCartCount: _screens[index].showCartIcon ?? false,
-        onTap: () => _setPage(index))));
+    for (int index = 0; index < _screens.length; index++) {
+      list.add(Expanded(
+          child: CustomMenuWidget(
+              isSelected: _pageIndex == index,
+              name: _screens[index].name,
+              icon: _screens[index].icon,
+              showCartCount: _screens[index].showCartIcon ?? false,
+              onTap: () => _setPage(index))));
     }
     return list;
   }
-
 }

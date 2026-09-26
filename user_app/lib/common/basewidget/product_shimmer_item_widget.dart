@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-
 
 class ProductShimmerItemWidget extends StatelessWidget {
   const ProductShimmerItemWidget({
@@ -12,23 +11,24 @@ class ProductShimmerItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Theme.of(context).highlightColor),
+          borderRadius: BorderRadius.circular(10), color: colors.surface),
       child: Shimmer.fromColors(
-        baseColor: Theme.of(context).cardColor,
-        highlightColor: Colors.grey[300]!,
+        baseColor: colors.skeletonBase,
+        highlightColor: colors.skeletonHighlight,
         enabled: true,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Expanded(
             flex: 6,
             child: Container(
               decoration: BoxDecoration(
-                color: Provider.of<ThemeController>(context).darkTheme ?
-                Theme.of(context).primaryColor.withValues(alpha:.05) :
-                Theme.of(context).cardColor,
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+                color: colors.skeletonBase,
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10)),
               ),
             ),
           ),
@@ -42,16 +42,23 @@ class ProductShimmerItemWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(height: 20, color: Colors.white),
+                  Container(height: 20, color: colors.skeletonBase),
                   const SizedBox(height: Dimensions.paddingSizeExtraSmall),
                   Row(children: [
                     Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                        Container(height: 20, width: 50, color: Colors.white),
-                      ]),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                                height: 20,
+                                width: 50,
+                                color: colors.skeletonBase),
+                          ]),
                     ),
-                    Container(height: 10, width: 50, color: Colors.white),
-                    const Icon(Icons.star, color: Colors.orange, size: 15),
+                    Container(
+                        height: 10, width: 50, color: colors.skeletonBase),
+                    const Icon(Icons.star,
+                        color: AllineColors.accent, size: 15),
                   ]),
                 ],
               ),

@@ -1,54 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
+import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
-import '../../../main.dart';
+import 'package:sixvalley_vendor_app/utill/styles.dart';
 
-List<Tab> _productTabs = <Tab>[
-  Tab(text: getTranslated('general_info', Get.context!) ?? 'General Info'),
-  Tab(text: getTranslated('variations', Get.context!) ?? 'Variations'),
-  Tab(text: getTranslated('seo', Get.context!) ??  'SEO'),
-];
-
-
-class AddProductTitleBar extends StatefulWidget {
+class AddProductTitleBar extends StatelessWidget {
   final TabController tabController;
   const AddProductTitleBar({super.key, required this.tabController});
 
   @override
-  State<AddProductTitleBar> createState() => _AddProductTitleBarState();
-}
-
-class _AddProductTitleBarState extends State<AddProductTitleBar> with SingleTickerProviderStateMixin {
-
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
+    final List<Tab> productTabs = [
+      Tab(
+        text: getTranslated('general_info', context) ?? 'المعلومات الأساسية',
+      ),
+      Tab(
+        text: getTranslated('variations_tab_title', context) ?? 'الخيارات والأسعار',
+      ),
+      Tab(
+        text: getTranslated('images_and_publishing_tab', context) ?? 'الصور والنشر',
+      ),
+    ];
 
-    return SizedBox(
-      height: 50,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0),
-        child: TabBar(
-          labelPadding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-          controller: widget.tabController,
-          tabs: _productTabs,
-          labelColor: Theme.of(context).cardColor,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: Theme.of(context).primaryColor,
-          dividerColor: Colors.transparent,
-          indicatorSize: TabBarIndicatorSize.tab,
-          indicatorPadding: EdgeInsets.zero,
-          indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(Dimensions.radiusSmall), // Match radiusSmall
-            border: Border.all(color: Theme.of(context).primaryColor),
-            color: Theme.of(context).primaryColor,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AllineColors.backgroundLight,
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        border: Border.all(color: AllineColors.borderLight),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: TabBar(
+        controller: tabController,
+        tabs: productTabs,
+        labelColor: Colors.white,
+        unselectedLabelColor: AllineColors.textLight,
+        labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall),
+        unselectedLabelStyle: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+          color: AllineColors.primary,
+          boxShadow: [
+            BoxShadow(
+              color: AllineColors.primary.withValues(alpha: 0.25),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
       ),
     );

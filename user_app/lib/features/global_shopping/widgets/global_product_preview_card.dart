@@ -37,14 +37,14 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
         Provider.of<ThemeController>(context, listen: false).darkTheme;
     final globalCtrl = Provider.of<GlobalShoppingController>(context);
 
-    final shippingCost = widget.preview.airShippingCost ?? 0.0;
-    final deliveryTime = widget.preview.deliveryTimeAir ?? '7 - 12 days';
-    final totalUsd = ((widget.preview.originalPrice ?? 0.0) +
-            shippingCost +
-            (widget.preview.customsFee ?? 0.0) +
-            (widget.preview.serviceFee ?? 0.0)) *
-        _quantity;
-    final totalYer = totalUsd * 535.0;
+    final shippingCost = widget.preview.airShippingCost;
+    final deliveryTime = widget.preview.deliveryTimeAir;
+    final totalUsd = widget.preview.totalEstimatedUsd == null
+        ? null
+        : widget.preview.totalEstimatedUsd! * _quantity;
+    final totalYer = widget.preview.totalEstimatedYer == null
+        ? null
+        : widget.preview.totalEstimatedYer! * _quantity;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
@@ -129,24 +129,25 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                                 height: 1.3),
                           ),
                           const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.withValues(alpha: 0.15),
-                                  borderRadius: BorderRadius.circular(4),
+                          if (widget.preview.estimatedWeightKg != null)
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'وزن تقريبي: ${widget.preview.estimatedWeightKg} كجم',
+                                    style: textRegular.copyWith(
+                                        fontSize: 10,
+                                        color: Theme.of(context).hintColor),
+                                  ),
                                 ),
-                                child: Text(
-                                  'وزن تقريبي: ${widget.preview.estimatedWeightKg} كجم',
-                                  style: textRegular.copyWith(
-                                      fontSize: 10,
-                                      color: Theme.of(context).hintColor),
-                                ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                         ],
                       ),
                     ),
@@ -197,9 +198,13 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  isLtr
-                                      ? 'Estimated arrival: $deliveryTime'
-                                      : 'مدة الوصول المتوقعة: $deliveryTime',
+                                  deliveryTime == null
+                                      ? (isLtr
+                                          ? 'Calculated after review'
+                                          : 'تحدد المدة بعد مراجعة الطلب')
+                                      : (isLtr
+                                          ? 'Estimated arrival: $deliveryTime'
+                                          : 'مدة الوصول المتوقعة: $deliveryTime'),
                                   style: textRegular.copyWith(
                                       fontSize: 11,
                                       color: Theme.of(context).hintColor),
@@ -207,11 +212,12 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                               ],
                             ),
                           ),
-                          Text(
-                            '\$${shippingCost.toStringAsFixed(2)}',
-                            style: textBold.copyWith(
-                                fontSize: Dimensions.fontSizeSmall),
-                          ),
+                          if (shippingCost != null)
+                            Text(
+                              '\$${shippingCost.toStringAsFixed(2)}',
+                              style: textBold.copyWith(
+                                  fontSize: Dimensions.fontSizeSmall),
+                            ),
                         ],
                       ),
                       const SizedBox(height: 6),
@@ -322,17 +328,20 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                '${totalYer.toStringAsFixed(0)} YER',
+                                totalYer == null
+                                    ? 'السعر النهائي يحدد عند تأكيد الطلب'
+                                    : '${totalYer.toStringAsFixed(0)} ر.ي',
                                 style: textBold.copyWith(
                                     color: Theme.of(context).primaryColor,
                                     fontSize: Dimensions.fontSizeLarge),
                               ),
-                              Text(
-                                '≈ \$${totalUsd.toStringAsFixed(2)} USD',
-                                style: textRegular.copyWith(
-                                    fontSize: 11,
-                                    color: Theme.of(context).hintColor),
-                              ),
+                              if (totalUsd != null)
+                                Text(
+                                  '≈ \$${totalUsd.toStringAsFixed(2)} USD',
+                                  style: textRegular.copyWith(
+                                      fontSize: 11,
+                                      color: Theme.of(context).hintColor),
+                                ),
                             ],
                           ),
                           TextButton.icon(
@@ -352,22 +361,30 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                       ),
                       if (_showCostBreakdown) ...[
                         const Divider(height: 16),
-                        _breakdownRow(
-                            context,
-                            isLtr ? 'Product Base Price' : 'سعر السلعة الأصلي',
-                            '\$${((widget.preview.originalPrice ?? 0.0) * _quantity).toStringAsFixed(2)}'),
-                        _breakdownRow(
-                            context,
-                            isLtr ? 'International Shipping' : 'الشحن الدولي',
-                            '\$${(shippingCost * _quantity).toStringAsFixed(2)}'),
-                        _breakdownRow(
-                            context,
-                            isLtr ? 'Customs & Handling' : 'الجمارك والمناولة',
-                            '\$${((widget.preview.customsFee ?? 0.0) * _quantity).toStringAsFixed(2)}'),
-                        _breakdownRow(
-                            context,
-                            isLtr ? 'Service Fee' : 'عمولة الخدمة',
-                            '\$${((widget.preview.serviceFee ?? 0.0) * _quantity).toStringAsFixed(2)}'),
+                        if (widget.preview.originalPrice != null)
+                          _breakdownRow(
+                              context,
+                              isLtr
+                                  ? 'Product Base Price'
+                                  : 'سعر السلعة الأصلي',
+                              '\$${((widget.preview.originalPrice ?? 0.0) * _quantity).toStringAsFixed(2)}'),
+                        if (shippingCost != null)
+                          _breakdownRow(
+                              context,
+                              isLtr ? 'International Shipping' : 'الشحن الدولي',
+                              '\$${(shippingCost * _quantity).toStringAsFixed(2)}'),
+                        if (widget.preview.customsFee != null)
+                          _breakdownRow(
+                              context,
+                              isLtr
+                                  ? 'Customs & Handling'
+                                  : 'الجمارك والمناولة',
+                              '\$${((widget.preview.customsFee ?? 0.0) * _quantity).toStringAsFixed(2)}'),
+                        if (widget.preview.serviceFee != null)
+                          _breakdownRow(
+                              context,
+                              isLtr ? 'Service Fee' : 'عمولة الخدمة',
+                              '\$${((widget.preview.serviceFee ?? 0.0) * _quantity).toStringAsFixed(2)}'),
                       ],
                     ],
                   ),

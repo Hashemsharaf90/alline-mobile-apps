@@ -248,7 +248,7 @@ class _RefundProductWidgetState extends State<RefundProductWidget> {
 
         bool canRefund = _canRefundRequest(configModel);
 
-        bool showRefundStatusButton = orderController.orderTypeIndex == 1 &&
+        bool showRefundStatusButton = (orderController.selectedType == 'delivered' || orderController.orderTypeIndex == 2 || orderController.orderTypeIndex == 1) &&
           orderDetails.refundReq != 0 && orderType != "POS";
 
         // --- CASE: Refund Request Button ---

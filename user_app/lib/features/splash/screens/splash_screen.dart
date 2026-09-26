@@ -53,7 +53,6 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeAsync() async {
-    await Future.delayed(const Duration(milliseconds: 500));
     _route();
   }
 
@@ -264,8 +263,10 @@ class SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _globalKey,
-      body: Provider.of<SplashController>(context).hasConnection ?
-      SplashWidget() : const NoInternetOrDataScreenWidget(isNoInternet: true, child: SplashScreen()),
+      body: Provider.of<SplashController>(context).hasConnection
+          ? const SplashWidget()
+          : const NoInternetOrDataScreenWidget(
+              isNoInternet: true, child: SplashScreen()),
     );
   }
 }
@@ -275,23 +276,18 @@ class SplashWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ColoredBox(
-      color: Theme.of(context).primaryColor,
-      child: Column(mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-        Row(children: []),
-        BouncyWidget(
-          duration: const Duration(milliseconds: 2000), lift: 50, ratio: 0.5, pause: 0.25,
-          child: SizedBox(width: 150, child: Image.asset(Images.logo, width: 150.0))
+      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+      child: Center(
+        child: Image.asset(
+          'assets/images/alline/login_logo_transparent.png',
+          width: 120,
+          height: 120,
+          fit: BoxFit.contain,
         ),
-        Text(AppConstants.appName,style: textRegular.copyWith(fontSize: Dimensions.fontSizeOverLarge, color: Colors.white)),
-        Padding(
-          padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
-          child: Text(AppConstants.slogan,style: textRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.white))
-        )
-      ]),
+      ),
     );
   }
 }

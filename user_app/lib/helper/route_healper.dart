@@ -20,6 +20,7 @@ import 'package:flutter_sixvalley_ecommerce/features/chat/domain/models/message_
 import 'package:flutter_sixvalley_ecommerce/features/chat/screens/media_viewer_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/screens/checkout_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/screens/digital_payment_order_place_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/checkout/screens/order_confirmation_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/clearance_sale/screens/clearance_sale_all_product_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/clearance_sale/screens/clearance_sale_shop_all_product_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/compare/screens/compare_product_screen.dart';
@@ -29,6 +30,7 @@ import 'package:flutter_sixvalley_ecommerce/features/deal/screens/featured_deal_
 import 'package:flutter_sixvalley_ecommerce/features/deal/screens/flash_deal_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/screens/view_all_product_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/location/screens/select_location_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/location/screens/location_setup_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/loyaltyPoint/screens/loyalty_point_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/more/screens/faq_screen_view.dart';
 import 'package:flutter_sixvalley_ecommerce/features/offline_payment/screens/offline_payment_screen.dart';
@@ -157,10 +159,12 @@ class RouterHelper {
   static const String addFundToWalletScreen = '/add-fund-wallet';
   static const String wishListScreen = '/wish-list';
   static const String selectLocationScreen = '/select-location-screen';
+  static const String locationSetupScreen = '/location-setup';
   static const String offlinePaymentScreen = '/offline-payment-screen';
   static const String shopOverviewScreen = '/shop-overview-screen';
   static const String orderOfflinePaymentScreen =
       '/order-offline-payment-screen';
+  static const String orderConfirmationScreen = '/order-confirmation';
 
   static const String signUp = '/sign-up';
   static const String digitalProduct = '/sign-up';
@@ -745,6 +749,20 @@ class RouterHelper {
     return _navigateRoute('$orderDetailsScreen$query', route: action);
   }
 
+  static String getOrderConfirmationRoute({
+    required String orderId,
+    bool isNewUser = false,
+    RouteAction? action,
+  }) {
+    final params = <String, String>{
+      'orderId': Uri.encodeComponent(orderId),
+      'isNewUser': isNewUser.toString(),
+    };
+    final query =
+        '?${params.entries.map((e) => '${e.key}=${e.value}').join('&')}';
+    return _navigateRoute('$orderConfirmationScreen$query', route: action);
+  }
+
   static String getProductImageScreenRoute({
     RouteAction? action,
     required String title,
@@ -889,6 +907,9 @@ class RouterHelper {
       },
     );
   }
+
+  static String getLocationSetupRoute({RouteAction? action}) =>
+      _navigateRoute(locationSetupScreen, route: action);
 
   static String getOfflinePaymentScreen({
     required double payableAmount,
@@ -1349,7 +1370,8 @@ class RouterHelper {
         ),
         GoRoute(
             path: categoryScreen,
-            builder: (context, state) => const CategoryScreen()),
+            builder: (context, state) =>
+                const CategoryScreen(isBackButtonExist: true)),
         GoRoute(
           path: chatScreen,
           builder: (context, state) {
@@ -1589,6 +1611,17 @@ class RouterHelper {
           },
         ),
         GoRoute(
+          path: orderConfirmationScreen,
+          builder: (context, state) {
+            final orderId = _safeDecodeQueryValue(state.uri.queryParameters['orderId']) ?? '';
+            final isNewUser = state.uri.queryParameters['isNewUser'] == 'true';
+            return OrderConfirmationScreen(
+              orderId: orderId,
+              isNewUser: isNewUser,
+            );
+          },
+        ),
+        GoRoute(
           path: productImageScreen,
           builder: (context, state) {
             String? title = state.uri.queryParameters['title'];
@@ -1728,6 +1761,9 @@ class RouterHelper {
             return const WishListScreen();
           },
         ),
+        GoRoute(
+            path: locationSetupScreen,
+            builder: (context, state) => const LocationSetupScreen()),
         GoRoute(
             path: selectLocationScreen,
             builder: (context, state) {

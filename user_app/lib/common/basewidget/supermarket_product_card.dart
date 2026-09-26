@@ -6,6 +6,8 @@ import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/produ
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +26,9 @@ class SupermarketProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final colors = context.allineColors;
+    final isDark =
+        Provider.of<ThemeController>(context, listen: false).darkTheme;
 
     return InkWell(
       borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
@@ -38,15 +42,17 @@ class SupermarketProductCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.all(margin ?? Dimensions.paddingSizeExtraSmall),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+          color: colors.surface,
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           border: Border.all(
-            color: Theme.of(context).primaryColor.withValues(alpha: .08),
+            color: colors.border,
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.18)
+                  : AllineColors.primaryDark.withValues(alpha: 0.04),
               spreadRadius: 0,
               blurRadius: 6,
               offset: const Offset(0, 2),
@@ -64,12 +70,14 @@ class SupermarketProductCard extends StatelessWidget {
                   AspectRatio(
                     aspectRatio: 1.0,
                     child: Container(
-                      padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
+                      padding: const EdgeInsets.all(
+                          Dimensions.paddingSizeExtraSmall),
                       color: isDark
                           ? Theme.of(context).highlightColor
-                          : const Color(0xFFF9FAFB),
+                          : colors.background,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(Dimensions.radiusSmall),
                         child: CustomImageWidget(
                           image: '${product.thumbnailFullUrl?.path}',
                           fit: BoxFit.cover,
@@ -97,7 +105,7 @@ class SupermarketProductCard extends StatelessWidget {
                             style: textMedium.copyWith(
                               fontSize: Dimensions.fontSizeSmall,
                               height: 1.2,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              color: colors.textPrimary,
                             ),
                           ),
 
@@ -120,26 +128,36 @@ class SupermarketProductCard extends StatelessWidget {
                                           product.unitPrice,
                                         ),
                                         style: textRegular.copyWith(
-                                          color: Theme.of(context).hintColor,
-                                          decoration: TextDecoration.lineThrough,
-                                          fontSize: Dimensions.fontSizeExtraSmall,
+                                          color: colors.textSecondary,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                          fontSize:
+                                              Dimensions.fontSizeExtraSmall,
                                         ),
                                       ),
                                     Text(
                                       PriceConverter.convertPrice(
                                         context,
                                         product.unitPrice,
-                                        discountType: (product.clearanceSale?.discountAmount ?? 0) > 0
-                                            ? product.clearanceSale?.discountType
+                                        discountType: (product.clearanceSale
+                                                        ?.discountAmount ??
+                                                    0) >
+                                                0
+                                            ? product
+                                                .clearanceSale?.discountType
                                             : product.discountType,
-                                        discount: (product.clearanceSale?.discountAmount ?? 0) > 0
-                                            ? product.clearanceSale?.discountAmount
+                                        discount: (product.clearanceSale
+                                                        ?.discountAmount ??
+                                                    0) >
+                                                0
+                                            ? product
+                                                .clearanceSale?.discountAmount
                                             : product.discount,
                                       ),
                                       style: textBold.copyWith(
                                         color: isDark
-                                            ? Theme.of(context).textTheme.bodyLarge?.color
-                                            : Theme.of(context).primaryColor,
+                                            ? colors.textPrimary
+                                            : AllineColors.primary,
                                         fontSize: Dimensions.fontSizeDefault,
                                       ),
                                     ),
@@ -163,19 +181,23 @@ class SupermarketProductCard extends StatelessWidget {
               ),
 
               // Out of Stock Overlay
-              if (product.currentStock == 0 && product.productType == 'physical')
+              if (product.currentStock == 0 &&
+                  product.productType == 'physical')
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                      borderRadius:
+                          BorderRadius.circular(Dimensions.radiusDefault),
                     ),
                     alignment: Alignment.center,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.error,
-                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                        borderRadius:
+                            BorderRadius.circular(Dimensions.radiusSmall),
                       ),
                       child: Text(
                         'Out of Stock',

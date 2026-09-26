@@ -20,7 +20,9 @@ class CartController extends ChangeNotifier {
   double amount = 0.0;
   bool isSelectAll = true;
   bool _cartLoading = false;
-  bool  get cartLoading => _cartLoading;
+  bool get cartLoading => _cartLoading;
+  bool _cartLoadFailed = false;
+  bool get cartLoadFailed => _cartLoadFailed;
   CartModel? cart;
   String? _updateQuantityErrorText;
   String? get addOrderStatusErrorText => _updateQuantityErrorText;
@@ -30,26 +32,31 @@ class CartController extends ChangeNotifier {
   List<CartModel> get cartList => _cartList;
   bool get getData => _getData;
 
-
-  void setCartData(){
+  void setCartData() {
     _getData = true;
   }
 
-  void getCartDataLoaded(){
+  void getCartDataLoaded() {
     _getData = false;
   }
 
-  Future<ApiResponseModel> getCartData(BuildContext context, {bool reload = true, String? couponCode, String? addressId}) async {
-    if(reload){
+  Future<ApiResponseModel> getCartData(BuildContext context,
+      {bool reload = true, String? couponCode, String? addressId}) async {
+    if (reload) {
       _cartLoading = true;
+      _cartLoadFailed = false;
+      notifyListeners();
     }
-    ApiResponseModel apiResponse = await cartServiceInterface!.getCartList(couponCode: couponCode, addressId: addressId);
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    ApiResponseModel apiResponse = await cartServiceInterface!
+        .getCartList(couponCode: couponCode, addressId: addressId);
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       _cartList = [];
-      apiResponse.response!.data.forEach((cart) => _cartList.add(CartModel.fromJson(cart)));
-      _cartLoading = false;
+      apiResponse.response!.data
+          .forEach((cart) => _cartList.add(CartModel.fromJson(cart)));
+      _cartLoadFailed = false;
     } else {
-      _cartLoading = false;
+      _cartLoadFailed = true;
       ApiChecker.checkApi(apiResponse);
     }
     _cartLoading = false;
@@ -57,58 +64,89 @@ class CartController extends ChangeNotifier {
     return apiResponse;
   }
 
-
   void setIsCartLoading() {
     _cartLoading = true;
+    _cartLoadFailed = false;
+    notifyListeners();
   }
 
   bool updatingIncrement = false;
   bool updatingDecrement = false;
 
-
-
-  Future<ApiResponseModel> updateCartProductQuantity(int? key, int quantity, BuildContext context, bool increment, int index) async{
-    if(increment){
+  Future<ApiResponseModel> updateCartProductQuantity(int? key, int quantity,
+      BuildContext context, bool increment, int index) async {
+    if (quantity < 1) {
+      return ApiResponseModel.withError('quantity_must_be_greater_than_0');
+    }
+    if (index >= 0 && index < cartList.length) {
+      if (cartList[index].increment == true ||
+          cartList[index].decrement == true) {
+        return ApiResponseModel.withError('already_updating');
+      }
+    }
+    if (increment) {
       cartList[index].increment = true;
-    }else{
+    } else {
       cartList[index].decrement = true;
     }
     notifyListeners();
     ApiResponseModel apiResponse;
-    apiResponse = await cartServiceInterface!.updateQuantity(key, quantity);
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
-      cartList[index].increment  = false;
-      cartList[index].decrement = false;
-      String message = apiResponse.response!.data['message'].toString();
-      showCustomSnackBarWidget(message, Get.context!, snackBarType: SnackBarType.success);
-      await getCartData(Get.context!);
-    } else {
-      cartList[index].increment  = false;
-      cartList[index].decrement = false;
-      ApiChecker.checkApi(apiResponse);
+    try {
+      apiResponse = await cartServiceInterface!.updateQuantity(key, quantity);
+      if (apiResponse.response != null &&
+          (apiResponse.response!.statusCode == 200 ||
+              apiResponse.response!.statusCode == 201)) {
+        String message = apiResponse.response!.data['message'].toString();
+        showCustomSnackBarWidget(message, Get.context!,
+            snackBarType: SnackBarType.success);
+        await getCartData(Get.context!);
+      } else {
+        ApiChecker.checkApi(apiResponse);
+      }
+    } finally {
+      if (index >= 0 && index < cartList.length) {
+        cartList[index].increment = false;
+        cartList[index].decrement = false;
+      }
+      notifyListeners();
     }
-    notifyListeners();
     return apiResponse;
   }
 
-
-
-
-
-  Future<ApiResponseModel> addToCartAPISilent(CartModelBody cart, BuildContext context, List<ChoiceOptions> choices, List<int>? variationIndexes, {int buyNow = 0, int? shippingMethodExist, int? shippingMethodId, bool showSnackbar = false}) async {
+  Future<ApiResponseModel> addToCartAPISilent(
+      CartModelBody cart,
+      BuildContext context,
+      List<ChoiceOptions> choices,
+      List<int>? variationIndexes,
+      {int buyNow = 0,
+      int? shippingMethodExist,
+      int? shippingMethodId,
+      bool showSnackbar = false}) async {
+    if (_addToCartLoading) {
+      return ApiResponseModel.withError('already_loading');
+    }
     _addToCartLoading = true;
     notifyListeners();
-    ApiResponseModel apiResponse = await cartServiceInterface!.addToCartListData(cart, choices, variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
-    _addToCartLoading = false;
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
-      if (showSnackbar && apiResponse.response!.data['message'] != null) {
-        showCustomSnackBarWidget(apiResponse.response!.data['message'], Get.context!, snackBarType: SnackBarType.success);
+    ApiResponseModel apiResponse;
+    try {
+      apiResponse = await cartServiceInterface!.addToCartListData(cart, choices,
+          variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
+      if (apiResponse.response != null &&
+          (apiResponse.response!.statusCode == 200 ||
+              apiResponse.response!.statusCode == 201)) {
+        if (showSnackbar && apiResponse.response!.data['message'] != null) {
+          showCustomSnackBarWidget(
+              apiResponse.response!.data['message'], Get.context!,
+              snackBarType: SnackBarType.success);
+        }
+        getCartData(Get.context!, reload: false);
+      } else {
+        ApiChecker.checkApi(apiResponse);
       }
-      getCartData(Get.context!, reload: false);
-    } else {
-      ApiChecker.checkApi(apiResponse);
+    } finally {
+      _addToCartLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
     return apiResponse;
   }
 
@@ -118,53 +156,90 @@ class CartController extends ChangeNotifier {
     }
   }
 
-  Future<ApiResponseModel> addToCartAPI(CartModelBody cart, BuildContext context, List<ChoiceOptions> choices, List<int>? variationIndexes, {int buyNow = 0, int? shippingMethodExist, int? shippingMethodId}) async {
-    _addToCartLoading = true;
-    notifyListeners();
-    ApiResponseModel apiResponse = await cartServiceInterface!.addToCartListData(cart, choices, variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
-    _addToCartLoading = false;
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
-      Navigator.of(Get.context!).pop();
-      _addToCartLoading = false;
-      showCustomSnackBarWidget(apiResponse.response!.data['message'], Get.context!, snackBarType: SnackBarType.success);
-      getCartData(Get.context!);
-    } else {
-      _addToCartLoading = false;
-      ApiChecker.checkApi(apiResponse);
+  Future<ApiResponseModel> addToCartAPI(
+      CartModelBody cart,
+      BuildContext context,
+      List<ChoiceOptions> choices,
+      List<int>? variationIndexes,
+      {int buyNow = 0,
+      int? shippingMethodExist,
+      int? shippingMethodId}) async {
+    if (_addToCartLoading) {
+      return ApiResponseModel.withError('already_loading');
     }
-    notifyListeners();
-    return apiResponse;
-  }
-
-
-  Future<ApiResponseModel> restockRequest(CartModelBody cart, BuildContext context, List<ChoiceOptions> choices, List<int>? variationIndexes, {int buyNow = 0, int? shippingMethodExist, int? shippingMethodId, String? variationType}) async {
     _addToCartLoading = true;
     notifyListeners();
-    ApiResponseModel apiResponse = await cartServiceInterface!.restockRequest(cart, choices, variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
-
-    _addToCartLoading = false;
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
-      Navigator.of(Get.context!).pop();
-      _addToCartLoading = false;
-      if(context.mounted) {
-        Provider.of<ProductDetailsController>(context, listen: false).updateProductRestock(variantKey: variationType);
+    ApiResponseModel apiResponse;
+    try {
+      apiResponse = await cartServiceInterface!.addToCartListData(cart, choices,
+          variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
+      if (apiResponse.response != null &&
+          (apiResponse.response!.statusCode == 200 ||
+              apiResponse.response!.statusCode == 201)) {
+        Navigator.of(Get.context!).pop();
+        showCustomSnackBarWidget(
+            apiResponse.response!.data['message'], Get.context!,
+            snackBarType: SnackBarType.success);
+        getCartData(Get.context!);
+      } else {
+        ApiChecker.checkApi(apiResponse);
       }
-      await FirebaseMessaging.instance.subscribeToTopic(apiResponse.response!.data['topic']);
-      showCustomSnackBarWidget(apiResponse.response!.data['message'], Get.context!, snackBarType: apiResponse.response!.data['status'] == 0 ? SnackBarType.error : SnackBarType.success);
-    } else {
+    } finally {
       _addToCartLoading = false;
-      ApiChecker.checkApi(apiResponse);
+      notifyListeners();
     }
-    notifyListeners();
     return apiResponse;
   }
 
+  Future<ApiResponseModel> restockRequest(
+      CartModelBody cart,
+      BuildContext context,
+      List<ChoiceOptions> choices,
+      List<int>? variationIndexes,
+      {int buyNow = 0,
+      int? shippingMethodExist,
+      int? shippingMethodId,
+      String? variationType}) async {
+    if (_addToCartLoading) {
+      return ApiResponseModel.withError('already_loading');
+    }
+    _addToCartLoading = true;
+    notifyListeners();
+    ApiResponseModel apiResponse;
+    try {
+      apiResponse = await cartServiceInterface!.restockRequest(cart, choices,
+          variationIndexes, buyNow, shippingMethodExist, shippingMethodId);
 
-  Future<void> removeFromCartAPI(int? key, int index) async{
+      if (apiResponse.response != null &&
+          apiResponse.response!.statusCode == 200) {
+        Navigator.of(Get.context!).pop();
+        if (context.mounted) {
+          Provider.of<ProductDetailsController>(context, listen: false)
+              .updateProductRestock(variantKey: variationType);
+        }
+        await FirebaseMessaging.instance
+            .subscribeToTopic(apiResponse.response!.data['topic']);
+        showCustomSnackBarWidget(
+            apiResponse.response!.data['message'], Get.context!,
+            snackBarType: apiResponse.response!.data['status'] == 0
+                ? SnackBarType.error
+                : SnackBarType.success);
+      } else {
+        ApiChecker.checkApi(apiResponse);
+      }
+    } finally {
+      _addToCartLoading = false;
+      notifyListeners();
+    }
+    return apiResponse;
+  }
+
+  Future<void> removeFromCartAPI(int? key, int index) async {
     cartList[index].decrement = true;
     notifyListeners();
     ApiResponseModel apiResponse = await cartServiceInterface!.delete(key!);
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       cartList[index].decrement = false;
       getCartData(Get.context!);
     } else {
@@ -174,17 +249,19 @@ class CartController extends ChangeNotifier {
     notifyListeners();
   }
 
-
-  Future<void> addRemoveCartSelectedItem(List<int> ids, bool action) async{
+  Future<void> addRemoveCartSelectedItem(List<int> ids, bool action) async {
     notifyListeners();
     Map<String, dynamic> data = {
-      'ids' : ids,
-      'action' : action ? 'checked' : 'unchecked'
+      'ids': ids,
+      'action': action ? 'checked' : 'unchecked'
     };
-    ApiResponseModel apiResponse = await cartServiceInterface!.addRemoveCartSelectedItem(data);
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    ApiResponseModel apiResponse =
+        await cartServiceInterface!.addRemoveCartSelectedItem(data);
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       await Future.wait([
-        Provider.of<ShippingController>(Get.context!, listen: false).getChosenShippingMethod(Get.context!),
+        Provider.of<ShippingController>(Get.context!, listen: false)
+            .getChosenShippingMethod(Get.context!),
         getCartData(Get.context!, reload: false),
       ]);
     } else {
@@ -193,25 +270,20 @@ class CartController extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void resetCartList({bool isUpdate = true}) {
     _cartList = [];
-    if(isUpdate){
+    if (isUpdate) {
       notifyListeners();
     }
   }
 
-
-  Future<void> mergeGuestCart() async{
+  Future<void> mergeGuestCart() async {
     ApiResponseModel apiResponse = await cartServiceInterface!.mergeGuestCart();
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
-
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
     } else {
       ApiChecker.checkApi(apiResponse);
     }
     notifyListeners();
   }
-
-
-
 }

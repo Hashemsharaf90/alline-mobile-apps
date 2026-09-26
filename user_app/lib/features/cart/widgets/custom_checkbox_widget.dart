@@ -7,14 +7,12 @@ class CustomCheckbox extends StatelessWidget {
   final WidgetStateBorderSide? side;
   final Color? checkColor;
   final VisualDensity? visualDensity;
-  final Key? key;
-
   final double size;
 
   final double checkSize;
 
   const CustomCheckbox({
-    this.key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.fillColor,
@@ -29,38 +27,50 @@ class CustomCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     final isChecked = value ?? false;
     final backgroundColor = fillColor?.resolve(
-      isChecked ? {WidgetState.selected} : {},
-    ) ??
+          isChecked ? {WidgetState.selected} : {},
+        ) ??
         Theme.of(context).cardColor;
     final borderSide = side?.resolve(
-      isChecked ? {WidgetState.selected} : {},
-    ) ??
+          isChecked ? {WidgetState.selected} : {},
+        ) ??
         BorderSide(
           color: Theme.of(context).hintColor.withValues(alpha: 0.5),
           width: 2,
         );
 
-    return GestureDetector(
-      onTap: () => onChanged?.call(!isChecked),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        height: size,
-        width: size,
-        decoration: BoxDecoration(
-          color: isChecked ? backgroundColor : Theme.of(context).cardColor,
-          border: Border.fromBorderSide(borderSide),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: isChecked
-            ? Center(
-          child: Icon(
-            fontWeight: FontWeight.w600,
-            Icons.check,
-            size: checkSize, // 👈 control tick mark size
-            color: checkColor ?? Colors.white,
+    return Semantics(
+      checked: isChecked,
+      enabled: onChanged != null,
+      child: InkResponse(
+        onTap: onChanged == null ? null : () => onChanged?.call(!isChecked),
+        radius: 24,
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              height: size,
+              width: size,
+              decoration: BoxDecoration(
+                color:
+                    isChecked ? backgroundColor : Theme.of(context).cardColor,
+                border: Border.fromBorderSide(borderSide),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: isChecked
+                  ? Center(
+                      child: Icon(
+                        fontWeight: FontWeight.w600,
+                        Icons.check,
+                        size: checkSize,
+                        color: checkColor ?? Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
           ),
-        )
-            : null,
+        ),
       ),
     );
   }

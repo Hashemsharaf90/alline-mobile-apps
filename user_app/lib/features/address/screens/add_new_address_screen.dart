@@ -1,8 +1,6 @@
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/domain/models/address_model.dart';
-import 'package:flutter_sixvalley_ecommerce/features/auth/widgets/code_picker_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
@@ -16,13 +14,11 @@ import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_app_bar_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/success_dialog_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_textfield_widget.dart';
 import 'package:geolocator/geolocator.dart';
@@ -59,8 +55,6 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
   final FocusNode _nameNode = FocusNode();
   final FocusNode _emailNode = FocusNode();
   final FocusNode _numberNode = FocusNode();
-  final FocusNode _cityNode = FocusNode();
-  final FocusNode _zipNode = FocusNode();
   Address? _address;
   String zip = '', country = 'YE';
   late LatLng _defaut;
@@ -118,8 +112,8 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
       _countryCodeController.text = '${widget.address?.country}';
       _contactPersonEmailController.text = '${widget.address?.email}';
       // _contactPersonNumberController.text = '${widget.address?.phone}';
-      _cityController.text = '${widget.address?.city}';
-      _zipCodeController.text = '${widget.address?.zip}';
+      _cityController.text = (widget.address?.city != null && widget.address!.city!.isNotEmpty) ? widget.address!.city! : 'صنعاء';
+      _zipCodeController.text = (widget.address?.zip != null && widget.address!.zip!.isNotEmpty) ? widget.address!.zip! : '00000';
       if (widget.address!.addressType == 'Home') {
         Provider.of<AddressController>(context, listen: false)
             .updateAddressIndex(0, false);
@@ -139,6 +133,9 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
           countryCode, widget.address?.phone ?? '');
       _contactPersonNumberController.text = phoneNumberOnly;
     } else {
+      _cityController.text = 'صنعاء';
+      _zipCodeController.text = '00000';
+      _countryCodeController.text = 'Yemen';
       if (Provider.of<ProfileController>(context, listen: false)
               .userInfoModel !=
           null) {
@@ -515,321 +512,18 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                             CustomTextFieldWidget(
                               labelText:
                                   getTranslated('delivery_address', context),
-                              hintText: getTranslated('usa', context),
+                              hintText: 'وصف تفصيلي للعنوان (الشارع، المعلم، المبنى)',
                               inputType: TextInputType.streetAddress,
-                              inputAction: TextInputAction.next,
+                              inputAction: TextInputAction.done,
                               focusNode: _addressNode,
                               prefixIcon: Images.address,
                               required: true,
-                              nextFocus: _cityNode,
                               controller: locationController.locationController,
                               validator: (value) =>
                                   ValidateCheck.validateEmptyText(
                                       value, "address_is_required"),
                             ),
-                            const SizedBox(
-                                height: Dimensions.paddingSizeDefaultAddress),
-                            ...[
-                              Text(getTranslated('country', context)!,
-                                  style: textRegular.copyWith(
-                                    color: Theme.of(context).hintColor,
-                                    fontSize: Dimensions.fontSizeSmall,
-                                  )),
-                              const SizedBox(
-                                  height: Dimensions.paddingSizeExtraSmall),
-                              SizedBox(
-                                  height: 60,
-                                  child: Consumer<AddressController>(
-                                      builder: (context, addressController, _) {
-                                    return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Provider.of<SplashController>(context,
-                                                          listen: false)
-                                                      .configModel!
-                                                      .deliveryCountryRestriction ==
-                                                  1
-                                              ? Container(
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  decoration: BoxDecoration(
-                                                      color: Theme.of(context)
-                                                          .cardColor,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5),
-                                                      border: Border.all(
-                                                          width: .1,
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .hintColor
-                                                              .withValues(
-                                                                  alpha: 0.1))),
-                                                  child:
-                                                      DropdownButtonFormField2<
-                                                          String>(
-                                                    isExpanded: true,
-                                                    isDense: true,
-                                                    decoration: InputDecoration(
-                                                        contentPadding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                vertical: 0),
-                                                        border: OutlineInputBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        5))),
-                                                    hint: Row(
-                                                      children: [
-                                                        Image.asset(
-                                                            Images.country),
-                                                        const SizedBox(
-                                                            width: Dimensions
-                                                                .paddingSizeSmall),
-                                                        Text(
-                                                            _countryCodeController
-                                                                .text,
-                                                            style: textRegular.copyWith(
-                                                                fontSize: Dimensions
-                                                                    .fontSizeDefault,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodyLarge!
-                                                                    .color)),
-                                                      ],
-                                                    ),
-                                                    items: addressController
-                                                        .restrictedCountryList
-                                                        .map((item) => DropdownMenuItem<
-                                                                String>(
-                                                            value: item,
-                                                            child: Text(item,
-                                                                style: textRegular.copyWith(
-                                                                    fontSize:
-                                                                        Dimensions
-                                                                            .fontSizeSmall,
-                                                                    color: Theme.of(
-                                                                            context)
-                                                                        .textTheme
-                                                                        .bodyLarge
-                                                                        ?.color))))
-                                                        .toList(),
-                                                    onChanged: (value) {
-                                                      _countryCodeController
-                                                          .text = value!;
-                                                    },
-                                                    buttonStyleData:
-                                                        const ButtonStyleData(
-                                                      padding: EdgeInsets.only(
-                                                          right: 8),
-                                                    ),
-                                                    iconStyleData: IconStyleData(
-                                                        icon: Icon(
-                                                            Icons
-                                                                .arrow_drop_down,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .hintColor),
-                                                        iconSize: 24),
-                                                    dropdownStyleData:
-                                                        DropdownStyleData(
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(5),
-                                                      ),
-                                                    ),
-                                                    menuItemStyleData:
-                                                        const MenuItemStyleData(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        16)),
-                                                  ),
-                                                )
-                                              : Container(
-                                                  width: MediaQuery.of(context)
-                                                      .size
-                                                      .width,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      vertical: Dimensions
-                                                          .paddingSizeSmall),
-                                                  decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .circular(Dimensions
-                                                              .paddingSizeSmall),
-                                                      color: Theme.of(context)
-                                                          .cardColor,
-                                                      border: Border.all(
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .hintColor
-                                                                  .withValues(
-                                                                      alpha:
-                                                                          .5))),
-                                                  child: CodePickerWidget(
-                                                    fromCountryList: true,
-                                                    padding: const EdgeInsets
-                                                        .only(
-                                                        left: Dimensions
-                                                            .paddingSizeSmall),
-                                                    flagWidth: 25,
-                                                    onChanged: (val) {
-                                                      _countryCodeController
-                                                          .text = val.name!;
-                                                    },
-                                                    initialSelection:
-                                                        _countryCodeController
-                                                            .text,
-                                                    showDropDownButton: true,
-                                                    showCountryOnly: true,
-                                                    showOnlyCountryWhenClosed:
-                                                        true,
-                                                    showFlagDialog: true,
-                                                    hideMainText: false,
-                                                    showFlagMain: false,
-                                                    dialogBackgroundColor:
-                                                        Theme.of(context)
-                                                            .cardColor,
-                                                    barrierColor:
-                                                        Provider.of<ThemeController>(
-                                                                    context)
-                                                                .darkTheme
-                                                            ? Colors.black
-                                                                .withValues(
-                                                                    alpha: 0.4)
-                                                            : null,
-                                                    textStyle:
-                                                        textRegular.copyWith(
-                                                      fontSize: Dimensions
-                                                          .fontSizeLarge,
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyLarge!
-                                                          .color,
-                                                    ),
-                                                    dialogTextStyle:
-                                                        textRegular.copyWith(
-                                                      fontSize: Dimensions
-                                                          .fontSizeDefault,
-                                                      color: Theme.of(context)
-                                                          .textTheme
-                                                          .bodyLarge!
-                                                          .color,
-                                                    ),
-                                                  ),
-                                                ),
-                                        ]);
-                                  })),
-                            ],
-                            const SizedBox(
-                                height: Dimensions.paddingSizeDefaultAddress),
-                            CustomTextFieldWidget(
-                              labelText: getTranslated('city', context),
-                              hintText: getTranslated('city', context),
-                              inputType: TextInputType.streetAddress,
-                              inputAction: TextInputAction.next,
-                              focusNode: _cityNode,
-                              required: true,
-                              nextFocus: _zipNode,
-                              prefixIcon: Images.city,
-                              controller: _cityController,
-                              validator: (value) =>
-                                  ValidateCheck.validateEmptyText(
-                                      value, 'city_is_required'),
-                            ),
-                            const SizedBox(
-                                height: Dimensions.paddingSizeDefaultAddress),
-                            Provider.of<SplashController>(context,
-                                            listen: false)
-                                        .configModel!
-                                        .deliveryZipCodeAreaRestriction ==
-                                    0
-                                ? CustomTextFieldWidget(
-                                    labelText: getTranslated('zip', context),
-                                    hintText: getTranslated('zip', context),
-                                    inputAction: TextInputAction.done,
-                                    focusNode: _zipNode,
-                                    required: true,
-                                    prefixIcon: Images.city,
-                                    controller: _zipCodeController,
-                                    validator: (value) =>
-                                        ValidateCheck.validateEmptyText(
-                                            value, 'zip_code_is_required'),
-                                  )
-                                : Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    decoration: BoxDecoration(
-                                        color: Theme.of(context).cardColor,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                            width: .1,
-                                            color: Theme.of(context)
-                                                .hintColor
-                                                .withValues(alpha: 0.1))),
-                                    child: DropdownButtonFormField2<String>(
-                                      isExpanded: true,
-                                      isDense: true,
-                                      decoration: InputDecoration(
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                  vertical: 0),
-                                          border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(5))),
-                                      hint: Row(
-                                        children: [
-                                          Image.asset(Images.city),
-                                          const SizedBox(
-                                            width: Dimensions.paddingSizeSmall,
-                                          ),
-                                          Text(getTranslated('zip', context)!,
-                                              style: textRegular.copyWith(
-                                                  fontSize: Dimensions
-                                                      .fontSizeDefault,
-                                                  color: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge!
-                                                      .color)),
-                                        ],
-                                      ),
-                                      items: addressController.restrictedZipList
-                                          .map((item) => DropdownMenuItem<
-                                                  String>(
-                                              value: item.zipcode,
-                                              child: Text(item.zipcode!,
-                                                  style: textRegular.copyWith(
-                                                      fontSize: Dimensions
-                                                          .fontSizeSmall))))
-                                          .toList(),
-                                      onChanged: (value) {
-                                        _zipCodeController.text = value!;
-                                      },
-                                      buttonStyleData: const ButtonStyleData(
-                                        padding: EdgeInsets.only(right: 8),
-                                      ),
-                                      iconStyleData: IconStyleData(
-                                          icon: Icon(Icons.arrow_drop_down,
-                                              color:
-                                                  Theme.of(context).hintColor),
-                                          iconSize: 24),
-                                      dropdownStyleData: DropdownStyleData(
-                                          decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(5))),
-                                      menuItemStyleData:
-                                          const MenuItemStyleData(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 16)),
-                                    ),
-                                  ),
-                            const SizedBox(
-                                height: Dimensions.paddingSizeDefaultAddress),
+                            const SizedBox(height: Dimensions.paddingSizeDefaultAddress),
                             Container(
                               height: 50.0,
                               margin: const EdgeInsets.all(
@@ -860,10 +554,9 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                                             email: _contactPersonEmailController
                                                 .text
                                                 .trim(),
-                                            city: _cityController.text,
-                                            zip: _zipCodeController.text,
-                                            country:
-                                                _countryCodeController.text,
+                                            city: _cityController.text.trim().isNotEmpty ? _cityController.text.trim() : 'صنعاء',
+                                            zip: _zipCodeController.text.trim().isNotEmpty ? _zipCodeController.text.trim() : '00000',
+                                            country: _countryCodeController.text.trim().isNotEmpty ? _countryCodeController.text.trim() : 'Yemen',
                                             guestId:
                                                 Provider.of<AuthController>(
                                                         context,
@@ -896,16 +589,6 @@ class _AddNewAddressScreenState extends State<AddNewAddressScreen> {
                                                 context,
                                                 addressModel: addressModel,
                                                 addressId: addressModel.id);
-                                          } else if (_countryCodeController.text
-                                              .trim()
-                                              .isEmpty) {
-                                            showCustomSnackBarWidget(
-                                                getTranslated(
-                                                    'country_is_required',
-                                                    context),
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
                                           } else {
                                             addressController
                                                 .addAddress(addressModel)

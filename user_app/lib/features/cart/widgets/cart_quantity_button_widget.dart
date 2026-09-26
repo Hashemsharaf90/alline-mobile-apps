@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_asset_image_widget.dart';
@@ -18,37 +16,47 @@ class CartQuantityButton extends StatelessWidget {
   final int? maxQty;
   final int? minimumOrderQuantity;
   final bool? digitalProduct;
-  const CartQuantityButton({super.key, required this.isIncrement, required this.quantity, required this.index,
-    required this.maxQty,required this.cartModel, this.minimumOrderQuantity, this.digitalProduct});
+  const CartQuantityButton(
+      {super.key,
+      required this.isIncrement,
+      required this.quantity,
+      required this.index,
+      required this.maxQty,
+      required this.cartModel,
+      this.minimumOrderQuantity,
+      this.digitalProduct});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CartController>(
-        builder: (context, cartProvider,_) {
-          return InkWell(
-            onTap: () {
-              if (!isIncrement && quantity! > minimumOrderQuantity!) {
-                cartProvider.updateCartProductQuantity(cartModel!.id, cartModel!.quantity!-1, context, false, index);
-              } else if ((isIncrement && quantity! < maxQty!) || (isIncrement && digitalProduct!)) {
-                cartProvider.updateCartProductQuantity(cartModel!.id, cartModel!.quantity!+1, context, true, index);
-              }else if(isIncrement && quantity! == maxQty!){
-                showCustomSnackBarWidget(getTranslated('out_of_stock', context), context, snackBarType: SnackBarType.warning);
-              }else{
-                cartProvider.removeFromCartAPI(cartModel!.id, index);
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: (!isIncrement && quantity! == minimumOrderQuantity!) ?
-              CustomAssetImageWidget(Images.cartDeleteIcon, height: 20, width: 20) :
-              Icon(
-                isIncrement ? CupertinoIcons.add : CupertinoIcons.minus,
-                color: Theme.of(context).primaryColor, size: 17, fontWeight: FontWeight.w900
-              ),
-            ),
-
-          );
-        }
-    );
+    return Consumer<CartController>(builder: (context, cartProvider, _) {
+      return InkWell(
+        onTap: () {
+          if (!isIncrement && quantity! > minimumOrderQuantity!) {
+            cartProvider.updateCartProductQuantity(
+                cartModel!.id, cartModel!.quantity! - 1, context, false, index);
+          } else if ((isIncrement && quantity! < maxQty!) ||
+              (isIncrement && digitalProduct!)) {
+            cartProvider.updateCartProductQuantity(
+                cartModel!.id, cartModel!.quantity! + 1, context, true, index);
+          } else if (isIncrement && quantity! == maxQty!) {
+            showCustomSnackBarWidget(
+                getTranslated('out_of_stock', context), context,
+                snackBarType: SnackBarType.warning);
+          } else {
+            cartProvider.removeFromCartAPI(cartModel!.id, index);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+          child: (!isIncrement && quantity! == minimumOrderQuantity!)
+              ? CustomAssetImageWidget(Images.cartDeleteIcon,
+                  height: 20, width: 20)
+              : Icon(isIncrement ? CupertinoIcons.add : CupertinoIcons.minus,
+                  color: Theme.of(context).primaryColor,
+                  size: 17,
+                  fontWeight: FontWeight.w900),
+        ),
+      );
+    });
   }
 }

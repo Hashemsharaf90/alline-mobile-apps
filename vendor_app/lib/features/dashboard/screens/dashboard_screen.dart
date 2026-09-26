@@ -6,7 +6,6 @@ import 'package:sixvalley_vendor_app/common/basewidgets/confirmation_dialog_widg
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_dialog_widget.dart';
 import 'package:sixvalley_vendor_app/features/addProduct/controllers/digital_product_controller.dart';
 import 'package:sixvalley_vendor_app/features/ai/controllers/ai_controller.dart';
-import 'package:sixvalley_vendor_app/features/ai_chat/screens/ai_chat_screen.dart';
 import 'package:sixvalley_vendor_app/features/pos/controllers/cart_controller.dart';
 import 'package:sixvalley_vendor_app/features/product/controllers/category_controller.dart';
 import 'package:sixvalley_vendor_app/features/shop/controllers/shop_controller.dart';
@@ -21,9 +20,10 @@ import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
 import 'package:sixvalley_vendor_app/features/home/screens/home_page_screen.dart';
-import 'package:sixvalley_vendor_app/features/menu/widgets/menu_widget.dart';
 import 'package:sixvalley_vendor_app/features/order/screens/order_screen.dart';
-import 'package:sixvalley_vendor_app/features/refund/screens/refund_screen.dart';
+import 'package:sixvalley_vendor_app/features/product/screens/product_list_screen.dart';
+import 'package:sixvalley_vendor_app/features/analytics/screens/seller_analytics_screen.dart';
+import 'package:sixvalley_vendor_app/features/profile/screens/seller_account_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -64,10 +64,10 @@ class DashboardScreenState extends State<DashboardScreen> {
           setPage(1);
         });
       }),
-
-      const OrderScreen(),
-      const RefundScreen(fromNotification: false),
-      const AiChatScreen(),
+      const OrderScreen(isBacButtonExist: false),
+      const ProductListMenuScreen(fromNotification: false, isBackButtonExist: false),
+      const SellerAnalyticsScreen(isBackButtonExist: false),
+      const SellerAccountScreen(),
     ];
 
     NetworkInfo.checkConnectivity(context);
@@ -98,25 +98,14 @@ class DashboardScreenState extends State<DashboardScreen> {
           currentIndex: _pageIndex,
           type: BottomNavigationBarType.fixed,
           items: [
-            _barItem(Images.home, getTranslated('home', context), 0),
-            _barItem(Images.order, getTranslated('my_order', context), 1),
-            _barItem(Images.refund, getTranslated('refund', context), 2),
-            _barItem(Images.message, 'AI', 3),
-            _barItem(Images.menu, getTranslated('menu', context), 4)
+            _barItem(Images.home, getTranslated('nav_home', context) ?? 'الرئيسية', 0),
+            _barItem(Images.order, getTranslated('nav_orders', context) ?? 'الطلبات', 1),
+            _barItem(Images.productIcon, getTranslated('nav_products', context) ?? 'المنتجات', 2),
+            _barItem(Images.pieChart, getTranslated('nav_analytics', context) ?? 'الإحصائيات', 3),
+            _barItem(Images.profile, getTranslated('nav_account', context) ?? 'حسابي', 4),
           ],
           onTap: (int index) {
-            if (index != 4) {
-              setState(() {
-                setPage(index);
-              });
-            } else {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (con) => const MenuBottomSheetWidget()
-              );
-            }
+            setPage(index);
           },
         ),
         body: PageView.builder(

@@ -19,8 +19,9 @@ class DioClient {
       Dio? dioC, {
         required this.loggingInterceptor,
         required this.sharedPreferences,
+        String? initialToken,
       }) {
-    token = sharedPreferences.getString(AppConstants.userLoginToken);
+    token = initialToken ?? sharedPreferences.getString(AppConstants.userLoginToken);
     countryCode = sharedPreferences.getString(AppConstants.countryCode) ?? AppConstants.languages[0].countryCode;
     dio = dioC ?? Dio();
     dio

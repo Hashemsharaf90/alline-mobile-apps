@@ -263,8 +263,6 @@ class AuthController with ChangeNotifier {
         context: Get.context!
       );
 
-      double value = 0;
-
       if (isProfile && image != null) {
         _sellerProfileImage = image;
       } else if(shopLogo && image != null) {

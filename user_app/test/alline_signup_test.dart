@@ -67,8 +67,10 @@ class _Splash extends ChangeNotifier implements SplashController {
           loginOption: LoginOption(socialMediaLogin: 1),
           socialMediaLoginOptions: SocialMediaLoginOptions(google: 1)));
   @override
-  List<BusinessPageModel> get defaultBusinessPages =>
-      [BusinessPageModel(slug: 'terms-and-conditions')];
+  List<BusinessPageModel> get defaultBusinessPages => [
+        BusinessPageModel(slug: 'terms-and-conditions'),
+        BusinessPageModel(slug: 'privacy-policy'),
+      ];
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -117,7 +119,8 @@ void main() {
                     key: captureKey,
                     child: const AuthScreen(referCode: 'WELCOME'))));
     await tester.pumpWidget(app('ar', 1));
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 300)));
     await tester.pumpAndSettle();
     await tester.runAsync(() async {
       final context = tester.element(find.byType(AuthScreen));
@@ -127,6 +130,7 @@ void main() {
     });
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('signup-referral')), findsNothing);
     final submit = find.byKey(const ValueKey('signup-submit'));
     expect(tester.widget<ElevatedButton>(submit).onPressed, isNull);
     final capture = Platform.environment['SIGNUP_CAPTURE'];
@@ -174,7 +178,8 @@ void main() {
     for (final locale in ['ar', 'en']) {
       tester.view.physicalSize = const Size(320, 568);
       await tester.pumpWidget(app(locale, 1.4));
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 300)));
       await tester.pumpAndSettle();
       await tester.ensureVisible(submit);
       await tester.pumpAndSettle();

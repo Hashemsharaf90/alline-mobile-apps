@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/domain/models/signup_model.dart';
@@ -41,12 +43,10 @@ class VerificationScreen extends StatefulWidget {
 
 class _VerificationScreenState extends State<VerificationScreen> {
   // Alline Design Tokens (per ALLINE_LOGIN_DESIGN.md)
-  static const Color primaryBlue = Color(0xFF015FC9);
-  static const Color darkBlue = Color(0xFF032C75);
-  static const Color primaryText = Color(0xFF071B49);
-  static const Color secondaryText = Color(0xFF6D85AF);
-  static const Color borderColor = Color(0xFFE1E8F2);
-  static const Color errorColor = Color(0xFFD9363E);
+  static const Color primaryBlue = AllineColors.primary;
+  static const Color darkBlue = AllineColors.primaryDark;
+  static const Color secondaryText = AllineColors.textSecondary;
+  static const Color errorColor = AllineColors.error;
   static const Color buttonDisabled = Color(0xFFB8C9DE);
 
   Timer? _timer;
@@ -64,7 +64,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   void _startTimer() {
     _timer?.cancel();
-    final config = Provider.of<SplashController>(context, listen: false).configModel;
+    final config =
+        Provider.of<SplashController>(context, listen: false).configModel;
     final int configuredTime = config?.otpResendTime ?? 45;
     _seconds = configuredTime > 1 ? configuredTime : 45;
 
@@ -124,7 +125,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
           if (mounted) {
             setState(() {
               _hasError = true;
-              _errorMessage = getTranslated('input_valid_otp', context) ?? 'رمز التحقق غير صحيح';
+              _errorMessage = getTranslated('input_valid_otp', context) ??
+                  'رمز التحقق غير صحيح';
             });
             showCustomSnackBarWidget(
               _errorMessage!,
@@ -148,7 +150,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
         } else if (isPhone && config.customerVerification?.phone == 1) {
           authProvider.verifyPhone(widget.userInput ?? '', '').then((value) {
             if (value.isSuccess && mounted) {
-              authProvider.navigateToHome(widget.toNavigateScreen, widget.onLoginSuccess);
+              authProvider.navigateToHome(
+                  widget.toNavigateScreen, widget.onLoginSuccess);
             } else if (mounted) {
               setState(() {
                 _hasError = true;
@@ -159,7 +162,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
         } else if (!isPhone && config.customerVerification?.email == 1) {
           authProvider.verifyEmail(widget.userInput ?? '').then((value) {
             if (value.isSuccess && mounted) {
-              authProvider.navigateToHome(widget.toNavigateScreen, widget.onLoginSuccess);
+              authProvider.navigateToHome(
+                  widget.toNavigateScreen, widget.onLoginSuccess);
             } else if (mounted) {
               setState(() {
                 _hasError = true;
@@ -182,16 +186,19 @@ class _VerificationScreenState extends State<VerificationScreen> {
       } else {
         authProvider.verifyPhoneForOtp(widget.userInput ?? '').then((value) {
           final (responseModel, tempToken) = value;
-          if ((responseModel != null && responseModel.isSuccess) && tempToken == null) {
+          if ((responseModel != null && responseModel.isSuccess) &&
+              tempToken == null) {
             if (widget.fromPage == FromPage.otpRegistration) {
               authProvider.clearPendingOtpRegistration();
             }
             if (authProvider.isActiveRememberMe) {
               String userCountryCode =
-                  NumberCheckerHelper.getCountryCode(widget.userInput) ?? '+967';
+                  NumberCheckerHelper.getCountryCode(widget.userInput) ??
+                      '+967';
               authProvider.saveUserEmailAndPassword(UserLogData(
                 countryCode: userCountryCode,
-                phoneNumber: widget.userInput?.substring(userCountryCode.length),
+                phoneNumber:
+                    widget.userInput?.substring(userCountryCode.length),
                 email: null,
                 password: null,
               ));
@@ -199,9 +206,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
               authProvider.clearUserEmailAndPassword();
             }
             if (mounted) {
-              authProvider.navigateToHome(widget.toNavigateScreen, widget.onLoginSuccess);
+              authProvider.navigateToHome(
+                  widget.toNavigateScreen, widget.onLoginSuccess);
             }
-          } else if ((responseModel != null && responseModel.isSuccess) && tempToken != null) {
+          } else if ((responseModel != null && responseModel.isSuccess) &&
+              tempToken != null) {
             if (widget.fromPage == FromPage.otpRegistration) {
               authProvider
                   .completePendingOtpRegistration(
@@ -251,7 +260,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
       String type = isPhone ? 'phone' : 'email';
       authProvider.verifyProfileInfo(widget.userInput!, type).then((value) {
         if (value.isSuccess && mounted) {
-          RouterHelper.getProfileScreen1Route(action: RouteAction.pushNamedAndRemoveUntil);
+          RouterHelper.getProfileScreen1Route(
+              action: RouteAction.pushNamedAndRemoveUntil);
         } else if (mounted) {
           setState(() {
             _hasError = true;
@@ -343,10 +353,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     final ConfigModel config =
-        Provider.of<SplashController>(context, listen: false).configModel ?? ConfigModel();
-    final bool isFirebaseOTP =
-        config.customerVerification?.status == 1 && config.customerVerification?.firebase == 1;
+        Provider.of<SplashController>(context, listen: false).configModel ??
+            ConfigModel();
+    final bool isFirebaseOTP = config.customerVerification?.status == 1 &&
+        config.customerVerification?.firebase == 1;
 
     int minutes = (_seconds / 60).truncate();
     int sec = _seconds % 60;
@@ -356,32 +368,22 @@ class _VerificationScreenState extends State<VerificationScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFFFFF),
-                Color(0xFFFFFFFF),
-                Color(0xFFF4F8FE),
-              ],
-              stops: [0.0, 0.7, 1.0],
-            ),
-          ),
+          decoration: BoxDecoration(color: colors.background),
           child: SafeArea(
             child: Consumer<AuthController>(
               builder: (context, authProvider, _) {
                 final bool isVerifying =
                     authProvider.isPhoneNumberVerificationButtonLoading ||
-                    authProvider.isLoading;
+                        authProvider.isLoading;
                 final bool canSubmit =
                     authProvider.verificationCode.length == 6 && !isVerifying;
 
                 return SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -395,12 +397,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colors.surface,
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: borderColor, width: 1.2),
+                              border: Border.all(color: colors.border),
                               boxShadow: [
                                 BoxShadow(
-                                  color: darkBlue.withOpacity(0.04),
+                                  color: darkBlue.withValues(alpha: 0.04),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -463,11 +465,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         textDirection: TextDirection.ltr,
                         child: Text(
                           _formatPhoneNumber(widget.userInput),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'AllineTajawal',
                             fontSize: 17,
                             fontWeight: FontWeight.w700,
-                            color: primaryText,
+                            color: colors.textPrimary,
                             letterSpacing: 0.5,
                           ),
                           textAlign: TextAlign.center,
@@ -514,18 +516,19 @@ class _VerificationScreenState extends State<VerificationScreen> {
                             borderWidth: 1.5,
                             borderRadius: BorderRadius.circular(14),
                             selectedColor: primaryBlue,
-                            selectedFillColor: Colors.white,
-                            inactiveFillColor: Colors.white,
-                            inactiveColor: _hasError ? errorColor : borderColor,
+                            selectedFillColor: colors.surface,
+                            inactiveFillColor: colors.surface,
+                            inactiveColor:
+                                _hasError ? errorColor : colors.border,
                             activeColor: primaryBlue,
-                            activeFillColor: Colors.white,
+                            activeFillColor: colors.surface,
                             errorBorderColor: errorColor,
                           ),
-                          textStyle: const TextStyle(
+                          textStyle: TextStyle(
                             fontFamily: 'AllineTajawal',
                             fontSize: 23,
                             fontWeight: FontWeight.w700,
-                            color: primaryText,
+                            color: colors.textPrimary,
                           ),
                           animationDuration: const Duration(milliseconds: 200),
                           backgroundColor: Colors.transparent,
@@ -586,8 +589,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                                 width: 18,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(primaryBlue),
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      primaryBlue),
                                 ),
                               )
                             : InkWell(

@@ -5,6 +5,7 @@ import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:provider/provider.dart';
 
 /// A sleek, persistent floating cart summary bar for Q-Commerce / Supermarket screens.
@@ -20,7 +21,9 @@ class FloatingCartBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final colors = context.allineColors;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
 
     return Consumer<CartController>(
       builder: (context, cartController, _) {
@@ -58,20 +61,13 @@ class FloatingCartBar extends StatelessWidget {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withValues(alpha: 0.85),
-                    ],
-                    begin: AlignmentDirectional.centerStart,
-                    end: AlignmentDirectional.centerEnd,
-                  ),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.35),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+                      color: colors.textPrimary.withValues(alpha: 0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
@@ -146,7 +142,9 @@ class FloatingCartBar extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Icon(
-                          isLtr ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                          isLtr
+                              ? Icons.arrow_forward_ios
+                              : Icons.arrow_back_ios,
                           color: Colors.white,
                           size: 14,
                         ),

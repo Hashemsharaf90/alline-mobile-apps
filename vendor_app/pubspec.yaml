@@ -19,6 +19,7 @@ dependencies:
   dio: ^5.9.1
   intl: ^0.20.2
   shared_preferences: ^2.5.4
+  flutter_secure_storage: ^10.2.0
   shimmer: ^3.0.0
   image_picker: ^1.2.1
   flutter_switch: ^0.3.2
@@ -114,6 +115,12 @@ flutter:
     - assets/svg/
 
   fonts:
+    - family: AllineTajawal
+      fonts:
+        - asset: assets/font/tajawal/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/font/tajawal/Tajawal-Bold.ttf
+          weight: 700
     - family: Roboto
       fonts:
         - asset: assets/font/roboto/Roboto-Regular.ttf

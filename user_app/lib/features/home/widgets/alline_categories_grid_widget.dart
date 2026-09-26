@@ -25,9 +25,9 @@ class AllineCategoriesGridWidget extends StatelessWidget {
         }
 
         return Container(
-          margin: const EdgeInsets.only(top: 8, bottom: 6),
+          margin: const EdgeInsets.only(bottom: 8),
           color: Theme.of(context).cardColor,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,25 +37,12 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 4,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isLtr ? 'Categories' : 'التصنيفات',
-                          style: textBold.copyWith(
-                            fontSize: 16,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      isLtr ? 'Categories' : 'التصنيفات السريعة',
+                      style: textBold.copyWith(
+                        fontSize: 17,
+                        color: isDark ? Colors.white : const Color(0xFF071B49),
+                      ),
                     ),
                     InkWell(
                       onTap: () => Navigator.push(
@@ -75,11 +62,6 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 2),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 11,
-                              color: Theme.of(context).primaryColor,
-                            ),
                           ],
                         ),
                       ),
@@ -92,18 +74,18 @@ class AllineCategoriesGridWidget extends StatelessWidget {
 
               // Horizontal Scrollable Categories
               SizedBox(
-                height: 118,
+                height: 116,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 14),
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final category = categories[index];
 
                     return SizedBox(
-                      width: 74,
+                      width: 72,
                       child: InkWell(
                         onTap: () => Navigator.push(
                           context,
@@ -119,55 +101,49 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Circular Category Image with modern border & soft shadow
                             Container(
                               width: 68,
                               height: 68,
-                              padding: const EdgeInsets.all(2.5),
+                              padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isDark
                                     ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF8FAFC),
-                                border: Border.all(
-                                  color: isDark
-                                      ? const Color(0xFF334155)
-                                      : const Color(0xFFE2E8F0),
-                                  width: 1.5,
-                                ),
+                                    : const Color(0xFFF4F5F7),
                                 boxShadow: [
                                   BoxShadow(
                                     color: isDark
-                                        ? Colors.black.withOpacity(0.3)
-                                        : Colors.black.withOpacity(0.05),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                                        ? Colors.black.withValues(alpha: .16)
+                                        : Colors.black.withValues(alpha: .03),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: CategoryAssetHelper.buildCircularCategoryAvatar(
+                              child: CategoryAssetHelper.buildContainedCategoryArtwork(
                                 category: category,
-                                size: 63,
+                                size: 54,
                               ),
                             ),
 
                             const SizedBox(height: 7),
 
-                            // Category Name
                             SizedBox(
-                              height: 32,
-                              child: Text(
-                                category.name ?? '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: textMedium.copyWith(
-                                  fontSize: 11.5,
-                                  color: isDark
-                                      ? const Color(0xFFE2E8F0)
-                                      : const Color(0xFF1E293B),
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
+                              height: 34,
+                              child: Center(
+                                child: Text(
+                                  category.name ?? '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: textMedium.copyWith(
+                                    fontSize: 11.5,
+                                    color: isDark
+                                        ? const Color(0xFFE2E8F0)
+                                        : const Color(0xFF071B49),
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.18,
+                                  ),
                                 ),
                               ),
                             ),

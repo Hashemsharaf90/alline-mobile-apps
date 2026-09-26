@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/domain/models/cart_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/controllers/checkout_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/checkout_condition_checkbox.dart';
-import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/order_place_bottomsheet_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/payment_method_bottom_sheet_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shipping/controllers/shipping_controller.dart';
@@ -19,7 +19,6 @@ import 'package:flutter_sixvalley_ecommerce/features/coupon/controllers/coupon_c
 import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/amount_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/animated_custom_dialog_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_app_bar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_button_widget.dart';
@@ -29,7 +28,9 @@ import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/choose_pay
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/coupon_apply_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/shipping_details_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/wallet_payment_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/wallet/controllers/wallet_controller.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final List<CartModel> cartList;
@@ -72,6 +73,16 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   late bool _billingAddress;
   double? _couponDiscount;
   double? _referralDiscount;
+  double? _customDeliveryFee;
+  double? _deliveryDistanceKm;
+
+  double get _payableAmount =>
+      _order +
+      (_customDeliveryFee ?? widget.shippingFee) -
+      widget.discount -
+      (_referralDiscount ?? 0) -
+      (_couponDiscount ?? 0) +
+      _tax;
 
   DebounceHelper debounceHelper = DebounceHelper(milliseconds: 500);
   SplashController splashController =
@@ -88,17 +99,24 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     Provider.of<CartController>(context, listen: false).getCartData(context);
     Provider.of<CheckoutController>(context, listen: false)
         .resetPaymentMethod();
+    if ((splashController.configModel?.cashOnDelivery ?? false) &&
+        !widget.onlyDigital) {
+      Provider.of<CheckoutController>(context, listen: false)
+          .setOfflineChecked('cod', notify: false);
+    }
     Provider.of<ShippingController>(context, listen: false)
         .getChosenShippingMethod(context);
-    if (splashController.configModel != null &&
-        splashController.configModel!.offlinePayment != null) {
-      Provider.of<CheckoutController>(context, listen: false)
-          .getOfflinePaymentList();
-    }
+    // The API is the source of truth for enabled local wallets.  Do not gate
+    // this request behind the cached config flag: it can be stale and would
+    // make a valid wallet unavailable for a whole cart.
+    Provider.of<CheckoutController>(context, listen: false)
+        .getOfflinePaymentList();
 
     if (Provider.of<AuthController>(context, listen: false).isLoggedIn()) {
       Provider.of<CouponController>(context, listen: false)
           .getAvailableCouponList();
+      Provider.of<WalletController>(context, listen: false)
+          .getLocalWalletMethods();
     }
 
     if (Provider.of<CheckoutController>(context, listen: false).isAcceptTerms) {
@@ -121,6 +139,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     _order = widget.totalOrderAmount + widget.discount;
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F8FE),
       resizeToAvoidBottomInset: true,
       key: _scaffoldKey,
       bottomNavigationBar:
@@ -261,34 +280,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                       : addressId
                                                   : '';
 
-                                          if (orderProvider
-                                                  .paymentMethodIndex !=
-                                              -1) {
-                                            orderProvider.digitalPaymentPlaceOrder(
-                                                orderNote: orderNote,
-                                                customerId: Provider.of<
-                                                                AuthController>(
-                                                            context,
-                                                            listen: false)
-                                                        .isLoggedIn()
-                                                    ? profileProvider
-                                                        .userInfoModel?.id
-                                                        .toString()
-                                                    : Provider.of<
-                                                                AuthController>(
-                                                            context,
-                                                            listen: false)
-                                                        .getGuestToken(),
-                                                addressId: addressId,
-                                                billingAddressId:
-                                                    billingAddressId,
-                                                couponCode: couponCode,
-                                                couponDiscount:
-                                                    couponCodeAmount,
-                                                paymentMethod: orderProvider
-                                                    .selectedDigitalPaymentMethodName);
-                                          } else if (orderProvider
-                                                  .isCODChecked &&
+                                          if (orderProvider.isCODChecked &&
                                               !widget.onlyDigital) {
                                             orderProvider.placeOrder(
                                                 callback: _callback,
@@ -300,16 +292,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                 orderNote: orderNote);
                                           } else if (orderProvider
                                               .isOfflineChecked) {
-                                            // Navigator.of(context).push(MaterialPageRoute(builder: (_)=> OfflinePaymentScreen(payableAmount: _order + widget.shippingFee - widget.discount - (_referralDiscount ?? 0) - _couponDiscount! + _tax, callback: _callback)));
                                             RouterHelper
                                                 .getOfflinePaymentScreen(
-                                                    payableAmount: (_order +
-                                                        widget.shippingFee -
-                                                        widget.discount -
-                                                        (_referralDiscount ??
-                                                            0) -
-                                                        _couponDiscount! +
-                                                        _tax),
+                                                    payableAmount:
+                                                        _payableAmount,
                                                     callback: _callback);
                                           } else if (orderProvider
                                               .isWalletChecked) {
@@ -320,24 +306,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                         profileProvider
                                                                 .balance ??
                                                             0,
-                                                    orderAmount: _order +
-                                                        widget.shippingFee -
-                                                        widget.discount -
-                                                        (_referralDiscount ??
-                                                            0) -
-                                                        _couponDiscount! +
-                                                        _tax,
+                                                    orderAmount: _payableAmount,
                                                     onTap: () {
                                                       if (profileProvider
                                                               .balance! <
-                                                          (_order +
-                                                              widget
-                                                                  .shippingFee -
-                                                              widget.discount -
-                                                              (_referralDiscount ??
-                                                                  0) -
-                                                              _couponDiscount! +
-                                                              _tax)) {
+                                                          _payableAmount) {
                                                         showCustomSnackBarWidget(
                                                             getTranslated(
                                                                 'insufficient_balance',
@@ -366,6 +339,15 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                 dismissible: false,
                                                 willFlip: true);
                                           } else {
+                                            showCustomSnackBarWidget(
+                                              getTranslated(
+                                                      'select_payment_method',
+                                                      context) ??
+                                                  'يرجى تحديد طريقة الدفع أولاً لإتمام الطلب',
+                                              context,
+                                              snackBarType:
+                                                  SnackBarType.warning,
+                                            );
                                             showModalBottomSheet(
                                               context: context,
                                               isScrollControlled: true,
@@ -373,16 +355,17 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                                   Colors.transparent,
                                               builder: (c) {
                                                 return PaymentMethodBottomSheetWidget(
-                                                    onlyDigital:
-                                                        widget.onlyDigital);
+                                                  onlyDigital:
+                                                      widget.onlyDigital,
+                                                  payableAmount: _payableAmount,
+                                                );
                                               },
                                             );
                                           }
                                         }
                                       }
                                     },
-                              buttonText:
-                                  '${getTranslated('proceed', context)}',
+                              buttonText: 'تأكيد الطلب',
                             )
                           ],
                         ),
@@ -392,7 +375,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
           });
         });
       }),
-      appBar: CustomAppBar(title: getTranslated('checkout', context)),
+      appBar: const CustomAppBar(
+        title: 'إتمام الطلب',
+        iconColor: Color(0xFF015FC9),
+      ),
       body: Consumer<AuthController>(builder: (context, authProvider, _) {
         return Consumer<CheckoutController>(
             builder: (context, orderProvider, _) {
@@ -411,8 +397,19 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                         hasPhysical: widget.hasPhysical,
                         billingAddress: _billingAddress,
                         passwordFormKey: passwordFormKey,
+                        onDeliveryCalculated: (distanceKm, feeYer) {
+                          if (_customDeliveryFee != feeYer ||
+                              _deliveryDistanceKm != distanceKm) {
+                            setState(() {
+                              _customDeliveryFee = feeYer;
+                              _deliveryDistanceKm = distanceKm;
+                            });
+                          }
+                        },
                       ),
                     ),
+                    _buildDeliveryInfoCard(context),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
                     if (Provider.of<AuthController>(context, listen: false)
                         .isLoggedIn())
                       Padding(
@@ -425,40 +422,29 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 0),
-                      child:
-                          ChoosePaymentWidget(onlyDigital: widget.onlyDigital),
+                      child: ChoosePaymentWidget(
+                        onlyDigital: widget.onlyDigital,
+                        payableAmount: _payableAmount,
+                      ),
                     ),
-                    SizedBox(height: Dimensions.paddingSizeSmall),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    // Order Summary Card matching screenshot
                     Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: const Color(0xFFE1E8F2)),
                         boxShadow: [
                           BoxShadow(
-                              color: Theme.of(context)
-                                  .hintColor
-                                  .withValues(alpha: 0.2),
-                              spreadRadius: 3,
-                              blurRadius: 3)
+                            color:
+                                AllineColors.primaryDark.withValues(alpha: .03),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
                         ],
                       ),
-                      padding: const EdgeInsets.fromLTRB(
-                        Dimensions.paddingSizeDefault,
-                        Dimensions.paddingSizeDefault,
-                        Dimensions.paddingSizeDefault,
-                        Dimensions.paddingSizeSmall,
-                      ),
-                      child: Text(
-                        getTranslated('order_summary', context) ?? '',
-                        style: textMedium.copyWith(
-                          fontSize: Dimensions.fontSizeLarge,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      color: Theme.of(context).cardColor,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: Dimensions.paddingSizeDefault),
                       child: Consumer<CheckoutController>(
                         builder: (context, checkoutController, child) {
                           _couponDiscount =
@@ -469,71 +455,102 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                       .referralAmount
                                       ?.amount ??
                                   0;
+                          final deliveryCost =
+                              _customDeliveryFee ?? widget.shippingFee;
+                          final totalPayable = _order +
+                              deliveryCost -
+                              (_referralDiscount ?? 0) -
+                              widget.discount -
+                              (_couponDiscount ?? 0) +
+                              _tax;
+
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              widget.quantity > 1
-                                  ? AmountWidget(
-                                      title:
-                                          '${getTranslated('sub_total', context)} ${' (${widget.quantity} ${getTranslated('items', context)}) '}',
-                                      amount: PriceConverter.convertPrice(
-                                          context, _order),
-                                    )
-                                  : AmountWidget(
-                                      title:
-                                          '${getTranslated('sub_total', context)} ${'(${widget.quantity} ${getTranslated('item', context)})'}',
-                                      amount: PriceConverter.convertPrice(
-                                          context, _order),
-                                    ),
-                              AmountWidget(
-                                title: getTranslated('shipping_fee', context),
-                                amount: PriceConverter.convertPrice(
-                                    context, widget.shippingFee),
+                              Text(
+                                'ملخص الطلب',
+                                style: textBold.copyWith(
+                                  fontSize: 16,
+                                  color: const Color(0xFF071B49),
+                                ),
                               ),
-                              AmountWidget(
-                                title: getTranslated('discount', context),
-                                amount: PriceConverter.convertPrice(
-                                    context, widget.discount),
+                              const SizedBox(height: 14),
+                              _buildSummaryRow(
+                                title: 'إجمالي المنتجات',
+                                value: PriceConverter.convertPrice(
+                                    context, _order),
                               ),
-                              AmountWidget(
-                                title: getTranslated('coupon_voucher', context),
-                                amount: PriceConverter.convertPrice(
-                                    context, _couponDiscount),
+                              const SizedBox(height: 8),
+                              if (widget.discount > 0) ...[
+                                _buildSummaryRow(
+                                  title: 'الخصم',
+                                  value:
+                                      '- ${PriceConverter.convertPrice(context, widget.discount)}',
+                                  isDiscount: true,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              if ((_couponDiscount ?? 0) > 0) ...[
+                                _buildSummaryRow(
+                                  title: 'خصم القسيمة',
+                                  value:
+                                      '- ${PriceConverter.convertPrice(context, _couponDiscount)}',
+                                  isDiscount: true,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              if ((_referralDiscount ?? 0) > 0) ...[
+                                _buildSummaryRow(
+                                  title: 'خصم الإحالة',
+                                  value:
+                                      '- ${PriceConverter.convertPrice(context, _referralDiscount)}',
+                                  isDiscount: true,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              _buildSummaryRow(
+                                title: 'رسوم التوصيل',
+                                value: PriceConverter.convertPrice(
+                                    context, deliveryCost),
                               ),
-                              if (splashController
-                                      .configModel?.systemTaxIncludeStatus !=
-                                  1)
-                                AmountWidget(
-                                  title: getTranslated('tax', context),
-                                  amount: PriceConverter.convertPrice(
+                              if (splashController.configModel
+                                          ?.systemTaxIncludeStatus !=
+                                      1 &&
+                                  _tax > 0) ...[
+                                const SizedBox(height: 8),
+                                _buildSummaryRow(
+                                  title: 'الضريبة',
+                                  value: PriceConverter.convertPrice(
                                       context, _tax),
                                 ),
-                              if ((_referralDiscount ?? 0) > 0)
-                                AmountWidget(
-                                  title: getTranslated(
-                                      'referral_discount', context),
-                                  amount: PriceConverter.convertPrice(
-                                      context, _referralDiscount),
-                                ),
-                              Divider(
-                                  height: 5,
-                                  color: Theme.of(context).hintColor),
-                              AmountWidget(
-                                fontSize: Dimensions.fontSizeLarge,
-                                isTitleBlack: true,
-                                title:
-                                    '${getTranslated('total_payable', context)} ${Provider.of<SplashController>(Get.context!, listen: false).configModel?.systemTaxIncludeStatus == 1 ? getTranslated('inc_vat_tax', context) : ''} ',
-                                amount: PriceConverter.convertPrice(
-                                  context,
-                                  (_order +
-                                      widget.shippingFee -
-                                      (_referralDiscount ?? 0) -
-                                      widget.discount -
-                                      _couponDiscount! +
-                                      _tax),
-                                ),
+                              ],
+                              const SizedBox(height: 12),
+                              const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: Color(0xFFF0F4FA)),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'الإجمالي',
+                                    style: textBold.copyWith(
+                                      fontSize: 16,
+                                      color: const Color(0xFF071B49),
+                                    ),
+                                  ),
+                                  Text(
+                                    PriceConverter.convertPrice(
+                                        context, totalPayable),
+                                    style: textBold.copyWith(
+                                      fontSize: 18,
+                                      color: const Color(0xFF015FC9),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: Dimensions.paddingSizeSmall),
                             ],
                           );
                         },
@@ -541,16 +558,11 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     SizedBox(height: Dimensions.paddingSizeSmall),
                     Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        boxShadow: [
-                          BoxShadow(
-                              color: Theme.of(context)
-                                  .hintColor
-                                  .withValues(alpha: 0.2),
-                              spreadRadius: 3,
-                              blurRadius: 3)
-                        ],
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: const Color(0xFFE1E8F2)),
                       ),
                       padding: const EdgeInsets.fromLTRB(
                         Dimensions.paddingSizeDefault,
@@ -585,6 +597,8 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    _buildWhatsAppSupport(context),
                     SizedBox(height: Dimensions.paddingSizeDefault),
                   ],
                 ),
@@ -596,59 +610,237 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Widget _buildSummaryRow({
+    required String title,
+    required String value,
+    bool isDiscount = false,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: textRegular.copyWith(
+            fontSize: 13.5,
+            color: const Color(0xFF6D85AF),
+          ),
+        ),
+        Text(
+          value,
+          style: isDiscount
+              ? textBold.copyWith(
+                  fontSize: 13.5,
+                  color: const Color(0xFF10B981),
+                )
+              : textMedium.copyWith(
+                  fontSize: 13.5,
+                  color: const Color(0xFF071B49),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryInfoCard(BuildContext context) {
+    final double activeFee = _customDeliveryFee ?? widget.shippingFee;
+    final feeText =
+        activeFee > 0 ? PriceConverter.convertPrice(context, activeFee) : null;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE1E8F2)),
+        boxShadow: [
+          BoxShadow(
+            color: AllineColors.primaryDark.withValues(alpha: .03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEAF3FF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.local_shipping_rounded,
+                  color: Color(0xFF015FC9),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'التوصيل',
+                      style: textBold.copyWith(
+                        fontSize: 15,
+                        color: const Color(0xFF071B49),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'سيتم توصيل طلبك إلى العنوان المحدد.',
+                      style: textRegular.copyWith(
+                        fontSize: 12,
+                        color: const Color(0xFF6D85AF),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          const Divider(height: 1, thickness: 1, color: Color(0xFFF0F4FA)),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'رسوم التوصيل',
+                style: textBold.copyWith(
+                  fontSize: 14,
+                  color: const Color(0xFF071B49),
+                ),
+              ),
+              if (feeText != null)
+                Text(
+                  feeText,
+                  style: textBold.copyWith(
+                    fontSize: 14,
+                    color: const Color(0xFF015FC9),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(
+            'يتم احتسابها حسب العنوان والمتجر',
+            style: textRegular.copyWith(
+              fontSize: 12,
+              color: const Color(0xFF6D85AF),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWhatsAppSupport(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE1E8F2)),
+        boxShadow: [
+          BoxShadow(
+            color: AllineColors.primaryDark.withValues(alpha: .03),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'تحتاج مساعدة؟',
+            style: textBold.copyWith(
+              fontSize: 14,
+              color: const Color(0xFF071B49),
+            ),
+          ),
+          InkWell(
+            onTap: () => _openWhatsApp(context),
+            borderRadius: BorderRadius.circular(10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  color: Color(0xFF25D366),
+                  size: 20,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'تواصل معنا عبر واتساب',
+                  style: textBold.copyWith(
+                    fontSize: 13,
+                    color: const Color(0xFF10B981),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openWhatsApp(BuildContext context) async {
+    const message = 'مرحبًا، أحتاج مساعدة بخصوص طلبي من Alline.';
+    final appUri = Uri.parse(
+      'whatsapp://send?phone=967775667733&text=${Uri.encodeComponent(message)}',
+    );
+    final webUri = Uri.parse(
+      'https://wa.me/967775667733?text=${Uri.encodeComponent(message)}',
+    );
+
+    var opened = false;
+    try {
+      opened = await launchUrl(
+        appUri,
+        mode: LaunchMode.externalApplication,
+      );
+    } catch (_) {
+      opened = false;
+    }
+
+    if (!opened) {
+      try {
+        opened = await launchUrl(
+          webUri,
+          mode: LaunchMode.externalApplication,
+        );
+      } catch (_) {
+        opened = false;
+      }
+    }
+
+    if (!opened && context.mounted) {
+      showCustomSnackBarWidget(
+        'تعذر فتح واتساب. يرجى المحاولة مرة أخرى.',
+        context,
+        snackBarType: SnackBarType.error,
+      );
+    }
+  }
+
   void _callback(bool isSuccess, String message, String orderID,
       bool createAccount) async {
     if (isSuccess) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        bool isLoggedIn =
-            Provider.of<AuthController>(context, listen: false).isLoggedIn();
-        String? orderId =
-            Provider.of<CheckoutController>(context, listen: false)
-                .getFirstOrderId(orderID);
-
-        if (isLoggedIn && orderId != null) {
-          RouterHelper.getOrderScreenRoute(
-              isBackButtonExist: true,
-              action: RouteAction.push,
-              fromPlaceOrder: true);
-        } else {
-          RouterHelper.getDashboardRoute(
-              action: RouteAction.pushReplacement, page: 'home');
-        }
-
-        Future.delayed(Duration(milliseconds: 300), () {
-          showModalBottomSheet(
-            isDismissible: false,
-            enableDrag: false,
-            context: Get.context!,
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            builder: (context) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: OrderPlaceBottomSheetWidget(
-                  orderID: orderID,
-                  icon: Icons.check,
-                  title: getTranslated(
-                    createAccount
-                        ? 'order_placed_Account_Created'
-                        : 'order_placed',
-                    Get.context!,
-                  ),
-                  description: getTranslated('your_order_placed', Get.context!),
-                  isFailed: false,
-                ),
-              );
-            },
-          );
-        });
+        RouterHelper.getOrderConfirmationRoute(
+          orderId: orderID,
+          isNewUser: createAccount,
+          action: RouteAction.pushReplacement,
+        );
       });
     } else {
       showCustomSnackBarWidget(message, context,

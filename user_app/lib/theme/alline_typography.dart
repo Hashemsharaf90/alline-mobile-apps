@@ -1,0 +1,86 @@
+import 'package:flutter/material.dart';
+
+abstract final class AllineTypography {
+  static const String fontFamily = 'AllineTajawal';
+
+  static TextTheme textTheme(Color primary, Color secondary) => TextTheme(
+        displayLarge: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 36,
+            height: 1.25,
+            fontWeight: FontWeight.w700,
+            color: primary),
+        displayMedium: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 32,
+            height: 1.25,
+            fontWeight: FontWeight.w700,
+            color: primary),
+        headlineLarge: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 28,
+            height: 1.3,
+            fontWeight: FontWeight.w700,
+            color: primary),
+        headlineMedium: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 24,
+            height: 1.35,
+            fontWeight: FontWeight.w700,
+            color: primary),
+        titleLarge: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 20,
+            height: 1.35,
+            fontWeight: FontWeight.w700,
+            color: primary),
+        titleMedium: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 17,
+            height: 1.4,
+            fontWeight: FontWeight.w600,
+            color: primary),
+        titleSmall: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 15,
+            height: 1.4,
+            fontWeight: FontWeight.w600,
+            color: primary),
+        bodyLarge: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 16,
+            height: 1.5,
+            fontWeight: FontWeight.w400,
+            color: primary),
+        bodyMedium: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 14,
+            height: 1.5,
+            fontWeight: FontWeight.w400,
+            color: primary),
+        bodySmall: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 12,
+            height: 1.45,
+            fontWeight: FontWeight.w400,
+            color: secondary),
+        labelLarge: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 16,
+            height: 1.25,
+            fontWeight: FontWeight.w700,
+            color: primary),
+        labelMedium: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 14,
+            height: 1.25,
+            fontWeight: FontWeight.w600,
+            color: primary),
+        labelSmall: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: 12,
+            height: 1.25,
+            fontWeight: FontWeight.w500,
+            color: secondary),
+      );
+}

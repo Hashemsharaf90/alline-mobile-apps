@@ -6,6 +6,28 @@ import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
 class CategoryAssetHelper {
   static const String _folder = 'assets/images/Categoires';
 
+  // Arabic source assets. Matching these by category name keeps the visual
+  // correct even when category IDs differ between server environments.
+  static const Map<String, String> _arabicNamedAssets = {
+    'اكسسوارات السيارات': '$_folder/اكسسوارات السيارات.png',
+    'الاثاث والديكور': '$_folder/الاثاث والديكور.png',
+    'الاجهزة المنزلية': '$_folder/الاجهزة المنزلية.png',
+    'الاضاءة والكهربائيات': '$_folder/الاضاءة والكهربائيات.png',
+    'الالكترونيات': '$_folder/الالكترونيات .png',
+    'الرياضة واللياقة': '$_folder/الرياضة واللياقة.png',
+    'الصحة والعناية': '$_folder/الصحة والعناي.png',
+    'الصيانة المنزلية والعدد': '$_folder/الصيانة المنزلية والعدد.png',
+    'العطور': '$_folder/العطور.png',
+    'العناية بالاطفال': '$_folder/العناية بالاطفال.png',
+    'المستلزمات المدرسية والمكتبية':
+        '$_folder/المستلزمات المدرسية والمكتبية.png',
+    'الملابس والاكسسوارات': '$_folder/الملابس والاكسسوارات.jpg',
+    'المنظفات المنزلية': '$_folder/المنظفات المنزلية.png',
+    'الهدايا والعروض': '$_folder/الهدايا والعروض.png',
+    'مستحضرات التجميل': '$_folder/مستحضرات التجميل.png',
+    'مستلزمات البيت والمطبخ': '$_folder/مستلزمات البيت والمطبخ.png',
+  };
+
   // 13 Primary Professional Category Assets (from assets/images/Categoires)
   static const String kitchenAccessories = Images.catKitchenAccessories;
   static const String carAccessories = Images.catCarAccessories;
@@ -32,7 +54,8 @@ class CategoryAssetHelper {
   // Fallbacks
   static const String personalCare = Images.catHealthPersonalCare;
   static const String kitchen = Images.catKitchenAccessories;
-  static const String clothing = '$_folder/a2359c40-b8e1-4d16-8142-fb36ff4ddb8e.jpg';
+  static const String clothing =
+      '$_folder/a2359c40-b8e1-4d16-8142-fb36ff4ddb8e.jpg';
   static const String cleaners = Images.catHomeMaintenance;
   static const String healthCare = Images.catHealthPersonalCare;
   static const String giftsOffers = Images.catPerfumes;
@@ -40,7 +63,18 @@ class CategoryAssetHelper {
 
   /// Maps a category to its designated primary asset image
   static String? getAssetForCategory({int? id, String? name, String? slug}) {
-    // 1. Direct ID matching based on the store taxonomy
+    // 1. Prefer semantic name matching so every Arabic-named image is paired
+    // with the category carrying the same name, regardless of its server ID.
+    final normalizedName = _normalizeArabic(name ?? '');
+    for (final entry in _arabicNamedAssets.entries) {
+      final normalizedKey = _normalizeArabic(entry.key);
+      if (normalizedName == normalizedKey ||
+          normalizedName.contains(normalizedKey)) {
+        return entry.value;
+      }
+    }
+
+    // 2. Direct ID matching based on the current store taxonomy.
     switch (id) {
       case 1:
         return healthPersonalCare;
@@ -82,7 +116,7 @@ class CategoryAssetHelper {
         return supermarket;
     }
 
-    // 2. Keyword matching on name & slug for dynamic or newly added categories
+    // 3. Keyword matching on name & slug for dynamic or newly added categories
     final text = '${name ?? ''} ${slug ?? ''}'.toLowerCase();
 
     // 1. اكسسوارات البيت والمطبخ
@@ -266,32 +300,91 @@ class CategoryAssetHelper {
     }
 
     // Supermarket & Fresh Foods
-    if (text.contains('خضار') || text.contains('فواك') || text.contains('ثمار') || text.contains('طازج') || text.contains('veg') || text.contains('fruit')) {
+    if (text.contains('خضار') ||
+        text.contains('فواك') ||
+        text.contains('ثمار') ||
+        text.contains('طازج') ||
+        text.contains('veg') ||
+        text.contains('fruit')) {
       return fruitsVeg;
     }
-    if (text.contains('لحم') || text.contains('لحوم') || text.contains('دجاج') || text.contains('دواجن') || text.contains('meat') || text.contains('poultry') || text.contains('butcher')) {
+    if (text.contains('لحم') ||
+        text.contains('لحوم') ||
+        text.contains('دجاج') ||
+        text.contains('دواجن') ||
+        text.contains('meat') ||
+        text.contains('poultry') ||
+        text.contains('butcher')) {
       return meat;
     }
-    if (text.contains('مخبز') || text.contains('مخابز') || text.contains('خبز') || text.contains('معجنات') || text.contains('حلويات') || text.contains('حلى') || text.contains('كيك') || text.contains('bakery') || text.contains('bread') || text.contains('sweet')) {
+    if (text.contains('مخبز') ||
+        text.contains('مخابز') ||
+        text.contains('خبز') ||
+        text.contains('معجنات') ||
+        text.contains('حلويات') ||
+        text.contains('حلى') ||
+        text.contains('كيك') ||
+        text.contains('bakery') ||
+        text.contains('bread') ||
+        text.contains('sweet')) {
       return bakery;
     }
-    if (text.contains('ألبان') || text.contains('البان') || text.contains('حليب') || text.contains('أجبان') || text.contains('اجبان') || text.contains('جبن') || text.contains('زبادي') || text.contains('بيض') || text.contains('dairy') || text.contains('milk') || text.contains('cheese')) {
+    if (text.contains('ألبان') ||
+        text.contains('البان') ||
+        text.contains('حليب') ||
+        text.contains('أجبان') ||
+        text.contains('اجبان') ||
+        text.contains('جبن') ||
+        text.contains('زبادي') ||
+        text.contains('بيض') ||
+        text.contains('dairy') ||
+        text.contains('milk') ||
+        text.contains('cheese')) {
       return dairy;
     }
-    if (text.contains('مطعم') || text.contains('مطاعم') || text.contains('وجب') || text.contains('أكل') || text.contains('برجر') || text.contains('بيتزا') || text.contains('restaurant') || text.contains('food') || text.contains('meal')) {
+    if (text.contains('مطعم') ||
+        text.contains('مطاعم') ||
+        text.contains('وجب') ||
+        text.contains('أكل') ||
+        text.contains('برجر') ||
+        text.contains('بيتزا') ||
+        text.contains('restaurant') ||
+        text.contains('food') ||
+        text.contains('meal')) {
       return restaurants;
     }
-    if (text.contains('سوبر') || text.contains('بقالة') || text.contains('تموين') || text.contains('غذائ') || text.contains('supermarket') || text.contains('grocery') || text.contains('market')) {
+    if (text.contains('سوبر') ||
+        text.contains('بقالة') ||
+        text.contains('تموين') ||
+        text.contains('غذائ') ||
+        text.contains('supermarket') ||
+        text.contains('grocery') ||
+        text.contains('market')) {
       return supermarket;
     }
 
     // Apparel
-    if (text.contains('ملابس') || text.contains('ازياء') || text.contains('أزياء') || text.contains('رجالي') || text.contains('نسائي') || text.contains('cloth') || text.contains('fashion')) {
+    if (text.contains('ملابس') ||
+        text.contains('ازياء') ||
+        text.contains('أزياء') ||
+        text.contains('رجالي') ||
+        text.contains('نسائي') ||
+        text.contains('cloth') ||
+        text.contains('fashion')) {
       return clothing;
     }
 
     return null;
   }
+
+  static String _normalizeArabic(String value) => value
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[أإآ]'), 'ا')
+      .replaceAll('ة', 'ه')
+      .replaceAll('ى', 'ي')
+      .replaceAll(RegExp(r'[\u064B-\u065F\u0670]'), '')
+      .replaceAll(RegExp(r'\s+'), ' ');
 
   /// Builds a circular avatar widget for a category
   static Widget buildCircularCategoryAvatar({
@@ -332,7 +425,8 @@ class CategoryAssetHelper {
                 width: size,
                 height: size,
                 color: const Color(0xFFE2E8F0),
-                child: Icon(Icons.category_rounded, size: size * 0.45, color: const Color(0xFF94A3B8)),
+                child: Icon(Icons.category_rounded,
+                    size: size * 0.45, color: const Color(0xFF94A3B8)),
               ),
       );
     } else if (hasValidRemote) {
@@ -366,4 +460,48 @@ class CategoryAssetHelper {
       ),
     );
   }
+
+  /// Compact home artwork: keeps transparent/3D assets fully visible instead
+  /// of cropping them as photography.
+  static Widget buildContainedCategoryArtwork({
+    required CategoryModel? category,
+    double size = 58,
+  }) {
+    final asset = getAssetForCategory(
+      id: category?.id,
+      name: category?.name,
+      slug: category?.slug,
+    );
+    final remoteUrl = category?.imageFullUrl?.path;
+    final hasRemote = remoteUrl != null &&
+        remoteUrl.isNotEmpty &&
+        !remoteUrl.contains('placeholder');
+
+    if (asset != null) {
+      return Image.asset(
+        asset,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        cacheWidth: (size * 3).toInt(),
+        cacheHeight: (size * 3).toInt(),
+        errorBuilder: (_, __, ___) => _categoryFallback(size),
+      );
+    }
+    if (hasRemote) {
+      return CustomImageWidget(
+        image: remoteUrl,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+      );
+    }
+    return _categoryFallback(size);
+  }
+
+  static Widget _categoryFallback(double size) => Icon(
+        Icons.category_rounded,
+        size: size * .48,
+        color: const Color(0xFF6D85AF),
+      );
 }

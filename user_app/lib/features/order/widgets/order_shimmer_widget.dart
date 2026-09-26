@@ -9,39 +9,175 @@ class OrderShimmerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 10,
-      padding: const EdgeInsets.all(0),
-      itemBuilder: (context, index) {
-        return Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: Theme.of(context).cardColor),
-            color: Provider.of<ThemeController>(context).darkTheme ?
-            Theme.of(context).primaryColor.withValues(alpha:.05) :
-            Theme.of(context).cardColor,
-            boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha:0.3), spreadRadius: 1, blurRadius: 5)]),
-          margin: const EdgeInsets.only(bottom: Dimensions.marginSizeDefault),
-          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[50]!;
 
+    return ListView.builder(
+      itemCount: 6,
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: Dimensions.paddingSizeDefault,
+            vertical: 7,
+          ),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? Theme.of(context).cardColor : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark
+                  ? Theme.of(context).dividerColor.withValues(alpha: 0.1)
+                  : const Color(0xFFE1E8F2),
+              width: 1,
+            ),
+          ),
           child: Shimmer.fromColors(
-            baseColor: Theme.of(context).cardColor,
-            highlightColor: Colors.grey[300]!,
-            enabled: true,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Container(height: 10, width: 150, color:  Theme.of(context).colorScheme.secondaryContainer),
-                const SizedBox(height: 10),
-                Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
-                  Container(height: 100, width: 100 ,decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,borderRadius: BorderRadius.circular(5))),
-                  const SizedBox(width: 10),
-                  Expanded(flex: 3, child: Column(children: [
-                    Container(height: 20, color:  Theme.of(context).colorScheme.secondaryContainer),
-                    const SizedBox(height: 10),
-                    Row(children: [
-                      Container(height: 10, width: 70, color:  Theme.of(context).colorScheme.secondaryContainer),
-                      const SizedBox(width: 10),
-                      Container(height: 10, width: 20, color:  Theme.of(context).colorScheme.secondaryContainer),
-                    ])])),
-                ])])),
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Top Badges
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    Container(
+                      width: 75,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // 2. Order ID & Date
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 130,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    Container(
+                      width: 90,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // 3. Store Name
+                Container(
+                  width: 100,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // 4. Product Thumbnails
+                Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    Container(
+                      width: 48,
+                      height: 48,
+                      margin: const EdgeInsets.only(left: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  height: 1,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 12),
+
+                // 5. Bottom Price & Action Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: 110,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      width: 100,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     );

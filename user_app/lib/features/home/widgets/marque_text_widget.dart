@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class MarqueeWidget extends StatefulWidget {
   final Widget child;
   final Axis direction;
@@ -18,7 +19,7 @@ class MarqueeWidget extends StatefulWidget {
 }
 
 class MarqueeWidgetState extends State<MarqueeWidget> {
-   ScrollController? scrollController;
+  ScrollController? scrollController;
 
   @override
   void initState() {

@@ -8,10 +8,50 @@ import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocationController with ChangeNotifier {
   final LocationServiceInterface locationServiceInterface;
   LocationController({required this.locationServiceInterface});
+
+  double? deliveryLatitude;
+  double? deliveryLongitude;
+  String? deliveryLabel;
+  bool _deliveryRestored = false;
+
+  Future<void> restoreDeliveryLocation() async {
+    if (_deliveryRestored) return;
+    final preferences = await SharedPreferences.getInstance();
+    deliveryLatitude = preferences.getDouble('alline_delivery_latitude');
+    deliveryLongitude = preferences.getDouble('alline_delivery_longitude');
+    deliveryLabel = preferences.getString('alline_delivery_label');
+    _deliveryRestored = true;
+    if (deliveryLatitude != null &&
+        deliveryLongitude != null &&
+        deliveryLabel?.isNotEmpty == true) {
+      await setPickedCoordinates(
+          latitude: deliveryLatitude!,
+          longitude: deliveryLongitude!,
+          fromAddress: true,
+          address: deliveryLabel);
+    }
+    notifyListeners();
+  }
+
+  /// Draft map/GPS changes become the delivery location only after confirmation.
+  Future<void> confirmDeliveryLocation() async {
+    if (_address.name?.trim().isNotEmpty != true) return;
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setDouble('alline_delivery_latitude', _position.latitude);
+    await preferences.setDouble(
+        'alline_delivery_longitude', _position.longitude);
+    await preferences.setString('alline_delivery_label', _address.name!.trim());
+    deliveryLatitude = _position.latitude;
+    deliveryLongitude = _position.longitude;
+    deliveryLabel = _address.name!.trim();
+    _deliveryRestored = true;
+    notifyListeners();
+  }
 
   Position _position = Position(
     longitude: 0,

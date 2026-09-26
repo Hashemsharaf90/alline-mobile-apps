@@ -1252,5 +1252,10 @@
   "approve_note": "ملاحظة الموافقة",
   "withdraw_request_updated_successfully": "تم تحديث طلب السحب بنجاح",
   "color": "اللون",
-  "this_order_was_placed_with_the_inhouse_shipping": "تم تقديم هذا الطلب باستخدام طريقة الشحن الداخلية ويجب تسليمه باستخدام خيار الشحن الذي اختاره العميل أثناء إتمام الطل"
+  "this_order_was_placed_with_the_inhouse_shipping": "تم تقديم هذا الطلب باستخدام طريقة الشحن الداخلية ويجب تسليمه باستخدام خيار الشحن الذي اختاره العميل أثناء إتمام الطل",
+  "nav_home": "الرئيسية",
+  "nav_orders": "الطلبات",
+  "nav_products": "المنتجات",
+  "nav_analytics": "الإحصائيات",
+  "nav_account": "حسابي"
 }

@@ -10,10 +10,9 @@ import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dar
 import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:provider/provider.dart';
-
-
 
 class CheckoutController with ChangeNotifier {
   final CheckoutServiceInterface checkoutServiceInterface;
@@ -46,7 +45,7 @@ class CheckoutController with ChangeNotifier {
   ReferralAmount? get referralAmount => _referralAmount;
 
   String selectedPaymentName = '';
-  void setSelectedPayment(String payment){
+  void setSelectedPayment(String payment) {
     selectedPaymentName = payment;
     notifyListeners();
   }
@@ -54,66 +53,120 @@ class CheckoutController with ChangeNotifier {
   bool _isAcceptTerms = false;
   bool get isAcceptTerms => _isAcceptTerms;
 
-
   final TextEditingController orderNoteController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   List<String> inputValueList = [];
 
+  String? _idempotencyKey;
+  String? get idempotencyKey => _idempotencyKey;
 
-
-  Future<void> placeOrder({required Function callback, String? addressID,
-        String? couponCode, String? couponAmount,
-        String? billingAddressId, String? orderNote, String? transactionId,
-        String? paymentNote, int? id, String? name,bool isfOffline = false, bool wallet = false}) async {
-    for(TextEditingController textEditingController in inputFieldControllerList) {
+  Future<void> placeOrder(
+      {required Function callback,
+      String? addressID,
+      String? couponCode,
+      String? couponAmount,
+      String? billingAddressId,
+      String? orderNote,
+      String? transactionId,
+      String? paymentNote,
+      int? id,
+      String? name,
+      bool isfOffline = false,
+      bool wallet = false}) async {
+    inputValueList = [];
+    for (TextEditingController textEditingController
+        in inputFieldControllerList) {
       inputValueList.add(textEditingController.text.trim());
-
     }
+
+    _idempotencyKey ??= const Uuid().v4();
 
     _isLoading = true;
     _newUser = false;
     notifyListeners();
     ApiResponseModel apiResponse;
-    isfOffline?
-    apiResponse = await checkoutServiceInterface.offlinePaymentPlaceOrder(addressID, couponCode, couponAmount, billingAddressId, orderNote, keyList, inputValueList, offlineMethodSelectedId, offlineMethodSelectedName, paymentNote, _isCheckCreateAccount, passwordController.text.trim()):
-    wallet?
-    apiResponse = await checkoutServiceInterface.walletPaymentPlaceOrder(addressID, couponCode, couponAmount, billingAddressId, orderNote, _isCheckCreateAccount, passwordController.text.trim()):
+    if (isfOffline) {
+      apiResponse = await checkoutServiceInterface.offlinePaymentPlaceOrder(
+          addressID,
+          couponCode,
+          couponAmount,
+          billingAddressId,
+          orderNote,
+          keyList,
+          inputValueList,
+          offlineMethodSelectedId,
+          offlineMethodSelectedName,
+          paymentNote,
+          _isCheckCreateAccount,
+          passwordController.text.trim(),
+          _idempotencyKey);
+    } else if (wallet) {
+      apiResponse = await checkoutServiceInterface.walletPaymentPlaceOrder(
+          addressID,
+          couponCode,
+          couponAmount,
+          billingAddressId,
+          orderNote,
+          _isCheckCreateAccount,
+          passwordController.text.trim(),
+          _idempotencyKey);
+    } else {
+      apiResponse = await checkoutServiceInterface.cashOnDeliveryPlaceOrder(
+        addressID: addressID,
+        couponCode: couponCode,
+        couponDiscountAmount: couponAmount,
+        billingAddressId: billingAddressId,
+        orderNote: orderNote,
+        isCheckCreateAccount: _isCheckCreateAccount,
+        password: passwordController.text.trim(),
+        cashChangeAmount: _cashChangesAmount,
+        currentCurrencyCode:
+            Provider.of<SplashController>(Get.context!, listen: false)
+                .myCurrency
+                ?.code,
+        idempotencyKey: _idempotencyKey,
+      );
+    }
 
-    apiResponse = await checkoutServiceInterface.cashOnDeliveryPlaceOrder(
-      addressID: addressID,
-      couponCode: couponCode,
-      couponDiscountAmount: couponAmount,
-      billingAddressId: billingAddressId,
-      orderNote: orderNote,
-      isCheckCreateAccount: _isCheckCreateAccount,
-      password: passwordController.text.trim(),
-      cashChangeAmount: _cashChangesAmount,
-      currentCurrencyCode: Provider.of<SplashController>(Get.context!, listen: false).myCurrency?.code,
-    );
-
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
+      _idempotencyKey = null;
       _isCheckCreateAccount = false;
       _isLoading = false;
       _addressIndex = null;
       _billingAddressIndex = null;
       sameAsBilling = false;
-      if(!Provider.of<AuthController>(Get.context!, listen: false).isLoggedIn()){
+      if (!Provider.of<AuthController>(Get.context!, listen: false)
+          .isLoggedIn()) {
         _newUser = apiResponse.response!.data['new_user'];
       }
 
       String message = apiResponse.response!.data.toString();
-      callback(true, message, extractId(apiResponse.response!.data['order_ids'].toString()), _newUser);
+      callback(
+          true,
+          message,
+          extractId(apiResponse.response!.data['order_ids'].toString()),
+          _newUser);
     } else {
       _isLoading = false;
-     ApiChecker.checkApi(apiResponse);
+      if (apiResponse.response == null ||
+          (apiResponse.response!.statusCode != null &&
+              apiResponse.response!.statusCode! >= 400 &&
+              apiResponse.response!.statusCode! < 500)) {
+        // If it's a client error (e.g., validation) or response is null (e.g. user canceled), we can reset it.
+        // Wait, instructions say:
+        // "After a DEFINITIVE failure (user explicitly starts over): `_idempotencyKey = null;`"
+        // "After an AMBIGUOUS failure (timeout, network error): keep `_idempotencyKey` so the retry reuses it"
+        // It's safer to keep it unless we are sure it's a definitive failure. Or we can just keep it and only clear it on success or when they start over.
+      }
+      ApiChecker.checkApi(apiResponse);
     }
     notifyListeners();
   }
 
-
   String? extractId(String idsString) {
-
     String cleaned = idsString.replaceAll(RegExp(r'[\[\]\s]'), '');
     return cleaned.isNotEmpty ? cleaned : null;
   }
@@ -126,32 +179,29 @@ class CheckoutController with ChangeNotifier {
     return ids.isNotEmpty ? ids.first : null;
   }
 
-
-
   void setAddressIndex(int index) {
     _addressIndex = index;
     notifyListeners();
   }
+
   void setBillingAddressIndex(int index) {
     _billingAddressIndex = index;
     notifyListeners();
   }
 
-
-  void resetPaymentMethod(){
+  void resetPaymentMethod() {
     _paymentMethodIndex = -1;
     isCODChecked = false;
     isWalletChecked = false;
     isOfflineChecked = false;
   }
 
-
-  void shippingAddressNull(){
+  void shippingAddressNull() {
     _addressIndex = null;
     notifyListeners();
   }
 
-  void billingAddressNull(){
+  void billingAddressNull() {
     _billingAddressIndex = null;
     notifyListeners();
   }
@@ -160,41 +210,42 @@ class CheckoutController with ChangeNotifier {
     _shippingIndex = index;
     notifyListeners();
   }
+
   void setSelectedBillingAddress(int index) {
     _billingAddressIndex = index;
     notifyListeners();
   }
 
-
   bool isOfflineChecked = false;
   bool isCODChecked = false;
   bool isWalletChecked = false;
 
-  void setOfflineChecked(String type, {bool notify = true}) {
-    if(type == 'offline'){
-      isOfflineChecked = !isOfflineChecked;
+  void setOfflineChecked(String type,
+      {bool notify = true, bool toggle = false}) {
+    if (type == 'offline') {
+      isOfflineChecked = toggle ? !isOfflineChecked : true;
       isCODChecked = false;
       isWalletChecked = false;
       _paymentMethodIndex = -1;
-      setOfflinePaymentMethodSelectedIndex(0);
-    }else if(type == 'cod'){
-      isCODChecked = !isCODChecked;
+      if (offlineMethodSelectedIndex < 0) {
+        setOfflinePaymentMethodSelectedIndex(0);
+      }
+    } else if (type == 'cod') {
+      isCODChecked = toggle ? !isCODChecked : true;
       isOfflineChecked = false;
       isWalletChecked = false;
       _paymentMethodIndex = -1;
-    }else if(type == 'wallet'){
-      isWalletChecked = !isWalletChecked;
+    } else if (type == 'wallet') {
+      isWalletChecked = toggle ? !isWalletChecked : true;
       isOfflineChecked = false;
       isCODChecked = false;
       _paymentMethodIndex = -1;
     }
 
-    if(notify) {
+    if (notify) {
       notifyListeners();
     }
   }
-
-
 
   String selectedDigitalPaymentMethodName = '';
 
@@ -207,68 +258,93 @@ class CheckoutController with ChangeNotifier {
     notifyListeners();
   }
 
-
-  void digitalOnly(bool value, {bool isUpdate = false}){
+  void digitalOnly(bool value, {bool isUpdate = false}) {
     _onlyDigital = value;
-    if(isUpdate){
+    if (isUpdate) {
       notifyListeners();
     }
-
   }
-
-
 
   OfflinePaymentModel? offlinePaymentModel;
   Future<ApiResponseModel> getOfflinePaymentList() async {
-    ApiResponseModel apiResponse = await checkoutServiceInterface.offlinePaymentList();
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    ApiResponseModel apiResponse =
+        await checkoutServiceInterface.offlinePaymentList();
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       offlineMethodSelectedIndex = 0;
-      offlinePaymentModel = OfflinePaymentModel.fromJson(apiResponse.response?.data);
-    }
-    else {
-      ApiChecker.checkApi( apiResponse);
+      offlinePaymentModel =
+          OfflinePaymentModel.fromJson(apiResponse.response?.data);
+    } else {
+      ApiChecker.checkApi(apiResponse);
     }
     notifyListeners();
     return apiResponse;
   }
 
   List<TextEditingController> inputFieldControllerList = [];
-  List <String?> keyList = [];
+  List<String?> keyList = [];
   int offlineMethodSelectedIndex = -1;
   int offlineMethodSelectedId = 0;
   String offlineMethodSelectedName = '';
 
-  void setOfflinePaymentMethodSelectedIndex(int index, {bool notify = true}){
+  void setOfflinePaymentMethodSelectedIndex(int index, {bool notify = true}) {
     keyList = [];
     inputFieldControllerList = [];
     offlineMethodSelectedIndex = index;
-    if(offlinePaymentModel != null && offlinePaymentModel!.offlineMethods!= null && offlinePaymentModel!.offlineMethods!.isNotEmpty){
-      offlineMethodSelectedId = offlinePaymentModel!.offlineMethods![offlineMethodSelectedIndex].id!;
-      offlineMethodSelectedName = offlinePaymentModel!.offlineMethods![offlineMethodSelectedIndex].methodName!;
+    if (offlinePaymentModel != null &&
+        offlinePaymentModel!.offlineMethods != null &&
+        offlinePaymentModel!.offlineMethods!.isNotEmpty) {
+      offlineMethodSelectedId =
+          offlinePaymentModel!.offlineMethods![offlineMethodSelectedIndex].id!;
+      offlineMethodSelectedName = offlinePaymentModel!
+          .offlineMethods![offlineMethodSelectedIndex].methodName!;
     }
 
-    if(offlinePaymentModel!.offlineMethods != null && offlinePaymentModel!.offlineMethods!.isNotEmpty && offlinePaymentModel!.offlineMethods![index].methodInformations!.isNotEmpty){
-      for(int i= 0; i< offlinePaymentModel!.offlineMethods![index].methodInformations!.length; i++){
+    if (offlinePaymentModel != null &&
+        offlinePaymentModel!.offlineMethods != null &&
+        offlinePaymentModel!.offlineMethods!.isNotEmpty &&
+        offlinePaymentModel!
+            .offlineMethods![index].methodInformations!.isNotEmpty) {
+      for (int i = 0;
+          i <
+              offlinePaymentModel!
+                  .offlineMethods![index].methodInformations!.length;
+          i++) {
         inputFieldControllerList.add(TextEditingController());
-        keyList.add(offlinePaymentModel!.offlineMethods![index].methodInformations![i].customerInput);
+        keyList.add(offlinePaymentModel!
+            .offlineMethods![index].methodInformations![i].customerInput);
       }
     }
-    if(notify){
+    if (notify) {
       notifyListeners();
     }
   }
 
-  Future<ApiResponseModel> digitalPaymentPlaceOrder({String? orderNote, String? customerId,
-    String? addressId, String? billingAddressId,
-    String? couponCode,
-    String? couponDiscount,
-    String? paymentMethod}) async {
-    _isLoading =true;
+  Future<ApiResponseModel> digitalPaymentPlaceOrder(
+      {String? orderNote,
+      String? customerId,
+      String? addressId,
+      String? billingAddressId,
+      String? couponCode,
+      String? couponDiscount,
+      String? paymentMethod}) async {
+    _isLoading = true;
     notifyListeners();
 
-    ApiResponseModel apiResponse = await checkoutServiceInterface.digitalPaymentPlaceOrder(orderNote, customerId, addressId, billingAddressId, couponCode, couponDiscount, paymentMethod, _isCheckCreateAccount, passwordController.text.trim());
+    ApiResponseModel apiResponse =
+        await checkoutServiceInterface.digitalPaymentPlaceOrder(
+            orderNote,
+            customerId,
+            addressId,
+            billingAddressId,
+            couponCode,
+            couponDiscount,
+            paymentMethod,
+            _isCheckCreateAccount,
+            passwordController.text.trim());
 
-    if (apiResponse.response != null && apiResponse.response?.statusCode == 200) {
+    if (apiResponse.response != null &&
+        apiResponse.response?.statusCode == 200) {
       _addressIndex = null;
       _billingAddressIndex = null;
       sameAsBilling = false;
@@ -279,16 +355,23 @@ class CheckoutController with ChangeNotifier {
         fromWallet: false,
         action: RouteAction.pushReplacement,
       );
-
-    } else if(apiResponse.error == 'Already registered ') {
+    } else if (apiResponse.error == 'Already registered ') {
       _isLoading = false;
-      showCustomSnackBarWidget(getTranslated(apiResponse.error, Get.context!), Get.context!, snackBarType: SnackBarType.warning);
-    } else if(apiResponse.response != null && apiResponse.response!.statusCode == 403) {
+      showCustomSnackBarWidget(
+          getTranslated(apiResponse.error, Get.context!), Get.context!,
+          snackBarType: SnackBarType.warning);
+    } else if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 403) {
       _isLoading = false;
-      showCustomSnackBarWidget(getTranslated(apiResponse.error, Get.context!), Get.context!, snackBarType: SnackBarType.error);
+      showCustomSnackBarWidget(
+          getTranslated(apiResponse.error, Get.context!), Get.context!,
+          snackBarType: SnackBarType.error);
     } else {
       _isLoading = false;
-      showCustomSnackBarWidget(getTranslated('payment_method_not_properly_configured', Get.context!), Get.context!, snackBarType: SnackBarType.error);
+      showCustomSnackBarWidget(
+          getTranslated('payment_method_not_properly_configured', Get.context!),
+          Get.context!,
+          snackBarType: SnackBarType.error);
     }
     notifyListeners();
     return apiResponse;
@@ -297,60 +380,55 @@ class CheckoutController with ChangeNotifier {
   bool sameAsBilling = false;
   void setSameAsBilling({bool isUpdate = true}) {
     sameAsBilling = !sameAsBilling;
-    if(isUpdate) {
+    if (isUpdate) {
       notifyListeners();
     }
   }
 
-  void clearData(){
+  void clearData() {
     orderNoteController.clear();
     passwordController.clear();
     confirmPasswordController.clear();
     _isCheckCreateAccount = false;
     _cashChangesAmount = null;
+    _idempotencyKey = null;
   }
-
 
   void setIsCheckCreateAccount(bool isCheck, {bool update = true}) {
     _isCheckCreateAccount = isCheck;
-    if(update) {
+    if (update) {
       notifyListeners();
     }
   }
 
-
-
-  void toggleChangeAmountShow(){
+  void toggleChangeAmountShow() {
     _changeAmountShow = !_changeAmountShow;
     notifyListeners();
   }
 
-  void onChangeCashChangesAmount(double? amount)=> _cashChangesAmount = amount;
-
+  void onChangeCashChangesAmount(double? amount) => _cashChangesAmount = amount;
 
   Future<ApiResponseModel> getReferralAmount(String? amount) async {
-    ApiResponseModel apiResponse = await checkoutServiceInterface.getReferralAmount(amount);
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
+    ApiResponseModel apiResponse =
+        await checkoutServiceInterface.getReferralAmount(amount);
+    if (apiResponse.response != null &&
+        apiResponse.response!.statusCode == 200) {
       _referralAmount = ReferralAmount.fromJson(apiResponse.response.data);
     } else {
-      ApiChecker.checkApi( apiResponse);
+      ApiChecker.checkApi(apiResponse);
     }
     notifyListeners();
     return apiResponse;
   }
 
-
   void toggleTermsCheck({bool isUpdate = true}) {
     _isAcceptTerms = !_isAcceptTerms;
-    if(isUpdate) {
+    if (isUpdate) {
       notifyListeners();
     }
   }
 
-
-  void updatePaymentSelection(){
+  void updatePaymentSelection() {
     notifyListeners();
   }
-
-
 }

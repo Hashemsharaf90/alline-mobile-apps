@@ -7,6 +7,7 @@ import 'package:flutter_sixvalley_ecommerce/features/shipping/domain/models/chos
 import 'package:flutter_sixvalley_ecommerce/features/shipping/domain/models/shipping_method_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shipping/domain/models/shipping_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/domain/models/selected_shipping_type.dart';
+import 'package:flutter_sixvalley_ecommerce/features/splash/controllers/splash_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shipping/domain/services/shipping_service_interface.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/api_checker.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
@@ -48,7 +49,7 @@ class ShippingController extends ChangeNotifier {
       _shippingList!.add(ShippingModel(-1, element[0].cartGroupId, []));
     }
 
-    await getChosenShippingMethod(context);
+    await getChosenShippingMethod(Get.context!);
     for (int i = 0; i < sellerIdList.length; i++) {
       ApiResponseModel apiResponse = await shippingServiceInterface
           .getShippingMethod(sellerIdList[i], sellerTypeList[i]);
@@ -182,6 +183,70 @@ class ShippingController extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// The Alline checkout does not expose legacy shipping-method choices.
+  /// When the 6Valley backend still requires a seller-wise shipping method,
+  /// persist the first method supplied by that seller before placing the order.
+  /// A null result means at least one selected store has no usable delivery
+  /// method, so checkout must not continue.
+  Future<double?> ensureDefaultShippingMethods(
+    BuildContext context,
+    List<CartModel> sellerGroupList,
+    List<List<CartModel>> cartProductList,
+  ) async {
+    final config =
+        Provider.of<SplashController>(context, listen: false).configModel;
+    if (config?.shippingMethod != 'sellerwise_shipping') {
+      return 0;
+    }
+
+    await getShippingMethod(context, cartProductList);
+    final shippingList = _shippingList;
+    if (shippingList == null || shippingList.length < sellerGroupList.length) {
+      return null;
+    }
+
+    double totalShippingCost = 0;
+    for (int index = 0; index < sellerGroupList.length; index++) {
+      final group = sellerGroupList[index];
+      final selectedPhysicalItems = cartProductList[index].where(
+        (item) => item.isChecked == true && item.productType == 'physical',
+      );
+      if (selectedPhysicalItems.isEmpty ||
+          group.isGroupItemChecked != true ||
+          group.shippingType != 'order_wise') {
+        continue;
+      }
+
+      final methods = shippingList[index].shippingMethodList;
+      if (methods == null || methods.isEmpty) {
+        return null;
+      }
+
+      var selectedIndex = shippingList[index].shippingIndex ?? -1;
+      if (selectedIndex < 0 || selectedIndex >= methods.length) {
+        final defaultMethod = methods.first;
+        if (defaultMethod.id == null) {
+          return null;
+        }
+        final response = await shippingServiceInterface.addShippingMethod(
+          defaultMethod.id,
+          group.cartGroupId,
+        );
+        final statusCode = response.response?.statusCode;
+        if (statusCode != 200 && statusCode != 201) {
+          return null;
+        }
+        selectedIndex = 0;
+        shippingList[index].shippingIndex = selectedIndex;
+      }
+      totalShippingCost += methods[selectedIndex].cost ?? 0;
+    }
+
+    await getChosenShippingMethod(Get.context!);
+    notifyListeners();
+    return totalShippingCost;
   }
 
   String? _selectedShippingType;

@@ -810,7 +810,8 @@ class AuthController with ChangeNotifier {
         }
         responseModel = ResponseModel('verification', token != null);
       } else {
-        _loginErrorMessage = ApiChecker.getError(apiResponse).errors![0].message;
+        _loginErrorMessage =
+            ApiChecker.getError(apiResponse).errors![0].message;
         showCustomSnackBarWidget(_loginErrorMessage, Get.context!,
             snackBarType: SnackBarType.error);
         responseModel = ResponseModel(_loginErrorMessage, false);
@@ -1358,10 +1359,10 @@ class AuthController with ChangeNotifier {
     return authServiceInterface.getGuestCartId();
   }
 
-  void navigateToHome(String? fromPage, VoidCallback? onLoginSuccess, {bool isNewUser = false}) {
+  void navigateToHome(String? fromPage, VoidCallback? onLoginSuccess,
+      {bool isNewUser = false}) {
     if (isNewUser) {
-      RouterHelper.getAddNewAddressRoute(
-          action: RouteAction.pushReplacement, fromCheckout: false);
+      RouterHelper.getLocationSetupRoute(action: RouteAction.pushReplacement);
       return;
     }
     if (fromPage != null) {

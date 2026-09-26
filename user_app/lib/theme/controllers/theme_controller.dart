@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,10 +18,13 @@ class ThemeController with ChangeNotifier {
   }
 
   void _loadCurrentTheme() async {
-    if (sharedPreferences != null && sharedPreferences!.containsKey(AppConstants.theme)) {
+    if (sharedPreferences != null &&
+        sharedPreferences!.containsKey(AppConstants.theme)) {
       _darkTheme = sharedPreferences!.getBool(AppConstants.theme)!;
     } else {
-      _darkTheme = WidgetsBinding.instance.platformDispatcher.platformBrightness == Brightness.dark;
+      _darkTheme =
+          WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+              Brightness.dark;
     }
     notifyListeners();
   }
@@ -30,15 +32,10 @@ class ThemeController with ChangeNotifier {
   Color? selectedPrimaryColor;
   Color? selectedSecondaryColor;
 
-
-
   void setThemeColor({Color? primaryColor, Color? secondaryColor}) {
     selectedPrimaryColor = primaryColor;
     selectedSecondaryColor = secondaryColor;
 
     notifyListeners();
   }
-
-
-
 }

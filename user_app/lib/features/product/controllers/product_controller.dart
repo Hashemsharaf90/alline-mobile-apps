@@ -32,8 +32,38 @@ class ProductController extends ChangeNotifier {
   ProductModel? _allProductModel;
   ProductModel? get allProductModel => _allProductModel;
 
+  ProductModel? _homeAllProductModel;
+  ProductModel? get homeAllProductModel => _homeAllProductModel;
+  bool _isHomeAllProductLoading = false;
+  bool get isHomeAllProductLoading => _isHomeAllProductLoading;
+  bool _isHomeAllProductLoadingMore = false;
+  bool get isHomeAllProductLoadingMore => _isHomeAllProductLoadingMore;
+  bool _hasHomeAllProductError = false;
+  bool get hasHomeAllProductError => _hasHomeAllProductError;
+
   ProductModel? _latestProductModel;
   ProductModel? get latestProductModel => _latestProductModel;
+
+  ProductModel? _homeBestSellingModel;
+  ProductModel? get homeBestSellingModel => _homeBestSellingModel;
+
+  Future<void> getHomeBestSellingProducts({bool reload = false}) async {
+    if (_homeBestSellingModel != null && !reload) return;
+    try {
+      final response =
+          await productServiceInterface?.getProductModelByType<Response>(
+              offset: 1,
+              productType: ProductType.bestSelling,
+              source: DataSourceEnum.client);
+      if (response?.response?.statusCode == 200) {
+        _homeBestSellingModel = ProductModel.fromJson(response!.response!.data);
+      }
+    } catch (_) {
+      // Optional discovery content must not block the rest of Home.
+    }
+    _homeBestSellingModel ??= ProductModel(products: []);
+    notifyListeners();
+  }
 
   ProductModel? _featuredProductModel;
   ProductModel? get featuredProductModel => _featuredProductModel;
@@ -169,20 +199,124 @@ class ProductController extends ChangeNotifier {
     } else {
       final ApiResponseModel? apiResponse =
           await productServiceInterface?.getProductModelByType<Response>(
-              offset: offset,
-              productType: ProductType.latestProduct,
-              source: DataSourceEnum.client);
+              offset: offset, productType: type, source: DataSourceEnum.client);
 
       if (apiResponse?.response?.statusCode == 200) {
         final ProductModel parsedProductModel =
             ProductModel.fromJson(apiResponse?.response?.data);
 
+        final existingIds = _allProductModel?.products
+                ?.map((product) => product.id)
+                .whereType<int>()
+                .toSet() ??
+            <int>{};
+        final newProducts = (parsedProductModel.products ?? [])
+            .where(
+                (product) => product.id == null || existingIds.add(product.id!))
+            .toList();
+
         _allProductModel?.totalSize = parsedProductModel.totalSize;
-        _allProductModel?.offset = parsedProductModel.offset;
-        _allProductModel?.products?.addAll(parsedProductModel.products ?? []);
+        _allProductModel?.offset = parsedProductModel.offset ?? offset;
+        _allProductModel?.products?.addAll(newProducts);
       } else {
         ApiChecker.checkApi(apiResponse!);
       }
+      notifyListeners();
+    }
+  }
+
+  Future<void> getHomeAllProductList(int offset, {bool reload = false}) async {
+    if (offset == 1) {
+      if (_homeAllProductModel != null && !reload) return;
+      _isHomeAllProductLoading = true;
+      if (reload) {
+        _homeAllProductModel = null;
+      }
+      notifyListeners();
+
+      await DataSyncHelper.fetchAndSyncData(
+        fetchFromLocal: () => productServiceInterface!.getProductModelByType(
+          offset: offset,
+          productType: ProductType.allProduct,
+          source: DataSourceEnum.local,
+        ),
+        fetchFromClient: () => productServiceInterface!.getProductModelByType(
+          offset: offset,
+          productType: ProductType.allProduct,
+          source: DataSourceEnum.client,
+        ),
+        onResponse: (data, source) {
+          try {
+            final parsed = ProductModel.fromJson(data);
+            final unique = <int>{};
+            final initialProducts = (parsed.products ?? [])
+                .where((p) => p.id == null || unique.add(p.id!))
+                .toList();
+            _homeAllProductModel = ProductModel(
+              totalSize: parsed.totalSize,
+              limit: parsed.limit,
+              offset: parsed.offset ?? offset,
+              products: initialProducts,
+            );
+          } catch (e) {
+            _homeAllProductModel = ProductModel(products: [], offset: offset);
+          }
+          if (source == DataSourceEnum.client) {
+            _isHomeAllProductLoading = false;
+          }
+          notifyListeners();
+        },
+      );
+      _isHomeAllProductLoading = false;
+      notifyListeners();
+    } else {
+      if (_isHomeAllProductLoadingMore) return;
+      if (_homeAllProductModel?.totalSize != null &&
+          (_homeAllProductModel?.products?.length ?? 0) >=
+              _homeAllProductModel!.totalSize!) {
+        return;
+      }
+      _isHomeAllProductLoadingMore = true;
+      _hasHomeAllProductError = false;
+      notifyListeners();
+
+      try {
+        final ApiResponseModel? apiResponse =
+            await productServiceInterface?.getProductModelByType<Response>(
+          offset: offset,
+          productType: ProductType.allProduct,
+          source: DataSourceEnum.client,
+        );
+
+        if (apiResponse?.response?.statusCode == 200) {
+          final ProductModel parsedProductModel =
+              ProductModel.fromJson(apiResponse?.response?.data);
+
+          final existingIds = _homeAllProductModel?.products
+                  ?.map((product) => product.id)
+                  .whereType<int>()
+                  .toSet() ??
+              <int>{};
+          final newProducts = (parsedProductModel.products ?? [])
+              .where((product) =>
+                  product.id == null || existingIds.add(product.id!))
+              .toList();
+
+          _homeAllProductModel?.totalSize = parsedProductModel.totalSize;
+          _homeAllProductModel?.offset = parsedProductModel.offset ?? offset;
+          _homeAllProductModel?.products?.addAll(newProducts);
+          if ((parsedProductModel.products ?? []).isEmpty) {
+            _homeAllProductModel?.totalSize =
+                _homeAllProductModel?.products?.length ?? 0;
+          }
+        } else {
+          _hasHomeAllProductError = true;
+        }
+      } catch (e) {
+        _hasHomeAllProductError = true;
+      }
+
+      _isHomeAllProductLoadingMore = false;
       notifyListeners();
     }
   }
@@ -359,12 +493,19 @@ class ProductController extends ChangeNotifier {
         _brandOrCategoryProductList =
             ProductModel.fromJson(apiResponse.response?.data);
       } else {
-        _brandOrCategoryProductList?.products?.addAll(
-            ProductModel.fromJson(apiResponse.response?.data).products ?? []);
-        _brandOrCategoryProductList?.offset =
-            ProductModel.fromJson(apiResponse.response?.data).offset;
-        _brandOrCategoryProductList?.totalSize =
-            ProductModel.fromJson(apiResponse.response?.data).totalSize;
+        final page = ProductModel.fromJson(apiResponse.response?.data);
+        final existingIds = _brandOrCategoryProductList?.products
+                ?.map((product) => product.id)
+                .whereType<int>()
+                .toSet() ??
+            <int>{};
+        final uniquePage = (page.products ?? [])
+            .where(
+                (product) => product.id == null || existingIds.add(product.id!))
+            .toList();
+        _brandOrCategoryProductList?.products?.addAll(uniquePage);
+        _brandOrCategoryProductList?.offset = page.offset ?? offset;
+        _brandOrCategoryProductList?.totalSize = page.totalSize;
       }
     } else {
       ApiChecker.checkApi(apiResponse);

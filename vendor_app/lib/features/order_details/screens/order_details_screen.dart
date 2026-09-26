@@ -1,38 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sixvalley_vendor_app/common/basewidgets/custom_dialog_widget.dart';
 import 'package:sixvalley_vendor_app/features/dashboard/screens/dashboard_screen.dart';
-import 'package:sixvalley_vendor_app/features/order/domain/models/order_model.dart';
 import 'package:sixvalley_vendor_app/features/order_details/controllers/order_details_controller.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/change_amount_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/due_ampunt_card.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/alline_order_header_card_widget.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/alline_order_progress_widget.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/alline_customer_card_widget.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/alline_order_summary_card_widget.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/alline_order_action_bar_widget.dart';
 import 'package:sixvalley_vendor_app/features/order_details/widgets/order_details_shimmer.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/order_payment_info_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/order_setup_bottom_sheet.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/order_top_section_widget.dart';
 import 'package:sixvalley_vendor_app/features/order_details/widgets/product_list_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_edit/controllers/order_edit_controller.dart';
-import 'package:sixvalley_vendor_app/helper/color_helper.dart';
-import 'package:sixvalley_vendor_app/helper/date_converter.dart';
-import 'package:sixvalley_vendor_app/helper/price_converter.dart';
-import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
-import 'package:sixvalley_vendor_app/main.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/delivery_man_information_widget.dart';
+import 'package:sixvalley_vendor_app/features/order_details/widgets/third_party_delivery_info_widget.dart';
 import 'package:sixvalley_vendor_app/features/order/controllers/order_controller.dart';
 import 'package:sixvalley_vendor_app/features/splash/controllers/splash_controller.dart';
+import 'package:sixvalley_vendor_app/main.dart';
+import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
-import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
-import 'package:sixvalley_vendor_app/common/basewidgets/custom_button_widget.dart';
-import 'package:sixvalley_vendor_app/common/basewidgets/custom_divider_widget.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_image_widget.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/image_diaglog_widget.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/no_data_screen.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/customer_contact_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/delivery_man_information_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/order_top_section_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/payment_status_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/shipping_and_biilling_widget.dart';
-import 'package:sixvalley_vendor_app/features/order_details/widgets/third_party_delivery_info_widget.dart';
-import '../../../common/basewidgets/custom_confirmation_dialog_widget.dart' show CustomConfirmationDialogWidget;
 
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -96,7 +84,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 builder: (context, orderDetailsController, child) {
                   double itemsPrice = 0;
                   double discount = 0;
-                  double? eeDiscount = 0;
+                  double eeDiscount = 0;
                   double tax = 0;
                   double coupon = 0;
                   double shipping = 0;
@@ -120,7 +108,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       if(orderDetailsController.orderDetails![0].order!.extraDiscountType == 'percent') {
                         eeDiscount = (itemsPrice - coupon - discount) * (orderDetailsController.orderDetails![0].order!.extraDiscount!/100);
                       }else{
-                        eeDiscount = orderDetailsController.orderDetails![0].order!.extraDiscount;
+                        eeDiscount = orderDetailsController.orderDetails![0].order!.extraDiscount ?? 0;
                       }
                     }
 
@@ -130,483 +118,146 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   }
                   double subTotal = itemsPrice + tax - discount;
 
-                  double totalPrice = subTotal + (isFreeShipping ? 0 : shipping) - coupon - eeDiscount! - referAndEarnDiscount;
+                  double totalPrice = subTotal + (isFreeShipping ? 0 : shipping) - coupon - eeDiscount - referAndEarnDiscount;
 
                   return orderDetailsController.orderDetails != null ? orderDetailsController.orderDetails!.isNotEmpty ?
-                  CustomScrollView(slivers: [
-                    SliverToBoxAdapter(child: Column(children: [
-                      Container(height: 10, color: Theme.of(context).primaryColor.withValues(alpha:.1)),
+                  CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Column(
+                          children: [
+                            // 1. Order Header Card (ID, Status Badge, Type, Date & Payment)
+                            AllineOrderHeaderCardWidget(order: orderDetailsController.orderDetails![0].order),
 
-                      Container(decoration: BoxDecoration(color: Theme.of(context).cardColor, boxShadow: ThemeShadow.getShadow(context)),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start,children: [
+                            // 2. Order Progress Tracker (Alline Stepper)
+                            AllineOrderProgressWidget(status: orderDetailsController.orderDetails![0].order?.orderStatus),
 
-                          OrderPaymentInfoWidget(),
-                          const SizedBox(height: Dimensions.paddingSizeSmall),
+                            // 3. Customer Information & Direct Contact Card
+                            AllineCustomerCardWidget(order: orderDetailsController.orderDetails![0].order),
 
-                          if(orderDetailsController.orderDetails![0].order?.editedStatus == 1 && (orderDetailsController.orderDetails?[0].latestEditHistory?.orderDueAmount ?? 0) > 0 &&  orderDetailsController.orderDetails![0].latestEditHistory!.orderDuePaymentMethod != 'cash_on_delivery')
-                          AmountDueCard(
-                            showButton: true,
-                            title: getTranslated('amount_due', context)!,
-                            price: PriceConverter.convertPrice(context, orderDetailsController.orderDetails![0].latestEditHistory!.orderDueAmount!),
-                            description: getTranslated('after_editing_the_order_amount_has_increased', context)!,
-                            buttonText:  getTranslated('switch_to_cod', context)!,
-                            onTap: () {
-                              showAnimatedDialogWidget( context,
-                                Consumer<OrderEditController>(
-                                  builder: (context, orderEditController, child) {
-                                  return CustomConfirmationDialogWidget(
-                                    icon: Images.switchToCodIcon,
-                                    title: getTranslated('switch_to_cash_on_delivery', context) ?? '',
-                                    description: getTranslated('before_switching_this_order_to_cash_on_delivery', context) ?? '',
-                                    highlightTexts: [getTranslated('cash_on_delivery_cod', context) ?? ''],
-                                    isLoading: orderEditController.isLoading,
-                                    onYesPressed: () {
-                                      orderEditController.switchToCod(orderDetailsController.orderDetails![0].order!.id!).then((response) {
-                                        if(response.response?.statusCode == 200) {
-                                          Navigator.of(Get.context!).pop();
-                                        }
-                                      });
-                                    },
-                                  );
-                                })
-                              );
-                            },
-                          ),
-
-                          if(orderDetailsController.orderDetails![0].order?.editedStatus == 1 && (orderDetailsController.orderDetails?[0].latestEditHistory?.orderReturnAmount ?? 0) > 0 &&  orderDetailsController.orderDetails![0].latestEditHistory!.orderReturnPaymentStatus != 'returned')
-                          AmountDueCard(
-                            showButton: false,
-                            title: getTranslated('need_to_return', context)!,
-                            price: PriceConverter.convertPrice(context, orderDetailsController.orderDetails![0].latestEditHistory!.orderReturnAmount!),
-                            description: getTranslated('the_order_amount_was_reduced_after_editing', context)!, buttonText: '',
-                            onTap: null,
-                          ),
-
-                          if(orderDetailsController.orderDetails![0].order?.editedStatus == 1 &&  (orderDetailsController.orderDetails?[0].latestEditHistory?.orderDueAmount ?? 0) > 0 &&  orderDetailsController.orderDetails![0].latestEditHistory!.orderDuePaymentMethod != 'cash_on_delivery')
-                          const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                          orderDetailsController.orderDetails![0].order!.orderType == 'POS' ? const SizedBox():
-                          ShippingAndBillingWidget(orderModel: orderDetailsController.orderDetails![0].order!, onlyDigital: _onlyDigital, orderType: orderDetailsController.orderDetails![0].order!.orderType!),
-
-                          if(orderDetailsController.orderDetails![0].order!.orderType != 'POS')
-                          const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            ProductListWidget(orderId: widget.orderId ?? 0),
-                            const SizedBox(height: Dimensions.paddingSizeSmall),
-
-
-                            CustomerContactWidget(orderModel: orderDetailsController.orderDetails![0].order),
-                            const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                            orderDetailsController.orderDetails![0].order!.deliveryMan != null?
-                            Padding(padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                              child: DeliveryManContactInformationWidget(orderModel: orderDetailsController.orderDetails![0].order, orderType: orderDetailsController.orderDetails![0].order!.orderType, onlyDigital: _onlyDigital),
-                            ):const SizedBox(),
-
-                            // Container(padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault,
-                            //     Dimensions.paddingSizeDefault, Dimensions.paddingSizeDefault, 0),
-                            //   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                            //     Row(children: [
-                            //       SizedBox(width: 15, child: Image.asset(Images.orderSummery)),
-                            //       const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                            //       Text(getTranslated('order_summery', context)!,
-                            //         style: titilliumSemiBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                            //     ],
-                            //     ),
-                            //     const SizedBox(height: Dimensions.paddingSizeDefault,),
-                            //
-                            //     ListView.builder(
-                            //       padding: const EdgeInsets.all(0),
-                            //       shrinkWrap: true,
-                            //       physics: const NeverScrollableScrollPhysics(),
-                            //       itemCount: orderDetailsController.orderDetails!.length,
-                            //       itemBuilder: (context, index) {
-                            //         return OrderedProductListItemWidget(orderDetailsModel: orderDetailsController.orderDetails![index],
-                            //           paymentStatus: orderController.paymentStatus,orderId: widget.orderId,
-                            //           index: index, length: orderDetailsController.orderDetails!.length,
-                            //         );
-                            //       },
-                            //     ),
-                            //   ],
-                            //   ),
-                            // ),
-
-
-                            /// bolling cummery section
-                            Container(
-                              padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeDefault),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).cardColor,
-                                boxShadow: [BoxShadow(color: Theme.of(context).hintColor.withValues(alpha:0.2), spreadRadius:1.5, blurRadius: 3)],
-                              ),
-
-                              child: Column(children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        getTranslated('billing_summery', context)!,
-                                        style: robotoBold.copyWith(
-                                            fontSize: Dimensions.fontSizeLarge,
-                                            color: Theme.of(context).textTheme.bodyLarge?.color
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(height: Dimensions.paddingSizeSmall),
-
-                                Divider(thickness: 0.2, height: 1, color: Theme.of(context).hintColor.withValues(alpha: .65)),
-                                SizedBox(height: Dimensions.paddingSizeSmall),
-
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                                  child: Column(
-                                    children: [
-
-                                      orderDetailsController.orderDetails![0].order!.editedStatus == 1 ?
-                                      Container(
-                                        padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.tertiary.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Icon(Icons.info, color: Theme.of(context).colorScheme.tertiary, size: Dimensions.iconSizeSmall),
-                                            SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                                            Text(
-                                                getTranslated('total_bill_has_been_updated_after', context) ?? '',
-                                                style: titilliumRegular.copyWith(color: Theme.of(context).textTheme.headlineLarge!.color, fontSize: Dimensions.fontSizeSmall)
-                                            )
-                                          ],
-                                        ),
-                                      ) : SizedBox(),
-
-
-                                      orderDetailsController.orderDetails![0].order!.editedStatus == 1 ?
-                                      SizedBox(height: Dimensions.paddingSizeSmall) : SizedBox(),
-
-
-                                      // Total
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('sub_total', context)!,
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7)
-                                            )
-                                        ),
-
-                                        Text(PriceConverter.convertPrice(context, itemsPrice),
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),]),
-                                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('tax', context)!,
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))
-                                        ),
-
-                                        Text(' + ${PriceConverter.convertPrice(context, tax)}',
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),]),
-                                      const SizedBox(height: Dimensions.paddingSizeSmall,),
-
-
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('discount', context)!,
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-
-
-                                        Text('- ${PriceConverter.convertPrice(context, discount)}',
-                                            style: titilliumRegular.copyWith(
-                                              color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7),
-                                            )),]),
-                                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-
-                                      if(referAndEarnDiscount > 0)
-                                        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                          Text(getTranslated('referral_discount', context)!,
-                                              style: titilliumRegular.copyWith(
-                                                  color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))
-                                          ),
-
-                                          Text('- ${PriceConverter.convertPrice(context, referAndEarnDiscount)}',
-                                              style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7),
-                                              )),
-                                        ]),
-
-                                      if(referAndEarnDiscount > 0)
-                                        const SizedBox(height: Dimensions.paddingSizeSmall,),
-
-
-                                      orderDetailsController.orderDetails![0].order!.orderType == "POS"?
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('extra_discount', context)!,
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-                                        Text('- ${PriceConverter.convertPrice(context, eeDiscount)}',
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-                                      ]):const SizedBox(),
-                                      SizedBox(height:  orderDetailsController.orderDetails![0].order!.orderType == "POS"? Dimensions.paddingSizeSmall: 0),
-
-
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('coupon_discount', context)!,
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-                                        Text('- ${PriceConverter.convertPrice(context, coupon)}',
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),]),
-                                      const SizedBox(height: Dimensions.paddingSizeSmall,),
-
-
-                                      if(!_onlyDigital)Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('shipping_fee', context)! + _shippingFreeText(orderDetailsController.orderDetails![0].order),
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-                                        Text('${(isFreeShipping) ? '' : '+'} ${PriceConverter.convertPrice(context, shipping)}',
-                                            style: titilliumRegular.copyWith(
-                                                color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),]),
-
-                                      const Padding(padding: EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                                          child: CustomDividerWidget()),
-
-
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                        Text(getTranslated('total_amount', context)!,
-                                            style: titilliumSemiBold.copyWith(fontSize: Dimensions.fontSizeDefault)
-                                        ),
-                                        Text(PriceConverter.convertPrice(context, totalPrice),
-                                          style: titilliumSemiBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge,
-                                              color: Theme.of(context).primaryColor),
-                                        ),
-                                      ]),
-
-                                      if (orderDetailsController.orderDetails![0].order!.orderType == 'POS')
-                                        Column(
-                                          children: [
-                                            const SizedBox(height: Dimensions.paddingSizeSmall),
-                                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                              Text(getTranslated('paid_amount', context)!,
-                                                  style: titilliumRegular.copyWith(
-                                                      color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-                                              Text(PriceConverter.convertPrice(context, orderDetailsController.orderDetails![0].order!.paidAmount),
-                                                  style: titilliumRegular.copyWith(
-                                                      color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),]
-                                            ),
-                                            const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                                            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                              Text(getTranslated('change_amount', context)!,
-                                                  style: titilliumRegular.copyWith(
-                                                      color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),
-                                              Text(PriceConverter.convertPrice(context, orderDetailsController.orderDetails![0].order!.paidAmount! - double.parse(totalPrice.toStringAsFixed(2))),
-                                                  style: titilliumRegular.copyWith(
-                                                      color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7))),]
-                                            ),
-                                            // const SizedBox(height: Dimensions.paddingSizeSmall),
-                                          ],
-                                        ),
-
-                                    ],
-                                  ),
-                                ),
-
-                              ],),
+                            // 4. Products List (Supermarket Compatible)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                              child: ProductListWidget(orderId: widget.orderId ?? 0),
                             ),
-                            SizedBox(height: Dimensions.paddingSizeSmall),
 
+                            // 5. Order Financial Summary & Payment Card
+                            AllineOrderSummaryCardWidget(
+                              order: orderDetailsController.orderDetails![0].order,
+                              itemsPrice: itemsPrice,
+                              discount: discount,
+                              tax: tax,
+                              shipping: isFreeShipping ? 0 : shipping,
+                              coupon: coupon,
+                              extraDiscount: eeDiscount,
+                              totalPrice: totalPrice,
+                            ),
 
-                            orderDetailsController.orderDetails![0].order!.orderNote != null && orderDetailsController.orderDetails![0].order!.orderNote!.trim().isNotEmpty ?
-                            Container(decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              boxShadow: [BoxShadow(color: Theme.of(context).hintColor.withValues(alpha:.25),spreadRadius: .11,blurRadius: .11, offset: const Offset(0,2))],
-                              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.paddingSizeSmall),
-                                bottomRight: Radius.circular(Dimensions.paddingSizeSmall))),
-                              child: Container(decoration: BoxDecoration(
-                                color: Theme.of(context).hintColor.withValues(alpha:.07),
-                                borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(Dimensions.paddingSizeSmall),
-                                    bottomRight: Radius.circular(Dimensions.paddingSizeSmall)),),
-                                padding: const EdgeInsets.fromLTRB( Dimensions.paddingSizeDefault,Dimensions.paddingSizeDefault,Dimensions.paddingSizeDefault,
-                                  Dimensions.paddingSizeDefault),
-
-                                child: Column(crossAxisAlignment: CrossAxisAlignment.start,children: [
-                                  Row(children: [
-                                    Padding(padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
-                                      child: Image.asset(Images.orderNote,color: Theme.of(context).textTheme.bodyLarge?.color, width: Dimensions.iconSizeSmall ),),
-                                    Text(getTranslated('order_note', context)!, style: titilliumSemiBold.copyWith(fontSize: Dimensions.fontSizeLarge,
-                                      color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.bodyLarge!.color!, 0.7),)),
-                                  ]),
-                                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                  Text(orderDetailsController.orderDetails![0].order!.orderNote != null? orderDetailsController.orderDetails![0].order!.orderNote ?? '': "",
-                                      style: titilliumRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color)),
-                                ]),
-                              ),
-                            ):const SizedBox(),
-                          ]),
-
-
-                          PaymentStatusWidget(order: orderController, orderModel: orderDetailsController.orderDetails![0].order!, orderDetailsModel: orderDetailsController.orderDetails![0]),
-
-                          if(orderDetailsController.orderDetails![0].orderEditHistory != null && orderDetailsController.orderDetails![0].orderEditHistory!.isNotEmpty)...[
-                            SizedBox(height: Dimensions.paddingSizeSmall),
-                            Container(
-                              padding: EdgeInsetsGeometry.symmetric(vertical: Dimensions.paddingSizeSmall),
-                              decoration: BoxDecoration(
-                                boxShadow: [BoxShadow(color: Theme.of(context).hintColor.withValues(alpha:0.2), spreadRadius:1.5, blurRadius: 3)],
-                                color: Theme.of(context).cardColor,
-                              ),
-                              child: Column(children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        getTranslated('edit_log', context)!,
-                                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge,
-                                            color: Theme.of(context).textTheme.bodyLarge?.color
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            // 6. Delivery Man Details (if assigned)
+                            if (orderDetailsController.orderDetails![0].order!.deliveryMan != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                child: DeliveryManContactInformationWidget(
+                                  orderModel: orderDetailsController.orderDetails![0].order,
+                                  orderType: orderDetailsController.orderDetails![0].order!.orderType,
+                                  onlyDigital: _onlyDigital,
                                 ),
-                                SizedBox(height: Dimensions.paddingSizeSmall),
+                              ),
 
-                                Divider(thickness: 0.2, height: 1, color: Theme.of(context).hintColor.withValues(alpha: .65)),
-                                SizedBox(height: Dimensions.paddingSizeSmall),
+                            // 7. Third-Party Courier Tracking (if assigned)
+                            if (orderDetailsController.orderDetails![0].order!.thirdPartyServiceName != null)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                                child: ThirdPartyDeliveryInfoWidget(orderModel: orderDetailsController.orderDetails![0].order),
+                              ),
 
-                                ListView.separated(
-                                  itemCount: orderDetailsController.orderDetails![0].orderEditHistory!.length,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemBuilder:  (context, index) {
-                                    return Container(
-                                      padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+                            // 8. Order Note (if provided)
+                            if (orderDetailsController.orderDetails![0].order!.orderNote != null &&
+                                orderDetailsController.orderDetails![0].order!.orderNote!.trim().isNotEmpty)
+                              Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(color: AllineColors.borderLight),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(Icons.note_alt_outlined, color: AllineColors.secondary, size: 20),
+                                    const SizedBox(width: 8),
+                                    Expanded(
                                       child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                getTranslated('edit_by', context)!,
-                                                style: robotoRegular.copyWith(
-                                                  fontSize: Dimensions.fontSizeDefault,
-                                                  color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.headlineLarge!.color!, 0.7),
-                                                )
-                                              ),
-
-                                              Text(
-                                                "${orderDetailsController.orderDetails![0].orderEditHistory![index].editBy} (${orderDetailsController.orderDetails![0].orderEditHistory![index].editedUserName})",
-                                                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault,
-                                                  color: Theme.of(context).textTheme.bodyLarge?.color
-                                                ),
-                                              ),
-                                            ],
+                                          Text(
+                                            'ملاحظات العميل على الطلب:',
+                                            style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: AllineColors.textDark),
                                           ),
-                                          SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                getTranslated('date', context)!,
-                                                style: robotoRegular.copyWith(
-                                                  fontSize: Dimensions.fontSizeDefault,
-                                                  color: ColorHelper.blendColors(Colors.white, Theme.of(context).textTheme.headlineLarge!.color!, 0.7),
-                                                )
-                                              ),
-
-                                              Text(
-                                                DateConverter.formatDateWithCommaAnd24Hour(DateTime.parse(orderDetailsController.orderDetails![0].orderEditHistory![index].createdAt!)),
-                                                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault,
-                                                  color: Theme.of(context).textTheme.bodyLarge?.color
-                                                ),
-                                              ),
-
-                                            ],
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            orderDetailsController.orderDetails![0].order!.orderNote!,
+                                            style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: AllineColors.textDark),
                                           ),
-
                                         ],
                                       ),
-                                    );
-                                  },
-
-                                  separatorBuilder: (BuildContext context, int index) {
-                                    return Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-                                      child: Divider(
-                                        color: Theme.of(context).hintColor.withValues(alpha: 0.5),
-                                      ),
-                                    );
-                                  },
+                                    ),
+                                  ],
                                 ),
-
-                              ],
-                              ),
-                            ),
-                            SizedBox(height: Dimensions.paddingSizeSmall),
-                          ],
-
-                          ChangeAmountWidget(
-                            amount: orderDetailsController.orderDetails![0].order?.bringCashAmount ?? 0,
-                            currency: orderDetailsController.orderDetails![0].order?.bringChangeAmountCurrency ?? '',
-                          ),
-
-
-                          orderDetailsController.orderDetails![0].order!.thirdPartyServiceName != null?
-                          Padding(padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
-                            child: ThirdPartyDeliveryInfoWidget(orderModel: orderDetailsController.orderDetails![0].order),
-                          ) : const SizedBox.shrink(),
-
-                          if(orderDetailsController.orderDetails != null && orderDetailsController.orderDetails![0].verificationImages != null && orderDetailsController.orderDetails![0].verificationImages!.isNotEmpty)
-                            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Padding(padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeSmall,  Dimensions.paddingSizeSmall, Dimensions.paddingSizeSmall, Dimensions.paddingSizeSmall),
-                                child: Text('${getTranslated('completed_service_picture', context)}',
-                                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).hintColor),)
                               ),
 
-                              SizedBox(height: 120,
-                                child: ListView.builder(
-                                  itemCount: orderDetailsController.orderDetails![0].verificationImages?.length,
-                                  scrollDirection: Axis.horizontal,
-                                  itemBuilder: (context, index){
-
-                                    return InkWell(onTap: () => showDialog(context: context, builder: (_)=> ImageDialogWidget(imageUrl: '${orderDetailsController.orderDetails![0].verificationImages?[index].imageFullUrl?.path}')),
-                                      child: Padding(padding:  EdgeInsets.only(left: Dimensions.paddingSizeSmall,
-                                          right: orderDetailsController.orderDetails![0].verificationImages!.length == index+1? Dimensions.paddingSizeSmall : 0),
-                                        child: SizedBox(width: 200,
-                                          child: ClipRRect(borderRadius: BorderRadius.circular(Dimensions.paddingSizeSmall),
-                                            child: Container(decoration: BoxDecoration(
-                                              border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha:.25), width: .25),
-                                              borderRadius: BorderRadius.circular(Dimensions.paddingSizeSmall)),
-                                              child: CustomImageWidget(image: '${orderDetailsController.orderDetails![0].verificationImages?[index].imageFullUrl?.path}')
+                            // 9. Delivery Verification Images (if uploaded)
+                            if (orderDetailsController.orderDetails != null &&
+                                orderDetailsController.orderDetails![0].verificationImages != null &&
+                                orderDetailsController.orderDetails![0].verificationImages!.isNotEmpty)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
+                                    child: Text(
+                                      '',
+                                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: AllineColors.textLight),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 120,
+                                    child: ListView.builder(
+                                      itemCount: orderDetailsController.orderDetails![0].verificationImages?.length,
+                                      scrollDirection: Axis.horizontal,
+                                      itemBuilder: (context, index) {
+                                        return InkWell(
+                                          onTap: () => showDialog(
+                                            context: context,
+                                            builder: (_) => ImageDialogWidget(
+                                              imageUrl: '',
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 14),
+                                            child: SizedBox(
+                                              width: 160,
+                                              child: ClipRRect(
+                                                borderRadius: BorderRadius.circular(10),
+                                                child: CustomImageWidget(
+                                                  image: '',
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                            ),
 
-
-
-                        ])),
-                        const SizedBox(height: Dimensions.paddingSizeSmall),
-                      ],
-                    ))
-                  ],
+                            const SizedBox(height: 100),
+                          ],
+                        ),
+                      ),
+                    ],
                   ) : const NoDataScreen() :
                   const OrderDetailsShimmer();
                 }
@@ -616,50 +267,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         ),
 
         bottomNavigationBar: Consumer<OrderDetailsController>(builder: (_, orderDetailsController, __) {
-          if(orderDetailsController.orderDetails?.isEmpty ?? true) return const SizedBox();
-          return orderDetailsController.orderDetails?[0].order?.orderType == 'POS'  ? const SizedBox() : Container(
-            decoration: BoxDecoration(color: Theme.of(context).cardColor, boxShadow: ThemeShadow.getShadow(context)),
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
-            child: CustomButtonWidget(
-              backgroundColor: (orderDetailsController.orderDetails == null ) ? Theme.of(context).hintColor : Theme.of(context).primaryColor,
-              borderRadius: Dimensions.paddingSizeExtraSmall,
-              btnTxt: getTranslated('order_setup', context),
-              onTap: (orderDetailsController.orderDetails == null ) ? null : () {
-
-                showModalBottomSheet(
-                  backgroundColor: Theme.of(context).cardColor,
-                  useSafeArea: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  isScrollControlled: true,
-                  context: context,
-                  builder: (BuildContext context){
-                    return OrderSetupBottomSheet(
-                      orderModel: orderDetailsController.orderDetails?[0].order,
-                      onlyDigital: _onlyDigital,
-                      bottomContext: context,
-                    );
-                  },
-                );
-              },
-            ),
+          if (orderDetailsController.orderDetails?.isEmpty ?? true) return const SizedBox();
+          return AllineOrderActionBarWidget(
+            order: orderDetailsController.orderDetails?[0].order,
+            onlyDigital: _onlyDigital,
           );
         }),
       ),
     );
   }
-
-
-  String _shippingFreeText(Order? order) {
-    if((order?.isShippingFree ?? false) && order?.shippingResponsibility == 'inhouse_shipping') {
-      return ' (${getTranslated('expense_bearer_admin', context)})';
-    } else if ((order?.isShippingFree ?? false) && order?.shippingResponsibility == 'sellerwise_shipping' ) {
-      return ' (${getTranslated('expense_bearer_vendor', context)})';
-    }
-    return '';
-  }
-
 }
+

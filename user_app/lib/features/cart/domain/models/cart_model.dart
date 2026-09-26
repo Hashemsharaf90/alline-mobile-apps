@@ -1,6 +1,7 @@
 import 'package:flutter_sixvalley_ecommerce/data/model/image_full_url.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/domain/models/seller_model.dart';
+
 class CartModel {
   int? id;
   int? productId;
@@ -28,7 +29,7 @@ class CartModel {
   String? shopInfo;
   List<ChoiceOptions>? choiceOptions;
   List<int>? variationIndexes;
-  double?  shippingCost;
+  double? shippingCost;
   String? shippingType;
   int? minimumOrderQuantity;
   ProductInfo? productInfo;
@@ -46,7 +47,9 @@ class CartModel {
   double? appliedTax;
   String? appliedTaxType;
   double? shippingCostTax;
-
+  String? shoppingSource;
+  String? globalStoreName;
+  int? globalShoppingRequestId;
 
   CartModel(
       this.id,
@@ -90,9 +93,7 @@ class CartModel {
       this.isGroupItemChecked,
       this.appliedTax,
       this.appliedTaxType,
-      this.shippingCostTax
-      );
-
+      this.shippingCostTax);
 
   CartModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -109,7 +110,9 @@ class CartModel {
     maxQuantity = json['max_quantity'];
     variant = json['variant'];
     color = json['color'];
-    variation = json['variation'] != null ? Variation.fromJson(json['variation']) : null;
+    variation = json['variation'] != null
+        ? Variation.fromJson(json['variation'])
+        : null;
     discount = json['discount'].toDouble();
     discountType = json['discount_type'];
     tax = json['tax'].toDouble();
@@ -120,37 +123,47 @@ class CartModel {
     shopInfo = json['shop_info'];
     if (json['choice_options'] != null) {
       choiceOptions = [];
-      json['choice_options'].forEach((v) {choiceOptions!.add(ChoiceOptions.fromJson(v));
+      json['choice_options'].forEach((v) {
+        choiceOptions!.add(ChoiceOptions.fromJson(v));
       });
     }
-    variationIndexes = json['variation_indexes'] != null ? json['variation_indexes'].cast<int>() : [];
-    if(json['shipping_cost'] != null){
-      shippingCost =double.parse(json['shipping_cost'].toString());
+    variationIndexes = json['variation_indexes'] != null
+        ? json['variation_indexes'].cast<int>()
+        : [];
+    if (json['shipping_cost'] != null) {
+      shippingCost = double.parse(json['shipping_cost'].toString());
     }
-    if(json['shipping_type'] != null){
+    if (json['shipping_type'] != null) {
       shippingType = json['shipping_type'];
     }
-    productInfo = json['product'] != null ? ProductInfo.fromJson(json['product']) : null;
+    productInfo =
+        json['product'] != null ? ProductInfo.fromJson(json['product']) : null;
     productType = json['product_type'];
     slug = json['slug'];
-    if(json['minimum_order_amount_info'] != null){
-      try{
+    if (json['minimum_order_amount_info'] != null) {
+      try {
         minimumOrderAmountInfo = json['minimum_order_amount_info'].toDouble();
-      }catch(e){
-        minimumOrderAmountInfo = double.parse(json['minimum_order_amount_info'].toString());
+      } catch (e) {
+        minimumOrderAmountInfo =
+            double.parse(json['minimum_order_amount_info'].toString());
       }
     }
     increment = false;
     decrement = false;
-    freeDeliveryOrderAmount = json['free_delivery_order_amount'] != null ? FreeDeliveryOrderAmount.fromJson(json['free_delivery_order_amount']) : null;
-    shop = json['shop'] != null ? Shop.fromJson(json['shop'], isAdminProduct: json['seller_is'] == 'admin') : null;
-    if(json["is_product_available"] != null){
+    freeDeliveryOrderAmount = json['free_delivery_order_amount'] != null
+        ? FreeDeliveryOrderAmount.fromJson(json['free_delivery_order_amount'])
+        : null;
+    shop = json['shop'] != null
+        ? Shop.fromJson(json['shop'],
+            isAdminProduct: json['seller_is'] == 'admin')
+        : null;
+    if (json["is_product_available"] != null) {
       isProductAvailable = int.parse(json["is_product_available"].toString());
-    }else{
+    } else {
       isProductAvailable = 1;
     }
 
-    if(json['is_checked'] != null) {
+    if (json['is_checked'] != null) {
       isChecked = json['is_checked'] == 1 ? true : false;
     } else {
       isChecked = false;
@@ -160,11 +173,18 @@ class CartModel {
         : null;
     isGroupChecked = false;
     isGroupItemChecked = false;
-    appliedTax =  json['applied_tax'] != null ?
-    double.tryParse(json['applied_tax'].toString()) : null;
+    appliedTax = json['applied_tax'] != null
+        ? double.tryParse(json['applied_tax'].toString())
+        : null;
     appliedTaxType = json['applied_tax_type'];
-    shippingCostTax = json['shipping_cost_tax'] != null ?
-    double.tryParse(json['shipping_cost_tax'].toString()) : null;
+    shippingCostTax = json['shipping_cost_tax'] != null
+        ? double.tryParse(json['shipping_cost_tax'].toString())
+        : null;
+    shoppingSource = json['shopping_source'] ?? json['source'];
+    globalStoreName = json['global_store_name'] ?? json['store_name'];
+    globalShoppingRequestId = json['global_shopping_request_id'] == null
+        ? null
+        : int.tryParse(json['global_shopping_request_id'].toString());
   }
 
   Map<String, dynamic> toJson() {
@@ -208,15 +228,22 @@ class CartModel {
     }
     data['increment'] = increment;
     data['decrement'] = decrement;
-    if (shop != null) data['shop'] = shop!.toJson();
+    if (shop != null) {
+      data['shop'] = shop!.toJson();
+    }
     data['is_product_available'] = isProductAvailable;
     data['is_checked'] = isChecked;
-    if (thumbnailFullUrl != null) data['thumbnail_full_url'] = thumbnailFullUrl!.toJson();
+    if (thumbnailFullUrl != null) {
+      data['thumbnail_full_url'] = thumbnailFullUrl!.toJson();
+    }
     data['is_group_checked'] = isGroupChecked;
     data['is_group_item_checked'] = isGroupItemChecked;
     data['applied_tax'] = appliedTax;
     data['applied_tax_type'] = appliedTaxType;
     data['shipping_cost_tax'] = shippingCostTax;
+    data['shopping_source'] = shoppingSource;
+    data['global_store_name'] = globalStoreName;
+    data['global_shopping_request_id'] = globalShoppingRequestId;
     return data;
   }
 }
@@ -226,13 +253,13 @@ class ProductInfo {
   int? totalCurrentStock;
   ImageFullUrl? thumbnailFullUrl;
 
-  ProductInfo({ this.minimumOrderQty, this.totalCurrentStock});
+  ProductInfo({this.minimumOrderQty, this.totalCurrentStock});
 
   ProductInfo.fromJson(Map<String, dynamic> json) {
-    if(json['minimum_order_qty'] != null) {
-      try{
+    if (json['minimum_order_qty'] != null) {
+      try {
         minimumOrderQty = json['minimum_order_qty'];
-      }catch(e){
+      } catch (e) {
         minimumOrderQty = int.parse(json['minimum_order_qty'].toString());
       }
     }
@@ -246,7 +273,9 @@ class ProductInfo {
     final data = <String, dynamic>{};
     data['minimum_order_qty'] = minimumOrderQty;
     data['total_current_stock'] = totalCurrentStock;
-    if (thumbnailFullUrl != null) data['thumbnail_full_url'] = thumbnailFullUrl!.toJson();
+    if (thumbnailFullUrl != null) {
+      data['thumbnail_full_url'] = thumbnailFullUrl!.toJson();
+    }
     return data;
   }
 }
@@ -258,30 +287,29 @@ class FreeDeliveryOrderAmount {
   double? shippingCostSaved;
   double? amountNeed;
 
-
-  FreeDeliveryOrderAmount(
-      {this.status,
-        this.amount,
-        this.percentage,
-        this.shippingCostSaved,
-        this.amountNeed,
-        });
+  FreeDeliveryOrderAmount({
+    this.status,
+    this.amount,
+    this.percentage,
+    this.shippingCostSaved,
+    this.amountNeed,
+  });
 
   FreeDeliveryOrderAmount.fromJson(Map<String, dynamic> json) {
     status = int.parse(json['status'].toString());
-    if(json['amount'] != null){
+    if (json['amount'] != null) {
       amount = json['amount'].toDouble();
     }
 
-    if(json['percentage'] != null){
+    if (json['percentage'] != null) {
       percentage = int.parse(json['percentage'].toString());
     }
 
-    if(json['shipping_cost_saved'] != null){
+    if (json['shipping_cost_saved'] != null) {
       shippingCostSaved = json['shipping_cost_saved'].toDouble();
     }
 
-    if(json['amount_need'] != null){
+    if (json['amount_need'] != null) {
       amountNeed = json['amount_need'].toDouble();
     }
   }
@@ -297,9 +325,7 @@ class FreeDeliveryOrderAmount {
   }
 }
 
-
-
-class CartModelBody{
+class CartModelBody {
   int? productId;
   String? variant;
   String? color;
@@ -309,14 +335,13 @@ class CartModelBody{
   double? digitalVariantPrice;
 
   CartModelBody(
-    {this.productId,
+      {this.productId,
       this.variant,
       this.color,
       this.variation,
       this.quantity,
       this.variantKey,
       this.digitalVariantPrice});
-
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
@@ -329,7 +354,6 @@ class CartModelBody{
     data['digital_variant_price'] = digitalVariantPrice;
     return data;
   }
-
 }
 
 class ReferralAmount {

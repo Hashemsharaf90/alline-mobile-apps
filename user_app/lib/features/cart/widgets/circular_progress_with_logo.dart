@@ -156,9 +156,8 @@ class _CircularProgressPainter extends CustomPainter {
     }
   }
 
-
   @override
   bool shouldRepaint(_CircularProgressPainter oldDelegate) =>
       oldDelegate.progress != progress ||
-          oldDelegate.strokeWidth != strokeWidth;
+      oldDelegate.strokeWidth != strokeWidth;
 }

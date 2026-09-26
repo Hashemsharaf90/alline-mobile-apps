@@ -201,7 +201,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
           backgroundColor: Theme.of(context).primaryColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+            icon: const Icon(Icons.arrow_forward_ios_rounded,
+                color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -316,7 +317,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                           icon: const Icon(Icons.bolt,
                               color: Colors.white, size: 22),
                           label: Text(
-                            isLtr ? 'Buy via Alline ⚡' : 'اطلب عبر Alline ⚡',
+                            isLtr ? 'Select via Alline' : 'اختيار عبر Alline',
                             style: textBold.copyWith(
                               color: Colors.white,
                               fontSize: Dimensions.fontSizeDefault,
@@ -365,14 +366,14 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
         Provider.of<ThemeController>(context, listen: false).darkTheme;
     final globalCtrl = Provider.of<GlobalShoppingController>(context);
 
-    final shippingCost = widget.preview.airShippingCost ?? 0.0;
-    final deliveryTime = widget.preview.deliveryTimeAir ?? '7 - 12 days';
-    final totalUsd = ((widget.preview.originalPrice ?? 0.0) +
-            shippingCost +
-            (widget.preview.customsFee ?? 0.0) +
-            (widget.preview.serviceFee ?? 0.0)) *
-        _quantity;
-    final totalYer = totalUsd * 535.0;
+    final shippingCost = widget.preview.airShippingCost;
+    final deliveryTime = widget.preview.deliveryTimeAir;
+    final totalUsd = widget.preview.totalEstimatedUsd == null
+        ? null
+        : widget.preview.totalEstimatedUsd! * _quantity;
+    final totalYer = widget.preview.totalEstimatedYer == null
+        ? null
+        : widget.preview.totalEstimatedYer! * _quantity;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -417,7 +418,9 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${totalYer.toStringAsFixed(0)} YER (≈ \$${totalUsd.toStringAsFixed(2)})',
+                        totalYer != null
+                            ? '${totalYer.toStringAsFixed(0)} ر.ي${totalUsd != null ? ' (≈ \$${totalUsd.toStringAsFixed(2)})' : ''}'
+                            : 'السعر النهائي يحدد عند تأكيد الطلب',
                         style: textBold.copyWith(
                             color: Theme.of(context).primaryColor,
                             fontSize: Dimensions.fontSizeDefault),
@@ -464,9 +467,13 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          isLtr
-                              ? 'Estimated arrival: $deliveryTime'
-                              : 'مدة الوصول المتوقعة: $deliveryTime',
+                          deliveryTime == null
+                              ? (isLtr
+                                  ? 'Calculated after request review'
+                                  : 'تحدد المدة بعد مراجعة الطلب')
+                              : (isLtr
+                                  ? 'Estimated arrival: $deliveryTime'
+                                  : 'مدة الوصول المتوقعة: $deliveryTime'),
                           style: textRegular.copyWith(
                               fontSize: 10.5,
                               color: Theme.of(context).hintColor),
@@ -474,8 +481,9 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                       ],
                     ),
                   ),
-                  Text('\$${shippingCost.toStringAsFixed(2)}',
-                      style: textBold.copyWith(fontSize: 12)),
+                  if (shippingCost != null)
+                    Text('\$${shippingCost.toStringAsFixed(2)}',
+                        style: textBold.copyWith(fontSize: 12)),
                 ],
               ),
             ),
@@ -571,8 +579,8 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                           onSuccess: () {
                             showCustomSnackBarWidget(
                               isLtr
-                                  ? 'Order placed successfully!'
-                                  : 'تم إرسال طلب الشراء بنجاح! سيتم اعتماده وتوصيله لك.',
+                                  ? 'Your pricing request was submitted.'
+                                  : 'تم إرسال طلب التسعير. ستتم إضافته للسلة بعد اعتماد السعر.',
                               context,
                               snackBarType: SnackBarType.success,
                             );
@@ -593,8 +601,8 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                           const SizedBox(width: 8),
                           Text(
                             isLtr
-                                ? 'Confirm & Order Now 🛒'
-                                : 'تأكيد وإتمام الطلب 🛒',
+                                ? 'Submit for pricing'
+                                : 'إرسال للمراجعة والتسعير',
                             style: textBold.copyWith(
                                 color: Colors.white, fontSize: 14),
                           ),

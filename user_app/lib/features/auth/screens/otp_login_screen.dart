@@ -1,5 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/enums/from_page.dart';
@@ -114,6 +116,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     final ConfigModel configModel =
         Provider.of<SplashController>(context, listen: false).configModel!;
     final SplashController splashController =
@@ -131,7 +134,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF6F9FD),
+        backgroundColor: colors.background,
         body: Stack(
           children: [
             // Soft ambient decorative circles
@@ -143,7 +146,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                 height: 280,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF0B63F8).withValues(alpha: 0.06),
+                  color: AllineColors.primary.withValues(alpha: 0.06),
                 ),
               ),
             ),
@@ -155,7 +158,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                 height: 240,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: const Color(0xFF38BDF8).withValues(alpha: 0.05),
+                  color: AllineColors.brightBlue.withValues(alpha: 0.05),
                 ),
               ),
             ),
@@ -187,10 +190,10 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: colors.surface,
                                         shape: BoxShape.circle,
-                                        border: Border.all(
-                                            color: const Color(0xFFE2E8F0)),
+                                        border:
+                                            Border.all(color: colors.border),
                                         boxShadow: [
                                           BoxShadow(
                                             color: Colors.black
@@ -200,10 +203,10 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                           )
                                         ],
                                       ),
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.arrow_back_ios_new_rounded,
                                         size: 15,
-                                        color: Color(0xFF1E293B),
+                                        color: colors.textPrimary,
                                       ),
                                     ),
                                   ),
@@ -226,10 +229,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: colors.surface,
                                       borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(
-                                          color: const Color(0xFFE2E8F0)),
+                                      border: Border.all(color: colors.border),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black
@@ -242,8 +244,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.language_rounded,
-                                            size: 16, color: Color(0xFF475569)),
+                                        Icon(Icons.language_rounded,
+                                            size: 16,
+                                            color: colors.textSecondary),
                                         const SizedBox(width: 6),
                                         Consumer<LocalizationController>(
                                           builder: (context, loc, _) {
@@ -256,16 +259,15 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                               name,
                                               style: textMedium.copyWith(
                                                 fontSize: 13,
-                                                color: const Color(0xFF1E293B),
+                                                color: colors.textPrimary,
                                               ),
                                             );
                                           },
                                         ),
                                         const SizedBox(width: 4),
-                                        const Icon(
-                                            Icons.keyboard_arrow_down_rounded,
+                                        Icon(Icons.keyboard_arrow_down_rounded,
                                             size: 16,
-                                            color: Color(0xFF64748B)),
+                                            color: colors.textSecondary),
                                       ],
                                     ),
                                   ),
@@ -283,7 +285,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                   textAlign: TextAlign.end,
                                   style: textBold.copyWith(
                                     fontSize: 13.5,
-                                    color: const Color(0xFF0B63F8),
+                                    color: AllineColors.primary,
                                   ),
                                 ),
                               ),
@@ -311,7 +313,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                             style: textBold.copyWith(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF0F172A),
+                              color: colors.textPrimary,
                             ),
                           ),
                         ),
@@ -322,7 +324,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                             textAlign: TextAlign.center,
                             style: textRegular.copyWith(
                               fontSize: 13,
-                              color: const Color(0xFF64748B),
+                              color: colors.textSecondary,
                               height: 1.45,
                             ),
                           ),
@@ -335,13 +337,12 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 24),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: colors.surface,
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                                color: const Color(0xFFE7EDF5), width: 1),
+                            border: Border.all(color: colors.border),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF0B63F8)
+                                color: AllineColors.primary
                                     .withValues(alpha: 0.05),
                                 blurRadius: 28,
                                 offset: const Offset(0, 10),
@@ -363,7 +364,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                 style: textBold.copyWith(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF1E293B),
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -372,10 +373,10 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                               Container(
                                 height: 54,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: colors.surface,
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: const Color(0xFFE2E8F0),
+                                    color: colors.border,
                                     width: 1.2,
                                   ),
                                 ),
@@ -402,15 +403,15 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                         flagWidth: 24,
                                         textStyle: textBold.copyWith(
                                           fontSize: 14,
-                                          color: const Color(0xFF1E293B),
+                                          color: colors.textPrimary,
                                         ),
-                                        dialogBackgroundColor: Colors.white,
+                                        dialogBackgroundColor: colors.surface,
                                       ),
                                     ),
                                     Container(
                                       width: 1,
                                       height: 26,
-                                      color: const Color(0xFFE2E8F0),
+                                      color: colors.border,
                                     ),
                                     Expanded(
                                       child: TextField(
@@ -422,13 +423,13 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                         style: textBold.copyWith(
                                           fontSize: 15,
                                           letterSpacing: 1.2,
-                                          color: const Color(0xFF0F172A),
+                                          color: colors.textPrimary,
                                         ),
                                         decoration: InputDecoration(
                                           hintText: '7XX XXX XXX',
                                           hintTextDirection: TextDirection.ltr,
                                           hintStyle: textRegular.copyWith(
-                                            color: const Color(0xFF94A3B8),
+                                            color: colors.textSecondary,
                                             fontSize: 14,
                                             letterSpacing: 1.2,
                                           ),
@@ -448,15 +449,15 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                               // Helper notice: "سنرسل لك رمز التحقق عبر رسالة نصية قصيرة (SMS)"
                               Row(
                                 children: [
-                                  const Icon(Icons.info_outline_rounded,
-                                      size: 14, color: Color(0xFF64748B)),
+                                  Icon(Icons.info_outline_rounded,
+                                      size: 14, color: colors.textSecondary),
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: Text(
                                       'سنرسل لك رمز التحقق عبر رسالة نصية قصيرة (SMS)',
                                       style: textRegular.copyWith(
                                         fontSize: 12,
-                                        color: const Color(0xFF64748B),
+                                        color: colors.textSecondary,
                                       ),
                                     ),
                                   ),
@@ -481,12 +482,12 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                       child: Ink(
                                         height: 54,
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF0B63F8),
+                                          color: AllineColors.primary,
                                           borderRadius:
                                               BorderRadius.circular(14),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: const Color(0xFF0B63F8)
+                                              color: AllineColors.primary
                                                   .withValues(alpha: 0.18),
                                               blurRadius: 14,
                                               offset: const Offset(0, 4),
@@ -548,10 +549,8 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                               // Divider ("أو")
                               Row(
                                 children: [
-                                  const Expanded(
-                                      child: Divider(
-                                          color: Color(0xFFE2E8F0),
-                                          thickness: 1)),
+                                  Expanded(
+                                      child: Divider(color: colors.border)),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 12),
@@ -559,14 +558,12 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                       'أو',
                                       style: textMedium.copyWith(
                                         fontSize: 12.5,
-                                        color: const Color(0xFF94A3B8),
+                                        color: colors.textSecondary,
                                       ),
                                     ),
                                   ),
-                                  const Expanded(
-                                      child: Divider(
-                                          color: Color(0xFFE2E8F0),
-                                          thickness: 1)),
+                                  Expanded(
+                                      child: Divider(color: colors.border)),
                                 ],
                               ),
 
@@ -582,11 +579,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                   child: Container(
                                     height: 54,
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: colors.surface,
                                       borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                          color: const Color(0xFFE2E8F0),
-                                          width: 1.2),
+                                      border: Border.all(color: colors.border),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black
@@ -607,7 +602,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                           'الدخول باستخدام Google',
                                           style: textBold.copyWith(
                                             fontSize: 14.5,
-                                            color: const Color(0xFF1E293B),
+                                            color: colors.textPrimary,
                                           ),
                                         ),
                                       ],
@@ -634,10 +629,9 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                                   widget.onLoginSuccess,
                                             ),
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: const Color(0xFF0B63F8),
+                                      foregroundColor: AllineColors.primary,
                                       minimumSize: const Size.fromHeight(50),
-                                      side: const BorderSide(
-                                          color: Color(0xFFBCD3FA)),
+                                      side: BorderSide(color: colors.border),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(14),
                                       ),
@@ -660,7 +654,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                     text: 'باستخدامك Alline، أنت توافق على ',
                                     style: textRegular.copyWith(
                                       fontSize: 12,
-                                      color: const Color(0xFF64748B),
+                                      color: colors.textSecondary,
                                     ),
                                     children: [
                                       WidgetSpan(
@@ -680,11 +674,11 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                             'الشروط',
                                             style: textMedium.copyWith(
                                               fontSize: 12,
-                                              color: const Color(0xFF0B63F8),
+                                              color: AllineColors.primary,
                                               decoration:
                                                   TextDecoration.underline,
                                               decorationColor:
-                                                  const Color(0xFF0B63F8),
+                                                  AllineColors.primary,
                                             ),
                                           ),
                                         ),
@@ -707,11 +701,11 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                             'سياسة الخصوصية',
                                             style: textMedium.copyWith(
                                               fontSize: 12,
-                                              color: const Color(0xFF0B63F8),
+                                              color: AllineColors.primary,
                                               decoration:
                                                   TextDecoration.underline,
                                               decorationColor:
-                                                  const Color(0xFF0B63F8),
+                                                  AllineColors.primary,
                                             ),
                                           ),
                                         ),
@@ -748,7 +742,7 @@ class _OtpLoginScreenState extends State<OtpLoginScreen> {
                                 'تصفح كزائر',
                                 style: textMedium.copyWith(
                                   fontSize: 13.5,
-                                  color: const Color(0xFF64748B),
+                                  color: colors.textSecondary,
                                   decoration: TextDecoration.underline,
                                 ),
                               ),

@@ -9,7 +9,7 @@ import 'package:flutter_sixvalley_ecommerce/features/checkout/domain/repositorie
 import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
-import 'dart:async';
+import 'package:flutter_sixvalley_ecommerce/features/profile/controllers/profile_contrroller.dart';
 import 'package:provider/provider.dart';
 
 class CheckoutRepository implements CheckoutRepositoryInterface{
@@ -28,6 +28,7 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
         String? password,
         double? cashChangeAmount,
         String? currentCurrencyCode,
+        String? idempotencyKey,
       }) async {
     try {
       // Build query parameters map
@@ -38,11 +39,16 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
         'billing_address_id': billingAddressId,
         'order_note': orderNote,
         'guest_id': Provider.of<AuthController>(Get.context!, listen: false).getGuestToken(),
+        'customer_id': Provider.of<ProfileController>(Get.context!, listen: false).userInfoModel?.id.toString(),
         'is_guest': '${Provider.of<AuthController>(Get.context!, listen: false).isLoggedIn() ? 0 : 1}',
         'is_check_create_account': (isCheckCreateAccount ?? false) ? 1 : 0,
         'password': password,
         'bring_change_amount' : cashChangeAmount,
         'current_currency_code': currentCurrencyCode,
+        'idempotency_key': idempotencyKey,
+        'payment_method': 'cash_on_delivery',
+        'payment_request_from': 'app',
+        'payment_platform': 'app',
       };
 
       debugPrint('----------(order_place)-----$queryParams');
@@ -56,7 +62,7 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
 
 
   @override
-  Future<ApiResponseModel> offlinePaymentPlaceOrder(String? addressID, String? couponCode, String? couponDiscountAmount, String? billingAddressId, String? orderNote, List <String?> typeKey, List<String> typeValue, int? id, String name, String? paymentNote, bool? isCheckCreateAccount, String? password) async {
+  Future<ApiResponseModel> offlinePaymentPlaceOrder(String? addressID, String? couponCode, String? couponDiscountAmount, String? billingAddressId, String? orderNote, List <String?> typeKey, List<String> typeValue, int? id, String name, String? paymentNote, bool? isCheckCreateAccount, String? password, String? idempotencyKey) async {
     try {
       Map<String?, String> fields = {};
       Map<String?, String> info = {};
@@ -78,9 +84,13 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
         'billing_address_id' : billingAddressId??'',
         'order_note' : orderNote??'',
         'guest_id': Provider.of<AuthController>(Get.context!, listen: false).getGuestToken()??'',
+        'customer_id': Provider.of<ProfileController>(Get.context!, listen: false).userInfoModel?.id.toString() ?? '',
         'is_guest' : Provider.of<AuthController>(Get.context!, listen: false).isLoggedIn()? '0':'1',
         'is_check_create_account' : isCheckAccount.toString(),
         'password' : password ?? '',
+        'idempotency_key': idempotencyKey ?? '',
+        'payment_request_from': 'app',
+        'payment_platform': 'app',
       });
       Response response = await dioClient!.post(AppConstants.offlinePayment, data: fields);
       return ApiResponseModel.withSuccess(response);
@@ -91,10 +101,11 @@ class CheckoutRepository implements CheckoutRepositoryInterface{
 
 
   @override
-  Future<ApiResponseModel> walletPaymentPlaceOrder(String? addressID, String? couponCode,String? couponDiscountAmount, String? billingAddressId, String? orderNote, bool? isCheckCreateAccount, String? password) async {
+  Future<ApiResponseModel> walletPaymentPlaceOrder(String? addressID, String? couponCode,String? couponDiscountAmount, String? billingAddressId, String? orderNote, bool? isCheckCreateAccount, String? password, String? idempotencyKey) async {
     int isCheckAccount = isCheckCreateAccount! ? 1: 0;
     try {
-      final response = await dioClient!.get('${AppConstants.walletPayment}?address_id=$addressID&coupon_code=$couponCode&coupon_discount=$couponDiscountAmount&billing_address_id=$billingAddressId&order_note=$orderNote&guest_id=${Provider.of<AuthController>(Get.context!, listen: false).getGuestToken()}&is_guest=${Provider.of<AuthController>(Get.context!, listen: false).isLoggedIn()? 0 :1}&is_check_create_account=$isCheckAccount&password=$password',);
+      final customerId = Provider.of<ProfileController>(Get.context!, listen: false).userInfoModel?.id.toString() ?? '';
+      final response = await dioClient!.get('${AppConstants.walletPayment}?address_id=$addressID&coupon_code=$couponCode&coupon_discount=$couponDiscountAmount&billing_address_id=$billingAddressId&order_note=$orderNote&guest_id=${Provider.of<AuthController>(Get.context!, listen: false).getGuestToken()}&customer_id=$customerId&is_guest=${Provider.of<AuthController>(Get.context!, listen: false).isLoggedIn()? 0 :1}&is_check_create_account=$isCheckAccount&password=$password&idempotency_key=${idempotencyKey ?? ''}&payment_request_from=app&payment_platform=app',);
       return ApiResponseModel.withSuccess(response);
     } catch (e) {
       return ApiResponseModel.withError(ApiErrorHandler.getMessage(e));

@@ -1,212 +1,65 @@
-import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_home_screen.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
-import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_store_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/features/location/screens/location_setup_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
-import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
+import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_home_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/supermarket/screens/supermarket_store_screen.dart';
 import 'package:provider/provider.dart';
 
 class AllineSupermarketSectionWidget extends StatelessWidget {
   const AllineSupermarketSectionWidget({super.key});
 
+  static const _primary = AllineColors.primary;
+
   @override
   Widget build(BuildContext context) {
-    final isLtr =
-        Provider.of<LocalizationController>(context, listen: false).isLtr;
-
-    return Consumer3<CategoryController, ProductController, AddressController>(
-      builder: (context, categoryController, productController,
-          addressController, _) {
-        final category =
-            _findSupermarketCategory(categoryController.categoryList);
-        final products = List<Product>.from(
-          productController.supermarketProductModel?.products ?? <Product>[],
-        )..sort(_compareProductsWithRealImagesFirst);
+    final colors = context.allineColors;
+    return Consumer<ProductController>(
+      builder: (context, products, _) {
         final stores =
-            productController.nearbySupermarkets.whereType<Map>().toList();
-        final hasKnownLocation = (productController.supermarketLatitude?.trim().isNotEmpty ?? false) ||
-            (addressController.addressList ?? []).any(
-              (address) =>
-                  (address.latitude?.trim().isNotEmpty ?? false) &&
-                  (address.longitude?.trim().isNotEmpty ?? false),
-            );
-
-        if (products.isEmpty && category == null && stores.isEmpty) {
-          return const SizedBox();
-        }
+            products.nearbySupermarkets.whereType<Map>().take(3).toList();
+        final hasLocation =
+            (products.supermarketLatitude?.trim().isNotEmpty ?? false);
 
         return Container(
-          color: Theme.of(context).cardColor,
-          padding: const EdgeInsets.fromLTRB(
-            Dimensions.homePagePadding,
-            Dimensions.paddingSizeSmall,
-            Dimensions.homePagePadding,
-            Dimensions.paddingSizeDefault,
-          ),
+          color: colors.surface,
+          padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isLtr ? 'Supermarket' : 'السوبر ماركت',
-                          textAlign: TextAlign.start,
-                          style: textBold.copyWith(
-                            fontSize: 22,
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _locationSubtitle(
-                            isLtr: isLtr,
-                            hasLocation: hasKnownLocation,
-                            usingCurrentLocation: productController
-                                .supermarketUsingCurrentLocation,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textRegular.copyWith(
-                            fontSize: Dimensions.fontSizeSmall,
-                            color: Theme.of(context).hintColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => _openSupermarket(context, category, isLtr),
-                    child: Text(isLtr ? 'View all' : 'عرض الكل'),
-                  ),
-                ],
+              _SectionHeader(
+                title: 'احتياجاتك اليومية',
+                subtitle: 'تسوق من السوبر ماركت القريبة منك',
+                onTap: () => _openHub(context),
               ),
-              const SizedBox(height: Dimensions.paddingSizeSmall),
-              if (productController.nearbySupermarketLoading)
-                const LinearProgressIndicator(minHeight: 2),
-              if (products.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              if (!hasLocation)
+                _LocationPrompt(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const LocationSetupScreen(),
+                  )),
+                )
+              else if (products.nearbySupermarketLoading)
+                const _StoreSkeleton()
+              else if (stores.isEmpty)
+                _ExploreCard(onTap: () => _openHub(context))
+              else
                 SizedBox(
-                  height: 255,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: products.length > 8 ? 8 : products.length,
-                    itemBuilder: (context, index) => SizedBox(
-                      width: 170,
-                      child: SupermarketProductCard(
-                        product: products[index],
-                        margin: Dimensions.paddingSizeExtraSmall,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-              ],
-              if (stores.isNotEmpty) ...[
-
-                SizedBox(
-                  height: 102,
+                  height: 150 +
+                      (MediaQuery.textScalerOf(context).scale(14) - 14) * 3,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
-                    itemCount: stores.length > 8 ? 8 : stores.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: Dimensions.paddingSizeSmall),
-                    itemBuilder: (context, index) {
-                      final store = stores[index];
-                      return _NearbyStoreCard(
-                        name: _storeString(store, 'name'),
-                        distanceKm: _storeDouble(store, 'distance_km'),
-                        deliveryFee: _storeDouble(store, 'delivery_fee'),
-                        estimatedDeliveryMinutes:
-                            _storeInt(store, 'estimated_delivery_minutes'),
-                        productsCount: _storeInt(store, 'products_count'),
-                        isLtr: isLtr,
-                        onTap: () =>
-                            _openStore(context, store, category, isLtr),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-              ],
-              InkWell(
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                onTap: () => _openSupermarket(context, category, isLtr),
-                child: Ink(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    borderRadius:
-                        BorderRadius.circular(Dimensions.radiusDefault),
-                    image: const DecorationImage(
-                      image: AssetImage(Images.allineSupermarketBanner),
-                      fit: BoxFit.cover,
-                    ),
-                    boxShadow: ThemeShadow.getShadow(context),
-                  ),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                    decoration: BoxDecoration(
-                      borderRadius:
-                          BorderRadius.circular(Dimensions.radiusDefault),
-                      gradient: LinearGradient(
-                        begin: AlignmentDirectional.centerStart,
-                        end: AlignmentDirectional.centerEnd,
-                        colors: [
-                          Colors.white.withValues(alpha: .94),
-                          Colors.white.withValues(alpha: .55),
-                          Colors.transparent,
-                        ],
-                      ),
-                    ),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 260),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isLtr
-                                  ? 'Fresh essentials near you'
-                                  : 'احتياجاتك اليومية بالقرب منك',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: textBold.copyWith(
-                                fontSize: 19,
-                                color: const Color(0xFF103A52),
-                              ),
-                            ),
-                            const SizedBox(
-                                height: Dimensions.paddingSizeExtraSmall),
-                            Text(
-                              isLtr
-                                  ? 'Groceries, cleaning, food, and home basics in one place.'
-                                  : 'مواد غذائية، منظفات، وخيارات منزلية أساسية في مكان واحد.',
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: textRegular.copyWith(
-                                fontSize: Dimensions.fontSizeSmall,
-                                color: const Color(0xFF516A78),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: stores.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 10),
+                    itemBuilder: (context, index) => _StoreCard(
+                      store: stores[index],
+                      onTap: () => _openStore(context, stores[index]),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         );
@@ -214,243 +67,214 @@ class AllineSupermarketSectionWidget extends StatelessWidget {
     );
   }
 
-  String _locationSubtitle({
-    required bool isLtr,
-    required bool hasLocation,
-    required bool usingCurrentLocation,
-  }) {
-    if (!hasLocation) {
-      return isLtr
-          ? 'Allow location or add an address to show nearby supermarkets'
-          : 'فعّل الموقع أو أضف عنوانًا لعرض السوبرماركت الأقرب إليك';
-    }
+  void _openHub(BuildContext context) => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const SupermarketHomeScreen()),
+      );
 
-    if (usingCurrentLocation) {
-      return isLtr
-          ? 'Nearby supermarkets from your current location'
-          : 'سوبرماركت قريبة من موقعك الحالي';
-    }
-
-    return isLtr
-        ? 'Nearby supermarkets from your saved address'
-        : 'سوبرماركت قريبة من عنوانك المحفوظ';
-  }
-
-  CategoryModel? _findSupermarketCategory(List<CategoryModel> categories) {
-    const keywords = [
-      'السوبر ماركت',
-      'سوبر ماركت',
-      'سوبرماركت',
-      'بقالة',
-      'مواد غذائية',
-      'أغذية',
-      'تموينات',
-      'سوبرماركت',
-      'ط³ظˆط¨ط± ظ…ط§ط±ظƒطھ',
-      'السوبر ماركت',
-      'بقالة',
-      'supermarket',
-      'super market',
-      'grocery',
-      'food',
-      'shopping',
-      'market',
-    ];
-
-    for (final category in categories) {
-      final name = (category.name ?? '').toLowerCase();
-      final slug = (category.slug ?? '').toLowerCase();
-      if (keywords
-          .any((keyword) => name.contains(keyword) || slug.contains(keyword))) {
-        return category;
-      }
-    }
-
-    return null;
-  }
-
-  int _compareProductsWithRealImagesFirst(Product first, Product second) {
-    final firstHasImage = _hasRealProductImage(first);
-    final secondHasImage = _hasRealProductImage(second);
-
-    if (firstHasImage == secondHasImage) {
-      return 0;
-    }
-
-    return firstHasImage ? -1 : 1;
-  }
-
-  bool _hasRealProductImage(Product product) {
-    final thumbnailPath = product.thumbnailFullUrl?.path?.trim();
-    if (thumbnailPath != null &&
-        thumbnailPath.isNotEmpty &&
-        !thumbnailPath.endsWith('/def.png') &&
-        !thumbnailPath.contains('placeholder')) {
-      return true;
-    }
-
-    return product.imagesFullUrl?.any((image) {
-          final path = image.path?.trim();
-          return path != null &&
-              path.isNotEmpty &&
-              !path.endsWith('/def.png') &&
-              !path.contains('placeholder');
-        }) ??
-        false;
-  }
-
-  void _openSupermarket(
-      BuildContext context, CategoryModel? category, bool isLtr) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const SupermarketHomeScreen(),
+  void _openStore(BuildContext context, Map store) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => SupermarketStoreScreen(
+        slug: _string(store, 'slug').isEmpty ? null : _string(store, 'slug'),
+        sellerId: _integer(store, 'seller_id'),
+        name: _string(store, 'name'),
+        banner: _string(store, 'banner'),
+        image: _string(store, 'image'),
+        address: _string(store, 'address'),
+        distanceKm: _decimal(store, 'distance_km'),
+        estimatedDeliveryMinutes: _integer(store, 'estimated_delivery_minutes'),
       ),
-    );
+    ));
   }
 
-  void _openStore(
-      BuildContext context, Map store, CategoryModel? category, bool isLtr) {
-    final slug = _storeString(store, 'slug');
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SupermarketStoreScreen(
-          slug: slug.isNotEmpty ? slug : null,
-          sellerId: _storeInt(store, 'seller_id'),
-          name: _storeString(store, 'name'),
-          banner: _storeString(store, 'banner'),
-          image: _storeString(store, 'image'),
-          address: _storeString(store, 'address'),
-          distanceKm: _storeDouble(store, 'distance_km'),
-          estimatedDeliveryMinutes: _storeInt(store, 'estimated_delivery_minutes'),
-        ),
-      ),
-    );
-  }
+  static String _string(Map store, String key) =>
+      store[key]?.toString().trim() ?? '';
+  static int _integer(Map store, String key) => store[key] is int
+      ? store[key] as int
+      : int.tryParse('${store[key]}') ?? 0;
+  static double? _decimal(Map store, String key) => store[key] is num
+      ? (store[key] as num).toDouble()
+      : double.tryParse('${store[key]}');
+}
 
-  String _storeString(Map store, String key) {
-    return store[key]?.toString().trim() ?? '';
-  }
-
-  int _storeInt(Map store, String key) {
-    final value = store[key];
-    if (value is int) {
-      return value;
-    }
-
-    return int.tryParse(value?.toString() ?? '') ?? 0;
-  }
-
-  double? _storeDouble(Map store, String key) {
-    final value = store[key];
-    if (value == null) {
-      return null;
-    }
-    if (value is num) {
-      return value.toDouble();
-    }
-
-    return double.tryParse(value.toString());
-  }
-
-  }
-
-class _NearbyStoreCard extends StatelessWidget {
-  final String name;
-  final double? distanceKm;
-  final double? deliveryFee;
-  final int estimatedDeliveryMinutes;
-  final int productsCount;
-  final bool isLtr;
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final String subtitle;
   final VoidCallback onTap;
 
-  const _NearbyStoreCard({
-    required this.name,
-    required this.distanceKm,
-    required this.deliveryFee,
-    required this.estimatedDeliveryMinutes,
-    required this.productsCount,
-    required this.isLtr,
-    required this.onTap,
-  });
+  const _SectionHeader(
+      {required this.title, required this.subtitle, required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
-    final distanceText = distanceKm == null
-        ? (isLtr ? 'Nearby' : 'قريب')
-        : (isLtr
-            ? '${distanceKm!.toStringAsFixed(1)} km'
-            : '${distanceKm!.toStringAsFixed(1)} كم');
-    final deliveryText = deliveryFee == null
-        ? ''
-        : (isLtr
-            ? ' - delivery ${deliveryFee!.toStringAsFixed(0)}'
-            : ' - توصيل ${deliveryFee!.toStringAsFixed(0)}');
-    final etaText = estimatedDeliveryMinutes > 0
-        ? (isLtr
-            ? ' - $estimatedDeliveryMinutes min'
-            : ' - $estimatedDeliveryMinutes د')
-        : '';
+  Widget build(BuildContext context) => Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                      fontFamily: 'AllineTajawal',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: context.allineColors.textPrimary,
+                    )),
+                const SizedBox(height: 2),
+                Text(subtitle,
+                    style: TextStyle(
+                      fontFamily: 'AllineTajawal',
+                      fontSize: 12.5,
+                      color: context.allineColors.textSecondary,
+                    )),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onTap,
+            child: const Text('عرض الكل',
+                style: TextStyle(
+                  fontFamily: 'AllineTajawal',
+                  fontWeight: FontWeight.w700,
+                  color: AllineSupermarketSectionWidget._primary,
+                )),
+          ),
+        ],
+      );
+}
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-      child: Container(
-        width: 210,
-        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+class _LocationPrompt extends StatelessWidget {
+  final VoidCallback onTap;
+  const _LocationPrompt({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          border: Border.all(color: Theme.of(context).dividerColor),
+          color: context.allineColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.allineColors.border),
         ),
         child: Row(
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-              ),
-              child: Icon(
-                Icons.storefront_outlined,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            const SizedBox(width: Dimensions.paddingSizeSmall),
+            const Icon(Icons.location_on_outlined,
+                color: AllineSupermarketSectionWidget._primary),
+            const SizedBox(width: 10),
             Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name.isEmpty ? (isLtr ? 'Supermarket' : 'سوبرماركت') : name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textMedium.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
-                    ),
+              child: Text('حدد موقعك لعرض المتاجر القريبة',
+                  style: TextStyle(
+                    fontFamily: 'AllineTajawal',
+                    fontSize: 13,
+                    color: context.allineColors.textPrimary,
+                  )),
+            ),
+            TextButton(onPressed: onTap, child: const Text('تحديد الموقع')),
+          ],
+        ),
+      );
+}
+
+class _ExploreCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ExploreCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: 92,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: context.allineColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.allineColors.border),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.storefront_outlined,
+                  color: AllineSupermarketSectionWidget._primary, size: 30),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text('استكشف السوبر ماركت والمنتجات المتاحة',
+                    style: TextStyle(
+                      fontFamily: 'AllineTajawal',
+                      fontWeight: FontWeight.w700,
+                      color: context.allineColors.textPrimary,
+                    )),
+              ),
+              Icon(Icons.arrow_back_rounded,
+                  color: AllineSupermarketSectionWidget._primary),
+            ],
+          ),
+        ),
+      );
+}
+
+class _StoreCard extends StatelessWidget {
+  final Map store;
+  final VoidCallback onTap;
+  const _StoreCard({required this.store, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = AllineSupermarketSectionWidget._string(store, 'name');
+    final distance =
+        AllineSupermarketSectionWidget._decimal(store, 'distance_km');
+    final eta = AllineSupermarketSectionWidget._integer(
+        store, 'estimated_delivery_minutes');
+    final image = AllineSupermarketSectionWidget._string(store, 'image');
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 190,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: context.allineColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.allineColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: context.allineColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '$distanceText$deliveryText$etaText',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textRegular.copyWith(
-                      fontSize: Dimensions.fontSizeExtraSmall,
-                      color: Theme.of(context).hintColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$productsCount ${isLtr ? 'items' : 'منتج'}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textRegular.copyWith(
-                      fontSize: Dimensions.fontSizeExtraSmall,
-                      color: Theme.of(context).hintColor,
-                    ),
-                  ),
-                ],
+                  clipBehavior: Clip.antiAlias,
+                  child: image.isNotEmpty
+                      ? CustomImageWidget(image: image, fit: BoxFit.cover)
+                      : const Icon(Icons.storefront_outlined,
+                          color: AllineSupermarketSectionWidget._primary),
+                ),
+              ],
+            ),
+            const SizedBox(height: 9),
+            Text(name.isEmpty ? 'سوبر ماركت' : name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: 'AllineTajawal',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: context.allineColors.textPrimary,
+                )),
+            const SizedBox(height: 5),
+            Text(
+              [
+                if (distance != null) '${distance.toStringAsFixed(1)} كم',
+                if (eta > 0) '$eta دقيقة',
+              ].join(' • '),
+              style: TextStyle(
+                fontFamily: 'AllineTajawal',
+                fontSize: 11.5,
+                color: context.allineColors.textSecondary,
               ),
             ),
           ],
@@ -458,4 +282,17 @@ class _NearbyStoreCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StoreSkeleton extends StatelessWidget {
+  const _StoreSkeleton();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 150,
+        decoration: BoxDecoration(
+          color: context.allineColors.skeletonBase,
+          borderRadius: BorderRadius.circular(16),
+        ),
+      );
 }

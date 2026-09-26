@@ -247,7 +247,7 @@ class Images {
 
   // 13 New Professional Category Images (Categoires folder)
   static const String catKitchenAccessories =
-      'assets/images/Categoires/cat_kitchen_accessories.png';
+      'assets/images/Categoires/مستلزمات البيت والمطبخ.png';
   static const String catCarAccessories =
       'assets/images/Categoires/cat_car_accessories.png';
   static const String catFurnitureDecor =
@@ -397,4 +397,23 @@ class Images {
       'assets/svg/order_due_amount_icon.svg';
   static const String orderReturnAmountIcon =
       'assets/svg/order_return_amount_icon.svg';
+
+  // Local Yemeni Wallet Images - Approved: Jeeb, Jawali, One Cash, Cash, Floosak
+  static const String jeebWallet = 'assets/images/jeeb_wallet.png';
+  static const String jawwaliWallet = 'assets/images/jawali_wallet.png';
+  static const String jawaliWallet = 'assets/images/jawali_wallet.png';
+  static const String oneCashWallet = 'assets/images/one_cash_wallet.png';
+  static const String cashWallet = 'assets/images/cash_wallet.png';
+  static const String floosakWallet = 'assets/images/floosak_wallet.png';
+
+  static String? getWalletLogo(String? walletNameOrCode) {
+    if (walletNameOrCode == null) return null;
+    final text = walletNameOrCode.trim().toLowerCase().replaceAll('_', ' ');
+    if (text.contains('جيب') || text.contains('jeeb')) return jeebWallet;
+    if (text.contains('جوالي') || text.contains('jawali') || text.contains('jawwali')) return jawaliWallet;
+    if (text.contains('ون كاش') || text.contains('ونكاش') || text.contains('one cash') || text.contains('onecash')) return oneCashWallet;
+    if (text.contains('فلوسك') || text.contains('floosak') || text.contains('flousak')) return floosakWallet;
+    if (text.contains('كاش') || text.contains('cash')) return cashWallet;
+    return null;
+  }
 }

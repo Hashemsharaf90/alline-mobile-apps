@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_asset_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_loader_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/domain/models/cart_model.dart';
@@ -19,13 +20,13 @@ import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.d
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_app_bar_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/no_internet_screen_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/not_logged_in_bottom_sheet_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/cart_page_shimmer_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/widgets/cart_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/shipping/widgets/shipping_method_bottom_sheet_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_state_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_card.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +50,7 @@ class CartScreenState extends State<CartScreen> {
   final List<GlobalKey> sellerKeys = [];
   bool validated = false;
   bool singleVendor = false;
+  bool _checkoutInProgress = false;
 
   Future<void> _loadData() async {
     await Provider.of<CartController>(Get.context!, listen: false)
@@ -78,16 +80,17 @@ class CartScreenState extends State<CartScreen> {
   }
 
   void _scrollToSeller(int? index) async {
-    if (index == null) return;
-
-    final context = sellerKeys[index].currentContext;
-    if (context == null) return;
+    if (index == null || index < 0 || index >= sellerKeys.length) return;
 
     // Wait for a frame to ensure layout is ready
     await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted || index >= sellerKeys.length) return;
+
+    final targetContext = sellerKeys[index].currentContext;
+    if (targetContext == null || !targetContext.mounted) return;
 
     Scrollable.ensureVisible(
-      Get.context!,
+      targetContext,
       duration: const Duration(milliseconds: 800),
       curve: Curves.easeInOutCubic,
       alignment: 0.1, // adjust if needed
@@ -120,6 +123,7 @@ class CartScreenState extends State<CartScreen> {
       return Consumer<ShippingController>(
           builder: (context, shippingController, _) {
         return Consumer<CartController>(builder: (context, cart, child) {
+          final colors = AllineThemeColors.of(context);
           double amount = 0.0;
           double shippingAmount = 0.0;
           double discount = 0.0;
@@ -248,6 +252,7 @@ class CartScreenState extends State<CartScreen> {
                   sellerGroupList, cartProductList);
 
           void navigateToCheckout({double? selectedShippingCost}) {
+            if (_checkoutInProgress) return;
             int sellerGroupLenght = 0;
             int physicalSellerGroupLength = 0;
 
@@ -272,11 +277,13 @@ class CartScreenState extends State<CartScreen> {
               }
             }
 
+            final rawShippingFee = selectedShippingCost ?? shippingAmount;
             final double checkoutShippingFee =
-                selectedShippingCost != null && shippingAmount <= 0
-                    ? selectedShippingCost
-                    : shippingAmount - freeDeliveryAmountDiscount;
+                rawShippingFee > freeDeliveryAmountDiscount
+                    ? rawShippingFee - freeDeliveryAmountDiscount
+                    : 0;
 
+            setState(() => _checkoutInProgress = true);
             RouterHelper.getCheckoutScreenRoute(
               action: RouteAction.push,
               cartList: cartList,
@@ -290,424 +297,476 @@ class CartScreenState extends State<CartScreen> {
               hasPhysical: physicalSellerGroupLength > 0,
               quantity: totalQuantity,
             );
+            Future<void>.delayed(const Duration(milliseconds: 800), () {
+              if (mounted) setState(() => _checkoutInProgress = false);
+            });
           }
 
           return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            backgroundColor: colors.background,
             bottomNavigationBar: (!cart.cartLoading && cartList.isNotEmpty)
                 ? Consumer<SplashController>(
                     builder: (context, configProvider, _) {
                     return Container(
-                        height: cartList.isNotEmpty ? 110 : 0,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: Dimensions.paddingSizeDefault,
-                            vertical: Dimensions.paddingSizeSmall),
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          10,
+                          16,
+                          10 +
+                              (widget.fromDashboard
+                                  ? 0
+                                  : MediaQuery.paddingOf(context).bottom),
+                        ),
                         decoration: BoxDecoration(
-                            color: Theme.of(context).cardColor,
-                            borderRadius: BorderRadius.circular(10)),
+                          color: colors.surface,
+                          border: Border(top: BorderSide(color: colors.border)),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.transparent
+                                    : colors.textPrimary.withValues(alpha: .07),
+                                offset: Offset(0, -4),
+                                blurRadius: 14)
+                          ],
+                        ),
                         child: cartList.isNotEmpty
-                            ? Column(children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: Dimensions.paddingSizeSmall),
-                                  child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(children: [
-                                          Text(
-                                              '${getTranslated('total_price', context)}  ',
-                                              style: titilliumSemiBold.copyWith(
-                                                  fontSize:
-                                                      Dimensions.fontSizeLarge,
-                                                  color:
-                                                      Provider.of<ThemeController>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .darkTheme
-                                                          ? Theme.of(context)
-                                                              .hintColor
-                                                          : Theme.of(context)
-                                                              .primaryColor)),
-                                          if (Provider.of<SplashController>(
-                                                      Get.context!,
-                                                      listen: false)
-                                                  .configModel
-                                                  ?.systemTaxIncludeStatus ==
-                                              1)
+                            ? Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        bottom: Dimensions.paddingSizeSmall),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(children: [
                                             Text(
-                                                '${getTranslated('inc_vat_tax', context)}',
-                                                style:
-                                                    titilliumSemiBold.copyWith(
-                                                        fontSize: Dimensions
-                                                            .fontSizeSmall,
-                                                        color: Theme.of(context)
-                                                            .hintColor)),
-                                        ]),
-                                        Text(
-                                            PriceConverter.convertPrice(
-                                                context,
-                                                amount +
-                                                    tax +
-                                                    shippingAmount -
-                                                    freeDeliveryAmountDiscount),
-                                            style: titilliumSemiBold.copyWith(
-                                                color:
-                                                    Provider.of<ThemeController>(
-                                                                context,
-                                                                listen: false)
-                                                            .darkTheme
-                                                        ? Theme.of(context)
-                                                            .hintColor
-                                                        : Theme.of(context)
-                                                            .primaryColor,
-                                                fontSize:
-                                                    Dimensions.fontSizeLarge)),
-                                      ]),
-                                ),
-                                Row(
-                                  children: [
-                                    Stack(children: [
-                                      Padding(
-                                        padding: EdgeInsetsGeometry.only(
-                                            right: Dimensions.paddingSizeSmall,
-                                            top: Dimensions.paddingSizeSmall,
-                                            bottom:
-                                                Dimensions.paddingSizeSmall),
-                                        child: CustomAssetImageWidget(
-                                          Images.cartBox,
-                                          height: 35,
-                                          width: 35,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 2,
-                                        right: 5,
-                                        child: Container(
-                                          padding: EdgeInsetsGeometry.all(5),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                                width: 2,
-                                                color: Theme.of(context)
-                                                    .cardColor),
-                                            shape: BoxShape.circle,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .error,
-                                          ),
-                                          child: Text(
-                                              totalItemCheckedCount.toString(),
-                                              style: titleRegular.copyWith(
-                                                  color: Theme.of(context)
-                                                      .cardColor,
-                                                  fontSize: Dimensions
-                                                      .fontSizeSmall)),
-                                        ),
-                                      ),
-                                    ]),
-                                    Expanded(
-                                      child: InkWell(
-                                        onTap: () async {
-                                          bool hasNull = false;
-                                          bool minimum = false;
-                                          bool stockOutProduct = false;
-                                          bool closeShop = false;
-                                          double total = 0;
-
-                                          if (configProvider.configModel!
-                                                  .shippingMethod ==
-                                              'sellerwise_shipping') {
-                                            for (int index = 0;
-                                                index < sellerGroupList.length;
-                                                index++) {
-                                              bool hasPhysical = false;
-                                              for (CartModel cart
-                                                  in cartProductList[index]) {
-                                                if (cart.productType ==
-                                                    'physical') {
-                                                  hasPhysical = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              if (hasPhysical &&
-                                                  sellerGroupList[index]
-                                                      .isGroupItemChecked! &&
-                                                  sellerGroupList[index]
-                                                          .shippingType ==
-                                                      'order_wise' &&
-                                                  Provider.of<ShippingController>(
-                                                              context,
-                                                              listen: false)
-                                                          .shippingList![index]
-                                                          .shippingIndex ==
-                                                      -1 &&
-                                                  sellerGroupList[index]
-                                                      .isGroupItemChecked!) {
-                                                hasNull = true;
-                                                break;
-                                              }
-                                            }
-                                          }
-
-                                          for (int index = 0;
-                                              index < sellerGroupList.length;
-                                              index++) {
-                                            total = 0;
-                                            for (CartModel cart
-                                                in cartProductList[index]) {
-                                              if (cart.isChecked ?? false) {
-                                                total += (cart.price! -
-                                                        cart.discount!) *
-                                                    cart.quantity!;
-                                              }
-                                            }
-                                            log("===Here===>$total======${sellerGroupList[index].minimumOrderAmountInfo!}>");
-                                            if (total <
-                                                sellerGroupList[index]
-                                                    .minimumOrderAmountInfo!) {
-                                              minimum = true;
-                                            }
-                                          }
-
-                                          for (int index = 0;
-                                              index < sellerGroupList.length;
-                                              index++) {
-                                            for (CartModel cart
-                                                in cartProductList[index]) {
-                                              if (cart.isChecked == true &&
-                                                  cart.quantity! >
-                                                      cart.productInfo!
-                                                          .totalCurrentStock! &&
-                                                  cart.productType ==
-                                                      "physical") {
-                                                stockOutProduct = true;
-                                                break;
-                                              }
-                                            }
-                                          }
-
-                                          for (int index = 0;
-                                              index < sellerGroupList.length;
-                                              index++) {
-                                            if (sellerGroupList[index]
-                                                    .shop
-                                                    ?.vacationEndDate !=
-                                                null) {
-                                              bool vacationIsOn =
-                                                  ShopHelper.isVacationActive(
-                                                context,
-                                                startDate:
-                                                    sellerGroupList[index]
-                                                        .shop
-                                                        ?.vacationStartDate,
-                                                endDate: sellerGroupList[index]
-                                                    .shop
-                                                    ?.vacationEndDate,
-                                                vacationDurationType:
-                                                    sellerGroupList[index]
-                                                        .shop
-                                                        ?.vacationDurationType,
-                                                vacationStatus:
-                                                    sellerGroupList[index]
-                                                        .shop
-                                                        ?.vacationStatus,
-                                                isInHouseSeller:
-                                                    sellerGroupList[index]
-                                                            .shop
-                                                            ?.id ==
-                                                        0,
-                                              );
-
-                                              if ((vacationIsOn ||
-                                                      (sellerGroupList[index]
-                                                              .shop
-                                                              ?.temporaryClose ??
-                                                          false)) &&
-                                                  (sellerGroupList[index]
-                                                          .isGroupItemChecked ??
-                                                      false)) {
-                                                closeShop = true;
-                                                break;
-                                              }
-                                            }
-                                          }
-
-                                          if (configProvider
-                                                      .configModel?.guestCheckOut ==
-                                                  0 &&
-                                              !Provider.of<AuthController>(
-                                                      context,
-                                                      listen: false)
-                                                  .isLoggedIn()) {
-                                            showModalBottomSheet(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                context: context,
-                                                builder: (_) =>
-                                                    NotLoggedInBottomSheetWidget(
-                                                        fromPage: widget
-                                                                .fromDashboard
-                                                            ? '${RouterHelper.dashboardScreen}?page=cart'
-                                                            : RouterHelper
-                                                                .cartScreen,
-                                                        onLoginSuccess: () {
-                                                          RouterHelper.getDashboardRoute(
-                                                              action: RouteAction
-                                                                  .pushReplacement,
-                                                              page: 'cart');
-                                                          Provider.of<CartController>(
-                                                                  context,
-                                                                  listen: false)
-                                                              .mergeGuestCart();
-                                                        }));
-                                          } else if (cart.cartList.isEmpty) {
-                                            showCustomSnackBarWidget(
-                                                getTranslated(
-                                                    'select_at_least_one_product',
-                                                    context),
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-                                          } else if (stockOutProduct) {
-                                            showCustomSnackBarWidget(
-                                                getTranslated(
-                                                    'stock_out_product_in_your_cart',
-                                                    context),
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-                                          } else if (closeShop) {
-                                            showCustomSnackBarWidget(
-                                                getTranslated(
-                                                    'unavailable_shop_product_in_your_cart',
-                                                    context),
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-                                          } else if (minimum) {
-                                            showCustomSnackBarWidget(
-                                                '${getTranslated('minimum_order_amount', Get.context!)} ${PriceConverter.convertPrice(Get.context!, requiredMinOrderAmountCart?.sellerCart.minimumOrderAmountInfo)} ${getTranslated('for', Get.context!)}  ${requiredMinOrderAmountCart?.sellerCart.sellerIs == 'admin' ? Provider.of<SplashController>(context, listen: false).configModel?.inHouseShop?.name : requiredShippingCartModel?.sellerCart.shop?.name}',
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-                                            _scrollToSeller(
-                                                requiredMinOrderAmountCart
-                                                    ?.sellerIndex);
-                                            await Future.delayed(const Duration(
-                                                milliseconds: 900));
-                                            changeColor();
-                                          } else if (!isItemChecked) {
-                                            showCustomSnackBarWidget(
-                                                getTranslated(
-                                                    'please_select_items',
-                                                    context),
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-                                          } else if (requiredMinOrderQtyCart !=
-                                              null) {
-                                            showCustomSnackBarWidget(
-                                                '${getTranslated('to_order', Get.context!)} ${requiredMinOrderQtyCart.productCart.name} ${getTranslated('min_order_quantity_is', Get.context!)} ${requiredMinOrderQtyCart.productCart.productInfo?.minimumOrderQty}',
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-                                            _scrollToSeller(
-                                                requiredMinOrderQtyCart
-                                                    .sellerIndex);
-                                            await Future.delayed(const Duration(
-                                                milliseconds: 900));
-                                            changeColor();
-                                          } else if (hasNull &&
-                                              configProvider.configModel!
-                                                      .shippingMethod ==
-                                                  'sellerwise_shipping' &&
-                                              !onlyDigital) {
-                                            showCustomSnackBarWidget(
-                                                '${getTranslated('select_all_shipping_method', context)} ${getTranslated('for', Get.context!)} ${requiredShippingCartModel?.sellerCart.sellerIs == 'admin' ? Provider.of<SplashController>(context, listen: false).configModel?.inHouseShop?.name : requiredShippingCartModel?.sellerCart.shop?.name}',
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-
-                                            _scrollToSeller(
-                                                requiredShippingCartModel
-                                                    ?.sellerIndex);
-                                            await Future.delayed(const Duration(
-                                                milliseconds: 900));
-                                            changeColor();
-                                          } else if (shippingController
-                                                  .chosenShippingList.isEmpty &&
-                                              configProvider.configModel!
-                                                      .shippingMethod !=
-                                                  'sellerwise_shipping' &&
-                                              configProvider.configModel!
-                                                      .inhouseSelectedShippingType ==
-                                                  'order_wise' &&
-                                              !onlyDigital) {
-                                            showCustomSnackBarWidget(
-                                                getTranslated(
-                                                    'select_shipping_method',
-                                                    context),
-                                                Get.context!,
-                                                snackBarType:
-                                                    SnackBarType.warning);
-
-                                            showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                builder: (context) =>
-                                                    ShippingMethodBottomSheetWidget(
-                                                      groupId: 'all_cart_group',
-                                                      sellerIndex: 0,
-                                                      sellerId: 1,
-                                                      onSelected: (shippingCost) =>
-                                                          navigateToCheckout(
-                                                              selectedShippingCost:
-                                                                  shippingCost),
-                                                    ));
-                                          } else {
-                                            navigateToCheckout();
-                                          }
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .primaryColor,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      Dimensions
-                                                          .paddingSizeSmall)),
-                                          child: Center(
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: Dimensions
-                                                      .paddingSizeSmall,
-                                                  vertical:
-                                                      Dimensions.fontSizeSmall),
-                                              child: Text(
-                                                  getTranslated(
-                                                      'checkout', context)!,
+                                                '${getTranslated('total_price', context)}  ',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                        color: colors
+                                                            .textSecondary,
+                                                        fontWeight:
+                                                            FontWeight.w600)),
+                                            if (Provider.of<SplashController>(
+                                                        Get.context!,
+                                                        listen: false)
+                                                    .configModel
+                                                    ?.systemTaxIncludeStatus ==
+                                                1)
+                                              Text(
+                                                  '${getTranslated('inc_vat_tax', context)}',
                                                   style: titilliumSemiBold
                                                       .copyWith(
                                                           fontSize: Dimensions
-                                                              .fontSizeDefault,
-                                                          color: Colors.white)),
+                                                              .fontSizeSmall,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .hintColor)),
+                                          ]),
+                                          Text(
+                                              PriceConverter.convertPrice(
+                                                  context,
+                                                  amount +
+                                                      tax +
+                                                      shippingAmount -
+                                                      freeDeliveryAmountDiscount),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.copyWith(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                  )),
+                                        ]),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Stack(children: [
+                                        Padding(
+                                          padding: EdgeInsetsGeometry.only(
+                                              right:
+                                                  Dimensions.paddingSizeSmall,
+                                              top: Dimensions.paddingSizeSmall,
+                                              bottom:
+                                                  Dimensions.paddingSizeSmall),
+                                          child: CustomAssetImageWidget(
+                                            Images.cartBox,
+                                            height: 35,
+                                            width: 35,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 2,
+                                          right: 5,
+                                          child: Container(
+                                            padding: EdgeInsetsGeometry.all(5),
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  width: 2,
+                                                  color: Theme.of(context)
+                                                      .cardColor),
+                                              shape: BoxShape.circle,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .error,
+                                            ),
+                                            child: Text(
+                                                totalItemCheckedCount
+                                                    .toString(),
+                                                style: titleRegular.copyWith(
+                                                    color: Theme.of(context)
+                                                        .cardColor,
+                                                    fontSize: Dimensions
+                                                        .fontSizeSmall)),
+                                          ),
+                                        ),
+                                      ]),
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () async {
+                                            bool hasNull = false;
+                                            bool minimum = false;
+                                            bool stockOutProduct = false;
+                                            bool closeShop = false;
+                                            double total = 0;
+
+                                            if (configProvider.configModel!
+                                                    .shippingMethod ==
+                                                'sellerwise_shipping') {
+                                              for (int index = 0;
+                                                  index <
+                                                      sellerGroupList.length;
+                                                  index++) {
+                                                bool hasPhysical = false;
+                                                for (CartModel cart
+                                                    in cartProductList[index]) {
+                                                  if (cart.productType ==
+                                                      'physical') {
+                                                    hasPhysical = true;
+                                                    break;
+                                                  }
+                                                }
+
+                                                final currentShippingList =
+                                                    shippingController
+                                                        .shippingList;
+                                                if (hasPhysical &&
+                                                    sellerGroupList[index]
+                                                        .isGroupItemChecked! &&
+                                                    sellerGroupList[index]
+                                                            .shippingType ==
+                                                        'order_wise' &&
+                                                    (currentShippingList ==
+                                                            null ||
+                                                        index >=
+                                                            currentShippingList
+                                                                .length ||
+                                                        currentShippingList[
+                                                                    index]
+                                                                .shippingIndex ==
+                                                            -1)) {
+                                                  hasNull = true;
+                                                  break;
+                                                }
+                                              }
+                                            }
+
+                                            for (int index = 0;
+                                                index < sellerGroupList.length;
+                                                index++) {
+                                              total = 0;
+                                              for (CartModel cart
+                                                  in cartProductList[index]) {
+                                                if (cart.isChecked ?? false) {
+                                                  total += (cart.price! -
+                                                          cart.discount!) *
+                                                      cart.quantity!;
+                                                }
+                                              }
+                                              final minimumOrderAmount =
+                                                  sellerGroupList[index]
+                                                          .minimumOrderAmountInfo ??
+                                                      0;
+                                              log("===Here===>$total======$minimumOrderAmount>");
+                                              if (total < minimumOrderAmount) {
+                                                minimum = true;
+                                              }
+                                            }
+
+                                            for (int index = 0;
+                                                index < sellerGroupList.length;
+                                                index++) {
+                                              for (CartModel cart
+                                                  in cartProductList[index]) {
+                                                final availableStock = cart
+                                                        .productInfo
+                                                        ?.totalCurrentStock ??
+                                                    cart.maxQuantity ??
+                                                    0;
+                                                if (cart.isChecked == true &&
+                                                    (cart.quantity ?? 0) >
+                                                        availableStock &&
+                                                    cart.productType ==
+                                                        "physical") {
+                                                  stockOutProduct = true;
+                                                  break;
+                                                }
+                                              }
+                                            }
+
+                                            for (int index = 0;
+                                                index < sellerGroupList.length;
+                                                index++) {
+                                              if (sellerGroupList[index]
+                                                      .shop
+                                                      ?.vacationEndDate !=
+                                                  null) {
+                                                bool vacationIsOn =
+                                                    ShopHelper.isVacationActive(
+                                                  context,
+                                                  startDate:
+                                                      sellerGroupList[index]
+                                                          .shop
+                                                          ?.vacationStartDate,
+                                                  endDate:
+                                                      sellerGroupList[index]
+                                                          .shop
+                                                          ?.vacationEndDate,
+                                                  vacationDurationType:
+                                                      sellerGroupList[index]
+                                                          .shop
+                                                          ?.vacationDurationType,
+                                                  vacationStatus:
+                                                      sellerGroupList[index]
+                                                          .shop
+                                                          ?.vacationStatus,
+                                                  isInHouseSeller:
+                                                      sellerGroupList[index]
+                                                              .shop
+                                                              ?.id ==
+                                                          0,
+                                                );
+
+                                                if ((vacationIsOn ||
+                                                        (sellerGroupList[index]
+                                                                .shop
+                                                                ?.temporaryClose ??
+                                                            false)) &&
+                                                    (sellerGroupList[index]
+                                                            .isGroupItemChecked ??
+                                                        false)) {
+                                                  closeShop = true;
+                                                  break;
+                                                }
+                                              }
+                                            }
+
+                                            if (configProvider.configModel
+                                                        ?.guestCheckOut ==
+                                                    0 &&
+                                                !Provider.of<AuthController>(
+                                                        context,
+                                                        listen: false)
+                                                    .isLoggedIn()) {
+                                              showModalBottomSheet(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  context: context,
+                                                  builder: (_) =>
+                                                      NotLoggedInBottomSheetWidget(
+                                                          fromPage: widget
+                                                                  .fromDashboard
+                                                              ? '${RouterHelper.dashboardScreen}?page=cart'
+                                                              : RouterHelper
+                                                                  .cartScreen,
+                                                          onLoginSuccess: () {
+                                                            RouterHelper.getDashboardRoute(
+                                                                action: RouteAction
+                                                                    .pushReplacement,
+                                                                page: 'cart');
+                                                            Provider.of<CartController>(
+                                                                    context,
+                                                                    listen:
+                                                                        false)
+                                                                .mergeGuestCart();
+                                                          }));
+                                            } else if (cart.cartList.isEmpty) {
+                                              showCustomSnackBarWidget(
+                                                  getTranslated(
+                                                      'select_at_least_one_product',
+                                                      context),
+                                                  Get.context!,
+                                                  snackBarType:
+                                                      SnackBarType.warning);
+                                            } else if (stockOutProduct) {
+                                              showCustomSnackBarWidget(
+                                                  getTranslated(
+                                                      'stock_out_product_in_your_cart',
+                                                      context),
+                                                  Get.context!,
+                                                  snackBarType:
+                                                      SnackBarType.warning);
+                                            } else if (closeShop) {
+                                              showCustomSnackBarWidget(
+                                                  getTranslated(
+                                                      'unavailable_shop_product_in_your_cart',
+                                                      context),
+                                                  Get.context!,
+                                                  snackBarType:
+                                                      SnackBarType.warning);
+                                            } else if (minimum) {
+                                              showCustomSnackBarWidget(
+                                                  '${getTranslated('minimum_order_amount', Get.context!)} ${PriceConverter.convertPrice(Get.context!, requiredMinOrderAmountCart?.sellerCart.minimumOrderAmountInfo)} ${getTranslated('for', Get.context!)}  ${requiredMinOrderAmountCart?.sellerCart.sellerIs == 'admin' ? Provider.of<SplashController>(context, listen: false).configModel?.inHouseShop?.name : requiredShippingCartModel?.sellerCart.shop?.name}',
+                                                  Get.context!,
+                                                  snackBarType:
+                                                      SnackBarType.warning);
+                                              _scrollToSeller(
+                                                  requiredMinOrderAmountCart
+                                                      ?.sellerIndex);
+                                              await Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 900));
+                                              changeColor();
+                                            } else if (!isItemChecked) {
+                                              showCustomSnackBarWidget(
+                                                  getTranslated(
+                                                      'please_select_items',
+                                                      context),
+                                                  Get.context!,
+                                                  snackBarType:
+                                                      SnackBarType.warning);
+                                            } else if (requiredMinOrderQtyCart !=
+                                                null) {
+                                              showCustomSnackBarWidget(
+                                                  '${getTranslated('to_order', Get.context!)} ${requiredMinOrderQtyCart.productCart.name} ${getTranslated('min_order_quantity_is', Get.context!)} ${requiredMinOrderQtyCart.productCart.productInfo?.minimumOrderQty}',
+                                                  Get.context!,
+                                                  snackBarType:
+                                                      SnackBarType.warning);
+                                              _scrollToSeller(
+                                                  requiredMinOrderQtyCart
+                                                      .sellerIndex);
+                                              await Future.delayed(
+                                                  const Duration(
+                                                      milliseconds: 900));
+                                              changeColor();
+                                            } else if (hasNull &&
+                                                configProvider.configModel!
+                                                        .shippingMethod ==
+                                                    'sellerwise_shipping' &&
+                                                !onlyDigital) {
+                                              final defaultShippingCost =
+                                                  await shippingController
+                                                      .ensureDefaultShippingMethods(
+                                                context,
+                                                sellerGroupList,
+                                                cartProductList,
+                                              );
+                                              if (!context.mounted) return;
+
+                                              if (defaultShippingCost == null) {
+                                                showCustomSnackBarWidget(
+                                                  'تعذر تحديد رسوم التوصيل لهذا الطلب. تأكد من أن المتجر يوفّر خدمة توصيل.',
+                                                  context,
+                                                  snackBarType:
+                                                      SnackBarType.warning,
+                                                );
+                                                _scrollToSeller(
+                                                    requiredShippingCartModel
+                                                        ?.sellerIndex);
+                                                return;
+                                              }
+
+                                              final productShippingCost =
+                                                  cartList
+                                                      .where((cartItem) =>
+                                                          cartItem.isChecked ==
+                                                          true)
+                                                      .fold<double>(
+                                                        0,
+                                                        (sum, cartItem) =>
+                                                            sum +
+                                                            (cartItem
+                                                                    .shippingCost ??
+                                                                0),
+                                                      );
+                                              navigateToCheckout(
+                                                selectedShippingCost:
+                                                    productShippingCost +
+                                                        defaultShippingCost,
+                                              );
+                                            } else {
+                                              navigateToCheckout();
+                                            }
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(16)),
+                                            child: Center(
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: Dimensions
+                                                        .paddingSizeSmall,
+                                                    vertical: Dimensions
+                                                        .fontSizeSmall),
+                                                child: _checkoutInProgress
+                                                    ? const SizedBox(
+                                                        width: 22,
+                                                        height: 22,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          strokeWidth: 2.3,
+                                                          color: Colors.white,
+                                                        ),
+                                                      )
+                                                    : const Text(
+                                                        'متابعة إلى الدفع',
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                'AllineTajawal',
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            color:
+                                                                Colors.white)),
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                              ])
+                                    ],
+                                  ),
+                                ],
+                              )
                             : const SizedBox());
                   })
                 : null,
-            appBar: CustomAppBar(
-                title: getTranslated('my_cart', context),
-                isBackButtonExist: widget.showBackButton),
+            appBar: AppBar(
+              leading: widget.showBackButton
+                  ? IconButton(
+                      tooltip: 'رجوع',
+                      onPressed: () => Navigator.maybePop(context),
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                    )
+                  : null,
+              title: Column(mainAxisSize: MainAxisSize.min, children: [
+                Text('السلة', style: Theme.of(context).textTheme.titleLarge),
+                if (cartList.isNotEmpty)
+                  Text('${cartList.length} منتجات',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: colors.textSecondary)),
+              ]),
+            ),
             body: Column(children: [
               cart.cartLoading
                   ? const Expanded(child: CartPageShimmerWidget())
@@ -724,6 +783,12 @@ class CartScreenState extends State<CartScreen> {
                                 },
                                 child: ListView(
                                   children: [
+                                    _CartSummaryIntro(
+                                      itemCount: cartList.length,
+                                      storeCount: sellerList.length,
+                                      selectedCount: totalItemCheckedCount,
+                                    ),
+                                    const _CartDeliveryAddressCard(),
                                     ListView.separated(
                                       shrinkWrap: true,
                                       padding: const EdgeInsets.only(
@@ -802,32 +867,7 @@ class CartScreenState extends State<CartScreen> {
                                         //         Provider.of<ShippingController>(context, listen: false).shippingList?[index].shippingIndex == -1 && sellerGroupList[index].isGroupItemChecked == true)
                                         //}---');
 
-                                        bool showColor = (sellerGroupList[index]
-                                                    .minimumOrderAmountInfo! >
-                                                totalCost) ||
-                                            (configProvider.configModel!.shippingMethod ==
-                                                    'sellerwise_shipping' &&
-                                                sellerGroupList[index].shippingType ==
-                                                    'order_wise' &&
-                                                Provider.of<ShippingController>(context, listen: false)
-                                                        .shippingList !=
-                                                    null &&
-                                                Provider.of<ShippingController>(context, listen: false)
-                                                    .shippingList!
-                                                    .isNotEmpty &&
-                                                requiredShippingCartModel
-                                                        ?.sellerIndex ==
-                                                    index &&
-                                                Provider.of<ShippingController>(
-                                                            context,
-                                                            listen: false)
-                                                        .shippingList?[index]
-                                                        .shippingIndex ==
-                                                    -1 &&
-                                                sellerGroupList[index].isGroupItemChecked == true);
-
-                                        bool isNotValidated = (sellerGroupList[index]
-                                                    .minimumOrderAmountInfo! >
+                                        bool showColor = ((sellerGroupList[index].minimumOrderAmountInfo ?? 0) >
                                                 totalCost) ||
                                             (configProvider.configModel!.shippingMethod ==
                                                     'sellerwise_shipping' &&
@@ -840,8 +880,32 @@ class CartScreenState extends State<CartScreen> {
                                                         listen: false)
                                                     .shippingList!
                                                     .isNotEmpty &&
+                                                requiredShippingCartModel?.sellerIndex ==
+                                                    index &&
                                                 Provider.of<ShippingController>(
                                                             context,
+                                                            listen: false)
+                                                        .shippingList?[index]
+                                                        .shippingIndex ==
+                                                    -1 &&
+                                                sellerGroupList[index].isGroupItemChecked == true);
+
+                                        bool isNotValidated = ((sellerGroupList[index]
+                                                        .minimumOrderAmountInfo ??
+                                                    0) >
+                                                totalCost) ||
+                                            (configProvider.configModel!
+                                                        .shippingMethod ==
+                                                    'sellerwise_shipping' &&
+                                                sellerGroupList[index].shippingType ==
+                                                    'order_wise' &&
+                                                Provider.of<ShippingController>(context, listen: false)
+                                                        .shippingList !=
+                                                    null &&
+                                                Provider.of<ShippingController>(context, listen: false)
+                                                    .shippingList!
+                                                    .isNotEmpty &&
+                                                Provider.of<ShippingController>(context,
                                                             listen: false)
                                                         .shippingList?[index]
                                                         .shippingIndex ==
@@ -851,7 +915,12 @@ class CartScreenState extends State<CartScreen> {
                                         return AnimatedContainer(
                                           key: sellerKeys[index],
                                           duration: duration,
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          clipBehavior: Clip.antiAlias,
                                           decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                             color: showColor
                                                 ? _currentColor
                                                 : index.floor().isOdd
@@ -859,27 +928,19 @@ class CartScreenState extends State<CartScreen> {
                                                         .cardColor
                                                     : Theme.of(context)
                                                         .cardColor,
-                                            boxShadow:
-                                                Provider.of<ThemeController>(
-                                                            context,
-                                                            listen: false)
-                                                        .darkTheme
-                                                    ? null
-                                                    : [
-                                                        BoxShadow(
-                                                            color: Colors.grey
-                                                                .withValues(
-                                                                    alpha: 0.3),
-                                                            spreadRadius: 1,
-                                                            blurRadius: 5)
-                                                      ],
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                  color: Color(0x0A032C75),
+                                                  offset: Offset(0, 3),
+                                                  blurRadius: 12)
+                                            ],
                                             border: Border.all(
-                                                color:
-                                                    validated && isNotValidated
-                                                        ? Theme.of(context)
-                                                            .colorScheme
-                                                            .error
-                                                        : Colors.transparent,
+                                                color: validated &&
+                                                        isNotValidated
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .error
+                                                    : const Color(0xFFE1E8F2),
                                                 width: 1),
                                           ),
                                           child: Padding(
@@ -963,62 +1024,15 @@ class CartScreenState extends State<CartScreen> {
                                                                             ]),
                                                                           ],
                                                                         ))),
-                                                                configProvider.configModel!.shippingMethod ==
-                                                                            'sellerwise_shipping' &&
-                                                                        sellerGroupList[index].shippingType ==
-                                                                            'order_wise' &&
-                                                                        hasPhysical
-                                                                    ? SizedBox(
-                                                                        width:
-                                                                            180,
-                                                                        child: configProvider.configModel!.shippingMethod == 'sellerwise_shipping' &&
-                                                                                sellerGroupList[index].shippingType == 'order_wise' &&
-                                                                                hasPhysical
-                                                                            ? Padding(
-                                                                                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                                                                                child: InkWell(
-                                                                                  onTap: () {
-                                                                                    showModalBottomSheet(
-                                                                                      context: context,
-                                                                                      isScrollControlled: true,
-                                                                                      backgroundColor: Colors.transparent,
-                                                                                      builder: (context) => ShippingMethodBottomSheetWidget(groupId: sellerGroupList[index].cartGroupId, sellerIndex: index, sellerId: sellerGroupList[index].id),
-                                                                                    );
-                                                                                  },
-                                                                                  child: Container(
-                                                                                    decoration: BoxDecoration(border: Border.all(width: 1.5, color: Theme.of(context).primaryColor.withValues(alpha: 0.15)), borderRadius: const BorderRadius.all(Radius.circular(Dimensions.radiusSmall))),
-                                                                                    child: Padding(
-                                                                                      padding: const EdgeInsets.all(Dimensions.paddingSizeExtraSmall),
-                                                                                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                                                                                        if (shippingController.shippingList == null || shippingController.shippingList!.isEmpty || shippingController.shippingList?[index].shippingMethodList == null || shippingController.chosenShippingList.isEmpty || shippingController.shippingList![index].shippingIndex == -1)
-                                                                                          Row(children: [
-                                                                                            SizedBox(width: 15, height: 15, child: Image.asset(Images.delivery, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                                                                                            const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                                                                                            Text(
-                                                                                              getTranslated('choose_shipping', context)!,
-                                                                                              style: textRegular.copyWith(color: Theme.of(context).textTheme.bodySmall?.color),
-                                                                                              overflow: TextOverflow.ellipsis,
-                                                                                              maxLines: 1,
-                                                                                            ),
-                                                                                          ]),
-                                                                                        Expanded(child: Text(((shippingController.shippingList != null && shippingController.shippingList!.isNotEmpty && shippingController.shippingList?[index].shippingMethodList != null) && (shippingController.chosenShippingList.isNotEmpty && shippingController.shippingList![index].shippingIndex != -1)) ? shippingController.shippingList![index].shippingMethodList![shippingController.shippingList![index].shippingIndex!].title.toString() : '', style: titilliumSemiBold.copyWith(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.start)),
-                                                                                        SizedBox(width: 15, child: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).textTheme.bodyLarge?.color)),
-                                                                                        SizedBox(width: Dimensions.paddingSizeExtraSmall)
-                                                                                      ]),
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                              )
-                                                                            : const SizedBox(),
-                                                                      )
-                                                                    : const SizedBox(),
+                                                                const SizedBox(),
                                                               ],
                                                             ),
                                                           ),
                                                         )
                                                       : const SizedBox(),
-                                                  if ((sellerGroupList[index]
-                                                              .minimumOrderAmountInfo! >
+                                                  if (((sellerGroupList[index]
+                                                                  .minimumOrderAmountInfo ??
+                                                              0) >
                                                           totalCost) ||
                                                       (configProvider
                                                                   .configModel!
@@ -1103,9 +1117,10 @@ class CartScreenState extends State<CartScreen> {
                                                           // if(configProvider.configModel!.shippingMethod == 'sellerwise_shipping' && sellerGroupList[index].shippingType == 'order_wise' && hasPhysical)
                                                           //   SizedBox(height: Dimensions.paddingSizeSmall,),
 
-                                                          if (sellerGroupList[
-                                                                      index]
-                                                                  .minimumOrderAmountInfo! >
+                                                          if ((sellerGroupList[
+                                                                          index]
+                                                                      .minimumOrderAmountInfo ??
+                                                                  0) >
                                                               totalCost)
                                                             Padding(
                                                                 padding: const EdgeInsets
@@ -1295,139 +1310,20 @@ class CartScreenState extends State<CartScreen> {
                                         );
                                       },
                                     ),
-                                    (!onlyDigital &&
-                                            configProvider.configModel!
-                                                    .shippingMethod !=
-                                                'sellerwise_shipping' &&
-                                            configProvider.configModel!
-                                                    .inhouseSelectedShippingType ==
-                                                'order_wise')
-                                        ? InkWell(
-                                            onTap: () {
-                                              showModalBottomSheet(
-                                                  context: context,
-                                                  isScrollControlled: true,
-                                                  backgroundColor:
-                                                      Colors.transparent,
-                                                  builder: (context) =>
-                                                      const ShippingMethodBottomSheetWidget(
-                                                          groupId:
-                                                              'all_cart_group',
-                                                          sellerIndex: 0,
-                                                          sellerId: 1));
-                                            },
-                                            child: Padding(
-                                              padding: const EdgeInsets
-                                                  .fromLTRB(
-                                                  Dimensions.paddingSizeDefault,
-                                                  Dimensions.paddingSizeSmall,
-                                                  Dimensions.paddingSizeDefault,
-                                                  Dimensions
-                                                      .paddingSizeDefault),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        width: 0.5,
-                                                        color: Colors.grey),
-                                                    borderRadius:
-                                                        const BorderRadius.all(
-                                                            Radius.circular(
-                                                                10))),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Row(children: [
-                                                          SizedBox(
-                                                              width: 15,
-                                                              height: 15,
-                                                              child: Image.asset(
-                                                                  Images
-                                                                      .delivery,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .textTheme
-                                                                      .bodyLarge
-                                                                      ?.color)),
-                                                          const SizedBox(
-                                                              width: Dimensions
-                                                                  .paddingSizeExtraSmall),
-                                                          Text(
-                                                              getTranslated('choose_shipping_method',
-                                                                  context)!,
-                                                              style: textRegular.copyWith(
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .textTheme
-                                                                      .bodyLarge
-                                                                      ?.color,
-                                                                  fontSize:
-                                                                      Dimensions
-                                                                          .fontSizeSmall),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              maxLines: 1)
-                                                        ]),
-                                                        SizedBox(
-                                                            height: Dimensions
-                                                                .paddingSizeDefault),
-                                                        Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .end,
-                                                            children: [
-                                                              Text(
-                                                                (shippingController
-                                                                                .shippingList ==
-                                                                            null ||
-                                                                        shippingController
-                                                                            .chosenShippingList.isEmpty ||
-                                                                        shippingController
-                                                                            .shippingList!
-                                                                            .isEmpty ||
-                                                                        shippingController.shippingList![0].shippingMethodList ==
-                                                                            null ||
-                                                                        shippingController.shippingList![0].shippingIndex ==
-                                                                            -1)
-                                                                    ? ''
-                                                                    : shippingController
-                                                                        .shippingList![
-                                                                            0]
-                                                                        .shippingMethodList![shippingController
-                                                                            .shippingList![0]
-                                                                            .shippingIndex!]
-                                                                        .title
-                                                                        .toString(),
-                                                                style: titilliumSemiBold.copyWith(
-                                                                    color: Theme.of(
-                                                                            context)
-                                                                        .hintColor),
-                                                                maxLines: 1,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                              ),
-                                                              const SizedBox(
-                                                                  width: Dimensions
-                                                                      .paddingSizeExtraSmall),
-                                                              Icon(
-                                                                  Icons
-                                                                      .keyboard_arrow_down,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .primaryColor),
-                                                            ]),
-                                                      ]),
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        : const SizedBox(),
+                                    const SizedBox(),
+                                    _CartOrderSummary(
+                                      productsSubtotal: amount + discount,
+                                      discount: discount,
+                                      shipping: shippingAmount -
+                                          freeDeliveryAmountDiscount,
+                                      tax: tax,
+                                      total: amount +
+                                          tax +
+                                          shippingAmount -
+                                          freeDeliveryAmountDiscount,
+                                      deliveryCalculated: shippingAmount > 0 ||
+                                          freeDeliveryAmountDiscount > 0,
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1560,13 +1456,28 @@ class CartScreenState extends State<CartScreen> {
                               ),
                           ],
                         ))
-                      : const Expanded(
-                          child: NoInternetOrDataScreenWidget(
-                          icon: Images.emptyCart,
-                          icCart: true,
-                          isNoInternet: false,
-                          message: 'no_product_in_cart',
-                        )),
+                      : cart.cartLoadFailed
+                          ? Expanded(
+                              child: AllineErrorState(
+                                title: 'تعذر تحميل السلة',
+                                message:
+                                    'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.',
+                                onRetry: () => cart.getCartData(context),
+                              ),
+                            )
+                          : Expanded(
+                              child: AllineEmptyState(
+                                icon: Icons.shopping_cart_outlined,
+                                title: 'سلتك فارغة',
+                                message:
+                                    'أضف المنتجات التي تعجبك إلى سلتك وابدأ التسوق.',
+                                actionLabel: 'ابدأ التسوق',
+                                onAction: () => RouterHelper.getDashboardRoute(
+                                  action: RouteAction.pushReplacement,
+                                  page: 'home',
+                                ),
+                              ),
+                            ),
             ]),
           );
         });
@@ -1580,7 +1491,6 @@ class CartScreenState extends State<CartScreen> {
   ) {
     final ConfigModel? configModel =
         Provider.of<SplashController>(context, listen: false).configModel;
-    bool hasNull;
     if (configModel!.shippingMethod == 'sellerwise_shipping') {
       for (int index = 0; index < sellerGroupList.length; index++) {
         bool hasPhysical = false;
@@ -1607,7 +1517,6 @@ class CartScreenState extends State<CartScreen> {
             sellerGroupList[index].isGroupItemChecked!) {
           // it breaks here ovider.of<ShippingController>(context, listen: false).shippingList![index].
 
-          hasNull = true;
           return (sellerCart: sellerGroupList[index], sellerIndex: index);
         }
       }
@@ -1641,7 +1550,6 @@ class CartScreenState extends State<CartScreen> {
     List<List<CartModel>> cartProductList,
   ) {
     double total;
-    bool minimum = false;
     for (int index = 0; index < sellerGroupList.length; index++) {
       total = 0;
       for (CartModel cart in cartProductList[index]) {
@@ -1649,11 +1557,12 @@ class CartScreenState extends State<CartScreen> {
           total += (cart.price! - cart.discount!) * cart.quantity!;
         }
       }
-      log("===Here===>$total======${sellerGroupList[index].minimumOrderAmountInfo!}>");
-      if (total < sellerGroupList[index].minimumOrderAmountInfo!) {
-        minimum = true;
+      final minimumOrderAmount =
+          sellerGroupList[index].minimumOrderAmountInfo ?? 0;
+      log("===Here===>$total======$minimumOrderAmount>");
+      if (total < minimumOrderAmount) {
         return (
-          productCart: cartProductList[0][0],
+          productCart: cartProductList[index].first,
           sellerCart: sellerGroupList[index],
           sellerIndex: index
         );
@@ -1723,5 +1632,205 @@ class CartScreenState extends State<CartScreen> {
           banner: sellerList.shop?.bannerFullUrl?.path,
           image: sellerList.shop?.imageFullUrl?.path);
     }
+  }
+}
+
+class _CartSummaryIntro extends StatelessWidget {
+  final int itemCount;
+  final int storeCount;
+  final int selectedCount;
+
+  const _CartSummaryIntro({
+    required this.itemCount,
+    required this.storeCount,
+    required this.selectedCount,
+  });
+
+  @override
+  Widget build(BuildContext context) => AllineCard(
+        margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Row(children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: .08),
+                borderRadius: BorderRadius.circular(13)),
+            child: Icon(Icons.shopping_cart_outlined,
+                color: Theme.of(context).colorScheme.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('لديك $itemCount منتجات في السلة',
+                    style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 3),
+                Text(
+                    '$selectedCount محدد${storeCount > 1 ? ' • سيتم تقسيم الطلب حسب $storeCount متاجر' : ''}',
+                    style: Theme.of(context).textTheme.bodySmall),
+              ],
+            ),
+          ),
+        ]),
+      );
+}
+
+class _CartDeliveryAddressCard extends StatelessWidget {
+  const _CartDeliveryAddressCard();
+
+  @override
+  Widget build(BuildContext context) => Consumer<LocationController>(
+        builder: (context, location, _) {
+          final colors = AllineThemeColors.of(context);
+          final label = location.deliveryLabel?.trim();
+          return AllineCard(
+            margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            padding: const EdgeInsets.all(16),
+            child: Row(children: [
+              Icon(Icons.location_on_outlined,
+                  color: Theme.of(context).colorScheme.primary, size: 24),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('عنوان التوصيل',
+                        style: Theme.of(context).textTheme.labelMedium),
+                    const SizedBox(height: 3),
+                    Text(
+                        label?.isNotEmpty == true
+                            ? label!
+                            : 'لم يتم تحديد عنوان التوصيل بعد',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: colors.textSecondary)),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () => RouterHelper.getLocationSetupRoute(
+                    action: RouteAction.push),
+                style: TextButton.styleFrom(
+                    minimumSize: const Size(44, 44),
+                    foregroundColor: Theme.of(context).colorScheme.primary),
+                child: Text(label?.isNotEmpty == true ? 'تغيير' : 'تحديد',
+                    style: Theme.of(context).textTheme.labelMedium),
+              ),
+            ]),
+          );
+        },
+      );
+}
+
+class _CartOrderSummary extends StatelessWidget {
+  final double productsSubtotal;
+  final double discount;
+  final double shipping;
+  final double tax;
+  final double total;
+  final bool deliveryCalculated;
+
+  const _CartOrderSummary({
+    required this.productsSubtotal,
+    required this.discount,
+    required this.shipping,
+    required this.tax,
+    required this.total,
+    required this.deliveryCalculated,
+  });
+
+  @override
+  Widget build(BuildContext context) => AllineCard(
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('ملخص الطلب', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 14),
+          _SummaryRow(
+              label: 'إجمالي المنتجات',
+              value: PriceConverter.convertPrice(context, productsSubtotal)),
+          if (discount > 0)
+            _SummaryRow(
+                label: 'الخصم',
+                value: '-${PriceConverter.convertPrice(context, discount)}',
+                valueColor: AllineThemeColors.of(context).success),
+          _SummaryRow(
+            label: 'رسوم التوصيل',
+            value: deliveryCalculated
+                ? (shipping <= 0
+                    ? 'مجاني'
+                    : PriceConverter.convertPrice(context, shipping))
+                : 'تحسب عند إتمام الطلب',
+          ),
+          if (tax > 0)
+            _SummaryRow(
+                label: 'الضريبة',
+                value: PriceConverter.convertPrice(context, tax)),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1),
+          ),
+          _SummaryRow(
+              label: 'الإجمالي',
+              value: PriceConverter.convertPrice(context, total),
+              emphasized: true),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(10)),
+            child: Text('يمكنك إضافة كوبون الخصم في خطوة الدفع التالية.',
+                style: Theme.of(context).textTheme.bodySmall),
+          ),
+        ]),
+      );
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color? valueColor;
+  final bool emphasized;
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+    this.emphasized = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AllineThemeColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(
+          child: Text(label,
+              style: TextStyle(
+                  fontSize: emphasized ? 16 : 13,
+                  fontWeight: emphasized ? FontWeight.w700 : FontWeight.w500,
+                  color: colors.textPrimary)),
+        ),
+        const SizedBox(width: 12),
+        Text(value,
+            textAlign: TextAlign.end,
+            style: TextStyle(
+                fontSize: emphasized ? 18 : 13,
+                fontWeight: emphasized ? FontWeight.w700 : FontWeight.w600,
+                color: valueColor ??
+                    (emphasized
+                        ? Theme.of(context).colorScheme.primary
+                        : colors.textPrimary))),
+      ]),
+    );
   }
 }
