@@ -203,6 +203,27 @@ class _OrderWidgetState extends State<OrderWidget> {
                           ),
                         ),
                       ),
+
+                      if (widget.orderModel?.paymentStatus == 'unpaid' &&
+                          !['canceled', 'failed', 'returned', 'delivered'].contains(widget.orderModel?.orderStatus))
+                        Container(
+                          margin: const EdgeInsetsDirectional.only(start: Dimensions.paddingSizeExtraSmall),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: Dimensions.paddingSizeEight,
+                            vertical: Dimensions.paddingSizeExtraSmall,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: Theme.of(context).colorScheme.error.withValues(alpha: 0.12),
+                          ),
+                          child: Text(
+                            getTranslated('unpaid', context) ?? 'بانتظار الدفع',
+                            style: textBold.copyWith(
+                              fontSize: Dimensions.fontSizeSmall,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
 
