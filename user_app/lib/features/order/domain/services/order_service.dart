@@ -14,7 +14,7 @@ class OrderService implements OrderServiceInterface{
 
   @override
   Future<void> getOrderList(int offset, String status, {String? type}) async {
-    return await orderRepositoryInterface.getOrderList(offset, status);
+    return await orderRepositoryInterface.getOrderList(offset, status, type: type);
   }
 
   @override
