@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/screens/category_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/screens/brand_and_category_product_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/category_asset_helper.dart';
@@ -14,7 +13,8 @@ class AllineCategoriesGridWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
 
     return Consumer<CategoryController>(
       builder: (context, categoryController, _) {
@@ -38,7 +38,7 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isLtr ? 'Categories' : 'التصنيفات السريعة',
+                      isLtr ? 'Categories' : 'التصنيفات',
                       style: textBold.copyWith(
                         fontSize: 17,
                         color: isDark ? Colors.white : const Color(0xFF071B49),
@@ -47,11 +47,13 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                     InkWell(
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CategoryScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const CategoryScreen()),
                       ),
                       borderRadius: BorderRadius.circular(20),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         child: Row(
                           children: [
                             Text(
@@ -120,14 +122,13 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: CategoryAssetHelper.buildContainedCategoryArtwork(
+                              child: CategoryAssetHelper
+                                  .buildCircularCategoryAvatar(
                                 category: category,
-                                size: 54,
+                                size: 63,
                               ),
                             ),
-
                             const SizedBox(height: 7),
-
                             SizedBox(
                               height: 34,
                               child: Center(

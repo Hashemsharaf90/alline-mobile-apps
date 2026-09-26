@@ -253,10 +253,13 @@ class _AllineProductCardState extends State<AllineProductCard> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Expanded(
-                    child: AllinePriceWidget(
-                      price: product.unitPrice ?? 0,
-                      discount: product.discount,
-                      discountType: product.discountType,
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: AllinePriceWidget(
+                        price: product.unitPrice ?? 0,
+                        discount: product.discount,
+                        discountType: product.discountType,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -436,11 +439,14 @@ class _AllineProductCardState extends State<AllineProductCard> {
               Row(
                 children: [
                   Expanded(
-                    child: AllinePriceWidget(
-                      price: product.unitPrice ?? 0,
-                      discount: product.discount,
-                      discountType: product.discountType,
-                      color: priceColor,
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: AllinePriceWidget(
+                        price: product.unitPrice ?? 0,
+                        discount: product.discount,
+                        discountType: product.discountType,
+                        color: priceColor,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 4),

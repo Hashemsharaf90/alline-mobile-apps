@@ -13,7 +13,7 @@ class AllineServicesGridWidget extends StatelessWidget {
 
   static const _blue = Color(0xFF015FC9);
   static const _text = Color(0xFF071B49);
-  static const _muted = Color(0xFF6D85AF);
+  static const _muted = Color(0xFF405777);
   static const _surface = Color(0xFFFFFFFF);
 
   @override
@@ -140,9 +140,9 @@ class _ServiceBanner extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: AllineServicesGridWidget._muted,
-                            fontSize: 11,
+                            fontSize: 12,
                             height: 1.35,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 9),
