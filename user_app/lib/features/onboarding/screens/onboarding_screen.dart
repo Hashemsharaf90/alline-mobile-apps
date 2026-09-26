@@ -22,13 +22,16 @@ class OnBoardingScreen extends StatelessWidget {
         context.watch<LocalizationController>().locale.languageCode == 'ar';
     return AllineWelcomeView(
       isArabic: isArabic,
-      onStart: () {
+      onRegister: () {
+        RouterHelper.getAuthScreenRoute();
+      },
+      onLogin: () => RouterHelper.getLoginRoute(),
+      onGuest: () {
         context.read<SplashController>().disableIntro();
         context.read<AuthController>().getGuestIdUrl();
         RouterHelper.getDashboardRoute(
             action: RouteAction.pushNamedAndRemoveUntil);
       },
-      onLogin: () => RouterHelper.getLoginRoute(),
       onLanguage: () => showModalBottomSheet<void>(
         context: context,
         isScrollControlled: true,
