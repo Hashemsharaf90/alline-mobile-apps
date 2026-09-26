@@ -53,7 +53,7 @@ class SmOffersWidget extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               SizedBox(
-                height: 220,
+                height: 252,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),

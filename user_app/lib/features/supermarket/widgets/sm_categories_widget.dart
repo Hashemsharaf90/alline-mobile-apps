@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_section_header.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 
-/// The 12 supermarket-specific display categories.
 const _kCategories = [
-  _SmCategory(emoji: '\u{1F95B}', label: '\u0627\u0644\u0623\u0644\u0628\u0627\u0646'),
-  _SmCategory(emoji: '\u{1F964}', label: '\u0627\u0644\u0645\u0634\u0631\u0648\u0628\u0627\u062a'),
-  _SmCategory(emoji: '\u{1F35A}', label: '\u0645\u0648\u0627\u062f \u063a\u0630\u0627\u0626\u064a\u0629'),
-  _SmCategory(emoji: '\u{1F966}', label: '\u062e\u0636\u0627\u0631 \u0648\u0641\u0648\u0627\u0643\u0647'),
-  _SmCategory(emoji: '\u{1F35E}', label: '\u0645\u062e\u0628\u0648\u0632\u0627\u062a'),
-  _SmCategory(emoji: '\u{1F36B}', label: '\u062d\u0644\u0648\u064a\u0627\u062a'),
-  _SmCategory(emoji: '\u{1F96B}', label: '\u0645\u0639\u0644\u0628\u0627\u062a'),
-  _SmCategory(emoji: '\u{1F9CA}', label: '\u0645\u062c\u0645\u062f\u0627\u062a'),
-  _SmCategory(emoji: '\u{1F9F4}', label: '\u0645\u0646\u0638\u0641\u0627\u062a'),
-  _SmCategory(emoji: '\u{1F9FC}', label: '\u0639\u0646\u0627\u064a\u0629 \u0634\u062e\u0635\u064a\u0629'),
-  _SmCategory(emoji: '\u{1F3E0}', label: '\u0645\u0646\u0632\u0644\u064a\u0629'),
-  _SmCategory(emoji: '\u{1F476}', label: '\u0623\u0637\u0641\u0627\u0644'),
+  _SmCategory(emoji: '\u{1F95B}', label: 'الألبان'),
+  _SmCategory(emoji: '\u{1F964}', label: 'المشروبات'),
+  _SmCategory(emoji: '\u{1F35A}', label: 'مواد غذائية'),
+  _SmCategory(emoji: '\u{1F966}', label: 'خضار وفواكه'),
+  _SmCategory(emoji: '\u{1F35E}', label: 'مخبوزات'),
+  _SmCategory(emoji: '\u{1F9F4}', label: 'منظفات'),
+  _SmCategory(emoji: '\u{1F9FC}', label: 'عناية شخصية'),
+  _SmCategory(emoji: '\u{1F3E0}', label: 'منزلية'),
 ];
 
 class _SmCategory {
@@ -24,12 +19,10 @@ class _SmCategory {
   const _SmCategory({required this.emoji, required this.label});
 }
 
-/// Horizontal category strip for the Supermarket Hub.
-///
-/// Shows 12 supermarket-specific categories as compact icon+label cards.
-/// Fires [onCategorySelected] with a display label when tapped (null = all).
+/// Horizontal category rail for the Alline supermarket hub.
 class SmCategoriesWidget extends StatefulWidget {
   final void Function(String? label)? onCategorySelected;
+
   const SmCategoriesWidget({super.key, this.onCategorySelected});
 
   @override
@@ -37,31 +30,27 @@ class SmCategoriesWidget extends StatefulWidget {
 }
 
 class _SmCategoriesWidgetState extends State<SmCategoriesWidget> {
-  int _selected = -1; // -1 = none selected
-
-  static const _primary = AllineColors.primary;
-  static const _text = Color(0xFF071B49);
-  static const _softBlue = Color(0xFFF4F8FE);
-  static const _border = Color(0xFFE1E8F2);
+  int _selected = -1;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AllineSectionHeader(
-            title: '\u0627\u0644\u062a\u0635\u0646\u064a\u0641\u0627\u062a',
+            title: 'التصنيفات',
+            subtitle: 'تصفح أقسام السوبرماركت بسرعة',
             onViewAll: () {
               setState(() => _selected = -1);
               widget.onCategorySelected?.call(null);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           SizedBox(
-            height: 84,
+            height: 112,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -69,51 +58,77 @@ class _SmCategoriesWidgetState extends State<SmCategoriesWidget> {
               itemCount: _kCategories.length,
               separatorBuilder: (_, __) => const SizedBox(width: 10),
               itemBuilder: (context, index) {
-                final cat = _kCategories[index];
-                final isSelected = _selected == index;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selected = isSelected ? -1 : index;
-                    });
-                    widget.onCategorySelected?.call(
-                      isSelected ? null : cat.label,
-                    );
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: 72,
-                    decoration: BoxDecoration(
-                      color: isSelected ? _primary : _softBlue,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isSelected ? _primary : _border,
+                final category = _kCategories[index];
+                final selected = _selected == index;
+                return Semantics(
+                  button: true,
+                  label: category.label,
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => _selected = selected ? -1 : index);
+                      widget.onCategorySelected?.call(
+                        selected ? null : category.label,
+                      );
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      width: 82,
+                      padding: const EdgeInsets.fromLTRB(6, 8, 6, 7),
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AllineColors.primary
+                            : const Color(0xFFF8FBFF),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: selected
+                              ? AllineColors.primary
+                              : const Color(0xFFDCE7F4),
+                        ),
+                        boxShadow: selected
+                            ? [
+                                BoxShadow(
+                                  color: AllineColors.primary
+                                      .withValues(alpha: .18),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ]
+                            : null,
                       ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          cat.emoji,
-                          style: const TextStyle(fontSize: 26),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          cat.label,
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: 'AllineTajawal',
-                            fontSize: 10.5,
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                            color: isSelected ? Colors.white : _text,
-                            height: 1.1,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: 58,
+                            height: 58,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? Colors.white.withValues(alpha: .16)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Text(
+                              category.emoji,
+                              style: const TextStyle(fontSize: 31),
+                            ),
                           ),
-                        ),
-                      ],
+                          Text(
+                            category.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'AllineTajawal',
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: selected
+                                  ? Colors.white
+                                  : const Color(0xFF071B49),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

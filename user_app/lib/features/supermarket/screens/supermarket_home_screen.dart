@@ -102,45 +102,52 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
                 onRetry: () => _loadData(forceReload: true),
               )
             else
-              CustomScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                slivers: [
+              RefreshIndicator(
+                color: const Color(0xFF015FC9),
+                onRefresh: () => _loadData(forceReload: true),
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  slivers: [
                   // 1. Header
                   const SliverToBoxAdapter(child: SmHeaderWidget()),
 
                   // 2. Search
                   const SliverToBoxAdapter(child: SmSearchBarWidget()),
 
+                  // 3. Delivery promise
+                  const SliverToBoxAdapter(child: _DeliveryPromiseCard()),
+
                   // Divider between white header zone and rest
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 3. Categories
+                  // 4. Categories
                   const SliverToBoxAdapter(child: SmCategoriesWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 4. Nearby Stores
+                  // 5. Nearby Stores
                   const SliverToBoxAdapter(child: SmNearbyStoresWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 5. Offers
+                  // 6. Offers
                   const SliverToBoxAdapter(child: SmOffersWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 6. Popular
+                  // 7. Popular
                   const SliverToBoxAdapter(child: SmPopularWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 7. Daily Essentials (non-scrollable grid inside SliverToBoxAdapter)
+                  // 8. Daily Essentials (non-scrollable grid inside SliverToBoxAdapter)
                   const SliverToBoxAdapter(child: SmEssentialsWidget()),
 
                   // Bottom padding — room for FloatingCartBar
                   const SliverToBoxAdapter(child: SizedBox(height: 90)),
-                ],
+                  ],
+                ),
               ),
 
             // Floating Cart Bar (shows only when cart has items)
@@ -168,4 +175,43 @@ class _SectionDivider extends StatelessWidget {
         height: 8,
         color: AllineThemeColors.of(context).background,
       );
+}
+
+class _DeliveryPromiseCard extends StatelessWidget {
+  const _DeliveryPromiseCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEAF3FF),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFCFE2FA)),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.verified_rounded, color: Color(0xFF015FC9), size: 22),
+            SizedBox(width: 9),
+            Expanded(
+              child: Text(
+                'تسوق بثقة، وتوصيل سريع إلى موقعك',
+                style: TextStyle(
+                  fontFamily: 'AllineTajawal',
+                  fontSize: 12.5,
+                  color: Color(0xFF071B49),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            Icon(Icons.arrow_back_ios_new_rounded,
+                color: Color(0xFF6D85AF), size: 14),
+          ],
+        ),
+      ),
+    );
+  }
 }
