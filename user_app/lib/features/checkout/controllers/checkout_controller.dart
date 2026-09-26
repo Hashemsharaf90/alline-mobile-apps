@@ -76,6 +76,7 @@ class CheckoutController with ChangeNotifier {
         String? couponCode, String? couponAmount,
         String? billingAddressId, String? orderNote, String? transactionId,
         String? paymentNote, int? id, String? name,bool isfOffline = false, bool wallet = false}) async {
+    inputValueList.clear();
     for(TextEditingController textEditingController in inputFieldControllerList) {
       inputValueList.add(textEditingController.text.trim());
 
