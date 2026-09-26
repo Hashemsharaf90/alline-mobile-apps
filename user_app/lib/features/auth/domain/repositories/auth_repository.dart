@@ -232,6 +232,9 @@ class AuthRepository implements AuthRepoInterface {
     } catch (_) {}
     sharedPreferences?.remove(AppConstants.userLoginToken);
     sharedPreferences?.remove(AppConstants.guestId);
+    sharedPreferences?.remove('alline_delivery_latitude');
+    sharedPreferences?.remove('alline_delivery_longitude');
+    sharedPreferences?.remove('alline_delivery_label');
     return true;
   }
 
