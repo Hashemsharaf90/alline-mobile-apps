@@ -18,6 +18,7 @@ class LocationController with ChangeNotifier {
   double? deliveryLongitude;
   String? deliveryLabel;
   bool _deliveryRestored = false;
+  int _mapUpdateSequence = 0;
 
   Future<void> restoreDeliveryLocation() async {
     if (_deliveryRestored) return;
@@ -111,6 +112,7 @@ class LocationController with ChangeNotifier {
 
   Future<void> getCurrentLocation(BuildContext context, bool fromAddress,
       {GoogleMapController? mapController}) async {
+    _mapUpdateSequence++;
     _loading = true;
     notifyListeners();
     Position myPosition;
@@ -168,6 +170,7 @@ class LocationController with ChangeNotifier {
     String? address,
     BuildContext? context,
   }) async {
+    _mapUpdateSequence++;
     _loading = true;
     notifyListeners();
 
@@ -212,12 +215,14 @@ class LocationController with ChangeNotifier {
   void updateMapPosition(CameraPosition? position, bool fromAddress,
       String? address, BuildContext context) async {
     if (_updateAddAddressData) {
+      if (position == null) return;
+
+      final updateSequence = ++_mapUpdateSequence;
       _loading = true;
-      // notifyListeners();
       try {
         if (fromAddress) {
           _position = Position(
-              latitude: position!.target.latitude,
+              latitude: position.target.latitude,
               longitude: position.target.longitude,
               timestamp: DateTime.now(),
               heading: 1,
@@ -229,7 +234,7 @@ class LocationController with ChangeNotifier {
               headingAccuracy: 1);
         } else {
           _pickPosition = Position(
-              latitude: position!.target.latitude,
+              latitude: position.target.latitude,
               longitude: position.target.longitude,
               timestamp: DateTime.now(),
               heading: 1,
@@ -240,13 +245,18 @@ class LocationController with ChangeNotifier {
               altitudeAccuracy: 1,
               headingAccuracy: 1);
         }
+
         if (_changeAddress) {
-          String? addresss = await getAddressFromGeocode(
+          final resolvedAddress = await getAddressFromGeocode(
               LatLng(position.target.latitude, position.target.longitude),
               context);
+
+          // Ignore stale reverse-geocoding results from an older camera move.
+          if (updateSequence != _mapUpdateSequence) return;
+
           fromAddress
-              ? _address = Placemark(name: addresss)
-              : _pickAddress = Placemark(name: addresss);
+              ? _address = Placemark(name: resolvedAddress)
+              : _pickAddress = Placemark(name: resolvedAddress);
 
           if (address != null) {
             _locationController.text = address;
@@ -261,8 +271,11 @@ class LocationController with ChangeNotifier {
           print(e);
         }
       }
-      _loading = false;
-      notifyListeners();
+
+      if (updateSequence == _mapUpdateSequence) {
+        _loading = false;
+        notifyListeners();
+      }
     } else {
       _updateAddAddressData = true;
     }
