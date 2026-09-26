@@ -106,7 +106,7 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                             Container(
                               width: 68,
                               height: 68,
-                              padding: const EdgeInsets.all(7),
+                              padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isDark
