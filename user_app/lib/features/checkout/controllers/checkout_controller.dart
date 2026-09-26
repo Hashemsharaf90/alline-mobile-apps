@@ -9,6 +9,7 @@ import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/language_constrants.dart';
 import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakbar_widget.dart';
 import 'package:provider/provider.dart';
@@ -46,7 +47,16 @@ class CheckoutController with ChangeNotifier {
   ReferralAmount? get referralAmount => _referralAmount;
 
   String selectedPaymentName = '';
+  String? _orderIdempotencyKey;
+
+  String _ensureOrderIdempotencyKey() {
+    return _orderIdempotencyKey ??= '${DateTime.now().microsecondsSinceEpoch}-${Random().nextInt(1 << 32)}';
+  }
+
   void setSelectedPayment(String payment){
+    if (selectedPaymentName != payment) {
+      _orderIdempotencyKey = null;
+    }
     selectedPaymentName = payment;
     notifyListeners();
   }
@@ -76,9 +86,9 @@ class CheckoutController with ChangeNotifier {
     notifyListeners();
     ApiResponseModel apiResponse;
     isfOffline?
-    apiResponse = await checkoutServiceInterface.offlinePaymentPlaceOrder(addressID, couponCode, couponAmount, billingAddressId, orderNote, keyList, inputValueList, offlineMethodSelectedId, offlineMethodSelectedName, paymentNote, _isCheckCreateAccount, passwordController.text.trim()):
+    apiResponse = await checkoutServiceInterface.offlinePaymentPlaceOrder(addressID, couponCode, couponAmount, billingAddressId, orderNote, keyList, inputValueList, offlineMethodSelectedId, offlineMethodSelectedName, paymentNote, _isCheckCreateAccount, passwordController.text.trim(), _ensureOrderIdempotencyKey()):
     wallet?
-    apiResponse = await checkoutServiceInterface.walletPaymentPlaceOrder(addressID, couponCode, couponAmount, billingAddressId, orderNote, _isCheckCreateAccount, passwordController.text.trim()):
+    apiResponse = await checkoutServiceInterface.walletPaymentPlaceOrder(addressID, couponCode, couponAmount, billingAddressId, orderNote, _isCheckCreateAccount, passwordController.text.trim(), _ensureOrderIdempotencyKey()):
 
     apiResponse = await checkoutServiceInterface.cashOnDeliveryPlaceOrder(
       addressID: addressID,
@@ -90,11 +100,13 @@ class CheckoutController with ChangeNotifier {
       password: passwordController.text.trim(),
       cashChangeAmount: _cashChangesAmount,
       currentCurrencyCode: Provider.of<SplashController>(Get.context!, listen: false).myCurrency?.code,
+      idempotencyKey: _ensureOrderIdempotencyKey(),
     );
 
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _isCheckCreateAccount = false;
       _isLoading = false;
+      _orderIdempotencyKey = null;
       _addressIndex = null;
       _billingAddressIndex = null;
       sameAsBilling = false;
