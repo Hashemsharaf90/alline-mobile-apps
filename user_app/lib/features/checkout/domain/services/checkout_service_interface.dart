@@ -11,6 +11,7 @@ abstract class CheckoutServiceInterface{
     double? cashChangeAmount,
     String? currentCurrencyCode,
   });
+    String? idempotencyKey
 
   Future<dynamic> offlinePaymentPlaceOrder(String? addressID, String? couponCode, String? couponDiscountAmount, String? billingAddressId, String? orderNote, List <String?> typeKey, List<String> typeValue, int? id, String name, String? paymentNote,bool? isCheckCreateAccount, String? password);
 
