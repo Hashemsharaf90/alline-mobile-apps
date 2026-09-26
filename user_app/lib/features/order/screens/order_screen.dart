@@ -32,7 +32,6 @@ class _OrderScreenState extends State<OrderScreen> {
   void initState() {
     if(!isGuestMode){
       Provider.of<OrderController>(context, listen: false).setIndex(0, notify: false);
-      Provider.of<OrderController>(context, listen: false).getOrderList(1,'ongoing');
     }
     super.initState();
   }
