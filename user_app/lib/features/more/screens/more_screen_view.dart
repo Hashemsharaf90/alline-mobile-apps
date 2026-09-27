@@ -16,6 +16,7 @@ import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/app_constants.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/images.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -388,9 +389,27 @@ class _MoreScreenState extends State<MoreScreen> {
                                       ),
                                       _buildDivider(),
                                       _buildMenuItem(
+                                        icon: Provider.of<ThemeController>(context).darkTheme
+                                            ? Icons.dark_mode_rounded
+                                            : Icons.light_mode_rounded,
+                                        iconColor: AllineColors.accent,
+                                        iconBgColor: const Color(0xFFFFF4DF),
+                                        title: 'المظهر',
+                                        subtitle: Provider.of<ThemeController>(context).darkTheme
+                                            ? 'الوضع الليلي مفعّل'
+                                            : 'الوضع النهاري مفعّل',
+                                        trailing: Switch.adaptive(
+                                          value: Provider.of<ThemeController>(context).darkTheme,
+                                          activeColor: AllineColors.primary,
+                                          onChanged: (_) => Provider.of<ThemeController>(context, listen: false).toggleTheme(),
+                                        ),
+                                        onTap: () => Provider.of<ThemeController>(context, listen: false).toggleTheme(),
+                                      ),
+                                      _buildDivider(),
+                                      _buildMenuItem(
                                         icon: Icons.settings_rounded,
                                         title: 'الإعدادات',
-                                        subtitle: 'اللغة والإشعارات والتفضيلات',
+                                        subtitle: 'اللغة والعملة والتفضيلات',
                                         onTap: () {
                                           RouterHelper.getSettingsRoute(
                                             action: RouteAction.push,
@@ -420,6 +439,15 @@ class _MoreScreenState extends State<MoreScreen> {
                                             ),
                                           );
                                         },
+                                      ),
+                                      _buildDivider(),
+                                      _buildMenuItem(
+                                        icon: Icons.contact_page_rounded,
+                                        title: 'تواصل معنا',
+                                        subtitle: 'قنوات التواصل الرسمية مع Alline',
+                                        onTap: () => RouterHelper.getContactUsScreenRoute(
+                                          action: RouteAction.push,
+                                        ),
                                       ),
                                       _buildDivider(),
                                       _buildMenuItem(
