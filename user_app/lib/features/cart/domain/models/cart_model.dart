@@ -96,30 +96,30 @@ class CartModel {
       this.shippingCostTax);
 
   CartModel.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    productId = int.parse(json['product_id'].toString());
+    id = json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '');
+    productId = int.tryParse(json['product_id']?.toString() ?? '') ?? 0;
     name = json['name'];
     seller = json['seller'];
     thumbnail = json['thumbnail'];
-    sellerId = int.parse(json['seller_id'].toString());
+    sellerId = int.tryParse(json['seller_id']?.toString() ?? '') ?? 0;
     sellerIs = json['seller_is'];
     image = json['image'];
-    price = json['price'].toDouble();
-    discountedPrice = json['discounted_price'];
-    quantity = int.parse(json['quantity'].toString());
-    maxQuantity = json['max_quantity'];
+    price = double.tryParse(json['price']?.toString() ?? '') ?? 0.0;
+    discountedPrice = json['discounted_price'] != null ? double.tryParse(json['discounted_price'].toString()) : null;
+    quantity = int.tryParse(json['quantity']?.toString() ?? '') ?? 1;
+    maxQuantity = json['max_quantity'] != null ? int.tryParse(json['max_quantity'].toString()) : null;
     variant = json['variant'];
     color = json['color'];
     variation = json['variation'] != null
-        ? Variation.fromJson(json['variation'])
+        ? Variation.fromJson(json['variation'] is Map ? Map<String, dynamic>.from(json['variation']) : {})
         : null;
-    discount = json['discount'].toDouble();
+    discount = double.tryParse(json['discount']?.toString() ?? '') ?? 0.0;
     discountType = json['discount_type'];
-    tax = json['tax'].toDouble();
+    tax = double.tryParse(json['tax']?.toString() ?? '') ?? 0.0;
     taxModel = json['tax_model'];
     taxType = json['tax_type'];
-    shippingMethodId = json['shipping_method_id'];
-    cartGroupId = json['cart_group_id'];
+    shippingMethodId = json['shipping_method_id'] is int ? json['shipping_method_id'] : int.tryParse(json['shipping_method_id']?.toString() ?? '');
+    cartGroupId = json['cart_group_id']?.toString();
     shopInfo = json['shop_info'];
     if (json['choice_options'] != null) {
       choiceOptions = [];

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_sixvalley_ecommerce/data/model/image_full_url.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/domain/models/seller_model.dart';
@@ -408,9 +409,21 @@ class ProductDetailsModel {
     _productType = json['product_type'];
     if (json['category_ids'] != null) {
       _categoryIds = <CategoryIds>[];
-      json['category_ids'].forEach((v) {
-        _categoryIds!.add(CategoryIds.fromJson(v));
-      });
+      var rawCategoryIds = json['category_ids'];
+      if (rawCategoryIds is String) {
+        try {
+          rawCategoryIds = jsonDecode(rawCategoryIds);
+        } catch (_) {
+          rawCategoryIds = [];
+        }
+      }
+      if (rawCategoryIds is List) {
+        for (var v in rawCategoryIds) {
+          if (v is Map) {
+            _categoryIds!.add(CategoryIds.fromJson(Map<String, dynamic>.from(v)));
+          }
+        }
+      }
     }
     _brandId = json['brand_id'];
     _unit = json['unit'];
@@ -445,29 +458,81 @@ class ProductDetailsModel {
     _videoUrl = json['video_url'];
     if (json['colors_formatted'] != null) {
       _colors = <ColorModel>[];
-      json['colors_formatted'].forEach((v) {
-        _colors!.add(ColorModel.fromJson(v));
-      });
+      var rawColors = json['colors_formatted'];
+      if (rawColors is String) {
+        try {
+          rawColors = jsonDecode(rawColors);
+        } catch (_) {
+          rawColors = [];
+        }
+      }
+      if (rawColors is List) {
+        for (var v in rawColors) {
+          if (v is Map) {
+            _colors!.add(ColorModel.fromJson(Map<String, dynamic>.from(v)));
+          }
+        }
+      }
     }
     _variantProduct = int.tryParse('${json['variant_product'] ?? 0}') ?? 0;
-    _attributes = json['attributes'] is List
-        ? List<int>.from(json['attributes'].map((attribute) => int.tryParse('$attribute') ?? 0))
+    var rawAttributes = json['attributes'];
+    if (rawAttributes is String) {
+      try {
+        rawAttributes = jsonDecode(rawAttributes);
+      } catch (_) {
+        rawAttributes = [];
+      }
+    }
+    _attributes = rawAttributes is List
+        ? List<int>.from(rawAttributes.map((attribute) => int.tryParse('$attribute') ?? 0))
         : [];
     if (json['choice_options'] != null) {
       _choiceOptions = <ChoiceOptions>[];
-      json['choice_options'].forEach((v) {
-        _choiceOptions!.add(ChoiceOptions.fromJson(v));
-      });
+      var rawChoices = json['choice_options'];
+      if (rawChoices is String) {
+        try {
+          rawChoices = jsonDecode(rawChoices);
+        } catch (_) {
+          rawChoices = [];
+        }
+      }
+      if (rawChoices is List) {
+        for (var v in rawChoices) {
+          if (v is Map) {
+            _choiceOptions!.add(ChoiceOptions.fromJson(Map<String, dynamic>.from(v)));
+          }
+        }
+      }
     }
     if (json['variation'] != null) {
       _variation = <Variation>[];
-      json['variation'].forEach((v) {
-        _variation!.add(Variation.fromJson(v));
-      });
+      var rawVariation = json['variation'];
+      if (rawVariation is String) {
+        try {
+          rawVariation = jsonDecode(rawVariation);
+        } catch (_) {
+          rawVariation = [];
+        }
+      }
+      if (rawVariation is List) {
+        for (var v in rawVariation) {
+          if (v is Map) {
+            _variation!.add(Variation.fromJson(Map<String, dynamic>.from(v)));
+          }
+        }
+      }
     }
 
     if(json['digital_product_file_types'] != null) {
-      _digitalProductFileTypes = json['digital_product_file_types'].cast<String>();
+      var rawFiles = json['digital_product_file_types'];
+      if (rawFiles is String) {
+        try {
+          rawFiles = jsonDecode(rawFiles);
+        } catch (_) {
+          rawFiles = [];
+        }
+      }
+      _digitalProductFileTypes = rawFiles is List ? List<String>.from(rawFiles.map((e) => e.toString())) : [];
     }else {
       _digitalProductFileTypes = [];
     }
@@ -479,9 +544,21 @@ class ProductDetailsModel {
     }
     if (json['digital_variation'] != null) {
       _digitalVariation = <DigitalVariation>[];
-      json['digital_variation'].forEach((v) {
-        _digitalVariation!.add(DigitalVariation.fromJson(v));
-      });
+      var rawDigVar = json['digital_variation'];
+      if (rawDigVar is String) {
+        try {
+          rawDigVar = jsonDecode(rawDigVar);
+        } catch (_) {
+          rawDigVar = [];
+        }
+      }
+      if (rawDigVar is List) {
+        for (var v in rawDigVar) {
+          if (v is Map) {
+            _digitalVariation!.add(DigitalVariation.fromJson(Map<String, dynamic>.from(v)));
+          }
+        }
+      }
     } else {
       _digitalVariation = [];
     }
@@ -594,8 +671,8 @@ class CategoryIds {
 
 
   CategoryIds.fromJson(Map<String, dynamic> json) {
-    _id = json['id'];
-    _position = json['position'];
+    _id = json['id']?.toString();
+    _position = int.tryParse('${json['position'] ?? 0}');
   }
 
   Map<String, dynamic> toJson() {

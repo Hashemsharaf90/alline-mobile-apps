@@ -13,8 +13,13 @@ class AppConstants {
   static const int imageQuality = 100;
   static const LocalCachesTypeEnum cachesType = LocalCachesTypeEnum.all;
 
-  static const String baseUrl = 'https://allinye.com';
-  // static const String baseUrl = 'http://192.168.1.100/6valley';
+  /// Production remains the safe default. Test builds can target an isolated
+  /// server with: --dart-define=ALLINE_API_BASE_URL=https://new.allinye.com
+  /// This keeps local/staging orders out of the production customer app.
+  static const String baseUrl = String.fromEnvironment(
+    'ALLINE_API_BASE_URL',
+    defaultValue: 'https://allinye.com',
+  );
 
   // Public Web OAuth client ID. This must never be replaced with an Android,
   // iOS, or client-secret value.

@@ -12,9 +12,9 @@ class OrderModel {
   OrderModel({this.totalSize, this.limit, this.offset, this.orders});
 
   OrderModel.fromJson(Map<String, dynamic> json) {
-    totalSize = json['total_size'];
-    limit = json['limit'];
-    offset = json['offset'];
+    totalSize = int.tryParse(json['total_size']?.toString() ?? '');
+    limit = json['limit']?.toString();
+    offset = json['offset']?.toString();
     if (json['orders'] != null) {
       orders = <Orders>[];
       json['orders'].forEach((v) {
@@ -158,33 +158,33 @@ class Orders {
     transactionRef = json['transaction_ref'];
     paymentBy = json['payment_by'];
     paymentNote = json['payment_note'];
-    orderAmount = json['order_amount'].toDouble();
+    orderAmount = double.tryParse(json['order_amount']?.toString() ?? '') ?? 0.0;
     if (json['paid_amount'] != null) {
-      paidAmount = json['paid_amount'].toDouble();
+      paidAmount = double.tryParse(json['paid_amount']?.toString() ?? '') ?? 0.0;
     }else{
       paidAmount = 0;
     }
-    adminCommission =  double.tryParse(json['admin_commission'].toString());
+    adminCommission = double.tryParse(json['admin_commission']?.toString() ?? '');
     cause = json['cause'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
-    discountAmount = json['discount_amount'].toDouble();
+    discountAmount = double.tryParse(json['discount_amount']?.toString() ?? '') ?? 0.0;
     discountType = json['discount_type'];
     couponCode = json['coupon_code'];
     couponDiscountBearer = json['coupon_discount_bearer'];
-    shippingMethodId = json['shipping_method_id'];
-    shippingCost = json['shipping_cost'].toDouble();
+    shippingMethodId = json['shipping_method_id'] is int ? json['shipping_method_id'] : int.tryParse(json['shipping_method_id']?.toString() ?? '');
+    shippingCost = double.tryParse(json['shipping_cost']?.toString() ?? '') ?? 0.0;
     isShippingFree = json['is_shipping_free']??false;
     orderGroupId = json['order_group_id'];
     verificationCode = json['verification_code'];
     verificationStatus = json['verification_status']??false;
-    sellerId = json['seller_id'];
+    sellerId = json['seller_id'] is int ? json['seller_id'] : int.tryParse(json['seller_id']?.toString() ?? '');
     sellerIs = json['seller_is'];
     final shippingData = json['shipping_address_data'];
     shippingAddressData = shippingData is Map<String, dynamic> ? ShippingAddressData.fromJson(shippingData) : null;
     deliveryManId = json['delivery_man_id'];
     if(json['deliveryman_charge'] != null){
-      deliverymanCharge = double.parse(json['deliveryman_charge'].toString());
+      deliverymanCharge = double.tryParse(json['deliveryman_charge']?.toString() ?? '') ?? 0.0;
     }else{
       deliverymanCharge = 0;
     }
@@ -195,7 +195,7 @@ class Orders {
     billingAddress = json['billing_address'];
     billingAddressData = (json['billing_address_data'] != null  && json['billing_address_data'] is  !List) ? BillingAddressData.fromJson(json['billing_address_data']) : null;
     orderType = json['order_type'];
-    extraDiscount = json['extra_discount'].toDouble();
+    extraDiscount = double.tryParse(json['extra_discount']?.toString() ?? '') ?? 0.0;
     extraDiscountType = json['extra_discount_type'];
     freeDeliveryBearer = json['free_delivery_bearer'];
     shippingType = json['shipping_type'];
@@ -472,10 +472,10 @@ class Details {
 
   Details.fromJson(Map<String, dynamic> json) {
     product = json['product'] != null ? Product.fromJson(json['product']) : null;
-    qty = json['qty'];
-    price = json['price'].toDouble();
-    tax = json['tax'].toDouble();
-    discount = json['discount'].toDouble();
+    qty = json['qty'] is int ? json['qty'] : int.tryParse(json['qty']?.toString() ?? '');
+    price = double.tryParse(json['price']?.toString() ?? '') ?? 0.0;
+    tax = double.tryParse(json['tax']?.toString() ?? '') ?? 0.0;
+    discount = double.tryParse(json['discount']?.toString() ?? '') ?? 0.0;
   }
 
 }
