@@ -257,6 +257,15 @@ class _OrderScreenState extends State<OrderScreen> {
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       child: Column(
         children: [
+          Consumer<OrderController>(
+            builder: (context, orderCtrl, _) => _buildOrdersSummary(
+              context,
+              orderCtrl.orderModel?.orders ?? const <Orders>[],
+              isDark,
+              isLtr,
+            ),
+          ),
+          const SizedBox(height: 10),
           // 1. Search Box
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
@@ -352,6 +361,58 @@ class _OrderScreenState extends State<OrderScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersSummary(
+    BuildContext context,
+    List<Orders> orders,
+    bool isDark,
+    bool isLtr,
+  ) {
+    final activeStatuses = {
+      'pending',
+      'confirmed',
+      'processing',
+      'out_for_delivery',
+    };
+    final activeCount = orders.where((order) => activeStatuses.contains(order.orderStatus?.toLowerCase())).length;
+    final deliveredCount = orders.where((order) => order.orderStatus?.toLowerCase() == 'delivered').length;
+    final labels = isLtr ? ['All', 'Active', 'Delivered'] : ['الكل', 'جارية', 'مكتملة'];
+    final values = [orders.length, activeCount, deliveredCount];
+    final icons = [Icons.receipt_long_rounded, Icons.local_shipping_rounded, Icons.check_circle_rounded];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+      child: Row(
+        children: List.generate(labels.length, (index) {
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.only(left: index == labels.length - 1 ? 0 : 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : const Color(0xFFF4F8FE),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: isDark ? Colors.white12 : const Color(0xFFE1E8F2)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icons[index], size: 16, color: index == 1 ? AllineColors.accent : AllineColors.primary),
+                  const SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${values[index]}', style: titilliumBold.copyWith(fontSize: 16, color: isDark ? Colors.white : const Color(0xFF071B49))),
+                      Text(labels[index], style: titilliumRegular.copyWith(fontSize: 10, color: const Color(0xFF6D85AF))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
