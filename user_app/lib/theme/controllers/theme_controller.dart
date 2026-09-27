@@ -22,9 +22,9 @@ class ThemeController with ChangeNotifier {
         sharedPreferences!.containsKey(AppConstants.theme)) {
       _darkTheme = sharedPreferences!.getBool(AppConstants.theme)!;
     } else {
-      _darkTheme =
-          WidgetsBinding.instance.platformDispatcher.platformBrightness ==
-              Brightness.dark;
+      // New installs start in Alline's light theme. A user's explicit
+      // preference is still restored from SharedPreferences above.
+      _darkTheme = false;
     }
     notifyListeners();
   }

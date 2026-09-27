@@ -9,7 +9,7 @@ class AppConstants {
   static const String appVersion = '5.1'; ///flutter SDK : 3.44.2
   static const String polylineMapKey = 'YOUR_MAP_KEY_HERE';
 
-  static const String baseUrl = 'https://new.allinye.com';
+  static const String baseUrl = 'https://allinye.com';
 
   static const String profileUri = '/api/v2/delivery-man/info';
   static const String configUri = '/api/v1/config';
