@@ -85,7 +85,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     return url?.isNotEmpty == true ? url! : _currentUrl;
   }
 
-  Future<void> _openInstantBuySheet(BuildContext context) async {
+  Future<void> _openProductRequestSheet(BuildContext context) async {
     final isLtr =
         Provider.of<LocalizationController>(context, listen: false).isLtr;
     final url = await _activeUrl();
@@ -94,7 +94,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
     final globalCtrl =
         Provider.of<GlobalShoppingController>(context, listen: false);
 
-    // Trigger instant preview extraction
+    // Ask the backend for a best-effort product metadata preview.
     globalCtrl.previewProduct(url, context);
 
     showModalBottomSheet(
@@ -119,8 +119,8 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                     const SizedBox(height: 16),
                     Text(
                       isLtr
-                          ? 'Extracting product & calculating landed price...'
-                          : 'جاري قراءة المنتج وحساب تكلفة الشحن لليمن...',
+                          ? 'Checking whether product details are available...'
+                          : 'جارٍ التحقق من إمكانية قراءة بيانات المنتج...',
                       textAlign: TextAlign.center,
                       style: textMedium.copyWith(
                           fontSize: Dimensions.fontSizeDefault),
@@ -138,17 +138,57 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.info_outline,
-                        color: Colors.orange, size: 36),
+                        color: Color(0xFF6D85AF), size: 36),
                     const SizedBox(height: 10),
                     Text(
-                      isLtr
-                          ? 'Please open a specific product page'
-                          : 'يرجى فتح صفحة منتج محددة داخل المتجر ثم الضغط على الزر',
+                      ctrl.previewErrorMessage ??
+                          (isLtr
+                              ? 'Could not read product details from this page.'
+                              : 'تعذر الحصول على بيانات المنتج من هذه الصفحة.'),
                       textAlign: TextAlign.center,
                       style: textBold.copyWith(
                           fontSize: Dimensions.fontSizeDefault),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => globalCtrl.previewProduct(url, context),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(isLtr ? 'Try again' : 'حاول مرة أخرى'),
+                    ),
+                    const SizedBox(height: 4),
+                    TextButton.icon(
+                      onPressed: ctrl.isSubmitLoading
+                          ? null
+                          : () async {
+                              await globalCtrl.submitRequest(
+                                productUrl: url,
+                                storeName: widget.storeName,
+                                onSuccess: () {
+                                  if (sheetContext.mounted) {
+                                    Navigator.pop(sheetContext);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const MyGlobalOrdersScreen(),
+                                      ),
+                                    );
+                                  }
+                                },
+                              );
+                            },
+                      icon: ctrl.isSubmitLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.support_agent_outlined),
+                      label: Text(isLtr
+                          ? 'Send link for manual review'
+                          : 'إرسال الرابط للمراجعة اليدوية'),
+                    ),
+                    const SizedBox(height: 4),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor),
@@ -161,7 +201,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
               );
             }
 
-            return _InstantBuyContent(
+            return _GlobalProductRequestContent(
               preview: preview,
               url: url,
               storeName: widget.storeName,
@@ -262,7 +302,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
               ),
             Expanded(child: WebViewWidget(controller: _controller)),
 
-            // Smart Floating 1-Click Purchase Bar
+            // Persistent action for requesting manual review of a product link.
             SafeArea(
               top: false,
               child: Container(
@@ -301,7 +341,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                     ),
                     const SizedBox(width: 8),
 
-                    // Primary Instant Purchase Button
+                    // Product information and final quote depend on store support.
                     Expanded(
                       child: SizedBox(
                         height: 46,
@@ -313,7 +353,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          onPressed: () => _openInstantBuySheet(context),
+                          onPressed: () => _openProductRequestSheet(context),
                           icon: const Icon(Icons.bolt,
                               color: Colors.white, size: 22),
                           label: Text(
@@ -337,13 +377,13 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   }
 }
 
-class _InstantBuyContent extends StatefulWidget {
+class _GlobalProductRequestContent extends StatefulWidget {
   final GlobalProductPreviewModel preview;
   final String url;
   final String storeName;
   final VoidCallback onSuccess;
 
-  const _InstantBuyContent({
+  const _GlobalProductRequestContent({
     required this.preview,
     required this.url,
     required this.storeName,
@@ -351,12 +391,20 @@ class _InstantBuyContent extends StatefulWidget {
   });
 
   @override
-  State<_InstantBuyContent> createState() => _InstantBuyContentState();
+  State<_GlobalProductRequestContent> createState() =>
+      _GlobalProductRequestContentState();
 }
 
-class _InstantBuyContentState extends State<_InstantBuyContent> {
+class _GlobalProductRequestContentState
+    extends State<_GlobalProductRequestContent> {
   int _quantity = 1;
   final TextEditingController _notesController = TextEditingController();
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -365,15 +413,6 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
     final isDark =
         Provider.of<ThemeController>(context, listen: false).darkTheme;
     final globalCtrl = Provider.of<GlobalShoppingController>(context);
-
-    final shippingCost = widget.preview.airShippingCost;
-    final deliveryTime = widget.preview.deliveryTimeAir;
-    final totalUsd = widget.preview.totalEstimatedUsd == null
-        ? null
-        : widget.preview.totalEstimatedUsd! * _quantity;
-    final totalYer = widget.preview.totalEstimatedYer == null
-        ? null
-        : widget.preview.totalEstimatedYer! * _quantity;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -417,14 +456,24 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                         style: textBold.copyWith(fontSize: 13, height: 1.3),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        totalYer != null
-                            ? '${totalYer.toStringAsFixed(0)} ر.ي${totalUsd != null ? ' (≈ \$${totalUsd.toStringAsFixed(2)})' : ''}'
-                            : 'السعر النهائي يحدد عند تأكيد الطلب',
-                        style: textBold.copyWith(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: Dimensions.fontSizeDefault),
-                      ),
+                      if (widget.preview.currentPrice != null &&
+                          widget.preview.originalCurrency != null)
+                        Text(
+                          '${widget.preview.currentPrice!.toStringAsFixed(2)} ${widget.preview.originalCurrency}',
+                          textDirection: TextDirection.ltr,
+                          style: textBold.copyWith(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: Dimensions.fontSizeDefault),
+                        ),
+                      if (widget.preview.convertedCurrentPrice != null &&
+                          widget.preview.convertedCurrency != null)
+                        Text(
+                          '≈ ${widget.preview.convertedCurrentPrice!.toStringAsFixed(0)} ${widget.preview.convertedCurrency}',
+                          textDirection: TextDirection.ltr,
+                          style: textRegular.copyWith(
+                              color: Theme.of(context).hintColor,
+                              fontSize: Dimensions.fontSizeSmall),
+                        ),
                     ],
                   ),
                 ),
@@ -434,12 +483,7 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
             const SizedBox(height: 12),
             const Divider(),
 
-            // Shipping Method
-            Text(
-              isLtr ? 'Shipping to Yemen:' : 'الشحن إلى اليمن:',
-              style: textBold.copyWith(fontSize: Dimensions.fontSizeSmall),
-            ),
-            const SizedBox(height: 6),
+            // Fees and shipping are manually quoted by Alline; don't fabricate them.
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
@@ -451,8 +495,9 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.flight_takeoff,
+                  Icon(Icons.info_outline,
                       color: Theme.of(context).primaryColor, size: 19),
                   const SizedBox(width: 8),
                   Expanded(
@@ -460,30 +505,17 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isLtr ? 'Air Express' : 'شحن جوي سريع',
-                          style: textBold.copyWith(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          deliveryTime == null
-                              ? (isLtr
-                                  ? 'Calculated after request review'
-                                  : 'تحدد المدة بعد مراجعة الطلب')
-                              : (isLtr
-                                  ? 'Estimated arrival: $deliveryTime'
-                                  : 'مدة الوصول المتوقعة: $deliveryTime'),
+                          isLtr
+                              ? 'Displayed price is for the product only. Alline will confirm shipping, customs, service fees, and delivery estimate after review.'
+                              : 'السعر الظاهر للمنتج فقط. يؤكد Alline الشحن والجمارك ورسوم الخدمة ومدة التوصيل بعد المراجعة.',
                           style: textRegular.copyWith(
-                              fontSize: 10.5,
+                              fontSize: 11,
+                              height: 1.4,
                               color: Theme.of(context).hintColor),
                         ),
                       ],
                     ),
                   ),
-                  if (shippingCost != null)
-                    Text('\$${shippingCost.toStringAsFixed(2)}',
-                        style: textBold.copyWith(fontSize: 12)),
                 ],
               ),
             ),
@@ -573,9 +605,6 @@ class _InstantBuyContentState extends State<_InstantBuyContent> {
                           storeName: widget.storeName,
                           quantity: _quantity,
                           customerNotes: _notesController.text.trim(),
-                          estimatedTotalUsd: totalUsd,
-                          estimatedTotalYer: totalYer,
-                          estimatedDeliveryTime: deliveryTime,
                           onSuccess: () {
                             showCustomSnackBarWidget(
                               isLtr

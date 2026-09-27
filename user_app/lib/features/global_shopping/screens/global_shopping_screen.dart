@@ -20,44 +20,22 @@ class GlobalShoppingScreen extends StatefulWidget {
 class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
   final TextEditingController _urlController = TextEditingController();
 
-  final List<Map<String, String>> _stores = [
-    {
-      'name': 'أمازون',
-      'en': 'Amazon',
-      'mark': 'a',
-      'url': 'https://www.amazon.com/'
-    },
-    {
-      'name': 'علي إكسبريس',
-      'en': 'AliExpress',
-      'mark': '⌁',
-      'url': 'https://www.aliexpress.com/'
-    },
-    {
-      'name': 'علي بابا',
-      'en': 'Alibaba',
-      'mark': 'a',
-      'url': 'https://www.alibaba.com/'
-    },
-    {
-      'name': 'شي إن',
-      'en': 'SHEIN',
-      'mark': 'S',
-      'url': 'https://www.shein.com/'
-    },
-    {
-      'name': 'ترينديول',
-      'en': 'Trendyol',
-      'mark': 'T',
-      'url': 'https://www.trendyol.com/'
-    },
-    {
-      'name': 'آي هيرب',
-      'en': 'iHerb',
-      'mark': 'i',
-      'url': 'https://www.iherb.com/'
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<GlobalShoppingController>(context, listen: false)
+            .fetchSupportedStores();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +55,7 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          isLtr ? 'Global Shopping Service' : 'الشراء من المواقع العالمية',
+          isLtr ? 'Global Shopping' : 'التسوق العالمي',
           style: textBold.copyWith(
               color: Colors.white, fontSize: Dimensions.fontSizeLarge),
         ),
@@ -127,8 +105,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                           Expanded(
                             child: Text(
                               isLtr
-                                  ? 'Shop from Any Store Worldwide!'
-                                  : 'اطلب من أي متجر في العالم ونوصله لبيتك!',
+                                  ? 'Shop global stores with Alline'
+                                  : 'تسوق من المتاجر العالمية عبر Alline',
                               style: textBold.copyWith(
                                   color: Colors.white,
                                   fontSize: Dimensions.fontSizeLarge),
@@ -139,8 +117,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                       const SizedBox(height: 8),
                       Text(
                         isLtr
-                            ? 'Paste the link of any product from Amazon, SHEIN, AliExpress, Alibaba, etc. and get instant pricing with air/sea shipping to Yemen.'
-                            : 'انسخ رابط أي منتج تريده من أمازون، شي إن، علي إكسبريس، أو علي بابا، واحصل على تسعير فوري وتوصيل سريع حتى بابك في اليمن.',
+                            ? 'Choose a supported store, paste a product link, and send it to Alline for manual pricing.'
+                            : 'اختر متجراً مدعوماً والصق رابط المنتج لإرساله إلى Alline للمراجعة والتسعير.',
                         style: textRegular.copyWith(
                             color: Colors.white.withValues(alpha: 0.9),
                             fontSize: Dimensions.fontSizeSmall,
@@ -152,88 +130,118 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
 
                 const SizedBox(height: Dimensions.paddingSizeDefault),
 
-                // Supported Stores Chips
                 Text(
                   isLtr
-                      ? 'Supported Global Stores:'
-                      : 'المتاجر العالمية المدعومة:',
+                      ? 'Choose a store'
+                      : 'اختر متجراً',
                   style:
                       textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
                 ),
                 const SizedBox(height: 8),
-                SizedBox(
-                  height: 86,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _stores.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final store = _stores[index];
-                      return Material(
-                        color: isDark
-                            ? Theme.of(context).highlightColor
-                            : Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          side: const BorderSide(color: Color(0xFFE1E8F2)),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => GlobalStoreWebViewScreen(
-                                storeName: store['en']!,
-                                initialUrl: store['url']!,
+                if (globalCtrl.isStoresLoading &&
+                    globalCtrl.supportedStores.isEmpty)
+                  const Center(child: CircularProgressIndicator())
+                else if (globalCtrl.hasStoresError)
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    child: ListTile(
+                      title: Text(isLtr
+                          ? 'Could not load stores'
+                          : 'تعذر تحميل المتاجر'),
+                      trailing: IconButton(
+                        tooltip: isLtr ? 'Retry' : 'إعادة المحاولة',
+                        onPressed: globalCtrl.fetchSupportedStores,
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 128,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: globalCtrl.supportedStores.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 10),
+                      itemBuilder: (context, index) {
+                        final store = globalCtrl.supportedStores[index];
+                        return Material(
+                          color: isDark
+                              ? Theme.of(context).highlightColor
+                              : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: const BorderSide(color: Color(0xFFE1E8F2)),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: store.requestSupported
+                                ? () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            GlobalStoreWebViewScreen(
+                                          storeName: store.name,
+                                          initialUrl: store.url,
+                                        ),
+                                      ),
+                                    )
+                                : null,
+                            child: SizedBox(
+                              width: 142,
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.public_rounded,
+                                      color: store.isComingSoon
+                                          ? const Color(0xFF6D85AF)
+                                          : Theme.of(context).primaryColor,
+                                      size: 24,
+                                    ),
+                                    const SizedBox(height: 7),
+                                    Text(
+                                      isLtr ? store.name : store.nameAr,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textBold.copyWith(
+                                        fontSize: Dimensions.fontSizeSmall,
+                                        color: const Color(0xFF071B49),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      isLtr
+                                          ? (store.requestSupported
+                                              ? 'Manual pricing'
+                                              : 'Coming soon')
+                                          : store.statusLabelAr,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textRegular.copyWith(
+                                        fontSize: 10,
+                                        color: store.requestSupported
+                                            ? Theme.of(context).primaryColor
+                                            : const Color(0xFF6D85AF),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                          child: SizedBox(
-                            width: 94,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF4F8FE),
-                                    borderRadius: BorderRadius.circular(9),
-                                  ),
-                                  child: Text(store['mark']!,
-                                      textDirection: TextDirection.ltr,
-                                      style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w900,
-                                          color: Color(0xFF071B49))),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(isLtr ? store['en']! : store['name']!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textBold.copyWith(
-                                        fontSize:
-                                            Dimensions.fontSizeExtraSmall)),
-                                Text(isLtr ? 'Browse' : 'تسوق عالمي',
-                                    style: textRegular.copyWith(
-                                        fontSize: 9,
-                                        color: const Color(0xFF6D85AF))),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
 
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
                 // Smart URL Input Box
                 Text(
-                  isLtr
-                      ? 'Paste Product Link:'
-                      : 'ألصق رابط المنتج المراد شراؤه:',
+                  isLtr ? 'Product link' : 'رابط المنتج',
                   style:
                       textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
                 ),
@@ -309,8 +317,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                                       const SizedBox(width: 6),
                                       Text(
                                         isLtr
-                                            ? 'Inspect & Price Instantly ⚡'
-                                            : 'فحص وتسعير المنتج فوراً ⚡',
+                                            ? 'Preview product details'
+                                            : 'معاينة بيانات المنتج',
                                         style: textBold.copyWith(
                                             color: Colors.white,
                                             fontSize:
@@ -340,6 +348,43 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                   ),
                 ],
 
+                if (globalCtrl.previewErrorMessage != null &&
+                    _urlController.text.trim().isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: globalCtrl.isSubmitLoading
+                          ? null
+                          : () async {
+                              await globalCtrl.submitRequest(
+                                productUrl: _urlController.text.trim(),
+                                onSuccess: () {
+                                  if (context.mounted) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            const MyGlobalOrdersScreen(),
+                                      ),
+                                    );
+                                  }
+                                },
+                              );
+                            },
+                      icon: globalCtrl.isSubmitLoading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.support_agent_outlined),
+                      label: Text(isLtr
+                          ? 'Send link for manual review'
+                          : 'إرسال الرابط للمراجعة اليدوية'),
+                    ),
+                  ),
+                ],
+
                 const SizedBox(height: Dimensions.paddingSizeLarge),
 
                 // How it works steps
@@ -361,8 +406,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                     children: [
                       Text(
                         isLtr
-                            ? 'How to order from global sites?'
-                            : 'كيف تطلب من المواقع العالمية؟',
+                            ? 'How global orders work'
+                            : 'كيف تتم الطلبات العالمية؟',
                         style: textBold.copyWith(
                             fontSize: Dimensions.fontSizeDefault),
                       ),
@@ -375,13 +420,13 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                       _stepRow(
                           '2',
                           isLtr
-                              ? 'Paste here and get instant price estimate'
-                              : 'الصق الرابط هنا لمعاينة السعر والشحن لليمن'),
+                              ? 'If available, Alline will show the product name and source price.'
+                              : 'إذا كانت بيانات المنتج متاحة، ستظهر معاينة للاسم والسعر الأصلي.'),
                       _stepRow(
                           '3',
                           isLtr
-                              ? 'Confirm order & receive at your door!'
-                              : 'أكد الطلب واستلم شحنتك عند باب بيتك!'),
+                              ? 'Send a pricing request. The final price and fees are confirmed before adding the product to your Alline cart.'
+                              : 'أرسل طلب التسعير. نؤكد السعر والرسوم قبل إضافة المنتج إلى سلة Alline.'),
                     ],
                   ),
                 ),

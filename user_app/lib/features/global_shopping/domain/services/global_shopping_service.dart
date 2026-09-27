@@ -1,6 +1,7 @@
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/dio/dio_client.dart';
 import 'package:flutter_sixvalley_ecommerce/data/datasource/remote/exception/api_error_handler.dart';
 import 'package:flutter_sixvalley_ecommerce/data/model/api_response.dart';
+import 'package:dio/dio.dart';
 
 class GlobalShoppingService {
   final DioClient dioClient;
@@ -25,6 +26,13 @@ class GlobalShoppingService {
       );
       return ApiResponseModel.withSuccess(response);
     } catch (e) {
+      if (e is DioException && e.response?.data is Map) {
+        final data = e.response!.data as Map;
+        return ApiResponseModel.withError({
+          'code': data['code']?.toString(),
+          'message': data['message']?.toString(),
+        });
+      }
       return ApiResponseModel.withError(ApiErrorHandler.getMessage(e));
     }
   }
@@ -34,10 +42,6 @@ class GlobalShoppingService {
     String? storeName,
     int quantity = 1,
     String? customerNotes,
-    String? shippingType,
-    double? estimatedTotalUsd,
-    double? estimatedTotalYer,
-    String? estimatedDeliveryTime,
   }) async {
     try {
       final response = await dioClient.post(
@@ -47,10 +51,6 @@ class GlobalShoppingService {
           'store_name': storeName,
           'quantity': quantity,
           'customer_notes': customerNotes,
-          'shipping_type': shippingType ?? 'air',
-          'estimated_total_usd': estimatedTotalUsd,
-          'estimated_total_yer': estimatedTotalYer,
-          'estimated_delivery_time': estimatedDeliveryTime,
         },
       );
       return ApiResponseModel.withSuccess(response);
