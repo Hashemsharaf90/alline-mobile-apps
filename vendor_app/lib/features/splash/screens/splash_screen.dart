@@ -21,7 +21,7 @@ import 'package:sixvalley_vendor_app/utill/app_constants.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
-import 'package:sixvalley_vendor_app/features/auth/screens/auth_screen.dart';
+import 'package:sixvalley_vendor_app/features/auth/screens/vendor_welcome_screen.dart';
 import 'package:sixvalley_vendor_app/features/dashboard/screens/dashboard_screen.dart';
 import 'package:sixvalley_vendor_app/features/splash/widgets/splash_painter_widget.dart';
 
@@ -116,7 +116,7 @@ class SplashScreenState extends State<SplashScreen> {
                 await Provider.of<AuthController>(context, listen: false).updateToken(context);
                 Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => const DashboardScreen()));
               } else {
-                Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => const AuthScreen()));
+                Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => const VendorWelcomeScreen()));
               }
             }
           }
