@@ -23,6 +23,8 @@ class OrderController with ChangeNotifier {
 
   OrderModel? orderModel;
   OrderModel? deliveredOrderModel;
+  OrderCounts? orderCounts;
+
   Future<void> getOrderList(int offset, String status, {String? type, bool refresh = false}) async {
 
     var localData =  await database.getCacheResponseById(AppConstants.orderUri);
@@ -35,9 +37,11 @@ class OrderController with ChangeNotifier {
     }
 
     if(offset == 1) {
-      orderModel = null;
-      if(refresh) {
-        notifyListeners();
+      if (refresh || orderModel == null) {
+        orderModel = null;
+        if(refresh) {
+          notifyListeners();
+        }
       }
     }
 
@@ -45,6 +49,9 @@ class OrderController with ChangeNotifier {
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       if(offset == 1){
         orderModel = OrderModel.fromJson(apiResponse.response?.data);
+        if (orderModel?.counts != null) {
+          orderCounts = orderModel!.counts;
+        }
         if(type == 'reorder'){
           deliveredOrderModel = OrderModel.fromJson(apiResponse.response?.data);
 
@@ -68,6 +75,9 @@ class OrderController with ChangeNotifier {
         orderModel!.orders!.addAll(OrderModel.fromJson(apiResponse.response?.data).orders!);
         orderModel!.offset = OrderModel.fromJson(apiResponse.response?.data).offset;
         orderModel!.totalSize = OrderModel.fromJson(apiResponse.response?.data).totalSize;
+        if (OrderModel.fromJson(apiResponse.response?.data).counts != null) {
+          orderCounts = OrderModel.fromJson(apiResponse.response?.data).counts;
+        }
       }
     }else{
       ApiChecker.checkApi(apiResponse);
@@ -91,15 +101,12 @@ class OrderController with ChangeNotifier {
       selectedType = 'ongoing';
       getOrderList(1, 'ongoing');
     }else if(_orderTypeIndex == 2){
-      selectedType = 'unpaid';
-      getOrderList(1, 'unpaid');
-    }else if(_orderTypeIndex == 3){
       selectedType = 'delivered';
       getOrderList(1, 'delivered');
-    }else if(_orderTypeIndex == 4){
+    }else if(_orderTypeIndex == 3){
       selectedType = 'canceled';
       getOrderList(1, 'canceled');
-    }else if(_orderTypeIndex == 5){
+    }else if(_orderTypeIndex == 4){
       selectedType = 'global';
     }
     if(notify) {
