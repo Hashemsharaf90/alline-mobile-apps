@@ -135,9 +135,12 @@ class CartController extends ChangeNotifier {
           (apiResponse.response!.statusCode == 200 ||
               apiResponse.response!.statusCode == 201)) {
         if (showSnackbar && apiResponse.response!.data['message'] != null) {
+          final isError = apiResponse.response!.data is Map &&
+              (apiResponse.response!.data['status'] == 0 ||
+                  apiResponse.response!.data['status'] == '0');
           showCustomSnackBarWidget(
               apiResponse.response!.data['message'], Get.context!,
-              snackBarType: SnackBarType.success);
+              snackBarType: isError ? SnackBarType.error : SnackBarType.success);
         }
         getCartData(Get.context!, reload: false);
       } else {
@@ -176,11 +179,20 @@ class CartController extends ChangeNotifier {
       if (apiResponse.response != null &&
           (apiResponse.response!.statusCode == 200 ||
               apiResponse.response!.statusCode == 201)) {
-        Navigator.of(Get.context!).pop();
-        showCustomSnackBarWidget(
-            apiResponse.response!.data['message'], Get.context!,
-            snackBarType: SnackBarType.success);
-        getCartData(Get.context!);
+        if (apiResponse.response!.data is Map &&
+            (apiResponse.response!.data['status'] == 0 ||
+                apiResponse.response!.data['status'] == '0')) {
+          showCustomSnackBarWidget(
+              apiResponse.response!.data['message'] ?? 'فشلت إضافة المنتج إلى السلة',
+              Get.context!,
+              snackBarType: SnackBarType.error);
+        } else {
+          Navigator.of(Get.context!).pop();
+          showCustomSnackBarWidget(
+              apiResponse.response!.data['message'], Get.context!,
+              snackBarType: SnackBarType.success);
+          getCartData(Get.context!);
+        }
       } else {
         ApiChecker.checkApi(apiResponse);
       }

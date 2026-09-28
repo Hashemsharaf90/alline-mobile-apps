@@ -133,7 +133,6 @@ class CartScreenState extends State<CartScreen> {
           List<CartModel> cartList = [];
           cartList.addAll(cart.cartList);
           bool isItemChecked = false;
-          int totalItemCheckedCount = 0;
 
           for (CartModel cart in cartList) {
             if (cart.productType == "physical" && cart.isChecked!) {
@@ -156,9 +155,6 @@ class CartScreenState extends State<CartScreen> {
               sellerList.add(cart.cartGroupId);
               cart.isGroupChecked = false;
               sellerGroupList.add(cart);
-            }
-            if (cart.isChecked ?? false) {
-              totalItemCheckedCount += 1;
             }
           }
 
@@ -334,99 +330,8 @@ class CartScreenState extends State<CartScreen> {
                             ? Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        bottom: Dimensions.paddingSizeSmall),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(children: [
-                                            Text(
-                                                '${getTranslated('total_price', context)}  ',
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyMedium
-                                                    ?.copyWith(
-                                                        color: colors
-                                                            .textSecondary,
-                                                        fontWeight:
-                                                            FontWeight.w600)),
-                                            if (Provider.of<SplashController>(
-                                                        Get.context!,
-                                                        listen: false)
-                                                    .configModel
-                                                    ?.systemTaxIncludeStatus ==
-                                                1)
-                                              Text(
-                                                  '${getTranslated('inc_vat_tax', context)}',
-                                                  style: titilliumSemiBold
-                                                      .copyWith(
-                                                          fontSize: Dimensions
-                                                              .fontSizeSmall,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .hintColor)),
-                                          ]),
-                                          Text(
-                                              PriceConverter.convertPrice(
-                                                  context,
-                                                  amount +
-                                                      tax +
-                                                      shippingAmount -
-                                                      freeDeliveryAmountDiscount),
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleLarge
-                                                  ?.copyWith(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .primary,
-                                                  )),
-                                        ]),
-                                  ),
                                   Row(
                                     children: [
-                                      Stack(children: [
-                                        Padding(
-                                          padding: EdgeInsetsGeometry.only(
-                                              right:
-                                                  Dimensions.paddingSizeSmall,
-                                              top: Dimensions.paddingSizeSmall,
-                                              bottom:
-                                                  Dimensions.paddingSizeSmall),
-                                          child: CustomAssetImageWidget(
-                                            Images.cartBox,
-                                            height: 35,
-                                            width: 35,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 2,
-                                          right: 5,
-                                          child: Container(
-                                            padding: EdgeInsetsGeometry.all(5),
-                                            decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  width: 2,
-                                                  color: Theme.of(context)
-                                                      .cardColor),
-                                              shape: BoxShape.circle,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .error,
-                                            ),
-                                            child: Text(
-                                                totalItemCheckedCount
-                                                    .toString(),
-                                                style: titleRegular.copyWith(
-                                                    color: Theme.of(context)
-                                                        .cardColor,
-                                                    fontSize: Dimensions
-                                                        .fontSizeSmall)),
-                                          ),
-                                        ),
-                                      ]),
                                       Expanded(
                                         child: InkWell(
                                           onTap: () async {
@@ -705,41 +610,102 @@ class CartScreenState extends State<CartScreen> {
                                             }
                                           },
                                           child: Container(
+                                            height: 56,
                                             decoration: BoxDecoration(
                                                 color: Theme.of(context)
                                                     .primaryColor,
                                                 borderRadius:
-                                                    BorderRadius.circular(16)),
+                                                    BorderRadius.circular(18),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Theme.of(context)
+                                                        .primaryColor
+                                                        .withValues(alpha: .16),
+                                                    blurRadius: 14,
+                                                    offset:
+                                                        const Offset(0, 5),
+                                                  ),
+                                                ]),
                                             child: Center(
-                                              child: Padding(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: Dimensions
-                                                        .paddingSizeSmall,
-                                                    vertical: Dimensions
-                                                        .fontSizeSmall),
-                                                child: _checkoutInProgress
-                                                    ? const SizedBox(
-                                                        width: 22,
-                                                        height: 22,
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          strokeWidth: 2.3,
-                                                          color: Colors.white,
-                                                        ),
-                                                      )
-                                                    : const Text(
-                                                        'متابعة إلى الدفع',
-                                                        style: TextStyle(
+                                              child: _checkoutInProgress
+                                                  ? const SizedBox(
+                                                      width: 22,
+                                                      height: 22,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 2.3,
+                                                        color: Colors.white,
+                                                      ),
+                                                    )
+                                                  : const Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                            Icons
+                                                                .shopping_cart_checkout_rounded,
+                                                            color: Colors.white,
+                                                            size: 21),
+                                                        SizedBox(width: 9),
+                                                        Text(
+                                                          'متابعة إلى الدفع',
+                                                          style: TextStyle(
                                                             fontFamily:
                                                                 'AllineTajawal',
                                                             fontSize: 16,
                                                             fontWeight:
                                                                 FontWeight.w700,
-                                                            color:
-                                                                Colors.white)),
-                                              ),
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
                                             ),
                                           ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      SizedBox(
+                                        width: 112,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              'الإجمالي الكلي',
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall
+                                                  ?.copyWith(
+                                                    color:
+                                                        colors.textSecondary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              PriceConverter.convertPrice(
+                                                context,
+                                                amount +
+                                                    tax +
+                                                    shippingAmount -
+                                                    freeDeliveryAmountDiscount,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.end,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall
+                                                  ?.copyWith(
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
@@ -750,6 +716,11 @@ class CartScreenState extends State<CartScreen> {
                   })
                 : null,
             appBar: AppBar(
+              backgroundColor: colors.surface,
+              foregroundColor: colors.textPrimary,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              centerTitle: true,
               leading: widget.showBackButton
                   ? IconButton(
                       tooltip: 'رجوع',
@@ -758,7 +729,13 @@ class CartScreenState extends State<CartScreen> {
                     )
                   : null,
               title: Column(mainAxisSize: MainAxisSize.min, children: [
-                Text('السلة', style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'السلة',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
                 if (cartList.isNotEmpty)
                   Text('${cartList.length} منتجات',
                       style: Theme.of(context)
@@ -783,11 +760,6 @@ class CartScreenState extends State<CartScreen> {
                                 },
                                 child: ListView(
                                   children: [
-                                    _CartSummaryIntro(
-                                      itemCount: cartList.length,
-                                      storeCount: sellerList.length,
-                                      selectedCount: totalItemCheckedCount,
-                                    ),
                                     const _CartDeliveryAddressCard(),
                                     ListView.separated(
                                       shrinkWrap: true,
@@ -1635,51 +1607,6 @@ class CartScreenState extends State<CartScreen> {
   }
 }
 
-class _CartSummaryIntro extends StatelessWidget {
-  final int itemCount;
-  final int storeCount;
-  final int selectedCount;
-
-  const _CartSummaryIntro({
-    required this.itemCount,
-    required this.storeCount,
-    required this.selectedCount,
-  });
-
-  @override
-  Widget build(BuildContext context) => AllineCard(
-        margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-        child: Row(children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withValues(alpha: .08),
-                borderRadius: BorderRadius.circular(13)),
-            child: Icon(Icons.shopping_cart_outlined,
-                color: Theme.of(context).colorScheme.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('لديك $itemCount منتجات في السلة',
-                    style: Theme.of(context).textTheme.titleSmall),
-                const SizedBox(height: 3),
-                Text(
-                    '$selectedCount محدد${storeCount > 1 ? ' • سيتم تقسيم الطلب حسب $storeCount متاجر' : ''}',
-                    style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ),
-          ),
-        ]),
-      );
-}
-
 class _CartDeliveryAddressCard extends StatelessWidget {
   const _CartDeliveryAddressCard();
 
@@ -1688,41 +1615,67 @@ class _CartDeliveryAddressCard extends StatelessWidget {
         builder: (context, location, _) {
           final colors = AllineThemeColors.of(context);
           final label = location.deliveryLabel?.trim();
-          return AllineCard(
-            margin: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            padding: const EdgeInsets.all(16),
+          final hasAddress = label?.isNotEmpty == true;
+          return Container(
+            margin: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 8, 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: Theme.of(context).brightness ==
+                          Brightness.dark
+                      ? .12
+                      : .045),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colors.border.withValues(alpha: .7)),
+            ),
             child: Row(children: [
               Icon(Icons.location_on_outlined,
-                  color: Theme.of(context).colorScheme.primary, size: 24),
-              const SizedBox(width: 10),
+                  color: Theme.of(context).colorScheme.primary, size: 23),
+              const SizedBox(width: 9),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('عنوان التوصيل',
-                        style: Theme.of(context).textTheme.labelMedium),
-                    const SizedBox(height: 3),
-                    Text(
-                        label?.isNotEmpty == true
-                            ? label!
-                            : 'لم يتم تحديد عنوان التوصيل بعد',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(color: colors.textSecondary)),
-                  ],
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'التوصيل إلى: ',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                      ),
+                      TextSpan(
+                        text: hasAddress ? label! : 'حدد عنوانك',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: colors.textPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               TextButton(
                 onPressed: () => RouterHelper.getLocationSetupRoute(
                     action: RouteAction.push),
                 style: TextButton.styleFrom(
-                    minimumSize: const Size(44, 44),
-                    foregroundColor: Theme.of(context).colorScheme.primary),
-                child: Text(label?.isNotEmpty == true ? 'تغيير' : 'تحديد',
-                    style: Theme.of(context).textTheme.labelMedium),
+                  minimumSize: const Size(44, 44),
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(hasAddress ? 'تغيير' : 'تحديد',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            )),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.chevron_left_rounded, size: 20),
+                  ],
+                ),
               ),
             ]),
           );
