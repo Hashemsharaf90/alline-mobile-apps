@@ -45,24 +45,44 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                         color: colors.textPrimary,
                       ),
                     ),
-                    InkWell(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CategoryScreen(),
+                    Semantics(
+                      button: true,
+                      label: isLtr ? 'View all categories' : 'عرض جميع التصنيفات',
+                      child: InkWell(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CategoryScreen(),
+                          ),
                         ),
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        child: Text(
-                          isLtr ? 'View all' : 'عرض الكل',
-                          style: textBold.copyWith(
-                            fontSize: 13,
-                            color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(20),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  isLtr ? 'View all' : 'عرض الكل',
+                                  style: textBold.copyWith(
+                                    fontSize: 13,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(
+                                  isLtr
+                                      ? Icons.arrow_forward_ios_rounded
+                                      : Icons.arrow_back_ios_new_rounded,
+                                  size: 13,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
