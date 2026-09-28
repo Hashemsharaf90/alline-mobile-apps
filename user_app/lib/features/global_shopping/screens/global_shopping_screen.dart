@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/models/global_shopping_store_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/global_store_webview_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_product_preview_card.dart';
@@ -175,7 +177,7 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: InkWell(
-                            onTap: store.requestSupported
+                            onTap: store.requestSupported && store.url.isNotEmpty
                                 ? () => Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (_) =>
@@ -194,23 +196,23 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
-                                      Icons.public_rounded,
-                                      color: store.isComingSoon
-                                          ? const Color(0xFF6D85AF)
-                                          : Theme.of(context).primaryColor,
-                                      size: 24,
+                                    SizedBox(
+                                      width: 46,
+                                      height: 38,
+                                      child: _storeLogo(store, isLtr),
                                     ),
-                                    const SizedBox(height: 7),
-                                    Text(
-                                      isLtr ? store.name : store.nameAr,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: textBold.copyWith(
-                                        fontSize: Dimensions.fontSizeSmall,
-                                        color: const Color(0xFF071B49),
+                                    const SizedBox(height: 5),
+                                    if (store.logoUrl != null &&
+                                        store.logoUrl!.isNotEmpty)
+                                      Text(
+                                        isLtr ? store.name : store.nameAr,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: textBold.copyWith(
+                                          fontSize: Dimensions.fontSizeSmall,
+                                          color: const Color(0xFF071B49),
+                                        ),
                                       ),
-                                    ),
                                     const SizedBox(height: 5),
                                     Text(
                                       isLtr
@@ -460,6 +462,49 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                   style: textRegular.copyWith(
                       fontSize: Dimensions.fontSizeSmall))),
         ],
+      ),
+    );
+  }
+
+  Widget _storeLogo(GlobalShoppingStoreModel store, bool isLtr) {
+    final logoUrl = store.logoUrl;
+    final uri = logoUrl == null ? null : Uri.tryParse(logoUrl);
+    if (uri != null && uri.scheme == 'https') {
+      if (uri.path.toLowerCase().endsWith('.svg')) {
+        return SvgPicture.network(
+          logoUrl!,
+          fit: BoxFit.contain,
+          placeholderBuilder: (_) => _storeWordmark(store, isLtr),
+          errorBuilder: (_, __, ___) => _storeWordmark(store, isLtr),
+        );
+      }
+      return Image.network(
+        logoUrl!,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, progress) => progress == null
+            ? child
+            : _storeWordmark(store, isLtr),
+        errorBuilder: (_, __, ___) => _storeWordmark(store, isLtr),
+      );
+    }
+    return _storeWordmark(store, isLtr);
+  }
+
+  Widget _storeWordmark(GlobalShoppingStoreModel store, bool isLtr) {
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          isLtr ? store.name : store.nameAr,
+          maxLines: 1,
+          style: textBold.copyWith(
+            color: store.isComingSoon
+                ? const Color(0xFF6D85AF)
+                : const Color(0xFF071B49),
+            fontSize: 17,
+            letterSpacing: isLtr ? -0.3 : 0,
+          ),
+        ),
       ),
     );
   }

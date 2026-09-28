@@ -331,6 +331,6 @@ class _OrderSetupBottomSheetState extends State<OrderSetupBottomSheet> {
     //     : true : false;
   }
 
-  bool _deliverySetUpExist() => isSellerWiseShipping && !widget.onlyDigital && widget.orderModel?.orderType != 'POS';
+  bool _deliverySetUpExist() => !widget.onlyDigital && widget.orderModel?.orderType != 'POS';
 
 }

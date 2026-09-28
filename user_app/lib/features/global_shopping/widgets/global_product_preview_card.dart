@@ -288,7 +288,6 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                       ],
                     ),
                   ),
-                ),
 
                 const SizedBox(height: 16),
 

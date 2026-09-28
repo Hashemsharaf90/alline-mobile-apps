@@ -126,23 +126,27 @@ class _OrderScreenState extends State<OrderScreen> {
                             return _buildEmptyStateForFilters(context, orderCtrl, isLtr);
                           }
 
-                          return PaginatedListView(
-                            scrollController: _scrollController,
-                            onPaginate: (int? offset) async {
-                              await orderCtrl.getOrderList(offset!, orderCtrl.selectedType);
-                            },
-                            totalSize: orderCtrl.orderModel?.totalSize,
-                            offset: orderCtrl.orderModel?.offset != null
-                                ? int.parse(orderCtrl.orderModel!.offset!)
-                                : 1,
-                            itemView: ListView.builder(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.only(top: 6, bottom: 24),
-                              itemCount: filteredOrders.length,
-                              itemBuilder: (context, index) {
-                                return OrderWidget(orderModel: filteredOrders[index]);
+                          return SingleChildScrollView(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: PaginatedListView(
+                              scrollController: _scrollController,
+                              onPaginate: (int? offset) async {
+                                await orderCtrl.getOrderList(offset!, orderCtrl.selectedType);
                               },
+                              totalSize: orderCtrl.orderModel?.totalSize,
+                              offset: orderCtrl.orderModel?.offset != null
+                                  ? int.parse(orderCtrl.orderModel!.offset!)
+                                  : 1,
+                              itemView: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: const EdgeInsets.only(top: 6, bottom: 24),
+                                itemCount: filteredOrders.length,
+                                itemBuilder: (context, index) {
+                                  return OrderWidget(orderModel: filteredOrders[index]);
+                                },
+                              ),
                             ),
                           );
                         },

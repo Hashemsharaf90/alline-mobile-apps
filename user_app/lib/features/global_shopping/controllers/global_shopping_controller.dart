@@ -60,6 +60,9 @@ class GlobalShoppingController extends ChangeNotifier {
             .map((store) => GlobalShoppingStoreModel.fromJson(
                 Map<String, dynamic>.from(store)))
             .toList();
+        _hasStoresError = _supportedStores.isEmpty;
+      } else {
+        _hasStoresError = true;
       }
     } else {
       _hasStoresError = true;

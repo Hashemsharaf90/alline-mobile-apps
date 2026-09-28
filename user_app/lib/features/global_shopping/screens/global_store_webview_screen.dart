@@ -35,6 +35,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   late final WebViewController _controller;
   int _progress = 0;
   String _currentUrl = '';
+  String? _mainFrameLoadError;
 
   bool get _isLoaded => _progress >= 100;
 
@@ -54,12 +55,20 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
             setState(() {
               _currentUrl = url;
               _progress = 0;
+              _mainFrameLoadError = null;
             });
           },
           onPageFinished: (url) {
             if (!mounted) return;
             setState(() {
               _currentUrl = url;
+              _progress = 100;
+            });
+          },
+          onWebResourceError: (error) {
+            if (!mounted || error.isForMainFrame == false) return;
+            setState(() {
+              _mainFrameLoadError = error.description;
               _progress = 100;
             });
           },
@@ -83,6 +92,22 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
   Future<String> _activeUrl() async {
     final url = await _controller.currentUrl();
     return url?.isNotEmpty == true ? url! : _currentUrl;
+  }
+
+  Future<void> _openInExternalBrowser() async {
+    final uri = Uri.tryParse(await _activeUrl());
+    if (uri == null || !['http', 'https'].contains(uri.scheme)) return;
+
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && mounted) {
+      final isLtr =
+          Provider.of<LocalizationController>(context, listen: false).isLtr;
+      showCustomSnackBarWidget(
+        isLtr ? 'Could not open the store in your browser.' : 'تعذر فتح المتجر في المتصفح الخارجي.',
+        context,
+        snackBarType: SnackBarType.warning,
+      );
+    }
   }
 
   Future<void> _openProductRequestSheet(BuildContext context) async {
@@ -257,6 +282,11 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
               onPressed: () => _controller.reload(),
               icon: const Icon(Icons.refresh_rounded, color: Colors.white),
             ),
+            IconButton(
+              tooltip: isLtr ? 'Open in browser' : 'فتح في المتصفح',
+              onPressed: _openInExternalBrowser,
+              icon: const Icon(Icons.open_in_browser, color: Colors.white),
+            ),
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: Colors.white),
               onSelected: (action) async {
@@ -273,8 +303,7 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                 } else if (action == 'share') {
                   await SharePlus.instance.share(ShareParams(text: url));
                 } else if (action == 'browser') {
-                  await launchUrl(Uri.parse(url),
-                      mode: LaunchMode.externalApplication);
+                  await _openInExternalBrowser();
                 }
               },
               itemBuilder: (context) => [
@@ -300,7 +329,71 @@ class _GlobalStoreWebViewScreenState extends State<GlobalStoreWebViewScreen> {
                 minHeight: 2.5,
                 color: Theme.of(context).primaryColor,
               ),
-            Expanded(child: WebViewWidget(controller: _controller)),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned.fill(child: WebViewWidget(controller: _controller)),
+                  if (_mainFrameLoadError != null)
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.language_rounded,
+                                    size: 44,
+                                    color: Theme.of(context).primaryColor),
+                                const SizedBox(height: 12),
+                                Text(
+                                  isLtr
+                                      ? 'This store could not be displayed inside Alline.'
+                                      : 'تعذر عرض المتجر داخل Alline.',
+                                  textAlign: TextAlign.center,
+                                  style: textBold.copyWith(
+                                      fontSize: Dimensions.fontSizeDefault),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  isLtr
+                                      ? 'Some stores restrict in-app browsing. Open the same page in your browser, then return and paste its product link.'
+                                      : 'بعض المتاجر تمنع التصفح داخل التطبيقات. افتح الصفحة في المتصفح، ثم عد إلى Alline والصق رابط المنتج.',
+                                  textAlign: TextAlign.center,
+                                  style: textRegular.copyWith(
+                                    fontSize: Dimensions.fontSizeSmall,
+                                    color: Theme.of(context).hintColor,
+                                    height: 1.4,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _openInExternalBrowser,
+                                    icon: const Icon(Icons.open_in_browser),
+                                    label: Text(isLtr
+                                        ? 'Open in browser'
+                                        : 'فتح في المتصفح'),
+                                  ),
+                                ),
+                                TextButton.icon(
+                                  onPressed: () => _controller.reload(),
+                                  icon: const Icon(Icons.refresh),
+                                  label: Text(isLtr
+                                      ? 'Try again in Alline'
+                                      : 'إعادة المحاولة داخل Alline'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
 
             // Persistent action for requesting manual review of a product link.
             SafeArea(

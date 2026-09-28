@@ -5,6 +5,8 @@ class Images {
   static const String onBoardingTwo = 'assets/images/onboarding_image_two.png';
   static const String onBoardingThree = 'assets/images/onboarding_image_three.png';
   static const String logo = 'assets/images/logo.png';
+  static const String allineLogoClean = 'assets/images/alline_logo_clean.png';
+  static const String welcomeHero = 'assets/images/welcome_hero.png';
   static const String whiteLogo = 'assets/images/logo_white.png';
   static const String logoWithAppName = 'assets/images/logo_with_app_name.png';
   static const String home = 'assets/images/home.png';
