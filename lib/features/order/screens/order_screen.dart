@@ -92,7 +92,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 color: AllineColors.primary,
                 onRefresh: () async {
                   final orderCtrl = Provider.of<OrderController>(context, listen: false);
-                  if (orderCtrl.orderTypeIndex == 5) {
+                  if (orderCtrl.orderTypeIndex == 4) {
                     await Provider.of<GlobalShoppingController>(context, listen: false).getMyRequests();
                   } else {
                     await orderCtrl.getOrderList(1, orderCtrl.selectedType, refresh: true);
@@ -107,12 +107,12 @@ class _OrderScreenState extends State<OrderScreen> {
                     Expanded(
                       child: Consumer2<OrderController, GlobalShoppingController>(
                         builder: (context, orderCtrl, globalCtrl, child) {
-                          // Tab 5: Global Shopping Requests
-                          if (orderCtrl.orderTypeIndex == 5) {
+                          // Tab 4: Global Shopping Requests
+                          if (orderCtrl.orderTypeIndex == 4) {
                             return _buildGlobalShoppingTab(context, globalCtrl, isDark, isLtr);
                           }
 
-                          // Tabs 0-4: Local Marketplace & Supermarket Orders
+                          // Tabs 0-3: Local Marketplace & Supermarket Orders
                           if (orderCtrl.orderModel == null) {
                             return const OrderShimmerWidget();
                           }
@@ -126,23 +126,27 @@ class _OrderScreenState extends State<OrderScreen> {
                             return _buildEmptyStateForFilters(context, orderCtrl, isLtr);
                           }
 
-                          return PaginatedListView(
-                            scrollController: _scrollController,
-                            onPaginate: (int? offset) async {
-                              await orderCtrl.getOrderList(offset!, orderCtrl.selectedType);
-                            },
-                            totalSize: orderCtrl.orderModel?.totalSize,
-                            offset: orderCtrl.orderModel?.offset != null
-                                ? int.parse(orderCtrl.orderModel!.offset!)
-                                : 1,
-                            itemView: ListView.builder(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.only(top: 6, bottom: 24),
-                              itemCount: filteredOrders.length,
-                              itemBuilder: (context, index) {
-                                return OrderWidget(orderModel: filteredOrders[index]);
+                          return SingleChildScrollView(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: PaginatedListView(
+                              scrollController: _scrollController,
+                              onPaginate: (int? offset) async {
+                                await orderCtrl.getOrderList(offset!, orderCtrl.selectedType);
                               },
+                              totalSize: orderCtrl.orderModel?.totalSize,
+                              offset: orderCtrl.orderModel?.offset != null
+                                  ? int.parse(orderCtrl.orderModel!.offset!)
+                                  : 1,
+                              itemView: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: const EdgeInsets.only(top: 6, bottom: 24),
+                                itemCount: filteredOrders.length,
+                                itemBuilder: (context, index) {
+                                  return OrderWidget(orderModel: filteredOrders[index]);
+                                },
+                              ),
                             ),
                           );
                         },
@@ -219,7 +223,7 @@ class _OrderScreenState extends State<OrderScreen> {
                 InkWell(
                   onTap: () {
                     final orderCtrl = Provider.of<OrderController>(context, listen: false);
-                    if (orderCtrl.orderTypeIndex == 5) {
+                    if (orderCtrl.orderTypeIndex == 4) {
                       Provider.of<GlobalShoppingController>(context, listen: false).getMyRequests();
                     } else {
                       orderCtrl.getOrderList(1, orderCtrl.selectedType, refresh: true);
@@ -257,6 +261,15 @@ class _OrderScreenState extends State<OrderScreen> {
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       child: Column(
         children: [
+          Consumer<OrderController>(
+            builder: (context, orderCtrl, _) => _buildOrdersSummary(
+              context,
+              orderCtrl.orderModel?.orders ?? const <Orders>[],
+              isDark,
+              isLtr,
+            ),
+          ),
+          const SizedBox(height: 10),
           // 1. Search Box
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
@@ -333,31 +346,77 @@ class _OrderScreenState extends State<OrderScreen> {
                 ),
                 const SizedBox(width: 8),
                 OrderTypeButton(
-                  text: isLtr ? 'Unpaid' : 'غير مدفوعة',
-                  index: 2,
-                  icon: Icons.pending_actions_rounded,
-                ),
-                const SizedBox(width: 8),
-                OrderTypeButton(
                   text: isLtr ? 'Delivered' : 'مكتملة',
-                  index: 3,
+                  index: 2,
                   icon: Icons.check_circle_outline_rounded,
                 ),
                 const SizedBox(width: 8),
                 OrderTypeButton(
                   text: isLtr ? 'Canceled' : 'ملغاة',
-                  index: 4,
+                  index: 3,
                   icon: Icons.cancel_outlined,
                 ),
                 const SizedBox(width: 8),
                 OrderTypeButton(
                   text: isLtr ? 'Global Shopping 🌍' : 'تسوق عالمي 🌍',
-                  index: 5,
+                  index: 4,
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersSummary(
+    BuildContext context,
+    List<Orders> orders,
+    bool isDark,
+    bool isLtr,
+  ) {
+    final activeStatuses = {
+      'pending',
+      'confirmed',
+      'processing',
+      'out_for_delivery',
+    };
+    final activeCount = orders.where((order) => activeStatuses.contains(order.orderStatus?.toLowerCase())).length;
+    final deliveredCount = orders.where((order) => order.orderStatus?.toLowerCase() == 'delivered').length;
+    final labels = isLtr ? ['All', 'Active', 'Delivered'] : ['الكل', 'جارية', 'مكتملة'];
+    final values = [orders.length, activeCount, deliveredCount];
+    final icons = [Icons.receipt_long_rounded, Icons.local_shipping_rounded, Icons.check_circle_rounded];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+      child: Row(
+        children: List.generate(labels.length, (index) {
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.only(left: index == labels.length - 1 ? 0 : 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : const Color(0xFFF4F8FE),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: isDark ? Colors.white12 : const Color(0xFFE1E8F2)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icons[index], size: 16, color: index == 1 ? AllineColors.accent : AllineColors.primary),
+                  const SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${values[index]}', style: titilliumBold.copyWith(fontSize: 16, color: isDark ? Colors.white : const Color(0xFF071B49))),
+                      Text(labels[index], style: titilliumRegular.copyWith(fontSize: 10, color: const Color(0xFF6D85AF))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -669,17 +728,6 @@ class _OrderScreenState extends State<OrderScreen> {
     } else if (orderCtrl.orderTypeIndex == 2) {
       return _buildEmptyState(
         context: context,
-        icon: Icons.pending_actions_rounded,
-        title: isLtr ? 'No Unpaid Orders' : 'لا توجد طلبات غير مدفوعة',
-        subtitle: isLtr
-            ? 'You have no orders pending payment.'
-            : 'ليس لديك أي طلبات معلقة بانتظار الدفع.',
-        buttonText: isLtr ? 'View All Orders' : 'عرض جميع الطلبات',
-        onPressed: () => orderCtrl.setIndex(0),
-      );
-    } else if (orderCtrl.orderTypeIndex == 3) {
-      return _buildEmptyState(
-        context: context,
         icon: Icons.check_circle_outline_rounded,
         title: isLtr ? 'No Completed Orders' : 'لا توجد طلبات مكتملة',
         subtitle: isLtr
@@ -688,7 +736,7 @@ class _OrderScreenState extends State<OrderScreen> {
         buttonText: isLtr ? 'View All Orders' : 'عرض جميع الطلبات',
         onPressed: () => orderCtrl.setIndex(0),
       );
-    } else if (orderCtrl.orderTypeIndex == 4) {
+    } else if (orderCtrl.orderTypeIndex == 3) {
       return _buildEmptyState(
         context: context,
         icon: Icons.cancel_outlined,
