@@ -11,23 +11,35 @@ import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 class AllineCategoriesGridWidget extends StatelessWidget {
   const AllineCategoriesGridWidget({super.key});
 
+  static List<CategoryModel> get _fallbackCategories => [
+        CategoryModel(id: 7, name: 'الالكترونيات'),
+        CategoryModel(id: 4, name: 'مستلزمات البيت والمطبخ'),
+        CategoryModel(id: 12, name: 'الاثاث والديكور'),
+        CategoryModel(id: 9, name: 'الملابس والاكسسوارات'),
+        CategoryModel(id: 2, name: 'العطور'),
+        CategoryModel(id: 6, name: 'الاجهزة المنزلية'),
+        CategoryModel(id: 1, name: 'الصحة والعناية'),
+        CategoryModel(id: 11, name: 'اكسسوارات السيارات'),
+        CategoryModel(id: 3, name: 'مستحضرات التجميل'),
+        CategoryModel(id: 12124, name: 'الرياضة واللياقة'),
+      ];
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
 
     return Consumer<CategoryController>(
       builder: (context, categoryController, _) {
-        final categories = categoryController.categoryList;
-
-        if (categories.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        final categories = categoryController.categoryList.isNotEmpty
+            ? categoryController.categoryList
+            : _fallbackCategories;
 
         return Container(
-          margin: const EdgeInsets.only(top: 8, bottom: 6),
+          margin: const EdgeInsets.only(bottom: 8),
           color: Theme.of(context).cardColor,
-          padding: const EdgeInsets.symmetric(vertical: 14),
+          padding: const EdgeInsets.symmetric(vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,34 +49,23 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 4,
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          isLtr ? 'Categories' : 'التصنيفات',
-                          style: textBold.copyWith(
-                            fontSize: 16,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      isLtr ? 'Categories' : 'التصنيفات',
+                      style: textBold.copyWith(
+                        fontSize: 17,
+                        color: isDark ? Colors.white : const Color(0xFF071B49),
+                      ),
                     ),
                     InkWell(
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CategoryScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const CategoryScreen()),
                       ),
                       borderRadius: BorderRadius.circular(20),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         child: Row(
                           children: [
                             Text(
@@ -75,11 +76,6 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 2),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 11,
-                              color: Theme.of(context).primaryColor,
-                            ),
                           ],
                         ),
                       ),
@@ -92,18 +88,18 @@ class AllineCategoriesGridWidget extends StatelessWidget {
 
               // Horizontal Scrollable Categories
               SizedBox(
-                height: 118,
+                height: 116,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: categories.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 14),
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final category = categories[index];
 
                     return SizedBox(
-                      width: 74,
+                      width: 72,
                       child: InkWell(
                         onTap: () => Navigator.push(
                           context,
@@ -119,55 +115,48 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Circular Category Image with modern border & soft shadow
                             Container(
                               width: 68,
                               height: 68,
-                              padding: const EdgeInsets.all(2.5),
+                              padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isDark
                                     ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF8FAFC),
-                                border: Border.all(
-                                  color: isDark
-                                      ? const Color(0xFF334155)
-                                      : const Color(0xFFE2E8F0),
-                                  width: 1.5,
-                                ),
+                                    : const Color(0xFFF4F5F7),
                                 boxShadow: [
                                   BoxShadow(
                                     color: isDark
-                                        ? Colors.black.withOpacity(0.3)
-                                        : Colors.black.withOpacity(0.05),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
+                                        ? Colors.black.withValues(alpha: .16)
+                                        : Colors.black.withValues(alpha: .03),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
-                              child: CategoryAssetHelper.buildCircularCategoryAvatar(
+                              child: CategoryAssetHelper
+                                  .buildCircularCategoryAvatar(
                                 category: category,
                                 size: 63,
                               ),
                             ),
-
                             const SizedBox(height: 7),
-
-                            // Category Name
                             SizedBox(
-                              height: 32,
-                              child: Text(
-                                category.name ?? '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: textMedium.copyWith(
-                                  fontSize: 11.5,
-                                  color: isDark
-                                      ? const Color(0xFFE2E8F0)
-                                      : const Color(0xFF1E293B),
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
+                              height: 34,
+                              child: Center(
+                                child: Text(
+                                  category.name ?? '',
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.center,
+                                  style: textMedium.copyWith(
+                                    fontSize: 11.5,
+                                    color: isDark
+                                        ? const Color(0xFFE2E8F0)
+                                        : const Color(0xFF071B49),
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.18,
+                                  ),
                                 ),
                               ),
                             ),
