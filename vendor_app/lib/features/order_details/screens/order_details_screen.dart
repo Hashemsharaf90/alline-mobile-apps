@@ -217,8 +217,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                   Padding(
                                     padding: const EdgeInsets.fromLTRB(14, 8, 14, 8),
                                     child: Text(
-                                      '',
-                                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: AllineColors.textLight),
+                                      'صور إثبات التسليم المرفوعة:',
+                                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: AllineColors.textDark),
                                     ),
                                   ),
                                   SizedBox(
@@ -227,11 +227,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                       itemCount: orderDetailsController.orderDetails![0].verificationImages?.length,
                                       scrollDirection: Axis.horizontal,
                                       itemBuilder: (context, index) {
+                                        final imgUrl = orderDetailsController.orderDetails![0].verificationImages?[index].imageFullUrl?.path ?? '';
                                         return InkWell(
                                           onTap: () => showDialog(
                                             context: context,
                                             builder: (_) => ImageDialogWidget(
-                                              imageUrl: '',
+                                              imageUrl: imgUrl,
                                             ),
                                           ),
                                           child: Padding(
@@ -241,7 +242,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                               child: ClipRRect(
                                                 borderRadius: BorderRadius.circular(10),
                                                 child: CustomImageWidget(
-                                                  image: '',
+                                                  image: imgUrl,
                                                 ),
                                               ),
                                             ),

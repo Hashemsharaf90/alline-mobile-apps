@@ -264,7 +264,7 @@ class _OrderScreenState extends State<OrderScreen> {
           Consumer<OrderController>(
             builder: (context, orderCtrl, _) => _buildOrdersSummary(
               context,
-              orderCtrl.orderModel?.orders ?? const <Orders>[],
+              orderCtrl,
               isDark,
               isLtr,
             ),
@@ -371,20 +371,30 @@ class _OrderScreenState extends State<OrderScreen> {
 
   Widget _buildOrdersSummary(
     BuildContext context,
-    List<Orders> orders,
+    OrderController orderCtrl,
     bool isDark,
     bool isLtr,
   ) {
-    final activeStatuses = {
-      'pending',
-      'confirmed',
-      'processing',
-      'out_for_delivery',
-    };
-    final activeCount = orders.where((order) => activeStatuses.contains(order.orderStatus?.toLowerCase())).length;
-    final deliveredCount = orders.where((order) => order.orderStatus?.toLowerCase() == 'delivered').length;
+    int allCount = orderCtrl.orderCounts?.all ?? (orderCtrl.orderModel?.totalSize ?? 0);
+    int activeCount = orderCtrl.orderCounts?.ongoing ?? 0;
+    int deliveredCount = orderCtrl.orderCounts?.delivered ?? 0;
+
+    // Fallback if counts not yet populated from backend
+    if (orderCtrl.orderCounts == null && orderCtrl.orderModel?.orders != null) {
+      final orders = orderCtrl.orderModel!.orders!;
+      final activeStatuses = {
+        'pending',
+        'confirmed',
+        'processing',
+        'out_for_delivery',
+      };
+      allCount = orders.length;
+      activeCount = orders.where((order) => activeStatuses.contains(order.orderStatus?.toLowerCase())).length;
+      deliveredCount = orders.where((order) => order.orderStatus?.toLowerCase() == 'delivered').length;
+    }
+
     final labels = isLtr ? ['All', 'Active', 'Delivered'] : ['الكل', 'جارية', 'مكتملة'];
-    final values = [orders.length, activeCount, deliveredCount];
+    final values = [allCount, activeCount, deliveredCount];
     final icons = [Icons.receipt_long_rounded, Icons.local_shipping_rounded, Icons.check_circle_rounded];
 
     return Padding(

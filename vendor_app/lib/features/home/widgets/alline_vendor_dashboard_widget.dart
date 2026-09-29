@@ -9,6 +9,7 @@ import 'package:sixvalley_vendor_app/features/product/controllers/product_contro
 import 'package:sixvalley_vendor_app/features/product/screens/stock_out_product_screen.dart';
 import 'package:sixvalley_vendor_app/features/profile/controllers/profile_controller.dart';
 import 'package:sixvalley_vendor_app/features/shop/controllers/shop_controller.dart';
+import 'package:sixvalley_vendor_app/features/shop/screens/vacation_mode_setup_screen.dart';
 import 'package:sixvalley_vendor_app/features/wallet/screens/wallet_screen.dart';
 import 'package:sixvalley_vendor_app/helper/price_converter.dart';
 import 'package:sixvalley_vendor_app/utill/color_resources.dart';
@@ -129,39 +130,49 @@ class AllineVendorDashboardWidget extends StatelessWidget {
                       ),
                     ),
 
-                    // Open / Active Status Pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isShopActive
-                            ? AllineColors.success.withValues(alpha: 0.2)
-                            : AllineColors.danger.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isShopActive ? AllineColors.success : AllineColors.danger,
-                          width: 1.2,
+                    // Interactive Open / Active Status Pill
+                    InkWell(
+                      onTap: () => _showStoreStatusDialog(context, shopCtrl),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isShopActive
+                              ? AllineColors.success.withValues(alpha: 0.2)
+                              : AllineColors.danger.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isShopActive ? AllineColors.success : AllineColors.danger,
+                            width: 1.2,
+                          ),
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: isShopActive ? AllineColors.success : AllineColors.danger,
-                              shape: BoxShape.circle,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: isShopActive ? AllineColors.success : AllineColors.danger,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            isShopActive ? 'نشط 🟢' : 'مغلق 🔴',
-                            style: robotoBold.copyWith(
+                            const SizedBox(width: 6),
+                            Text(
+                              isShopActive ? 'نشط 🟢' : 'مغلق 🔴',
+                              style: robotoBold.copyWith(
+                                color: Colors.white,
+                                fontSize: 10,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.keyboard_arrow_down_rounded,
                               color: Colors.white,
-                              fontSize: 10,
+                              size: 14,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -169,6 +180,86 @@ class AllineVendorDashboardWidget extends StatelessWidget {
               ),
 
               const SizedBox(height: 12),
+
+              // Needs Attention Section (Alerts for Pending, Processing, Low Stock)
+              if (pendingCount > 0 || processingCount > 0 || lowStockCount > 0) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFD97706).withValues(alpha: 0.06),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEF3C7),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.bolt_rounded, color: Color(0xFFD97706), size: 16),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'يحتاج انتباهك الآن ⚡',
+                            style: robotoBold.copyWith(fontSize: 13, color: AllineColors.navyText),
+                          ),
+                        ],
+                      ),
+                      if (pendingCount > 0)
+                        _buildAttentionItem(
+                          context,
+                          icon: Icons.notifications_active_rounded,
+                          color: AllineColors.danger,
+                          text: 'لديك $pendingCount طلبات جديدة تحتاج موافقتك',
+                          buttonLabel: 'مراجعة',
+                          onTap: () {
+                            Provider.of<OrderController>(context, listen: false).setIndex(context, 1);
+                            if (callback != null) callback!();
+                          },
+                        ),
+                      if (processingCount > 0)
+                        _buildAttentionItem(
+                          context,
+                          icon: Icons.hourglass_top_rounded,
+                          color: const Color(0xFFF59E0B),
+                          text: 'لديك $processingCount طلبات قيد التجهيز تحتاج تسليم للمندوب',
+                          buttonLabel: 'متابعة',
+                          onTap: () {
+                            Provider.of<OrderController>(context, listen: false).setIndex(context, 2);
+                            if (callback != null) callback!();
+                          },
+                        ),
+                      if (lowStockCount > 0)
+                        _buildAttentionItem(
+                          context,
+                          icon: Icons.warning_amber_rounded,
+                          color: const Color(0xFFEA580C),
+                          text: 'لديك $lowStockCount منتجات أوشكت على النفاد من المخزون',
+                          buttonLabel: 'تحديث',
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const StockOutProductScreen()),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
 
               // 2. Quick Wallet & Earnings Summary Banner
               InkWell(
@@ -584,6 +675,173 @@ class AllineVendorDashboardWidget extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildAttentionItem(
+    BuildContext context, {
+    required IconData icon,
+    required Color color,
+    required String text,
+    required String buttonLabel,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: robotoMedium.copyWith(
+                fontSize: Dimensions.fontSizeSmall,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                buttonLabel,
+                style: robotoBold.copyWith(
+                  fontSize: Dimensions.fontSizeExtraSmall,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showStoreStatusDialog(BuildContext context, ShopController shopCtrl) {
+    final isShopActive = !(shopCtrl.shopModel?.temporaryClose ?? false);
+    final isVacation = shopCtrl.shopModel?.vacationStatus ?? false;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Theme.of(context).cardColor,
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: (isShopActive ? AllineColors.success : AllineColors.danger).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        isShopActive ? Icons.storefront_rounded : Icons.store_mall_directory_outlined,
+                        color: isShopActive ? AllineColors.success : AllineColors.danger,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'حالة المتجر والتشغيل',
+                            style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                          ),
+                          Text(
+                            isVacation
+                                ? 'المتجر حالياً في وضع الإجازة'
+                                : (isShopActive ? 'المتجر متاح لاستقبال طلبات العملاء' : 'المتجر مغلق مؤقتاً ولا يستقبل طلبات جديدة'),
+                            style: robotoRegular.copyWith(
+                              fontSize: Dimensions.fontSizeSmall,
+                              color: AllineColors.textLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const Divider(height: 1),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isShopActive ? AllineColors.danger : AllineColors.success,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: Icon(
+                    isShopActive ? Icons.pause_circle_outline_rounded : Icons.play_circle_outline_rounded,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    isShopActive ? 'إغلاق المتجر مؤقتاً' : 'إعادة فتح وتنشيط المتجر الآن',
+                    style: robotoBold.copyWith(color: Colors.white, fontSize: Dimensions.fontSizeDefault),
+                  ),
+                  onPressed: () {
+                    shopCtrl.shopTemporaryClose(bottomSheetContext, isShopActive ? 1 : 0);
+                  },
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    side: const BorderSide(color: AllineColors.secondary),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  icon: const Icon(Icons.beach_access_rounded, color: AllineColors.secondary),
+                  label: Text(
+                    'إعدادات وضع الإجازة (Vacation Mode)',
+                    style: robotoBold.copyWith(color: AllineColors.secondary, fontSize: Dimensions.fontSizeDefault),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(bottomSheetContext);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const VacationModeScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

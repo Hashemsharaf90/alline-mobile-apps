@@ -7,7 +7,7 @@ class AppConstants {
   static const bool demo = false;
   static const int imageQuality = 100;
   static const String appVersion = '5.1'; ///flutter SDK : 3.44.2
-  static const String polylineMapKey = 'YOUR_MAP_KEY_HERE';
+  static const String polylineMapKey = 'AIzaSyCICT4UuAh8D7Do2Vv-sY7NSrGnL7yrUjM';
 
   static const String baseUrl = 'https://allinye.com';
 

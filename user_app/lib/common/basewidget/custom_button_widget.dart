@@ -16,6 +16,7 @@ class CustomButton extends StatelessWidget {
   final String? leftIcon;
   final double? borderWidth;
   final bool isLoading;
+  final String? loadingText;
   final double buttonHeight;
 
   const CustomButton({
@@ -33,6 +34,7 @@ class CustomButton extends StatelessWidget {
     this.loadingColor = Colors.white,
     this.borderWidth,
     this.isLoading = false,
+    this.loadingText,
     this.buttonHeight = AllineTouchTarget.buttonHeight,
   });
 
@@ -56,7 +58,7 @@ class CustomButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AllineSpacing.sm),
-            Text(getTranslated('loading', context) ?? '...'),
+            Text(loadingText ?? getTranslated('loading', context) ?? '...'),
           ])
         : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             if (leftIcon != null) ...[

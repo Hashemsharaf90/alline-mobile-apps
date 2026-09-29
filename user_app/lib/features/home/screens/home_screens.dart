@@ -4,6 +4,7 @@ import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_categor
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_promo_banner_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_nearby_stores_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_featured_offers_section_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_flash_deal_section_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_services_grid_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_home_all_products_section_widget.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +65,7 @@ class HomePage extends StatefulWidget {
         Provider.of<SplashController>(Get.context!, listen: false);
 
     if (flashDealController.flashDealList.isEmpty || reload) {
-      // await flashDealController.getFlashDealList(reload, false);
+      await flashDealController.getFlashDealList(reload, false);
     }
 
     splashController.initConfig(Get.context!, null, null);
@@ -248,6 +249,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               const SliverToBoxAdapter(child: AllinePromoBannerWidget()),
               const SliverToBoxAdapter(
                   child: AllineNearbyStoresSectionWidget()),
+              const SliverToBoxAdapter(child: AllineFlashDealSectionWidget()),
               const SliverToBoxAdapter(child: AllineHomeProductDiscovery()),
               const AllineHomeAllProductsSectionWidget(),
               const SliverToBoxAdapter(child: SizedBox(height: 104)),

@@ -26,7 +26,83 @@ class BankInfoController extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   BusinessAnalyticsFilterDataModel? _businessAnalyticsFilterData;
-  BusinessAnalyticsFilterDataModel? get businessAnalyticsFilterData => _businessAnalyticsFilterData;
+  BusinessAnalyticsFilterDataModel? get businessAnalyticsFilterData =>
+      _businessAnalyticsFilterData;
+  BusinessAnalyticsFilterDataModel? _dashboardTodayAnalytics;
+  BusinessAnalyticsFilterDataModel? get dashboardTodayAnalytics =>
+      _dashboardTodayAnalytics;
+  BusinessAnalyticsFilterDataModel? _dashboardActionAnalytics;
+  BusinessAnalyticsFilterDataModel? get dashboardActionAnalytics =>
+      _dashboardActionAnalytics;
+
+  Future<void> getDashboardActionAnalytics() async {
+    final response = await bankInfoServiceInterface.getOrderFilterData('all');
+    if (response.response?.statusCode == 200 &&
+        response.response?.data is Map) {
+      _dashboardActionAnalytics =
+          BusinessAnalyticsFilterDataModel.fromJson(response.response!.data);
+    } else {
+      _dashboardActionAnalytics = null;
+    }
+    notifyListeners();
+  }
+
+  Future<void> getDashboardTodayAnalytics() async {
+    final response = await bankInfoServiceInterface.getOrderFilterData('today');
+    if (response.response?.statusCode == 200 &&
+        response.response?.data is Map) {
+      _dashboardTodayAnalytics =
+          BusinessAnalyticsFilterDataModel.fromJson(response.response!.data);
+    } else {
+      _dashboardTodayAnalytics = null;
+    }
+    notifyListeners();
+  }
+
+  double? _todaySales;
+  double? _yesterdaySales;
+  double? get todaySales => _todaySales;
+  double? get yesterdaySales => _yesterdaySales;
+  List<double>? _dashboardWeekEarnings;
+  List<double>? get dashboardWeekEarnings => _dashboardWeekEarnings;
+
+  Future<void> getDashboardWeekEarnings() async {
+    final response = await bankInfoServiceInterface.chartFilterData('WeekEarn');
+    if (response.response?.statusCode == 200 &&
+        response.response?.data is Map) {
+      final values = response.response!.data['seller_earn'];
+      if (values is List) {
+        _dashboardWeekEarnings = values
+            .map((value) => double.tryParse('$value') ?? 0.0)
+            .toList(growable: false);
+      } else {
+        _dashboardWeekEarnings = null;
+      }
+    } else {
+      _dashboardWeekEarnings = null;
+    }
+    notifyListeners();
+  }
+
+  bool _salesSummaryFailed = false;
+  bool get salesSummaryFailed => _salesSummaryFailed;
+
+  Future<void> getDashboardSalesSummary() async {
+    final response = await bankInfoServiceInterface.getDashboardSalesSummary();
+    if (response.response?.statusCode == 200 &&
+        response.response?.data is Map) {
+      final data = response.response!.data;
+      _todaySales = double.tryParse('${data['today_sales']}');
+      _yesterdaySales = double.tryParse('${data['yesterday_sales']}');
+      _salesSummaryFailed = _todaySales == null;
+    } else {
+      _todaySales = null;
+      _yesterdaySales = null;
+      _salesSummaryFailed = true;
+    }
+    notifyListeners();
+  }
+
   int _revenueFilterTypeIndex = 0;
   int get revenueFilterTypeIndex => _revenueFilterTypeIndex;
   String? _revenueFilterType = '';
@@ -35,25 +111,26 @@ class BankInfoController extends ChangeNotifier {
   bool _showWarning = true;
   bool get showWarning => _showWarning;
 
-  void setRevenueFilterName(BuildContext context, String? filterName, bool notify) {
+  void setRevenueFilterName(
+      BuildContext context, String? filterName, bool notify) {
     _revenueFilterType = filterName;
     String? callingString;
-    if(_revenueFilterType == 'this_year'){
+    if (_revenueFilterType == 'this_year') {
       callingString = 'yearEarn';
-    }else if(_revenueFilterType == 'this_month'){
+    } else if (_revenueFilterType == 'this_month') {
       callingString = 'MonthEarn';
-    }else if(_revenueFilterType == 'this_week'){
+    } else if (_revenueFilterType == 'this_week') {
       callingString = 'WeekEarn';
     }
-   getDashboardRevenueData(context, callingString);
-    if(notify) {
+    getDashboardRevenueData(context, callingString);
+    if (notify) {
       notifyListeners();
     }
   }
 
   void setRevenueFilterType(int index, bool notify) {
     _revenueFilterTypeIndex = index;
-    if(notify) {
+    if (notify) {
       notifyListeners();
     }
   }
@@ -65,28 +142,30 @@ class BankInfoController extends ChangeNotifier {
   double _lim = 0.0;
   double get lim => _lim;
 
-
-  Future<void> getDashboardRevenueData(BuildContext context, String? filterType) async {
-    ApiResponse apiResponse = await bankInfoServiceInterface.chartFilterData(filterType);
-    if(apiResponse.response != null  && apiResponse.response!.data != null && apiResponse.response!.statusCode == 200) {
+  Future<void> getDashboardRevenueData(
+      BuildContext context, String? filterType) async {
+    ApiResponse apiResponse =
+        await bankInfoServiceInterface.chartFilterData(filterType);
+    if (apiResponse.response != null &&
+        apiResponse.response!.data != null &&
+        apiResponse.response!.statusCode == 200) {
       _userEarnings = [];
-      _userCommissions  = [];
+      _userCommissions = [];
       _earnings = [];
-      _commission =[];
+      _commission = [];
       _earnings.addAll(apiResponse.response!.data['seller_earn']);
       _commission.addAll(apiResponse.response!.data['commission_earn']);
-      for(dynamic data in _earnings) {
-        try{
+      for (dynamic data in _earnings) {
+        try {
           _userEarnings!.add(data.toDouble());
-        }catch(e){
+        } catch (e) {
           _userEarnings!.add(double.parse(data.toString()));
         }
-
       }
-      for(dynamic data in _commission) {
-        try{
+      for (dynamic data in _commission) {
+        try {
           _userCommissions!.add(data.toDouble());
-        }catch(e){
+        } catch (e) {
           _userCommissions!.add(double.parse(data.toString()));
         }
       }
@@ -99,15 +178,15 @@ class BankInfoController extends ChangeNotifier {
       counts.sort();
       comCounts.sort();
       double max = 0;
-      max = counts.isNotEmpty? counts[counts.length-1]??0 : 0;
+      max = counts.isNotEmpty ? counts[counts.length - 1] ?? 0 : 0;
       double maxx = 0;
-      maxx = counts.isNotEmpty?comCounts[comCounts.length-1]??0:0;
-      if(max>maxx){
+      maxx = counts.isNotEmpty ? comCounts[comCounts.length - 1] ?? 0 : 0;
+      if (max > maxx) {
         _lim = max;
-      }else{
+      } else {
         _lim = maxx;
       }
-    }else {
+    } else {
       ApiChecker.checkApi(apiResponse);
     }
     notifyListeners();
@@ -118,10 +197,15 @@ class BankInfoController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<ResponseModel?> updateBankInfo(BuildContext context,ProfileInfoModel updateUserModel, ProfileBody seller, String token) async {
+  Future<ResponseModel?> updateBankInfo(
+      BuildContext context,
+      ProfileInfoModel updateUserModel,
+      ProfileBody seller,
+      String token) async {
     _isLoading = true;
     notifyListeners();
-    ResponseModel responseModel = await bankInfoServiceInterface.updateBank(updateUserModel, seller, token);
+    ResponseModel responseModel = await bankInfoServiceInterface.updateBank(
+        updateUserModel, seller, token);
     _isLoading = false;
     notifyListeners();
     return responseModel;
@@ -131,30 +215,33 @@ class BankInfoController extends ChangeNotifier {
     return bankInfoServiceInterface.getBankToken();
   }
 
-
-  void setAnalyticsFilterName(BuildContext context, String? filterName, bool notify) {
+  void setAnalyticsFilterName(
+      BuildContext context, String? filterName, bool notify) {
     _analyticsName = filterName;
     getAnalyticsFilterData(context, _analyticsName);
-    if(notify) {
+    if (notify) {
       notifyListeners();
     }
   }
 
   void setAnalyticsFilterType(int index, bool notify) {
     _analyticsIndex = index;
-    if(notify) {
+    if (notify) {
       _businessAnalyticsFilterData = null;
       notifyListeners();
     }
   }
 
-  Future<void> getAnalyticsFilterData(BuildContext context, String? type) async {
+  Future<void> getAnalyticsFilterData(
+      BuildContext context, String? type) async {
     _isLoading = true;
-    ApiResponse response = await bankInfoServiceInterface.getOrderFilterData(type);
-    if(response.response != null && response.response!.statusCode == 200) {
-      _businessAnalyticsFilterData = BusinessAnalyticsFilterDataModel.fromJson(response.response!.data);
+    ApiResponse response =
+        await bankInfoServiceInterface.getOrderFilterData(type);
+    if (response.response != null && response.response!.statusCode == 200) {
+      _businessAnalyticsFilterData =
+          BusinessAnalyticsFilterDataModel.fromJson(response.response!.data);
       _isLoading = false;
-    }else {
+    } else {
       _isLoading = false;
       ApiChecker.checkApi(response);
     }
@@ -163,9 +250,8 @@ class BankInfoController extends ChangeNotifier {
 
   void setWarningValue(bool showWarning, {bool isUpdate = false}) {
     _showWarning = showWarning;
-    if(isUpdate) {
+    if (isUpdate) {
       notifyListeners();
     }
   }
-
 }

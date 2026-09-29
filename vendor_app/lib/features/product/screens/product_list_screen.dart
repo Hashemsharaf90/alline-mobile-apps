@@ -16,7 +16,9 @@ import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_app_bar_widget.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_search_field_widget.dart';
+import 'package:sixvalley_vendor_app/features/addProduct/screens/add_product_tab_view_screen.dart';
 import 'package:sixvalley_vendor_app/features/product/widgets/product_widget.dart';
+import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 
 class ProductListMenuScreen extends StatefulWidget {
   final bool fromNotification;
@@ -73,6 +75,26 @@ class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
       },
 
       child: Scaffold(
+        floatingActionButton: FloatingActionButton.extended(
+          backgroundColor: AllineColors.primary,
+          elevation: 4,
+          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
+          label: const Text(
+            'إضافة منتج',
+            style: TextStyle(
+              fontFamily: 'AllineTajawal',
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const AddProductTabView(fromHome: false)),
+            );
+          },
+        ),
         appBar: CustomAppBarWidget(
           title: getTranslated('product_list', context),
           isBackButtonExist: widget.isBackButtonExist,

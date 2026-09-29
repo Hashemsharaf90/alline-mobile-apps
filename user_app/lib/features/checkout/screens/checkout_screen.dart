@@ -26,6 +26,7 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakba
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_textfield_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/choose_payment_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/coupon_apply_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/checkout_products_summary.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/shipping_details_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/checkout/widgets/wallet_payment_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/wallet/controllers/wallet_controller.dart';
@@ -73,12 +74,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   late bool _billingAddress;
   double? _couponDiscount;
   double? _referralDiscount;
-  double? _customDeliveryFee;
-  double? _deliveryDistanceKm;
 
   double get _payableAmount =>
       _order +
-      (_customDeliveryFee ?? widget.shippingFee) -
+      widget.shippingFee -
       widget.discount -
       (_referralDiscount ?? 0) -
       (_couponDiscount ?? 0) +
@@ -152,224 +151,285 @@ class CheckoutScreenState extends State<CheckoutScreen> {
               _tax = CartHelper().calculateVatTax(
                   Provider.of<CartController>(context, listen: false).cartList);
             }
+            _couponDiscount = couponProvider.discount ?? 0;
+            _referralDiscount = orderProvider.referralAmount?.amount ?? 0;
             return Consumer<CartController>(
                 builder: (context, cartProvider, _) {
               return Consumer<ProfileController>(
                   builder: (context, profileProvider, _) {
-                return orderProvider.isLoading
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                            SizedBox(
-                                width: 30,
-                                height: 30,
-                                child: CircularProgressIndicator())
-                          ])
-                    : Container(
-                        padding:
-                            const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                        color: Theme.of(context).cardColor,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const CheckoutConditionCheckBox(),
-                            const SizedBox(height: Dimensions.paddingSizeSmall),
-                            CustomButton(
-                              onTap: (orderProvider.isLoading ||
-                                      !orderProvider.isAcceptTerms)
-                                  ? null
-                                  : () async {
-                                      final addressList =
-                                          locationProvider.addressList ?? [];
-                                      final hasDeliveryAddress =
-                                          orderProvider.addressIndex != null &&
-                                              orderProvider.addressIndex! >=
-                                                  0 &&
-                                              orderProvider.addressIndex! <
-                                                  addressList.length;
-                                      final hasBillingAddress = orderProvider
-                                                  .billingAddressIndex !=
-                                              null &&
-                                          orderProvider.billingAddressIndex! >=
-                                              0 &&
-                                          orderProvider.billingAddressIndex! <
-                                              addressList.length;
+                final addressList = locationProvider.addressList ?? [];
+                final hasDeliveryAddress = orderProvider.addressIndex != null &&
+                    orderProvider.addressIndex! >= 0 &&
+                    orderProvider.addressIndex! < addressList.length;
+                final deliveryAddressMissing = widget.hasPhysical &&
+                    locationProvider.addressList != null &&
+                    !hasDeliveryAddress;
+                final paymentMethodMissing = !orderProvider.isCODChecked &&
+                    !orderProvider.isOfflineChecked &&
+                    !orderProvider.isWalletChecked &&
+                    orderProvider.selectedDigitalPaymentMethodName.isEmpty;
+                final totalPayable = _payableAmount;
 
-                                      if (!hasDeliveryAddress &&
-                                          widget.hasPhysical) {
-                                        RouterHelper.getSavedAddressListRoute(
+                return SafeArea(
+                  top: false,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      border: const Border(
+                        top: BorderSide(color: Color(0xFFE1E8F2)),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF032C75).withValues(alpha: .04),
+                          blurRadius: 14,
+                          offset: const Offset(0, -4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'الإجمالي',
+                                    style: textRegular.copyWith(
+                                      fontSize: 12,
+                                      color: const Color(0xFF6D85AF),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    PriceConverter.convertPrice(
+                                        context, totalPayable),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textBold.copyWith(
+                                      fontSize: 18,
+                                      color: const Color(0xFF015FC9),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: CheckoutConditionCheckBox(),
+                            ),
+                          ],
+                        ),
+                        if (deliveryAddressMissing) ...[
+                          const SizedBox(height: 6),
+                          _CheckoutRequirementMessage(
+                            text: 'أضف عنوان التوصيل للمتابعة.',
+                            icon: Icons.location_on_outlined,
+                          ),
+                        ],
+                        if (paymentMethodMissing) ...[
+                          const SizedBox(height: 6),
+                          const _CheckoutRequirementMessage(
+                            text: 'اختر طريقة الدفع لإتمام الطلب.',
+                            icon: Icons.account_balance_wallet_outlined,
+                          ),
+                        ],
+                        if (!orderProvider.isAcceptTerms) ...[
+                          const SizedBox(height: 6),
+                          const _CheckoutRequirementMessage(
+                            text: 'الموافقة على الشروط مطلوبة للمتابعة.',
+                            icon: Icons.info_outline_rounded,
+                          ),
+                        ],
+                        const SizedBox(height: 10),
+                        CustomButton(
+                          isLoading: orderProvider.isLoading,
+                          loadingText: 'جارٍ إرسال الطلب...',
+                          onTap: (orderProvider.isLoading ||
+                                  !orderProvider.isAcceptTerms)
+                              ? null
+                              : () async {
+                                  final addressList =
+                                      locationProvider.addressList ?? [];
+                                  final hasDeliveryAddress =
+                                      orderProvider.addressIndex != null &&
+                                          orderProvider.addressIndex! >= 0 &&
+                                          orderProvider.addressIndex! <
+                                              addressList.length;
+                                  final hasBillingAddress = orderProvider
+                                              .billingAddressIndex !=
+                                          null &&
+                                      orderProvider.billingAddressIndex! >= 0 &&
+                                      orderProvider.billingAddressIndex! <
+                                          addressList.length;
+
+                                  if (!hasDeliveryAddress &&
+                                      widget.hasPhysical) {
+                                    RouterHelper.getSavedAddressListRoute(
+                                        fromGuest: !Provider.of<AuthController>(
+                                                context,
+                                                listen: false)
+                                            .isLoggedIn());
+                                    showCustomSnackBarWidget(
+                                        getTranslated(
+                                            'select_a_shipping_address',
+                                            context),
+                                        Get.context!,
+                                        snackBarType: SnackBarType.warning);
+                                  } else if ((!hasBillingAddress &&
+                                      !widget.hasPhysical &&
+                                      !_billingAddress)) {
+                                    showCustomSnackBarWidget(
+                                        getTranslated(
+                                            'you_cant_place_order_of_digital_product_without_billing_address',
+                                            context),
+                                        Get.context!,
+                                        snackBarType: SnackBarType.warning);
+                                  } else if ((!hasBillingAddress &&
+                                          !widget.hasPhysical &&
+                                          !orderProvider.sameAsBilling &&
+                                          _billingAddress) ||
+                                      (!hasBillingAddress &&
+                                          _billingAddress &&
+                                          !orderProvider.sameAsBilling)) {
+                                    RouterHelper
+                                        .getSavedBillingAddressListRoute(
                                             fromGuest:
                                                 !Provider.of<AuthController>(
                                                         context,
                                                         listen: false)
                                                     .isLoggedIn());
-                                        showCustomSnackBarWidget(
-                                            getTranslated(
-                                                'select_a_shipping_address',
-                                                context),
-                                            Get.context!,
-                                            snackBarType: SnackBarType.warning);
-                                      } else if ((!hasBillingAddress &&
-                                          !widget.hasPhysical &&
-                                          !_billingAddress)) {
-                                        showCustomSnackBarWidget(
-                                            getTranslated(
-                                                'you_cant_place_order_of_digital_product_without_billing_address',
-                                                context),
-                                            Get.context!,
-                                            snackBarType: SnackBarType.warning);
-                                      } else if ((!hasBillingAddress &&
-                                              !widget.hasPhysical &&
-                                              !orderProvider.sameAsBilling &&
-                                              _billingAddress) ||
-                                          (!hasBillingAddress &&
-                                              _billingAddress &&
-                                              !orderProvider.sameAsBilling)) {
-                                        RouterHelper
-                                            .getSavedBillingAddressListRoute(
-                                                fromGuest: !Provider.of<
-                                                            AuthController>(
-                                                        context,
-                                                        listen: false)
-                                                    .isLoggedIn());
-                                        showCustomSnackBarWidget(
-                                            getTranslated(
-                                                'select_a_billing_address',
-                                                context),
-                                            Get.context!,
-                                            snackBarType: SnackBarType.warning);
-                                      } else {
-                                        if (!orderProvider
-                                                .isCheckCreateAccount ||
-                                            (orderProvider
-                                                    .isCheckCreateAccount &&
-                                                (passwordFormKey.currentState
-                                                        ?.validate() ??
-                                                    false))) {
-                                          String orderNote = orderProvider
-                                              .orderNoteController.text
-                                              .trim();
-                                          String couponCode =
-                                              couponProvider.discount != null &&
-                                                      couponProvider.discount !=
-                                                          0
-                                                  ? couponProvider.couponCode
-                                                  : '';
-                                          String couponCodeAmount =
-                                              couponProvider.discount != null &&
-                                                      couponProvider.discount !=
-                                                          0
-                                                  ? couponProvider.discount
-                                                      .toString()
-                                                  : '0';
-
-                                          String addressId = hasDeliveryAddress
-                                              ? addressList[orderProvider
-                                                      .addressIndex!]
-                                                  .id
+                                    showCustomSnackBarWidget(
+                                        getTranslated(
+                                            'select_a_billing_address',
+                                            context),
+                                        Get.context!,
+                                        snackBarType: SnackBarType.warning);
+                                  } else {
+                                    if (!orderProvider.isCheckCreateAccount ||
+                                        (orderProvider.isCheckCreateAccount &&
+                                            (passwordFormKey.currentState
+                                                    ?.validate() ??
+                                                false))) {
+                                      String orderNote = orderProvider
+                                          .orderNoteController.text
+                                          .trim();
+                                      String couponCode =
+                                          couponProvider.discount != null &&
+                                                  couponProvider.discount != 0
+                                              ? couponProvider.couponCode
+                                              : '';
+                                      String couponCodeAmount =
+                                          couponProvider.discount != null &&
+                                                  couponProvider.discount != 0
+                                              ? couponProvider.discount
                                                   .toString()
+                                              : '0';
+
+                                      String addressId = hasDeliveryAddress
+                                          ? addressList[
+                                                  orderProvider.addressIndex!]
+                                              .id
+                                              .toString()
+                                          : '';
+
+                                      String billingAddressId =
+                                          (_billingAddress)
+                                              ? !orderProvider.sameAsBilling
+                                                  ? addressList[orderProvider
+                                                          .billingAddressIndex!]
+                                                      .id
+                                                      .toString()
+                                                  : addressId
                                               : '';
 
-                                          String billingAddressId =
-                                              (_billingAddress)
-                                                  ? !orderProvider.sameAsBilling
-                                                      ? addressList[orderProvider
-                                                              .billingAddressIndex!]
-                                                          .id
-                                                          .toString()
-                                                      : addressId
-                                                  : '';
-
-                                          if (orderProvider.isCODChecked &&
-                                              !widget.onlyDigital) {
-                                            orderProvider.placeOrder(
-                                                callback: _callback,
-                                                addressID: addressId,
-                                                couponCode: couponCode,
-                                                couponAmount: couponCodeAmount,
-                                                billingAddressId:
-                                                    billingAddressId,
-                                                orderNote: orderNote);
-                                          } else if (orderProvider
-                                              .isOfflineChecked) {
-                                            RouterHelper
-                                                .getOfflinePaymentScreen(
-                                                    payableAmount:
-                                                        _payableAmount,
-                                                    callback: _callback);
-                                          } else if (orderProvider
-                                              .isWalletChecked) {
-                                            showAnimatedDialog(
-                                                context,
-                                                WalletPaymentWidget(
-                                                    currentBalance:
-                                                        profileProvider
-                                                                .balance ??
-                                                            0,
-                                                    orderAmount: _payableAmount,
-                                                    onTap: () {
-                                                      if (profileProvider
-                                                              .balance! <
-                                                          _payableAmount) {
-                                                        showCustomSnackBarWidget(
-                                                            getTranslated(
-                                                                'insufficient_balance',
-                                                                context),
-                                                            context,
-                                                            snackBarType:
-                                                                SnackBarType
-                                                                    .warning);
-                                                      } else {
-                                                        Navigator.pop(context);
-                                                        orderProvider.placeOrder(
-                                                            callback: _callback,
-                                                            wallet: true,
-                                                            addressID:
-                                                                addressId,
-                                                            couponCode:
-                                                                couponCode,
-                                                            couponAmount:
-                                                                couponCodeAmount,
-                                                            billingAddressId:
-                                                                billingAddressId,
-                                                            orderNote:
-                                                                orderNote);
-                                                      }
-                                                    }),
-                                                dismissible: false,
-                                                willFlip: true);
-                                          } else {
-                                            showCustomSnackBarWidget(
-                                              getTranslated(
-                                                      'select_payment_method',
-                                                      context) ??
-                                                  'يرجى تحديد طريقة الدفع أولاً لإتمام الطلب',
-                                              context,
-                                              snackBarType:
-                                                  SnackBarType.warning,
+                                      if (orderProvider.isCODChecked &&
+                                          !widget.onlyDigital) {
+                                        orderProvider.placeOrder(
+                                            callback: _callback,
+                                            addressID: addressId,
+                                            couponCode: couponCode,
+                                            couponAmount: couponCodeAmount,
+                                            billingAddressId: billingAddressId,
+                                            orderNote: orderNote);
+                                      } else if (orderProvider
+                                          .isOfflineChecked) {
+                                        RouterHelper.getOfflinePaymentScreen(
+                                            payableAmount: _payableAmount,
+                                            callback: _callback);
+                                      } else if (orderProvider
+                                          .isWalletChecked) {
+                                        showAnimatedDialog(
+                                            context,
+                                            WalletPaymentWidget(
+                                                currentBalance:
+                                                    profileProvider.balance ??
+                                                        0,
+                                                orderAmount: _payableAmount,
+                                                onTap: () {
+                                                  if (profileProvider.balance! <
+                                                      _payableAmount) {
+                                                    showCustomSnackBarWidget(
+                                                        getTranslated(
+                                                            'insufficient_balance',
+                                                            context),
+                                                        context,
+                                                        snackBarType:
+                                                            SnackBarType
+                                                                .warning);
+                                                  } else {
+                                                    Navigator.pop(context);
+                                                    orderProvider.placeOrder(
+                                                        callback: _callback,
+                                                        wallet: true,
+                                                        addressID: addressId,
+                                                        couponCode: couponCode,
+                                                        couponAmount:
+                                                            couponCodeAmount,
+                                                        billingAddressId:
+                                                            billingAddressId,
+                                                        orderNote: orderNote);
+                                                  }
+                                                }),
+                                            dismissible: false,
+                                            willFlip: true);
+                                      } else {
+                                        showCustomSnackBarWidget(
+                                          getTranslated('select_payment_method',
+                                                  context) ??
+                                              'يرجى تحديد طريقة الدفع أولاً لإتمام الطلب',
+                                          context,
+                                          snackBarType: SnackBarType.warning,
+                                        );
+                                        showModalBottomSheet(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          builder: (c) {
+                                            return PaymentMethodBottomSheetWidget(
+                                              onlyDigital: widget.onlyDigital,
+                                              payableAmount: _payableAmount,
                                             );
-                                            showModalBottomSheet(
-                                              context: context,
-                                              isScrollControlled: true,
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              builder: (c) {
-                                                return PaymentMethodBottomSheetWidget(
-                                                  onlyDigital:
-                                                      widget.onlyDigital,
-                                                  payableAmount: _payableAmount,
-                                                );
-                                              },
-                                            );
-                                          }
-                                        }
+                                          },
+                                        );
                                       }
-                                    },
-                              buttonText: 'تأكيد الطلب',
-                            )
-                          ],
+                                    }
+                                  }
+                                },
+                          buttonText: deliveryAddressMissing
+                              ? 'إضافة عنوان التوصيل'
+                              : orderProvider.isOfflineChecked
+                                  ? 'متابعة إلى بيانات الدفع'
+                                  : 'تأكيد الطلب',
                         ),
-                      );
+                      ],
+                    ),
+                  ),
+                );
               });
             });
           });
@@ -397,18 +457,12 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                         hasPhysical: widget.hasPhysical,
                         billingAddress: _billingAddress,
                         passwordFormKey: passwordFormKey,
-                        onDeliveryCalculated: (distanceKm, feeYer) {
-                          if (_customDeliveryFee != feeYer ||
-                              _deliveryDistanceKm != distanceKm) {
-                            setState(() {
-                              _customDeliveryFee = feeYer;
-                              _deliveryDistanceKm = distanceKm;
-                            });
-                          }
-                        },
+                        showDistanceEstimate: false,
                       ),
                     ),
                     _buildDeliveryInfoCard(context),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
+                    CheckoutProductsSummary(cartItems: widget.cartList),
                     const SizedBox(height: Dimensions.paddingSizeSmall),
                     if (Provider.of<AuthController>(context, listen: false)
                         .isLoggedIn())
@@ -455,8 +509,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                                       .referralAmount
                                       ?.amount ??
                                   0;
-                          final deliveryCost =
-                              _customDeliveryFee ?? widget.shippingFee;
+                          final deliveryCost = widget.shippingFee;
                           final totalPayable = _order +
                               deliveryCost -
                               (_referralDiscount ?? 0) -
@@ -642,9 +695,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _buildDeliveryInfoCard(BuildContext context) {
-    final double activeFee = _customDeliveryFee ?? widget.shippingFee;
-    final feeText =
-        activeFee > 0 ? PriceConverter.convertPrice(context, activeFee) : null;
+    final feeText = PriceConverter.convertPrice(context, widget.shippingFee);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -693,7 +744,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'سيتم توصيل طلبك إلى العنوان المحدد.',
+                      'رسوم خيار الشحن المحدد في السلة.',
                       style: textRegular.copyWith(
                         fontSize: 12,
                         color: const Color(0xFF6D85AF),
@@ -711,29 +762,20 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'رسوم التوصيل',
+                'الشحن المختار',
                 style: textBold.copyWith(
                   fontSize: 14,
                   color: const Color(0xFF071B49),
                 ),
               ),
-              if (feeText != null)
-                Text(
-                  feeText,
-                  style: textBold.copyWith(
-                    fontSize: 14,
-                    color: const Color(0xFF015FC9),
-                  ),
+              Text(
+                feeText,
+                style: textBold.copyWith(
+                  fontSize: 14,
+                  color: const Color(0xFF015FC9),
                 ),
+              ),
             ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'يتم احتسابها حسب العنوان والمتجر',
-            style: textRegular.copyWith(
-              fontSize: 12,
-              color: const Color(0xFF6D85AF),
-            ),
           ),
         ],
       ),
@@ -846,5 +888,32 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       showCustomSnackBarWidget(message, context,
           snackBarType: SnackBarType.error);
     }
+  }
+}
+
+class _CheckoutRequirementMessage extends StatelessWidget {
+  final String text;
+  final IconData icon;
+
+  const _CheckoutRequirementMessage({required this.text, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        Icon(icon, size: 16, color: const Color(0xFF6D85AF)),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: textRegular.copyWith(
+              fontSize: 12,
+              color: const Color(0xFF6D85AF),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

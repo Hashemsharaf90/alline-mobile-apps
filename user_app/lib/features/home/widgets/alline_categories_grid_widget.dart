@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/screens/category_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/screens/brand_and_category_product_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/category_asset_helper.dart';
@@ -10,6 +11,19 @@ import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 class AllineCategoriesGridWidget extends StatelessWidget {
   const AllineCategoriesGridWidget({super.key});
 
+  static List<CategoryModel> get _fallbackCategories => [
+        CategoryModel(id: 7, name: 'الالكترونيات'),
+        CategoryModel(id: 4, name: 'مستلزمات البيت والمطبخ'),
+        CategoryModel(id: 12, name: 'الاثاث والديكور'),
+        CategoryModel(id: 9, name: 'الملابس والاكسسوارات'),
+        CategoryModel(id: 2, name: 'العطور'),
+        CategoryModel(id: 6, name: 'الاجهزة المنزلية'),
+        CategoryModel(id: 1, name: 'الصحة والعناية'),
+        CategoryModel(id: 11, name: 'اكسسوارات السيارات'),
+        CategoryModel(id: 3, name: 'مستحضرات التجميل'),
+        CategoryModel(id: 12124, name: 'الرياضة واللياقة'),
+      ];
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -18,11 +32,9 @@ class AllineCategoriesGridWidget extends StatelessWidget {
 
     return Consumer<CategoryController>(
       builder: (context, categoryController, _) {
-        final categories = categoryController.categoryList;
-
-        if (categories.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        final categories = categoryController.categoryList.isNotEmpty
+            ? categoryController.categoryList
+            : _fallbackCategories;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 8),

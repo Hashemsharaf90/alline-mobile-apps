@@ -8,8 +8,9 @@ class OrderModel {
   String? limit;
   String? offset;
   List<Orders>? orders;
+  OrderCounts? counts;
 
-  OrderModel({this.totalSize, this.limit, this.offset, this.orders});
+  OrderModel({this.totalSize, this.limit, this.offset, this.orders, this.counts});
 
   OrderModel.fromJson(Map<String, dynamic> json) {
     totalSize = int.tryParse(json['total_size']?.toString() ?? '');
@@ -21,8 +22,27 @@ class OrderModel {
         orders!.add(Orders.fromJson(v));
       });
     }
+    if (json['counts'] != null && json['counts'] is Map) {
+      counts = OrderCounts.fromJson(Map<String, dynamic>.from(json['counts']));
+    }
   }
 
+}
+
+class OrderCounts {
+  int? all;
+  int? ongoing;
+  int? delivered;
+  int? canceled;
+
+  OrderCounts({this.all, this.ongoing, this.delivered, this.canceled});
+
+  OrderCounts.fromJson(Map<String, dynamic> json) {
+    all = int.tryParse(json['all']?.toString() ?? '0') ?? 0;
+    ongoing = int.tryParse(json['ongoing']?.toString() ?? '0') ?? 0;
+    delivered = int.tryParse(json['delivered']?.toString() ?? '0') ?? 0;
+    canceled = int.tryParse(json['canceled']?.toString() ?? '0') ?? 0;
+  }
 }
 
 class Orders {

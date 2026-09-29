@@ -21,14 +21,17 @@ class ShippingDetailsWidget extends StatefulWidget {
   final bool hasPhysical;
   final bool billingAddress;
   final GlobalKey<FormState> passwordFormKey;
-  final Function(double distanceKm, double deliveryFeeYer)? onDeliveryCalculated;
+  final Function(double distanceKm, double deliveryFeeYer)?
+      onDeliveryCalculated;
+  final bool showDistanceEstimate;
 
   const ShippingDetailsWidget(
       {super.key,
       required this.hasPhysical,
       required this.billingAddress,
       required this.passwordFormKey,
-      this.onDeliveryCalculated});
+      this.onDeliveryCalculated,
+      this.showDistanceEstimate = true});
 
   @override
   State<ShippingDetailsWidget> createState() => _ShippingDetailsWidgetState();
@@ -51,7 +54,8 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
         if (shippingProvider.addressIndex == null && addressList.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && shippingProvider.addressIndex == null) {
-              int defaultIndex = addressList.indexWhere((a) => a.isBilling == true);
+              int defaultIndex =
+                  addressList.indexWhere((a) => a.isBilling == true);
               if (defaultIndex == -1) defaultIndex = 0;
               shippingProvider.setAddressIndex(defaultIndex);
               if (shippingProvider.sameAsBilling) {
@@ -111,7 +115,8 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
                               ),
                               const SizedBox(width: 12),
                               Text(
-                                getTranslated('delivery_address', context) ?? 'عنوان التوصيل',
+                                getTranslated('delivery_address', context) ??
+                                    'عنوان التوصيل',
                                 style: textBold.copyWith(
                                   fontSize: 16,
                                   color: const Color(0xFF071B49),
@@ -125,7 +130,8 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
                                   fromGuest: isGuestMode);
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 4, vertical: 4),
                               child: Text(
                                 deliveryAddress != null ? 'تغيير' : 'اختيار',
                                 style: textBold.copyWith(
@@ -140,7 +146,9 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
                       const SizedBox(height: 12),
                       if (deliveryAddress != null) ...[
                         Text(
-                          deliveryAddress.addressType ?? 'المنزل',
+                          deliveryAddress.addressType?.trim().isNotEmpty == true
+                              ? deliveryAddress.addressType!.trim()
+                              : 'عنوان التوصيل',
                           style: textBold.copyWith(
                             fontSize: 14,
                             color: const Color(0xFF071B49),
@@ -157,9 +165,12 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                ('${deliveryAddress.city ?? ''} ${deliveryAddress.address ?? ''}').trim().isNotEmpty
-                                    ? ('${deliveryAddress.city ?? ''} ${deliveryAddress.address ?? ''}').trim()
-                                    : 'صنعاء، حدة',
+                                ('${deliveryAddress.city ?? ''} ${deliveryAddress.address ?? ''}')
+                                        .trim()
+                                        .isNotEmpty
+                                    ? ('${deliveryAddress.city ?? ''} ${deliveryAddress.address ?? ''}')
+                                        .trim()
+                                    : 'لا يوجد وصف إضافي للعنوان',
                                 style: textRegular.copyWith(
                                   fontSize: 12,
                                   color: const Color(0xFF6D85AF),
@@ -171,23 +182,29 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
                           ],
                         ),
                         const SizedBox(height: 8),
-                        _buildDistanceDeliveryCard(context, deliveryAddress, locationProvider),
+                        if (widget.showDistanceEstimate)
+                          _buildDistanceDeliveryCard(
+                              context, deliveryAddress, locationProvider),
                       ] else ...[
                         InkWell(
-                          onTap: () => RouterHelper.getSavedAddressListRoute(fromGuest: isGuestMode),
+                          onTap: () => RouterHelper.getSavedAddressListRoute(
+                              fromGuest: isGuestMode),
                           borderRadius: BorderRadius.circular(12),
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14, horizontal: 12),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF4F8FE),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE1E8F2)),
+                              border:
+                                  Border.all(color: const Color(0xFFE1E8F2)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.add_location_alt_outlined, color: Color(0xFF015FC9), size: 20),
+                                const Icon(Icons.add_location_alt_outlined,
+                                    color: Color(0xFF015FC9), size: 20),
                                 const SizedBox(width: 8),
                                 Text(
                                   'تحديد عنوان التوصيل',
@@ -591,7 +608,8 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
                   fontSize: 14,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'مثال: شارع حدة، بجوار مركز الكميم، عمارة 4، الدور الثاني',
+                  hintText:
+                      'مثال: شارع حدة، بجوار مركز الكميم، عمارة 4، الدور الثاني',
                   hintStyle: const TextStyle(
                     fontFamily: 'AllineTajawal',
                     fontSize: 13,
@@ -716,7 +734,8 @@ class _ShippingDetailsWidgetState extends State<ShippingDetailsWidget> {
         ? DeliveryDistanceHelper.calculateFeeFromDistanceKm(distanceKm)
         : DeliveryDistanceHelper.minFeeYer;
 
-    final int etaMinutes = DeliveryDistanceHelper.calculateEtaMinutes(distanceKm);
+    final int etaMinutes =
+        DeliveryDistanceHelper.calculateEtaMinutes(distanceKm);
     final String etaText = DeliveryDistanceHelper.formatEtaText(etaMinutes);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
