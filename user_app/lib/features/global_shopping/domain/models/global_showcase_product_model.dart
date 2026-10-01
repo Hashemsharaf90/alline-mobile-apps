@@ -19,6 +19,8 @@ class GlobalShowcaseProduct {
   final List<String> features;
   final String? badge;
   final Color? badgeColor;
+  final bool isRfq;
+  final int? moq;
 
   const GlobalShowcaseProduct({
     required this.id,
@@ -39,6 +41,8 @@ class GlobalShowcaseProduct {
     this.features = const [],
     this.badge,
     this.badgeColor,
+    this.isRfq = false,
+    this.moq,
   });
 
   /// Approximate price in Yemeni Rials (YER) based on an estimated rate of 535 YER/USD
@@ -57,6 +61,120 @@ class GlobalShowcaseProduct {
 
 class GlobalShowcaseRepository {
   static const List<GlobalShowcaseProduct> curatedProducts = [
+    // 0a. Amazon - Huawei Band 8 (Prototype Hero Product)
+    GlobalShowcaseProduct(
+      id: 'huawei_band',
+      name: 'ساعة هواوي الذكية باند 8 - تتبع اللياقة والصحة',
+      nameEn: 'Huawei Band 8 Smartwatch Activity Tracker',
+      store: 'Amazon',
+      category: 'إلكترونيات',
+      categoryEn: 'Electronics',
+      priceUsd: 49.99,
+      originalPriceUsd: 65.00,
+      imageUrl: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=80',
+      galleryImages: [
+        'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=80',
+      ],
+      rating: 4.8,
+      reviewsCount: 3200,
+      productUrl: 'https://www.amazon.com/dp/B0BYZ28W4X',
+      badge: 'الأكثر مبيعاً',
+      badgeColor: Color(0xFF015FC9),
+      description: 'شاشة AMOLED، تتبع الصحة واللياقة، بطارية طويلة العمر حتى 14 يوماً وتصميم فائق النحافة.',
+      descriptionEn: 'Ultra-thin design, scientific sleep tracking, fast charging, and up to 14 days of battery life.',
+      features: [
+        'شاشة ملونة AMOLED فائقة الوضوح',
+        'مراقبة نبض القلب ونسبة الأكسجين والنوم',
+        'شحن سريع وبطارية تدوم حتى 14 يوماً',
+        'مقاومة الماء حتى عمق 50 متراً',
+      ],
+    ),
+
+    // 0b. AliExpress - Wireless Headphones (Prototype Product)
+    GlobalShowcaseProduct(
+      id: 'wireless_headphones',
+      name: 'سماعات رأس لاسلكية عازلة للضوضاء بصوت محيطي',
+      nameEn: 'Wireless Noise Cancelling Over-Ear Headphones',
+      store: 'AliExpress',
+      category: 'إلكترونيات',
+      categoryEn: 'Electronics',
+      priceUsd: 29.50,
+      originalPriceUsd: 45.00,
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+      galleryImages: [
+        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+      ],
+      rating: 4.7,
+      reviewsCount: 1850,
+      productUrl: 'https://ar.aliexpress.com/item/headphones.html',
+      badge: 'صفقة خاصة',
+      badgeColor: Color(0xFFE4271A),
+      description: 'صوت عالي الدقة Hi-Res، اتصال بلوتوث 5.3 متطور، وبطارية مذهلة تدوم حتى 40 ساعة تشغيل متواصل.',
+      descriptionEn: 'Hi-Res audio clarity, active noise cancellation, Bluetooth 5.3, and 40-hour playback.',
+      features: [
+        'عزل ضوضاء هجين نشط للمكالمات والموسيقى',
+        'وسائد أذن جلدية مريحة للاستخدام الطويل',
+        'منفذ Type-C للشحن فائق السرعة',
+      ],
+    ),
+
+    // 0c. SHEIN - Winter Trench Coat (Prototype Product)
+    GlobalShowcaseProduct(
+      id: 'shein_coat',
+      name: 'معطف أنيق بياقة مزدوجة وحزام خصر عصري',
+      nameEn: 'Double-Breasted Elegant Winter Trench Coat',
+      store: 'SHEIN',
+      category: 'أزياء',
+      categoryEn: 'Fashion',
+      priceUsd: 34.00,
+      originalPriceUsd: 52.00,
+      imageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce667823?w=600&auto=format&fit=crop&q=80',
+      galleryImages: [
+        'https://images.unsplash.com/photo-1539533018447-63fcce667823?w=600&auto=format&fit=crop&q=80',
+      ],
+      rating: 4.9,
+      reviewsCount: 5200,
+      productUrl: 'https://ar.shein.com/trench-coat.html',
+      badge: 'أزياء راقية',
+      badgeColor: Color(0xFF071B49),
+      description: 'صوف دافئ وناعم بتصميم أنيق يناسب فصل الشتاء، متوفر بمقاسات وألوان متعددة.',
+      descriptionEn: 'Stylish winter trench coat with tailored fit, waist tie, and premium warm lining.',
+      features: [
+        'قماش صوف معالج وناعم ضد التجعد',
+        'تصميم كلاسيكي بقصة مريحة',
+        'جيوب جانبية وأزرار أمامية أنيقة',
+      ],
+    ),
+
+    // 0d. Alibaba - Industrial Tool Set (Prototype RFQ Product)
+    GlobalShowcaseProduct(
+      id: 'alibaba_tools',
+      name: 'حقيبة عدة ميكانيكية شاملة 108 قطع للمصانع والورش',
+      nameEn: 'Industrial 108-Piece Mechanics Tool Set Box',
+      store: 'Alibaba',
+      category: 'عدد وأدوات',
+      categoryEn: 'Tools',
+      priceUsd: 18.00,
+      originalPriceUsd: 28.00,
+      imageUrl: 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=600&auto=format&fit=crop&q=80',
+      galleryImages: [
+        'https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=600&auto=format&fit=crop&q=80',
+      ],
+      rating: 4.9,
+      reviewsCount: 3100,
+      productUrl: 'https://arabic.alibaba.com/product-detail/tool-set.html',
+      badge: 'جملة ومصانع',
+      badgeColor: Color(0xFFEC970D),
+      isRfq: true,
+      moq: 20,
+      description: 'حقيبة عدة متكاملة مصنوعة من الكروم فاناديوم المقاوم للصدأ والتآكل، مواصفات صناعية عالية للمصانع والورش.',
+      descriptionEn: '108-piece industrial tool kit with blow molded case, heavy duty chrome vanadium steel.',
+      features: [
+        '108 قطع متنوعة تشمل المفاتيح والمفكات والمقابس',
+        'صندوق مقاوم للصدمات وسهل الحمل والتخزين',
+        'سعر جملة خاص ومباشر من المصنع عبر Alline',
+      ],
+    ),
     // 1. Amazon - Apple AirPods Pro 2
     GlobalShowcaseProduct(
       id: 'amz_airpods_pro_2',

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_product_card.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_section_header.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
@@ -56,7 +56,8 @@ class SmOffersWidget extends StatelessWidget {
               ),
               const SizedBox(height: 14),
               SizedBox(
-                height: 268,
+                height:
+                    300 + (MediaQuery.textScalerOf(context).scale(14) - 14) * 8,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -64,10 +65,10 @@ class SmOffersWidget extends StatelessWidget {
                   itemCount: offers.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) => SizedBox(
-                    width: 156,
-                    child: SupermarketProductCard(
+                    width: 176,
+                    child: AllineProductCard(
+                      grocery: true,
                       product: offers[index],
-                      margin: 0,
                     ),
                   ),
                 ),

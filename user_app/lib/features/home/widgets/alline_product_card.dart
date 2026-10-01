@@ -15,14 +15,17 @@ import 'package:flutter_sixvalley_ecommerce/features/wishlist/controllers/wishli
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/shop_helper.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_price_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
 
 class AllineProductCard extends StatefulWidget {
   final Product product;
   final bool compact;
+  final bool grocery;
   const AllineProductCard({
     super.key,
     required this.product,
     this.compact = false,
+    this.grocery = false,
   });
   @override
   State<AllineProductCard> createState() => _AllineProductCardState();
@@ -33,6 +36,13 @@ class _AllineProductCardState extends State<AllineProductCard> {
 
   Future<void> _quickAdd() async {
     if (_loading) return;
+    if (widget.product.slug?.isNotEmpty != true) {
+      RouterHelper.getProductDetailsRoute(
+          action: RouteAction.push,
+          productId: widget.product.id,
+          slug: widget.product.slug);
+      return;
+    }
     setState(() => _loading = true);
     try {
       final service = context
@@ -136,6 +146,9 @@ class _AllineProductCardState extends State<AllineProductCard> {
   Widget build(BuildContext context) {
     final colors = AllineThemeColors.of(context);
     final product = widget.product;
+    if (widget.grocery) {
+      return SupermarketProductCard(product: product, onAdd: _quickAdd);
+    }
     if (widget.compact) {
       return _buildCompactCard(context, colors, product);
     }

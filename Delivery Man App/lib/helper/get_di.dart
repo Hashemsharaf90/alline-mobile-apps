@@ -6,6 +6,11 @@ import 'package:sixvalley_delivery_boy/features/auth/controllers/auth_controller
 import 'package:sixvalley_delivery_boy/features/auth/domain/repositories/auth_repository_interface.dart';
 import 'package:sixvalley_delivery_boy/features/auth/domain/services/auth_service.dart';
 import 'package:sixvalley_delivery_boy/features/auth/domain/services/auth_service_interface.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/controllers/driver_onboarding_controller.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/domain/repositories/driver_onboarding_repository.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/domain/repositories/driver_onboarding_repository_interface.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/domain/services/driver_onboarding_service.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/domain/services/driver_onboarding_service_interface.dart';
 import 'package:sixvalley_delivery_boy/features/chat/controllers/chat_controller.dart';
 import 'package:sixvalley_delivery_boy/features/chat/domain/repositories/chat_repository_interface.dart';
 import 'package:sixvalley_delivery_boy/features/chat/domain/services/chat_service.dart';
@@ -105,10 +110,14 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(()=> emergencyContactRepoInterface);
   OrderDetailsRepositoryInterface orderDetailsRepositoryInterface = OrderDetailsRepository(apiClient: Get.find());
   Get.lazyPut(()=> orderDetailsRepositoryInterface);
+  DriverOnboardingRepositoryInterface driverOnboardingRepoInterface = DriverOnboardingRepository(apiClient: Get.find(), sharedPreferences: Get.find());
+  Get.lazyPut(() => driverOnboardingRepoInterface);
 
 
   AuthServiceInterface authServiceInterface = AuthService(authRepoInterface: Get.find());
   Get.lazyPut(() => authServiceInterface);
+  DriverOnboardingServiceInterface driverOnboardingServiceInterface = DriverOnboardingService(onboardingRepo: Get.find());
+  Get.lazyPut(() => driverOnboardingServiceInterface);
   ChatServiceInterface chatServiceInterface = ChatService(chatRepoInterface: Get.find());
   Get.lazyPut(()=> chatServiceInterface);
   NotificationServiceInterface notificationServiceInterface = NotificationService(notificationRepoInterfcace: Get.find());
@@ -179,6 +188,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(()=> WithdrawController(withdrawServiceInterface: Get.find()));
   Get.lazyPut(()=> EmergencyContactController(emergencyContactServiceInterface: Get.find()));
   Get.lazyPut(()=> OrderDetailsController(orderDetailsServiceInterface: Get.find()));
+  Get.lazyPut(() => DriverOnboardingController(onboardingService: Get.find()));
 
   Get.lazyPut(() => LocalizationController(sharedPreferences: sharedPreferences));
   Get.lazyPut(() => RiderController(riderRepo : Get.find()));

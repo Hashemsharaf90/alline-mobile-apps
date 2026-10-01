@@ -28,7 +28,9 @@ class SmHeaderWidget extends StatelessWidget {
           Row(
             children: [
               _IconButton(
-                icon: Icons.arrow_forward_ios_rounded,
+                icon: Directionality.of(context) == TextDirection.rtl
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_new_rounded,
                 tooltip: 'رجوع',
                 onTap: () => Navigator.of(context).pop(),
               ),
@@ -135,7 +137,9 @@ class SmHeaderWidget extends StatelessWidget {
                             ?.copyWith(color: primary),
                       ),
                       Icon(
-                        Icons.chevron_left_rounded,
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_left_rounded
+                            : Icons.chevron_right_rounded,
                         color: primary,
                         size: 20,
                       ),

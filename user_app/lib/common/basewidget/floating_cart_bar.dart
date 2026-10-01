@@ -42,6 +42,7 @@ class FloatingCartBar extends StatelessWidget {
         }
 
         return SafeArea(
+          top: false,
           child: Padding(
             padding: margin ??
                 const EdgeInsets.symmetric(
@@ -91,6 +92,8 @@ class FloatingCartBar extends StatelessWidget {
                         children: [
                           Text(
                             '$totalCount ${isLtr ? (totalCount == 1 ? "item" : "items") : "منتجات"}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: textRegular.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
@@ -101,6 +104,8 @@ class FloatingCartBar extends StatelessWidget {
                           ),
                           Text(
                             PriceConverter.convertPrice(context, totalPrice),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: textBold.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: Dimensions.fontSizeLarge,

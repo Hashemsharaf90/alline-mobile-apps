@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixvalley_delivery_boy/data/api/api_client.dart';
@@ -27,9 +26,12 @@ class AuthRepository implements AuthRepositoryInterface{
 
 
   @override
-  Future<bool> saveUserToken(String token) async {
+  Future<bool> saveUserToken(String token, [String? approvalStatus]) async {
     apiClient.token = token;
     apiClient.updateHeader(token, sharedPreferences.getString(AppConstants.languageCode));
+    if (approvalStatus != null) {
+      await sharedPreferences.setString(AppConstants.driverApprovalStatus, approvalStatus);
+    }
     return await sharedPreferences.setString(AppConstants.token, token);
   }
 
@@ -90,6 +92,7 @@ class AuthRepository implements AuthRepositoryInterface{
       } catch (_) {}
     }
     await sharedPreferences.remove(AppConstants.token);
+    await sharedPreferences.remove(AppConstants.driverApprovalStatus);
     apiClient.token = null;
     apiClient.updateHeader(null, sharedPreferences.getString(AppConstants.languageCode));
     return true;

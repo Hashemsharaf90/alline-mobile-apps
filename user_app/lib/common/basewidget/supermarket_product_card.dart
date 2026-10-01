@@ -12,11 +12,13 @@ import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 class SupermarketProductCard extends StatelessWidget {
   final Product product;
   final double? margin;
+  final Future<void> Function()? onAdd;
 
   const SupermarketProductCard({
     super.key,
     required this.product,
     this.margin,
+    this.onAdd,
   });
 
   bool get hasDiscount =>
@@ -104,7 +106,7 @@ class SupermarketProductCard extends StatelessWidget {
                               : 'عرض',
                           style: TextStyle(
                             fontFamily: 'AllineTajawal',
-                            fontSize: 10,
+                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).colorScheme.onSecondary,
                           ),
@@ -152,8 +154,8 @@ class SupermarketProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: textMedium.copyWith(
                         color: colors.textPrimary,
-                        fontSize: 13,
-                        height: 1.25,
+                        fontSize: 14,
+                        height: 1.35,
                       ),
                     ),
                     if (unit?.isNotEmpty == true) ...[
@@ -164,7 +166,7 @@ class SupermarketProductCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: textRegular.copyWith(
                           color: colors.textSecondary,
-                          fontSize: 10.5,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -176,7 +178,7 @@ class SupermarketProductCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: textRegular.copyWith(
                           color: colors.textSecondary,
-                          fontSize: 11,
+                          fontSize: 12,
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
@@ -186,7 +188,7 @@ class SupermarketProductCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: textBold.copyWith(
                         color: Theme.of(context).colorScheme.primary,
-                        fontSize: 14,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: AllineSpacing.xs),
@@ -200,6 +202,7 @@ class SupermarketProductCard extends StatelessWidget {
                                   ?.copyWith(color: colors.textSecondary))
                           : QuickAddToCartWidget(
                               product: product,
+                              onAdd: onAdd,
                               height: AllineTouchTarget.minimum,
                               iconSize: 20,
                             ),

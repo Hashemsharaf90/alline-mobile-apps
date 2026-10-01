@@ -20,9 +20,15 @@ import 'package:sixvalley_delivery_boy/utill/app_constants.dart';
 import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
 import 'package:sixvalley_delivery_boy/utill/images.dart';
 import 'package:sixvalley_delivery_boy/utill/styles.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixvalley_delivery_boy/features/auth/screens/login_screen.dart';
 import 'package:sixvalley_delivery_boy/features/dashboard/screens/dashboard_screen.dart';
 import 'package:sixvalley_delivery_boy/features/onboard/screens/onboarding_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_pending_approval_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_changes_requested_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_profile_step_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_rejected_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_suspended_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   final NotificationBody? body;
@@ -56,7 +62,8 @@ class _SplashScreenState extends State<SplashScreen> {
   void _route() {
     bool showIntro = Get.find<SplashController>().showIntro() ?? false;
     Get.find<SplashController>().getConfigData().then((isSuccess) async {
-      if(Get.find<AuthController>().isLoggedIn()) {
+      String? approvalStatus = Get.find<SharedPreferences>().getString(AppConstants.driverApprovalStatus);
+      if(Get.find<AuthController>().isLoggedIn() && (approvalStatus == null || approvalStatus == 'active')) {
         await Get.find<ProfileController>().getProfile();
       }
       if(isSuccess) {
@@ -120,9 +127,22 @@ class _SplashScreenState extends State<SplashScreen> {
 
             } else {
               if (Get.find<AuthController>().isLoggedIn()) {
-                Get.find<AuthController>().updateToken();
-                await Get.find<ProfileController>().getProfile();
-                Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen(pageIndex: 0)));
+                String? approvalStatus = Get.find<SharedPreferences>().getString(AppConstants.driverApprovalStatus);
+                if (approvalStatus == 'pending_approval') {
+                  Get.offAll(() => const DriverPendingApprovalScreen());
+                } else if (approvalStatus == 'changes_requested') {
+                  Get.offAll(() => const DriverChangesRequestedScreen());
+                } else if (approvalStatus == 'draft') {
+                  Get.offAll(() => const DriverProfileStepScreen());
+                } else if (approvalStatus == 'account_rejected' || approvalStatus == 'rejected') {
+                  Get.offAll(() => const DriverRejectedScreen());
+                } else if (approvalStatus == 'account_suspended' || approvalStatus == 'suspended') {
+                  Get.offAll(() => const DriverSuspendedScreen());
+                } else {
+                  Get.find<AuthController>().updateToken();
+                  await Get.find<ProfileController>().getProfile();
+                  Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen(pageIndex: 0)));
+                }
               } else {
                 if (showIntro) {
                   Get.offAll(const OnBoardingScreen());

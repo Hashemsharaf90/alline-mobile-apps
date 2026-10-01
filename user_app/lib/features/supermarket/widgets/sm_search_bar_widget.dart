@@ -37,7 +37,9 @@ class SmSearchBarWidget extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'ابحث عن منتجات أو سوبر ماركت',
+                  'ابحث عن منتج',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium

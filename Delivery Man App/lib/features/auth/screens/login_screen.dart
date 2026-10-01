@@ -17,6 +17,12 @@ import 'package:sixvalley_delivery_boy/common/basewidgets/custom_snackbar_widget
 import 'package:sixvalley_delivery_boy/features/dashboard/screens/dashboard_screen.dart';
 import 'package:sixvalley_delivery_boy/features/auth/screens/forget_password_screen.dart';
 import 'package:sixvalley_delivery_boy/features/auth/widgets/code_picker_widget.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_welcome_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_pending_approval_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_changes_requested_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_profile_step_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_rejected_screen.dart';
+import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver_suspended_screen.dart';
 
 
 
@@ -252,10 +258,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         } else {
                           authController.clearUserEmailAndPassword();
                         }
-                        await Get.find<ProfileController>().getProfile();
-                        Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen(pageIndex: 0,)));
-                      }else {
-                        showCustomSnackBarWidget(status.message);
+
+                        if (status.approvalStatus == 'pending_approval') {
+                          Get.offAll(() => const DriverPendingApprovalScreen());
+                        } else if (status.approvalStatus == 'changes_requested') {
+                          Get.offAll(() => DriverChangesRequestedScreen(reviewNote: status.reviewNote));
+                        } else if (status.approvalStatus == 'draft') {
+                          Get.offAll(() => const DriverProfileStepScreen());
+                        } else {
+                          await Get.find<ProfileController>().getProfile();
+                          Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(builder: (_) => const DashboardScreen(pageIndex: 0)));
+                        }
+                      } else {
+                        if (status.approvalStatus == 'account_rejected') {
+                          Get.to(() => DriverRejectedScreen(reviewNote: status.reviewNote));
+                        } else if (status.approvalStatus == 'account_suspended') {
+                          Get.to(() => DriverSuspendedScreen(reviewNote: status.reviewNote));
+                        } else {
+                          showCustomSnackBarWidget(status.message);
+                        }
                       }
                     }
                     );
@@ -264,6 +285,18 @@ class _LoginScreenState extends State<LoginScreen> {
               ) :
               Center(child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Get.isDarkMode ? Theme.of(context).hintColor : Theme.of(context).primaryColor))),
+
+              const SizedBox(height: 18),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => Get.to(() => const DriverWelcomeScreen()),
+                  icon: const Icon(Icons.person_add_alt_1, size: 18),
+                  label: Text(
+                    'new_to_alline_register_now'.tr,
+                    style: rubikBold.copyWith(fontSize: 14, color: Theme.of(context).primaryColor),
+                  ),
+                ),
+              ),
 
               GetBuilder<SplashController>
                 (builder: (splashController) {

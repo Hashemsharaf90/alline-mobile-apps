@@ -27,7 +27,9 @@ class SmNearbyStoresWidget extends StatelessWidget {
     return Consumer<ProductController>(
       builder: (context, ctrl, _) {
         final stores = ctrl.nearbySupermarkets.whereType<Map>().toList();
-        final hasLocation = ctrl.supermarketLatitude?.trim().isNotEmpty == true;
+        final hasLocation =
+            ctrl.supermarketLatitude?.trim().isNotEmpty == true &&
+                ctrl.supermarketLongitude?.trim().isNotEmpty == true;
 
         return Container(
           color: context.allineColors.surface,
@@ -56,7 +58,8 @@ class SmNearbyStoresWidget extends StatelessWidget {
                 const SmNearbyStoresSkeleton()
               else if (ctrl.nearbySupermarketHasError)
                 Padding(
-                  padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
+                  padding:
+                      const EdgeInsetsDirectional.symmetric(horizontal: 16),
                   child: SizedBox(
                     height: 260,
                     child: AllineErrorState(
@@ -74,7 +77,8 @@ class SmNearbyStoresWidget extends StatelessWidget {
                 const _EmptyStores()
               else
                 SizedBox(
-                  height: 200,
+                  height: 220 +
+                      (MediaQuery.textScalerOf(context).scale(14) - 14) * 6,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
@@ -149,7 +153,7 @@ class _StoreCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AllineRadius.card),
       child: Container(
-        width: 160,
+        width: 224,
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(AllineRadius.card),
@@ -259,7 +263,7 @@ class _StoreCard extends StatelessWidget {
                           rating.toStringAsFixed(1),
                           style: TextStyle(
                             fontFamily: 'AllineTajawal',
-                            fontSize: 11.5,
+                            fontSize: 12,
                             color: colors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
@@ -268,7 +272,10 @@ class _StoreCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                   ],
-                  Row(
+                  Wrap(
+                    spacing: 2,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       if (distance != null) ...[
                         Icon(Icons.location_on_outlined,
@@ -278,7 +285,7 @@ class _StoreCard extends StatelessWidget {
                           '${distance.toStringAsFixed(1)} \u0643\u0645',
                           style: TextStyle(
                             fontFamily: 'AllineTajawal',
-                            fontSize: 11,
+                            fontSize: 12,
                             color: colors.textSecondary,
                           ),
                         ),
@@ -292,7 +299,7 @@ class _StoreCard extends StatelessWidget {
                           '$etaInt \u062f\u0642\u064a\u0642\u0629',
                           style: TextStyle(
                             fontFamily: 'AllineTajawal',
-                            fontSize: 11,
+                            fontSize: 12,
                             color: colors.textSecondary,
                           ),
                         ),
@@ -310,12 +317,18 @@ class _StoreCard extends StatelessWidget {
 
   bool _asFlag(Object? value) {
     final normalized = value?.toString().toLowerCase();
-    return value == true || value == 1 || normalized == 'true' || normalized == '1';
+    return value == true ||
+        value == 1 ||
+        normalized == 'true' ||
+        normalized == '1';
   }
 
   bool _asUnavailable(Object? value) {
     final normalized = value?.toString().toLowerCase();
-    return value == false || value == 0 || normalized == 'false' || normalized == '0';
+    return value == false ||
+        value == 0 ||
+        normalized == 'false' ||
+        normalized == '0';
   }
 }
 

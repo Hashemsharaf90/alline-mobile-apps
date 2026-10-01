@@ -45,7 +45,7 @@ class SmStoreCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.allineColors;
     return Container(
-      width: 160,
+      width: 224,
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(16),
@@ -99,8 +99,8 @@ class SmProductCardSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.allineColors;
     return Container(
-      width: 156,
-      height: 268,
+      width: 176,
+      height: 300 + (MediaQuery.textScalerOf(context).scale(14) - 14) * 8,
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(16),
@@ -173,7 +173,7 @@ class SmNearbyStoresSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 192,
+      height: 220 + (MediaQuery.textScalerOf(context).scale(14) - 14) * 6,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -192,7 +192,7 @@ class SmProductListSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 268,
+      height: 300 + (MediaQuery.textScalerOf(context).scale(14) - 14) * 8,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -58,10 +58,22 @@ class AppConstants {
   static const String singleOrderHistoryUri = '/api/v2/delivery-man/order-item';
   static const String businessPagesUri = '/api/v1/business-pages?type=';
 
+  // Driver Onboarding Endpoints
+  static const String driverRegisterUri = '/api/v2/delivery-man/auth/register';
+  static const String driverVerifyRegistrationOtpUri = '/api/v2/delivery-man/auth/verify-registration-otp';
+  static const String driverResendRegistrationOtpUri = '/api/v2/delivery-man/auth/resend-registration-otp';
+  static const String driverOnboardingProfileUri = '/api/v2/delivery-man/onboarding/profile';
+  static const String driverOnboardingDocumentsUri = '/api/v2/delivery-man/onboarding/documents';
+  static const String driverOnboardingDeleteDocumentUri = '/api/v2/delivery-man/onboarding/documents/';
+  static const String driverOnboardingVehicleUri = '/api/v2/delivery-man/onboarding/vehicle';
+  static const String driverOnboardingLocationUri = '/api/v2/delivery-man/onboarding/location';
+  static const String driverOnboardingSubmitUri = '/api/v2/delivery-man/onboarding/submit';
+  static const String driverOnboardingStatusUri = '/api/v2/delivery-man/onboarding/status';
 
   // Shared Key
   static const String theme = 'theme';
   static const String token = 'token';
+  static const String driverApprovalStatus = 'driver_approval_status';
   static const String countryCode = 'country_code';
   static const String languageCode = 'language_code';
   static const String cartList = 'cart_list';

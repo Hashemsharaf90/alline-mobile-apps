@@ -2,7 +2,7 @@ import 'package:sixvalley_delivery_boy/interface/repository_interface.dart';
 
 abstract class AuthRepositoryInterface implements RepositoryInterface {
   Future<dynamic> login(String countryCode, String phone, String password);
-  void saveUserToken(String token);
+  void saveUserToken(String token, [String? approvalStatus]);
   Future<dynamic> updateToken();
   Future<dynamic> setLanguageCode(String currentLanguage);
   bool isLoggedIn();

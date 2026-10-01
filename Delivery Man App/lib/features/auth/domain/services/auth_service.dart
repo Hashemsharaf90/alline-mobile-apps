@@ -44,11 +44,24 @@ class AuthService implements AuthServiceInterface {
     Response response = await authRepoInterface.login(countryCode, phone, password);
 
     if (response.statusCode == 200) {
-      authRepoInterface.saveUserToken(response.body['token']);
-      await authRepoInterface.updateToken();
-      return ResponseModel(true, 'successful');
+      String? token = response.body['token'];
+      String approvalStatus = response.body['approval_status'] ?? 'active';
+      String? reviewNote = response.body['review_note'];
+      if (token != null) {
+        authRepoInterface.saveUserToken(token, approvalStatus);
+        if (approvalStatus == 'active') {
+          await authRepoInterface.updateToken();
+        }
+      }
+      return ResponseModel(true, 'successful', approvalStatus: approvalStatus, reviewNote: reviewNote);
     } else {
-      return ResponseModel(false, response.statusText);
+      String? reviewNote;
+      String? code;
+      if (response.body is Map && response.body['errors'] != null && response.body['errors'] is List && response.body['errors'].isNotEmpty) {
+        reviewNote = response.body['errors'][0]['review_note'];
+        code = response.body['errors'][0]['code'];
+      }
+      return ResponseModel(false, response.statusText, approvalStatus: code, reviewNote: reviewNote);
     }
   }
 
@@ -58,8 +71,8 @@ class AuthService implements AuthServiceInterface {
   }
 
   @override
-  void saveUserToken(String token) {
-    return authRepoInterface.saveUserToken(token);
+  void saveUserToken(String token, [String? approvalStatus]) {
+    return authRepoInterface.saveUserToken(token, approvalStatus);
   }
 
   @override

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
@@ -117,6 +116,28 @@ class ApiClient extends GetxService {
         headers: headers ?? _mainHeaders,
       ).timeout(Duration(seconds: timeoutInSeconds));
       return handleResponse(_response, uri);
+    } catch (e) {
+      return const Response(statusCode: 1, statusText: noInternetMessage);
+    }
+  }
+
+  Future<Response> putMultipartData(String uri, Map<String, String> body, List<MultipartBody> multipartBody, {Map<String, String>? headers}) async {
+    try {
+      if (foundation.kDebugMode) {
+        debugPrint('====> API PUT Multipart: $uri with ${multipartBody.length} files');
+      }
+      http.MultipartRequest _request = http.MultipartRequest('POST', Uri.parse(appBaseUrl+uri));
+      _request.headers.addAll(headers ?? _mainHeaders as Map<String, String>);
+      _request.fields.addAll(body);
+      _request.fields['_method'] = 'PUT';
+      for(MultipartBody multipart in multipartBody) {
+        File _file = File(multipart.file.path);
+        _request.files.add(http.MultipartFile(
+          multipart.key, _file.readAsBytes().asStream(), _file.lengthSync(), filename: _file.path.split('/').last,
+        ));
+      }
+      http.Response response = await http.Response.fromStream(await _request.send());
+      return handleResponse(response, uri);
     } catch (e) {
       return const Response(statusCode: 1, statusText: noInternetMessage);
     }

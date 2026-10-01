@@ -3,6 +3,10 @@ class Images {
   static const String sheinLogo = 'assets/images/shein_logo.jpg';
   static const String aliexpressLogo = 'assets/images/aliexpress_logo.png';
   static const String alibabaLogo = 'assets/images/alibaba_logo.webp';
+  static const String amazonCard = 'assets/images/store_card_amazon.png';
+  static const String sheinCard = 'assets/images/store_card_shein.png';
+  static const String aliexpressCard = 'assets/images/store_card_aliexpress.png';
+  static const String alibabaCard = 'assets/images/store_card_alibaba.png';
   static const String moreFilledImage = 'assets/images/more_filled.png';
   static const String cartArrowDownImage = 'assets/images/cart_arrow_down.png';
   static const String cartImage = 'assets/images/cart.png';
@@ -66,6 +70,7 @@ class Images {
   static const String loginTopSlogan = 'assets/images/alline/login_top_slogan.png';
   static const String loginBottomTagline = 'assets/images/alline/login_bottom_tagline.png';
   static const String loginBottomBadges = 'assets/images/alline/login_bottom_badges.png';
+  static const String globalShoppingHeroBanner = 'assets/images/alline/global_shopping_hero_banner.png';
 
   static const String address = 'assets/images/address.png';
   static const String dropdown = 'assets/images/dropdown.png';
