@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/global_store_webview_screen.dart';
@@ -24,37 +25,37 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
     {
       'name': 'أمازون',
       'en': 'Amazon',
-      'mark': 'a',
+      'logo': 'assets/svg/global_store_amazon.svg',
       'url': 'https://www.amazon.com/'
     },
     {
       'name': 'علي إكسبريس',
       'en': 'AliExpress',
-      'mark': '⌁',
+      'logo': 'assets/svg/global_store_aliexpress.svg',
       'url': 'https://www.aliexpress.com/'
     },
     {
       'name': 'علي بابا',
       'en': 'Alibaba',
-      'mark': 'a',
+      'logo': 'assets/svg/global_store_alibaba.svg',
       'url': 'https://www.alibaba.com/'
     },
     {
       'name': 'شي إن',
       'en': 'SHEIN',
-      'mark': 'S',
+      'logo': 'assets/svg/global_store_shein.svg',
       'url': 'https://www.shein.com/'
     },
     {
       'name': 'ترينديول',
       'en': 'Trendyol',
-      'mark': 'T',
+      'logo': 'assets/svg/global_store_trendyol.svg',
       'url': 'https://www.trendyol.com/'
     },
     {
       'name': 'آي هيرب',
       'en': 'iHerb',
-      'mark': 'i',
+      'logo': 'assets/svg/global_store_iherb.svg',
       'url': 'https://www.iherb.com/'
     },
   ];
@@ -170,12 +171,9 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                     itemBuilder: (context, index) {
                       final store = _stores[index];
                       return Material(
-                        color: isDark
-                            ? Theme.of(context).highlightColor
-                            : Colors.white,
+                        color: Colors.transparent,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          side: const BorderSide(color: Color(0xFFE1E8F2)),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         clipBehavior: Clip.antiAlias,
                         child: InkWell(
@@ -188,37 +186,57 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                             ),
                           ),
                           child: SizedBox(
-                            width: 94,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 34,
-                                  height: 34,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF4F8FE),
-                                    borderRadius: BorderRadius.circular(9),
+                            width: 118,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 10),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: 42,
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: isDark
+                                          ? Colors.white
+                                          : const Color(0xFFF7FAFF),
+                                      borderRadius: BorderRadius.circular(11),
+                                      border: Border.all(
+                                          color: const Color(0xFFE5ECF6)),
+                                    ),
+                                    child: SvgPicture.asset(
+                                      store['logo']!,
+                                      fit: BoxFit.contain,
+                                      semanticsLabel: store['en'],
+                                    ),
                                   ),
-                                  child: Text(store['mark']!,
-                                      textDirection: TextDirection.ltr,
-                                      style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w900,
-                                          color: Color(0xFF071B49))),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(isLtr ? store['en']! : store['name']!,
+                                  const SizedBox(height: 7),
+                                  Text(
+                                    isLtr ? store['en']! : store['name']!,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
                                     style: textBold.copyWith(
                                         fontSize:
-                                            Dimensions.fontSizeExtraSmall)),
-                                Text(isLtr ? 'Browse' : 'تسوق عالمي',
-                                    style: textRegular.copyWith(
-                                        fontSize: 9,
-                                        color: const Color(0xFF6D85AF))),
-                              ],
+                                            Dimensions.fontSizeExtraSmall),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                          isLtr ? 'Browse' : 'تسوق عالمي',
+                                          style: textRegular.copyWith(
+                                              fontSize: 9,
+                                              color: const Color(0xFF6D85AF))),
+                                      const SizedBox(width: 3),
+                                      const Icon(Icons.arrow_forward_ios,
+                                          size: 8, color: Color(0xFF2B83E8)),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
