@@ -7,6 +7,7 @@ import 'package:flutter_sixvalley_ecommerce/localization/controllers/localizatio
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_store_logo_widget.dart';
 import 'package:provider/provider.dart';
 
 class GlobalProductPreviewCard extends StatefulWidget {
@@ -72,16 +73,32 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
             ),
             child: Row(
               children: [
-                Icon(Icons.check_circle_outline,
-                    color: Theme.of(context).primaryColor, size: 18),
-                const SizedBox(width: 6),
-                Text(
-                  isLtr
-                      ? 'Product Identified from ${widget.preview.storeName}'
-                      : 'تم التعرف على المنتج من ${widget.preview.storeName}',
-                  style: textBold.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: Dimensions.fontSizeSmall),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: GlobalStoreLogoWidget(
+                    storeName: widget.preview.storeName,
+                    height: 14,
+                    width: 32,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isLtr
+                        ? 'Product from ${widget.preview.storeName}'
+                        : 'تم التعرف على المنتج من ${widget.preview.storeName}',
+                    style: textBold.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: Dimensions.fontSizeSmall),
+                  ),
                 ),
               ],
             ),
@@ -324,13 +341,13 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.shopping_bag_outlined,
+                              const Icon(Icons.add_shopping_cart_rounded,
                                   color: Colors.white, size: 20),
                               const SizedBox(width: 8),
                               Text(
                                 isLtr
-                                ? 'Request manual quote'
-                                    : 'إرسال للمراجعة والتسعير',
+                                    ? 'Add to Alline Cart 🛒'
+                                    : 'أضف إلى سلة Alline 🛒',
                                 style: textBold.copyWith(
                                     color: Colors.white,
                                     fontSize: Dimensions.fontSizeDefault),

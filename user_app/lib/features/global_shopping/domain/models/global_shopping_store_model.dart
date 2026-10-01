@@ -35,11 +35,11 @@ class GlobalShoppingStoreModel {
 
   factory GlobalShoppingStoreModel.fromJson(Map<String, dynamic> json) {
     final domain = json['domain']?.toString() ?? '';
-    final url = _httpsUrl(
+    final url = _normalizeUrl(
       json['url']?.toString() ?? json['store_url']?.toString() ?? domain,
     );
     final rawLogo = (json['logo_url'] ?? json['logo'] ?? json['icon'])?.toString();
-    final normalizedLogo = _httpsUrl(rawLogo ?? '');
+    final normalizedLogo = _normalizeUrl(rawLogo ?? '');
     final explicitSupport = json['request_supported'] ?? json['supported'];
     // Older deployed APIs returned a store directory with a domain and icon,
     // but no request_supported/url fields. The legacy request endpoint accepts
@@ -68,14 +68,19 @@ class GlobalShoppingStoreModel {
     );
   }
 
-  static String _httpsUrl(String value) {
+  static String _normalizeUrl(String value) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return '';
+
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      final uri = Uri.tryParse(trimmed);
+      if (uri != null && uri.host.isNotEmpty) return uri.toString();
+    }
 
     final uri = Uri.tryParse(
       trimmed.contains('://') ? trimmed : 'https://$trimmed',
     );
     if (uri == null || uri.host.isEmpty) return '';
-    return uri.replace(scheme: 'https').toString();
+    return uri.toString();
   }
 }

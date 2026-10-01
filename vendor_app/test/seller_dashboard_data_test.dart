@@ -61,4 +61,18 @@ void main() {
     expect(controller.todaySales, isNull);
     expect(controller.salesSummaryFailed, isTrue);
   });
+
+  test('dashboard calculates sales growth percentage correctly', () {
+    const today = 245000.0;
+    const yesterday = 200000.0;
+    final diff = (today - yesterday) / yesterday * 100;
+    expect(diff, closeTo(22.5, 0.01));
+    expect(diff >= 0, isTrue);
+
+    // Negative growth case
+    const todayDown = 150000.0;
+    final diffDown = (todayDown - yesterday) / yesterday * 100;
+    expect(diffDown, closeTo(-25.0, 0.01));
+    expect(diffDown < 0, isTrue);
+  });
 }

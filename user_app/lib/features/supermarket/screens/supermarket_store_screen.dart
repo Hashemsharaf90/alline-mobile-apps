@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_state_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/floating_cart_bar.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/no_internet_screen_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
-import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/seller_product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/shop/controllers/shop_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/main.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_skeleton_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +51,7 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
   int _selectedCategoryIndex = 0; // 0 means 'All'
   int? _selectedCategoryId;
   bool _isLoading = false;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -58,17 +59,33 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
 
     final slug = widget.slug ?? '';
-    if (slug.isNotEmpty) {
-      await Provider.of<ShopController>(Get.context!, listen: false).getSellerInfo(slug);
-      await Provider.of<CategoryController>(Get.context!, listen: false).getSellerWiseCategoryList(slug);
-      await Provider.of<SellerProductController>(Get.context!, listen: false).getSellerProductList(slug, 1, "");
+    final productController = context.read<SellerProductController>();
+    try {
+      if (slug.isNotEmpty) {
+        await Future.wait([
+          context.read<ShopController>().getSellerInfo(slug),
+          context.read<CategoryController>().getSellerWiseCategoryList(slug),
+        ]);
+        final response =
+            await productController.getSellerProductList(slug, 1, '');
+        if (response.response?.statusCode != 200) _hasError = true;
+      }
+    } catch (_) {
+      if (mounted) _hasError = true;
     }
-
-    await Provider.of<ProductController>(Get.context!, listen: false).getSupermarketProductList(1);
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -77,11 +94,13 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
-    final isDark = Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final colors = context.allineColors;
+    final primary = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: isDark ? Theme.of(context).cardColor : const Color(0xFFF6F8FA),
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           CustomScrollView(
@@ -91,9 +110,14 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
               SliverAppBar(
                 expandedHeight: 180,
                 pinned: true,
-                backgroundColor: Theme.of(context).primaryColor,
+                backgroundColor: primary,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                  icon: Icon(
+                    isLtr
+                        ? Icons.arrow_back_ios_new_rounded
+                        : Icons.arrow_forward_ios_rounded,
+                    color: AllineColors.white,
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
@@ -106,26 +130,15 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                           fit: BoxFit.cover,
                         )
                       else
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Theme.of(context).primaryColor,
-                                AllineColors.primaryDark,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                          ),
-                        ),
+                        ColoredBox(color: primary),
                       Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withValues(alpha: 0.3),
-                              Colors.black.withValues(alpha: 0.75),
+                              AllineColors.primaryDark.withValues(alpha: 0.28),
+                              AllineColors.primaryDark.withValues(alpha: 0.70),
                             ],
                           ),
                         ),
@@ -140,25 +153,23 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.15),
-                                    blurRadius: 8,
-                                  ),
-                                ],
+                                color: colors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(
+                                    Dimensions.radiusDefault),
+                                border: Border.all(color: colors.border),
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                child: (widget.image != null && widget.image!.isNotEmpty)
+                                borderRadius: BorderRadius.circular(
+                                    Dimensions.radiusDefault),
+                                child: (widget.image != null &&
+                                        widget.image!.isNotEmpty)
                                     ? CustomImageWidget(
                                         image: widget.image!,
                                         fit: BoxFit.cover,
                                       )
                                     : Icon(
                                         Icons.storefront,
-                                        color: Theme.of(context).primaryColor,
+                                        color: primary,
                                         size: 32,
                                       ),
                               ),
@@ -170,11 +181,12 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    widget.name ?? (isLtr ? 'Supermarket' : 'سوبر ماركت'),
+                                    widget.name ??
+                                        (isLtr ? 'Supermarket' : 'سوبر ماركت'),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: textBold.copyWith(
-                                      color: Colors.white,
+                                      color: AllineColors.white,
                                       fontSize: Dimensions.fontSizeLarge,
                                     ),
                                   ),
@@ -185,31 +197,39 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                                         Icon(
                                           Icons.location_on,
                                           size: 14,
-                                          color: Colors.white.withValues(alpha: 0.85),
+                                          color: AllineColors.white
+                                              .withValues(alpha: 0.85),
                                         ),
                                         const SizedBox(width: 2),
                                         Text(
                                           '${widget.distanceKm!.toStringAsFixed(1)} ${isLtr ? "km" : "كم"}',
                                           style: textRegular.copyWith(
-                                            color: Colors.white.withValues(alpha: 0.9),
-                                            fontSize: Dimensions.fontSizeExtraSmall,
+                                            color: AllineColors.white
+                                                .withValues(alpha: 0.9),
+                                            fontSize:
+                                                Dimensions.fontSizeExtraSmall,
                                           ),
                                         ),
                                         const SizedBox(width: 8),
                                       ],
-                                      if (widget.estimatedDeliveryMinutes != null &&
-                                          widget.estimatedDeliveryMinutes! > 0) ...[
+                                      if (widget.estimatedDeliveryMinutes !=
+                                              null &&
+                                          widget.estimatedDeliveryMinutes! >
+                                              0) ...[
                                         Icon(
                                           Icons.timer_outlined,
                                           size: 14,
-                                          color: Colors.white.withValues(alpha: 0.85),
+                                          color: AllineColors.white
+                                              .withValues(alpha: 0.85),
                                         ),
                                         const SizedBox(width: 2),
                                         Text(
                                           '${widget.estimatedDeliveryMinutes} ${isLtr ? "min" : "دقيقة"}',
                                           style: textRegular.copyWith(
-                                            color: Colors.white.withValues(alpha: 0.9),
-                                            fontSize: Dimensions.fontSizeExtraSmall,
+                                            color: AllineColors.white
+                                                .withValues(alpha: 0.9),
+                                            fontSize:
+                                                Dimensions.fontSizeExtraSmall,
                                           ),
                                         ),
                                       ],
@@ -227,96 +247,113 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
               ),
 
               // Grocery-only Sticky Categories Header
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _StickyCategoryDelegate(
-                  child: Consumer<CategoryController>(
-                    builder: (context, categoryController, _) {
-                      final categories = _getSupermarketCategories(categoryController);
+              if (!_isLoading &&
+                  context
+                      .watch<CategoryController>()
+                      .sellerWiseCategoryList
+                      .isNotEmpty)
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _StickyCategoryDelegate(
+                    child: Consumer<CategoryController>(
+                      builder: (context, categoryController, _) {
+                        final categories =
+                            _getSupermarketCategories(categoryController);
+                        if (categories.isEmpty) return const SizedBox.shrink();
 
-                      return Container(
-                        height: 52,
-                        color: isDark ? Theme.of(context).cardColor : Colors.white,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: Dimensions.paddingSizeSmall,
-                            vertical: 8,
-                          ),
-                          itemCount: categories.length + 1,
-                          itemBuilder: (context, index) {
-                            final bool isSelected = _selectedCategoryIndex == index;
-                            final String title = index == 0
-                                ? (isLtr ? 'All Items' : 'جميع الأصناف')
-                                : categories[index - 1].name;
+                        return Container(
+                          height: 52,
+                          color: colors.surface,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: Dimensions.paddingSizeSmall,
+                              vertical: 8,
+                            ),
+                            itemCount: categories.length + 1,
+                            itemBuilder: (context, index) {
+                              final bool isSelected =
+                                  _selectedCategoryIndex == index;
+                              final String title = index == 0
+                                  ? (isLtr ? 'All Items' : 'جميع الأصناف')
+                                  : categories[index - 1].name;
 
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: ChoiceChip(
-                                label: Text(title),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() {
-                                      _selectedCategoryIndex = index;
-                                      _selectedCategoryId = index == 0 ? null : categories[index - 1].id;
-                                    });
-                                  }
-                                },
-                                selectedColor: Theme.of(context).primaryColor,
-                                backgroundColor: isDark
-                                    ? Theme.of(context).highlightColor
-                                    : const Color(0xFFF0F2F5),
-                                labelStyle: textMedium.copyWith(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Theme.of(context).textTheme.bodyLarge?.color,
-                                  fontSize: Dimensions.fontSizeSmall,
-                                ),
-                                showCheckmark: false,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: BorderSide(
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                child: ChoiceChip(
+                                  label: Text(title),
+                                  selected: isSelected,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() {
+                                        _selectedCategoryIndex = index;
+                                        _selectedCategoryId = index == 0
+                                            ? null
+                                            : categories[index - 1].id;
+                                      });
+                                    }
+                                  },
+                                  selectedColor: primary,
+                                  backgroundColor: colors.background,
+                                  labelStyle: textMedium.copyWith(
                                     color: isSelected
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.transparent,
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : colors.textPrimary,
+                                    fontSize: Dimensions.fontSizeSmall,
+                                  ),
+                                  showCheckmark: false,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    side: BorderSide(
+                                      color:
+                                          isSelected ? primary : colors.border,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
 
               // Products Grid
-              Consumer2<SellerProductController, ProductController>(
-                builder: (context, sellerProductController, productController, _) {
-                  List<Product> products = [];
-                  if (sellerProductController.sellerProduct != null &&
-                      sellerProductController.sellerProduct!.products != null &&
-                      sellerProductController.sellerProduct!.products!.isNotEmpty) {
-                    products = List<Product>.from(sellerProductController.sellerProduct!.products!);
-                  } else if (productController.supermarketProductModel?.products != null) {
-                    products = List<Product>.from(productController.supermarketProductModel!.products!);
-                  }
+              Consumer<SellerProductController>(
+                builder: (context, sellerProductController, _) {
+                  List<Product> products = widget.slug?.isNotEmpty == true
+                      ? List<Product>.from(
+                          sellerProductController.sellerProduct?.products ??
+                              <Product>[],
+                        )
+                      : <Product>[];
 
                   // Filter by category if selected
                   if (_selectedCategoryId != null) {
                     products = products.where((p) {
                       if (p.categoryIds != null && p.categoryIds!.isNotEmpty) {
-                        return p.categoryIds!.any((c) => c.id == _selectedCategoryId.toString());
+                        return p.categoryIds!
+                            .any((c) => c.id == _selectedCategoryId.toString());
                       }
-                      return true;
+                      return false;
                     }).toList();
                   }
 
                   if (_isLoading) {
                     return const SliverFillRemaining(
-                      child: Center(child: CircularProgressIndicator()),
+                      child: SmProductListSkeleton(),
+                    );
+                  }
+
+                  if (_hasError) {
+                    return SliverFillRemaining(
+                      child: AllineErrorState(
+                        title: 'تعذر تحميل منتجات المتجر',
+                        message: 'تحقق من اتصالك ثم حاول مرة أخرى.',
+                        onRetry: _loadData,
+                      ),
                     );
                   }
 
@@ -334,22 +371,24 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
                   }
 
                   return SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      Dimensions.paddingSizeSmall,
-                      Dimensions.paddingSizeSmall,
-                      Dimensions.paddingSizeSmall,
-                      80, // Space for floating cart
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      AllineSpacing.sm,
+                      AllineSpacing.sm,
+                      AllineSpacing.sm,
+                      96, // Space for floating cart
                     ),
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount:
+                            MediaQuery.sizeOf(context).width < 320 ? 1 : 2,
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 0.68,
+                        mainAxisExtent: 268,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
-                          return SupermarketProductCard(product: products[index]);
+                          return SupermarketProductCard(
+                              product: products[index]);
                         },
                         childCount: products.length,
                       ),
@@ -373,42 +412,13 @@ class _SupermarketStoreScreenState extends State<SupermarketStoreScreen> {
   }
 
   /// Extracts ONLY Supermarket-specific categories & subcategories
-  List<_StoreCategoryItem> _getSupermarketCategories(CategoryController controller) {
+  List<_StoreCategoryItem> _getSupermarketCategories(
+      CategoryController controller) {
     final List<_StoreCategoryItem> list = [];
 
-    // 1. Look for root Supermarket category
-    CategoryModel? supermarketCat;
-    for (final c in controller.categoryList) {
-      final name = (c.name ?? '').toLowerCase();
-      final slug = (c.slug ?? '').toLowerCase();
-      if (slug == 'supermarket' || name.contains('supermarket') || name.contains('سوبر')) {
-        supermarketCat = c;
-        break;
-      }
-    }
-
-    // 2. If it has subcategories, add them
-    if (supermarketCat != null && supermarketCat.subCategories != null && supermarketCat.subCategories!.isNotEmpty) {
-      for (final sub in supermarketCat.subCategories!) {
-        list.add(_StoreCategoryItem(id: sub.id, name: sub.name ?? ''));
-      }
-    }
-
-    // 3. Fallback to standard grocery categories
-    if (list.isEmpty) {
-      final fallbackGroceryNames = [
-        'ألبان وأجبان وبيض',
-        'زيوت وسمن وأرز وسكر',
-        'معلبات وبقوليات وتونة',
-        'مشروبات وعصائر ومياه',
-        'مخبوزات وحلويات وشوكولاتة',
-        'خضار وفواكه طازجة',
-        'لحوم ودواجن ومجمدات',
-        'منظفات وعناية منزلية',
-        'بهارات وتوابل ومكسرات',
-      ];
-      for (int i = 0; i < fallbackGroceryNames.length; i++) {
-        list.add(_StoreCategoryItem(id: 12139 + i, name: fallbackGroceryNames[i]));
+    for (final category in controller.sellerWiseCategoryList) {
+      if (category.id != null && (category.name?.trim().isNotEmpty ?? false)) {
+        list.add(_StoreCategoryItem(id: category.id, name: category.name!));
       }
     }
 
@@ -433,10 +443,11 @@ class _StickyCategoryDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 52;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Material(
       elevation: overlapsContent ? 3 : 0,
-      shadowColor: Colors.black.withValues(alpha: 0.15),
+      shadowColor: Theme.of(context).shadowColor.withValues(alpha: 0.10),
       child: child,
     );
   }

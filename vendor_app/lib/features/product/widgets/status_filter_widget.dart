@@ -11,7 +11,12 @@ import '../../../main.dart';
 
 class StatusFilterWidget extends StatefulWidget {
   final Function(int index) onFilterChanged;
-  const StatusFilterWidget({super.key, required this.onFilterChanged});
+  final TextEditingController? searchController;
+  const StatusFilterWidget({
+    super.key,
+    required this.onFilterChanged,
+    this.searchController,
+  });
 
   @override
   State<StatusFilterWidget> createState() => _StatusFilterWidgetState();
@@ -28,8 +33,9 @@ class _StatusFilterWidgetState extends State<StatusFilterWidget> {
   _callApi (String status) {
     productController.getSellerProductList(
       Provider.of<ProfileController>(context, listen: false).userId.toString(), 1,
-      Provider.of<LocalizationController>(context, listen: false).locale.languageCode == 'US'?'en':
-      Provider.of<LocalizationController>(context, listen: false).locale.countryCode!.toLowerCase(),'',
+      Provider.of<LocalizationController>(context, listen: false).locale.languageCode == 'en'?'en':
+      Provider.of<LocalizationController>(context, listen: false).locale.languageCode,
+      widget.searchController?.text.trim() ?? '',
       filterSearchModel:  productController.filterModel.copyWith(
         reload: true,
         isApproved: status,

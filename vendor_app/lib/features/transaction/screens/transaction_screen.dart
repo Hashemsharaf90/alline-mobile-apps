@@ -47,7 +47,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         Provider.of<TransactionController>(context, listen: false).getTransactionList(context, 'all','','');
       },
       child: Scaffold(
-        appBar: CustomAppBarWidget(title: getTranslated('transactions', context), isAction: true),
+        appBar: CustomAppBarWidget(title: 'سجل طلبات السحب', isAction: true),
         body: Consumer<TransactionController>(
           builder: (context, transactionProvider, child) {
 

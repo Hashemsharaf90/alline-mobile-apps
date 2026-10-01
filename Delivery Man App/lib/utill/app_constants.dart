@@ -7,13 +7,15 @@ class AppConstants {
   static const bool demo = false;
   static const int imageQuality = 100;
   static const String appVersion = '5.1'; ///flutter SDK : 3.44.2
-  static const String polylineMapKey = 'AIzaSyCICT4UuAh8D7Do2Vv-sY7NSrGnL7yrUjM';
+  // Polyline routing uses server-side proxy routePolylineApi; client map key is configured via AndroidManifest
+  static const String polylineMapKey = '';
 
   static const String baseUrl = 'https://allinye.com';
 
   static const String profileUri = '/api/v2/delivery-man/info';
   static const String configUri = '/api/v1/config';
   static const String loginUri = '/api/v2/delivery-man/auth/login';
+  static const String logoutUri = '/api/v2/delivery-man/logout';
 
   static const String notificationUri = '/api/v2/delivery-man/notifications';
   static const String currentOrderUri = '/api/v2/delivery-man/current-orders';
@@ -25,7 +27,7 @@ class AppConstants {
   static const String pauseAndResumeOrderStatusUri = '/api/v2/delivery-man/order-update-is-pause';
   static const String updatePaymentStatusUri = '/api/v2/delivery-man/update-payment-status';
   static const String tokenUri = '/api/v2/delivery-man/update-fcm-token';
-  static const String searchConversationListUri = '/api/v2/delivery-man/update-fcm-token';
+  static const String searchConversationListUri = '/api/v2/delivery-man/messages/search/';
   static const String statusOnOffUri = '/api/v2/delivery-man/is-online';
   static const String withdrawRequestUri = '/api/v2/delivery-man/withdraw-request';
   static const String walletInfoUri = '/api/v2/delivery-man/wallet';

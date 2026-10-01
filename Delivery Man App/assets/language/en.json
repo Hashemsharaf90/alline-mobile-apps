@@ -101,7 +101,7 @@
   "select_a_language": "Select a language",
   "enter_email_address": "Enter email address",
   "enter_password": "Enter password",
-  "password_should_be": "Password should be equal or getter than 6 character",
+  "password_should_be": "Password should be at least 8 characters",
   "enter_valid_email": "Enter valid email",
   "settings": "Settings",
   "terms_and_condition": "Terms and Condition",
@@ -409,6 +409,9 @@
   "partially_paid": "Partially Paid",
   "paid_amount": "Paid Amount",
   "due_amount": "Due Amount",
-  "no_address_found": "No address found"
-
+  "no_address_found": "No address found",
+  "session_expired_please_login_again": "Your session has expired. Please log in again.",
+  "too_many_requests_try_later": "Too many requests. Please try again later.",
+  "something_went_wrong_please_try_again": "Something went wrong. Please try again.",
+  "reschedule": "Reschedule"
 }

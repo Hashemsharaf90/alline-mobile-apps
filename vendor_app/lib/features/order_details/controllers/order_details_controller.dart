@@ -40,6 +40,8 @@ class OrderDetailsController extends ChangeNotifier{
   File? get selectedFileForImport =>_selectedFileForImport;
   bool _isLoading = false;
   bool get isLoading=> _isLoading;
+  bool _hasOrderDetailsError = false;
+  bool get hasOrderDetailsError => _hasOrderDetailsError;
 
   bool _isUploadLoading = false;
   bool get isUploadLoading=> _isUploadLoading;
@@ -62,15 +64,39 @@ class OrderDetailsController extends ChangeNotifier{
 
   Future<void> getOrderDetails( String orderID) async {
     _orderDetails = null;
-    ApiResponse apiResponse = await orderDetailsServiceInterface.getOrderDetails(orderID);
-    if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
-      _orderDetails = [];
-      apiResponse.response!.data.forEach((order) => _orderDetails!.add(OrderDetailsModel.fromJson(order)));
-      initOrderStatusList(_orderDetails?[0].order?.shippingResponsibility ?? '');
-    } else {
-      ApiChecker.checkApi(apiResponse);
-    }
+    _orderStatusList = [];
+    _orderStatusType = '';
+    _isLoading = true;
+    _hasOrderDetailsError = false;
     notifyListeners();
+    try {
+      final apiResponse =
+          await orderDetailsServiceInterface.getOrderDetails(orderID);
+      final response = apiResponse.response;
+      final data = response?.data;
+      if (response?.statusCode == 200 && data is List) {
+        _orderDetails = data
+            .whereType<Map<String, dynamic>>()
+            .map(OrderDetailsModel.fromJson)
+            .toList();
+        if (_orderDetails!.isEmpty) {
+          _hasOrderDetailsError = true;
+        } else {
+          initOrderStatusList(
+            _orderDetails!.first.order?.shippingResponsibility ?? '',
+          );
+        }
+      } else {
+        _hasOrderDetailsError = true;
+        ApiChecker.checkApi(apiResponse);
+      }
+    } catch (_) {
+      _hasOrderDetailsError = true;
+      _orderDetails = null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
 
@@ -78,8 +104,11 @@ class OrderDetailsController extends ChangeNotifier{
     ApiResponse apiResponse = await orderDetailsServiceInterface.getOrderStatusList(type);
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _orderStatusList =[];
-      _orderStatusList.addAll(apiResponse.response!.data);
-      _orderStatusType = apiResponse.response!.data[0];
+      final statuses = apiResponse.response!.data;
+      if (statuses is List && statuses.isNotEmpty) {
+        _orderStatusList.addAll(statuses.cast<String>());
+        _orderStatusType = _orderStatusList.first;
+      }
     } else {
       ApiChecker.checkApi(apiResponse);
     }
@@ -123,7 +152,7 @@ class OrderDetailsController extends ChangeNotifier{
   }
 
 
-  void setMarker(BillingAddressData address) async {
+  Future<void> setMarker(BillingAddressData address) async {
     _markers = HashSet<Marker>();
     Uint8List destinationImageData = await convertAssetToUnit8List(
       Images.marker, width: 50,
@@ -252,6 +281,7 @@ class OrderDetailsController extends ChangeNotifier{
 
   void emptyOrderDetails() {
     _orderDetails = null;
+    _hasOrderDetailsError = false;
     notifyListeners();
   }
 

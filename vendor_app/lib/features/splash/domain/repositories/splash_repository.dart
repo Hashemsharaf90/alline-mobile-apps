@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,9 +16,28 @@ class SplashRepository implements SplashRepositoryInterface{
   @override
   Future<ApiResponse> getConfig() async {
     try {
-      final response = await dioClient!.get(AppConstants.configUri);
+      final response = await dioClient!.get(
+        AppConstants.configUri,
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200 && response.data != null) {
+        try {
+          sharedPreferences?.setString('alline_cached_config_vendor', jsonEncode(response.data));
+        } catch (_) {}
+      }
       return ApiResponse.withSuccess(response);
     } catch (e) {
+      final cached = sharedPreferences?.getString('alline_cached_config_vendor');
+      if (cached != null && cached.isNotEmpty) {
+        try {
+          final data = jsonDecode(cached);
+          final cachedResponse = Response(
+            data: data,
+            statusCode: 200,
+            requestOptions: RequestOptions(path: AppConstants.configUri),
+          );
+          return ApiResponse.withSuccess(cachedResponse);
+        } catch (_) {}
+      }
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
     }
   }

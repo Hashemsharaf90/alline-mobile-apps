@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sixvalley_vendor_app/features/order/domain/models/order_model.dart';
 import 'package:sixvalley_vendor_app/helper/price_converter.dart';
-import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
 import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
@@ -14,6 +13,7 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
   final double shipping;
   final double coupon;
   final double extraDiscount;
+  final double referAndEarnDiscount;
   final double totalPrice;
 
   const AllineOrderSummaryCardWidget({
@@ -25,6 +25,7 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
     required this.shipping,
     required this.coupon,
     required this.extraDiscount,
+    this.referAndEarnDiscount = 0,
     required this.totalPrice,
   });
 
@@ -32,20 +33,13 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (order == null) return const SizedBox.shrink();
 
-    String paymentMethodName = 'نقد عند الاستلام (COD)';
-    if (order!.paymentMethod == 'pay_by_wallet') {
-      paymentMethodName = 'محفظة Alline الإلكترونية';
-    } else if (order!.paymentMethod != null && order!.paymentMethod != 'cash_on_delivery') {
-      paymentMethodName = getTranslated(order!.paymentMethod ?? '', context) ?? order!.paymentMethod!;
-    }
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AllineColors.borderLight),
+        border: Border.all(color: ColorResources.getBorder(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -62,24 +56,24 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: AllineColors.secondary.withValues(alpha: 0.1),
+                  color: ColorResources.getPrimary(context).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.receipt_long_rounded, color: AllineColors.secondary, size: 18),
+                child: Icon(Icons.receipt_long_rounded, color: ColorResources.getPrimary(context), size: 18),
               ),
               const SizedBox(width: 8),
               Text(
-                'الملخص المالي وطريقة الدفع',
+                'ملخص الطلب',
                 style: robotoBold.copyWith(
                   fontSize: Dimensions.fontSizeDefault,
-                  color: AllineColors.textDark,
+                  color: ColorResources.getTextTitle(context),
                 ),
               ),
             ],
           ),
 
           const SizedBox(height: 12),
-          const Divider(height: 1, color: AllineColors.borderLight),
+          Divider(height: 1, color: ColorResources.getBorder(context)),
           const SizedBox(height: 12),
 
           // Subtotal
@@ -123,6 +117,16 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
             const SizedBox(height: 8),
           ],
 
+          if (referAndEarnDiscount > 0) ...[
+            _buildSummaryRow(
+              context,
+              label: 'خصم الإحالة',
+              amount: '- ${PriceConverter.convertPrice(context, referAndEarnDiscount)}',
+              isNegative: true,
+            ),
+            const SizedBox(height: 8),
+          ],
+
           // Delivery fee
           _buildSummaryRow(
             context,
@@ -143,7 +147,7 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
             const SizedBox(height: 8),
           ],
 
-          const Divider(height: 16, color: AllineColors.borderLight),
+          Divider(height: 16, color: ColorResources.getBorder(context)),
 
           // Grand Total
           Row(
@@ -153,55 +157,19 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
                 'الإجمالي الصافي',
                 style: robotoBold.copyWith(
                   fontSize: Dimensions.fontSizeLarge,
-                  color: AllineColors.textDark,
+                  color: ColorResources.getTextTitle(context),
                 ),
               ),
               Text(
                 PriceConverter.convertPrice(context, totalPrice),
                 style: robotoBold.copyWith(
                   fontSize: Dimensions.fontSizeLarge + 1,
-                  color: AllineColors.secondary,
+                  color: ColorResources.getPrimary(context),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 14),
-
-          // Payment method info box
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: AllineColors.backgroundLight,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: AllineColors.borderLight),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.payment_rounded, size: 18, color: AllineColors.secondary),
-                    const SizedBox(width: 8),
-                    Text(
-                      paymentMethodName,
-                      style: robotoMedium.copyWith(
-                        fontSize: Dimensions.fontSizeSmall,
-                        color: AllineColors.textDark,
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  order!.paymentStatus == 'paid' ? 'مدفوع بالكامل ✅' : 'الدفع عند الاستلام',
-                  style: robotoBold.copyWith(
-                    fontSize: 10,
-                    color: order!.paymentStatus == 'paid' ? AllineColors.success : AllineColors.orange,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -220,14 +188,14 @@ class AllineOrderSummaryCardWidget extends StatelessWidget {
           label,
           style: robotoRegular.copyWith(
             fontSize: Dimensions.fontSizeSmall,
-            color: AllineColors.textLight,
+          color: ColorResources.getTextSubTitle(context),
           ),
         ),
         Text(
           amount,
           style: robotoMedium.copyWith(
             fontSize: Dimensions.fontSizeSmall,
-            color: isNegative ? AllineColors.danger : AllineColors.textDark,
+          color: isNegative ? ColorResources.getError(context) : ColorResources.getTextTitle(context),
           ),
         ),
       ],

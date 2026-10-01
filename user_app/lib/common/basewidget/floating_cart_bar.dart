@@ -6,6 +6,7 @@ import 'package:flutter_sixvalley_ecommerce/localization/controllers/localizatio
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:provider/provider.dart';
 
 /// A sleek, persistent floating cart summary bar for Q-Commerce / Supermarket screens.
@@ -48,7 +49,7 @@ class FloatingCartBar extends StatelessWidget {
                   vertical: Dimensions.paddingSizeSmall,
                 ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+              borderRadius: BorderRadius.circular(AllineRadius.button),
               onTap: () {
                 RouterHelper.getCartScreenRoute(
                   action: RouteAction.push,
@@ -62,7 +63,7 @@ class FloatingCartBar extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  borderRadius: BorderRadius.circular(AllineRadius.button),
                   boxShadow: [
                     BoxShadow(
                       color: colors.textPrimary.withValues(alpha: 0.12),
@@ -73,34 +74,11 @@ class FloatingCartBar extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    // Cart Icon with item badge
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        const Icon(
-                          Icons.shopping_bag_outlined,
-                          color: Colors.white,
-                          size: 26,
-                        ),
-                        Positioned(
-                          right: -6,
-                          top: -6,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '$totalCount',
-                              style: textBold.copyWith(
-                                color: Theme.of(context).primaryColor,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    // Count is written beside the icon, avoiding an overlapping badge.
+                    Icon(
+                      Icons.shopping_cart_outlined,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 26,
                     ),
 
                     const SizedBox(width: Dimensions.paddingSizeDefault),
@@ -114,14 +92,17 @@ class FloatingCartBar extends StatelessWidget {
                           Text(
                             '$totalCount ${isLtr ? (totalCount == 1 ? "item" : "items") : "منتجات"}',
                             style: textRegular.copyWith(
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimary
+                                  .withValues(alpha: 0.9),
                               fontSize: Dimensions.fontSizeExtraSmall,
                             ),
                           ),
                           Text(
                             PriceConverter.convertPrice(context, totalPrice),
                             style: textBold.copyWith(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: Dimensions.fontSizeLarge,
                             ),
                           ),
@@ -136,7 +117,7 @@ class FloatingCartBar extends StatelessWidget {
                         Text(
                           isLtr ? 'View Cart' : 'عرض السلة',
                           style: textBold.copyWith(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onPrimary,
                             fontSize: Dimensions.fontSizeDefault,
                           ),
                         ),
@@ -145,7 +126,7 @@ class FloatingCartBar extends StatelessWidget {
                           isLtr
                               ? Icons.arrow_forward_ios
                               : Icons.arrow_back_ios,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           size: 14,
                         ),
                       ],

@@ -16,6 +16,7 @@ import 'package:sixvalley_vendor_app/features/review/controllers/product_review_
 import 'package:sixvalley_vendor_app/features/shipping/controllers/shipping_controller.dart';
 import 'package:sixvalley_vendor_app/features/shop/controllers/shop_controller.dart';
 import 'package:sixvalley_vendor_app/features/splash/controllers/splash_controller.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 
@@ -157,33 +158,107 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
 class _DashboardSkeleton extends StatelessWidget {
   const _DashboardSkeleton();
+
   @override
   Widget build(BuildContext context) {
-    final shade = ColorResources.getBorder(context);
-    Widget bar(double height, double width) => Container(
-        height: height,
-        width: width,
-        decoration: BoxDecoration(
-            color: shade, borderRadius: BorderRadius.circular(12)));
-    return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          bar(25, 180),
-          const SizedBox(height: 8),
-          bar(15, 130),
-          const SizedBox(height: 22),
-          bar(72, double.infinity),
-          const SizedBox(height: 12),
-          bar(152, double.infinity),
-          const SizedBox(height: 24),
-          bar(20, 160),
-          const SizedBox(height: 10),
-          bar(124, double.infinity),
-          const SizedBox(height: 24),
-          bar(20, 130),
-          const SizedBox(height: 10),
-          bar(155, double.infinity),
-        ]));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor =
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final highlightColor =
+        isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC);
+
+    Widget box(double height, double width, {double radius = 12}) => Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        );
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                box(52, 52, radius: 26),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      box(18, 160, radius: 8),
+                      const SizedBox(height: 6),
+                      box(13, 110, radius: 6),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Store Status
+            box(58, double.infinity, radius: 16),
+            const SizedBox(height: 16),
+
+            // Hero Sales Card
+            box(185, double.infinity, radius: 22),
+            const SizedBox(height: 16),
+
+            // 2x2 KPI Grid
+            Row(
+              children: [
+                Expanded(child: box(78, double.infinity, radius: 16)),
+                const SizedBox(width: 12),
+                Expanded(child: box(78, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: box(78, double.infinity, radius: 16)),
+                const SizedBox(width: 12),
+                Expanded(child: box(78, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Quick Actions
+            box(18, 120, radius: 8),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: box(68, double.infinity, radius: 16)),
+                const SizedBox(width: 10),
+                Expanded(child: box(68, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: box(68, double.infinity, radius: 16)),
+                const SizedBox(width: 10),
+                Expanded(child: box(68, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Recent Orders
+            box(18, 140, radius: 8),
+            const SizedBox(height: 12),
+            box(72, double.infinity, radius: 16),
+            const SizedBox(height: 10),
+            box(72, double.infinity, radius: 16),
+          ],
+        ),
+      ),
+    );
   }
 }
 

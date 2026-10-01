@@ -73,8 +73,9 @@ class GlobalShoppingController extends ChangeNotifier {
   }
 
   Future<void> previewProduct(String url, BuildContext context) async {
+    final isLtr = Localizations.localeOf(context).languageCode == 'en';
     if (url.trim().isEmpty) {
-      showCustomSnackBarWidget('Please enter a valid product URL', context,
+      showCustomSnackBarWidget(isLtr ? 'Please enter a valid product URL' : 'يرجى إدخال رابط منتج صحيح', context,
           snackBarType: SnackBarType.warning);
       return;
     }
@@ -95,7 +96,6 @@ class GlobalShoppingController extends ChangeNotifier {
         _productPreview = GlobalProductPreviewModel.fromJson(data['data']);
       }
     } else {
-      final isLtr = Localizations.localeOf(context).languageCode == 'en';
       final error = apiResponse.error;
       final code = error is Map ? error['code']?.toString() : null;
       final message = switch (code) {
@@ -112,12 +112,14 @@ class GlobalShoppingController extends ChangeNotifier {
             ? 'Could not read this product. Check your connection and try again.'
             : 'تعذر قراءة المنتج. تحقق من اتصالك وحاول مرة أخرى.',
       };
-      showCustomSnackBarWidget(message, context,
-          snackBarType: SnackBarType.warning);
+      if (context.mounted) {
+        showCustomSnackBarWidget(message, context,
+            snackBarType: SnackBarType.warning);
+      }
       _previewErrorMessage = message;
     }
     if (_productPreview == null && _previewErrorMessage == null) {
-      _previewErrorMessage = Localizations.localeOf(context).languageCode == 'en'
+      _previewErrorMessage = isLtr
           ? 'Could not read this product. Try again.'
           : 'تعذر قراءة بيانات هذا المنتج. حاول مرة أخرى.';
     }

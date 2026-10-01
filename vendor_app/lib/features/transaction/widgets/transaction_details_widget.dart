@@ -6,6 +6,7 @@ import 'package:sixvalley_vendor_app/features/transaction/domain/models/transact
 import 'package:sixvalley_vendor_app/features/transaction/widgets/transaction_widget.dart';
 import 'package:sixvalley_vendor_app/features/wallet/controllers/wallet_controller.dart';
 import 'package:sixvalley_vendor_app/helper/date_converter.dart';
+import 'package:sixvalley_vendor_app/helper/price_converter.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
@@ -56,7 +57,10 @@ class TransactionDetailsWidget extends StatelessWidget {
                             ),
                             children: [
                               TextSpan(
-                                text: "\$${transactionModel.amount}",
+                                text: PriceConverter.convertPrice(
+                                  context,
+                                  transactionModel.amount ?? 0,
+                                ),
                                 style: robotoMedium.copyWith(
                                   fontSize: Dimensions.fontSizeDefault,
                                   color: Theme.of(context).textTheme.bodyLarge?.color,

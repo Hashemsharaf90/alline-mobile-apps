@@ -13,6 +13,8 @@ class UserInfoModel {
   List<dynamic>? identityImage;
   List<ImageFullUrl>? identityImageFullUrl;
   int? isActive;
+  int? isOnline;
+  String? approvalStatus;
   String? createdAt;
   String? updatedAt;
   double? withdrawableBalance;
@@ -46,6 +48,8 @@ class UserInfoModel {
         this.identityImage,
         this.identityImageFullUrl,
         this.isActive,
+        this.isOnline,
+        this.approvalStatus,
         this.createdAt,
         this.updatedAt,
         this.withdrawableBalance,
@@ -74,7 +78,9 @@ class UserInfoModel {
     phone = json['phone'];
     email = json['email'];
     image = json['image'];
-    isActive = int.parse(json['is_online'].toString());
+    isActive = int.tryParse(json['is_active']?.toString() ?? '1') ?? 1;
+    isOnline = int.tryParse(json['is_online']?.toString() ?? '0') ?? 0;
+    approvalStatus = json['approval_status']?.toString();
     identityNumber = json['identity_number'];
     identityType = json['identity_type'];
     if(json['identity_image'] is !String){

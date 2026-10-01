@@ -13,13 +13,15 @@ import 'package:sixvalley_vendor_app/features/splash/controllers/splash_controll
 import 'package:sixvalley_vendor_app/features/splash/domain/models/config_model.dart';
 import 'package:sixvalley_vendor_app/helper/price_converter.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
+import 'package:sixvalley_vendor_app/localization/controllers/localization_controller.dart';
 import 'package:sixvalley_vendor_app/main.dart';
 import 'package:sixvalley_vendor_app/theme/controllers/theme_controller.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
 
 class ProductFilterBottomSheet extends StatefulWidget {
-  const ProductFilterBottomSheet({super.key});
+  final TextEditingController? searchController;
+  const ProductFilterBottomSheet({super.key, this.searchController});
   
   @override
   State<ProductFilterBottomSheet> createState() => _ProductFilterBottomSheetState();
@@ -918,9 +920,12 @@ class _ButtonWidget extends StatelessWidget {
               if(true) {
                 await productController.getSellerProductList(
                   '${Provider.of<ProfileController>(context, listen: false).userId}',
-                  productController.sellerProductModel?.offset ?? 1, 'en',
-                  productController.sellerProductModel?.search ?? '',
-                  filterSearchModel: FilterModel(isUpdate: true),
+                1,
+                Provider.of<LocalizationController>(context, listen: false)
+                    .locale.languageCode,
+                widget.searchController?.text.trim() ??
+                    productController.sellerProductModel?.search ?? '',
+                  filterSearchModel: FilterModel(reload: true, isUpdate: true),
                 );
                 productController.clearFilterData();
                 productController.setPriceRange(0, Provider.of<SplashController>(context, listen: false).configModel?.productMaxPriceRange ?? 0);
@@ -941,10 +946,13 @@ class _ButtonWidget extends StatelessWidget {
 
               await productController.getSellerProductList(
                 '${Provider.of<ProfileController>(context, listen: false).userId}',
-                productController.sellerProductModel?.offset ?? 1,
-                'en',
-                productController.sellerProductModel?.search ?? '',
+                1,
+                Provider.of<LocalizationController>(context, listen: false)
+                    .locale.languageCode,
+                widget.searchController?.text.trim() ??
+                    productController.sellerProductModel?.search ?? '',
                   filterSearchModel: productController.filterModel.copyWith(
+                  reload: true,
                   brandIds: productController.selectedBrandIds.toList(),
                   categoryIds: _getSelectedCategoryIds(context),
                   filterSubCategoryIds: _getSelectedSubCategoryIds(context),

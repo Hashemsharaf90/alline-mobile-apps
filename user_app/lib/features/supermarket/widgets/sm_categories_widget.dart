@@ -1,142 +1,127 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/category/domain/models/category_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_section_header.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:provider/provider.dart';
 
-const _kCategories = [
-  _SmCategory(emoji: '\u{1F95B}', label: 'الألبان'),
-  _SmCategory(emoji: '\u{1F964}', label: 'المشروبات'),
-  _SmCategory(emoji: '\u{1F35A}', label: 'مواد غذائية'),
-  _SmCategory(emoji: '\u{1F966}', label: 'خضار وفواكه'),
-  _SmCategory(emoji: '\u{1F35E}', label: 'مخبوزات'),
-  _SmCategory(emoji: '\u{1F9F4}', label: 'منظفات'),
-  _SmCategory(emoji: '\u{1F9FC}', label: 'عناية شخصية'),
-  _SmCategory(emoji: '\u{1F3E0}', label: 'منزلية'),
-];
-
-class _SmCategory {
-  final String emoji;
-  final String label;
-  const _SmCategory({required this.emoji, required this.label});
-}
-
-/// Horizontal category rail for the Alline supermarket hub.
-class SmCategoriesWidget extends StatefulWidget {
+/// Shows real supermarket subcategories from the existing category response.
+/// An empty taxonomy stays empty rather than advertising categories with no data.
+class SmCategoriesWidget extends StatelessWidget {
   final void Function(String? label)? onCategorySelected;
 
   const SmCategoriesWidget({super.key, this.onCategorySelected});
 
   @override
-  State<SmCategoriesWidget> createState() => _SmCategoriesWidgetState();
-}
-
-class _SmCategoriesWidgetState extends State<SmCategoriesWidget> {
-  int _selected = -1;
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.only(top: 16, bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AllineSectionHeader(
-            title: 'التصنيفات',
-            subtitle: 'تصفح أقسام السوبرماركت بسرعة',
-            onViewAll: () {
-              setState(() => _selected = -1);
-              widget.onCategorySelected?.call(null);
-            },
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            height: 112,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _kCategories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 10),
-              itemBuilder: (context, index) {
-                final category = _kCategories[index];
-                final selected = _selected == index;
-                return Semantics(
-                  button: true,
-                  label: category.label,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => _selected = selected ? -1 : index);
-                      widget.onCategorySelected?.call(
-                        selected ? null : category.label,
-                      );
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      width: 82,
-                      padding: const EdgeInsets.fromLTRB(6, 8, 6, 7),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AllineColors.primary
-                            : const Color(0xFFF8FBFF),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: selected
-                              ? AllineColors.primary
-                              : const Color(0xFFDCE7F4),
+    return Consumer<CategoryController>(builder: (context, controller, _) {
+      CategoryModel? supermarket;
+      for (final category in controller.categoryList) {
+        final label =
+            '${category.name ?? ''} ${category.slug ?? ''}'.toLowerCase();
+        if (label.contains('سوبر') || label.contains('supermarket')) {
+          supermarket = category;
+          break;
+        }
+      }
+      final categories = supermarket?.subCategories ?? <SubCategory>[];
+      if (categories.isEmpty) return const SizedBox.shrink();
+
+      final colors = context.allineColors;
+      final primary = Theme.of(context).colorScheme.primary;
+      return ColoredBox(
+        color: colors.surface,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: AllineSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AllineSectionHeader(title: 'التصنيفات'),
+              const SizedBox(height: AllineSpacing.sm),
+              SizedBox(
+                height: 106,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AllineSpacing.md),
+                  itemCount: categories.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(width: AllineSpacing.xs),
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    final name = category.name?.trim() ?? '';
+                    return SizedBox(
+                      width: 88,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(AllineRadius.card),
+                        onTap: category.id == null
+                            ? null
+                            : () {
+                                onCategorySelected?.call(name);
+                                RouterHelper.getBrandCategoryRoute(
+                                  action: RouteAction.push,
+                                  id: category.id,
+                                  name: name,
+                                  subCategory: category,
+                                );
+                              },
+                        child: Column(
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: colors.background,
+                                borderRadius:
+                                    BorderRadius.circular(AllineRadius.control),
+                                border: Border.all(color: colors.border),
+                              ),
+                              child: Icon(_iconFor(name),
+                                  color: primary, size: 28),
+                            ),
+                            const SizedBox(height: AllineSpacing.xs),
+                            Text(
+                              name,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: colors.textPrimary),
+                            ),
+                          ],
                         ),
-                        boxShadow: selected
-                            ? [
-                                BoxShadow(
-                                  color: AllineColors.primary
-                                      .withValues(alpha: .18),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : null,
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 58,
-                            height: 58,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: selected
-                                  ? Colors.white.withValues(alpha: .16)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Text(
-                              category.emoji,
-                              style: const TextStyle(fontSize: 31),
-                            ),
-                          ),
-                          Text(
-                            category.label,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'AllineTajawal',
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: selected
-                                  ? Colors.white
-                                  : const Color(0xFF071B49),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ),
+      );
+    });
+  }
+
+  IconData _iconFor(String name) {
+    if (name.contains('خض') || name.contains('فواك')) {
+      return Icons.eco_outlined;
+    }
+    if (name.contains('ألبان') || name.contains('حليب')) {
+      return Icons.egg_outlined;
+    }
+    if (name.contains('مشروب') || name.contains('مياه')) {
+      return Icons.local_drink_outlined;
+    }
+    if (name.contains('مخبوز') || name.contains('خبز')) {
+      return Icons.bakery_dining_outlined;
+    }
+    if (name.contains('منظف')) return Icons.cleaning_services_outlined;
+    if (name.contains('عناية')) return Icons.spa_outlined;
+    return Icons.shopping_basket_outlined;
   }
 }

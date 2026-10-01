@@ -101,7 +101,7 @@
   "select_a_language": "اختر لغة",
   "enter_email_address": "أدخل عنوان البريد الإلكتروني",
   "enter_password": "أدخل كلمة المرور",
-  "password_should_be": "يجب أن تكون كلمة المرور مساوية أو أكبر من 6 أحرف",
+  "password_should_be": "يجب أن تتكون كلمة المرور من 8 أحرف على الأقل",
   "enter_valid_email": "أدخل بريدًا إلكترونيًا صالحًا",
   "settings": "إعدادات",
   "terms_and_condition": "الشروط والأحكام",
@@ -404,5 +404,9 @@
   "partially_paid": "مدفوع جزئيًا",
   "paid_amount": "المبلغ المدفوع",
   "due_amount": "المبلغ المستحق",
-  "no_address_found": "لم يتم العثور على عنوان"
+  "no_address_found": "لم يتم العثور على عنوان",
+  "session_expired_please_login_again": "انتهت جلسة تسجيل الدخول، يرجى تسجيل الدخول مرة أخرى.",
+  "too_many_requests_try_later": "طلبات كثيرة جداً، يرجى المحاولة لاحقاً.",
+  "something_went_wrong_please_try_again": "حدث خطأ ما، يرجى المحاولة مرة أخرى.",
+  "reschedule": "تأجيل التسليم"
 }

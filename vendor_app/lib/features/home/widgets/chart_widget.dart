@@ -6,7 +6,8 @@ import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/features/home/widgets/transaction_chart_widget.dart';
 
 class ChartWidget extends StatelessWidget {
-  const ChartWidget({super.key});
+  final bool showPeriodSelector;
+  const ChartWidget({super.key, this.showPeriodSelector = true});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class ChartWidget extends StatelessWidget {
       child: Padding(padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeExtraSmall, horizontal: Dimensions.paddingSizeSmall),
         child: Consumer<BankInfoController>(builder: (context, bankInfo, child) {
           return (bankInfo.userCommissions!=null && bankInfo.userEarnings != null) ?
-          const TransactionChart() : SizedBox(height : 300,  child: EarningStatisticsShimmer(isDarkMode: Provider.of<ThemeController>(context).darkTheme));
+          TransactionChart(showPeriodSelector: showPeriodSelector) : SizedBox(height : 300,  child: EarningStatisticsShimmer(isDarkMode: Provider.of<ThemeController>(context).darkTheme));
         }),
       ),
     );

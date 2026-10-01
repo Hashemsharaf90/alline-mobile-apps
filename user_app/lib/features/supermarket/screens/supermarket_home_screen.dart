@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_state_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/floating_cart_bar.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_near
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_offers_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_popular_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_search_bar_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:provider/provider.dart';
 
 /// Alline Supermarket Hub — the dedicated grocery shopping experience.
@@ -54,12 +54,9 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
       _hasError = false;
     });
 
+    final productCtrl = context.read<ProductController>();
+    final catCtrl = context.read<CategoryController>();
     try {
-      final productCtrl =
-          Provider.of<ProductController>(Get.context!, listen: false);
-      final catCtrl =
-          Provider.of<CategoryController>(Get.context!, listen: false);
-
       await Future.wait([
         productCtrl.getSupermarketProductList(
           1,
@@ -79,7 +76,11 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
       return;
     }
 
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {
+        _hasError = productCtrl.supermarketProductModel == null;
+      });
+    }
   }
 
   @override
@@ -97,55 +98,49 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
           children: [
             if (_hasError)
               AllineErrorState(
-                title: 'تعذّر تحميل المتاجر',
+                title: 'تعذّر تحميل بيانات السوبر ماركت',
                 message: 'تحقّق من اتصالك بالإنترنت وحاول مرة أخرى.',
                 onRetry: () => _loadData(forceReload: true),
               )
             else
               RefreshIndicator(
-                color: const Color(0xFF015FC9),
+                color: Theme.of(context).colorScheme.primary,
                 onRefresh: () => _loadData(forceReload: true),
                 child: CustomScrollView(
                   controller: _scrollController,
                   physics: const BouncingScrollPhysics(),
                   slivers: [
-                  // 1. Header
-                  const SliverToBoxAdapter(child: SmHeaderWidget()),
+                    // 1. Header
+                    const SliverToBoxAdapter(child: SmHeaderWidget()),
 
-                  // 2. Search
-                  const SliverToBoxAdapter(child: SmSearchBarWidget()),
+                    // 2. Search
+                    const SliverToBoxAdapter(child: SmSearchBarWidget()),
 
-                  // 3. Delivery promise
-                  const SliverToBoxAdapter(child: _DeliveryPromiseCard()),
+                    // Categories come from the existing catalog taxonomy.
+                    const SliverToBoxAdapter(child: SmCategoriesWidget()),
 
-                  // Divider between white header zone and rest
-                  const SliverToBoxAdapter(child: _SectionDivider()),
+                    const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 4. Categories
-                  const SliverToBoxAdapter(child: SmCategoriesWidget()),
+                    // 5. Nearby Stores
+                    const SliverToBoxAdapter(child: SmNearbyStoresWidget()),
 
-                  const SliverToBoxAdapter(child: _SectionDivider()),
+                    const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 5. Nearby Stores
-                  const SliverToBoxAdapter(child: SmNearbyStoresWidget()),
+                    // 6. Offers
+                    const SliverToBoxAdapter(child: SmOffersWidget()),
 
-                  const SliverToBoxAdapter(child: _SectionDivider()),
+                    const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 6. Offers
-                  const SliverToBoxAdapter(child: SmOffersWidget()),
+                    // 7. Popular
+                    const SliverToBoxAdapter(child: SmPopularWidget()),
 
-                  const SliverToBoxAdapter(child: _SectionDivider()),
+                    const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 7. Popular
-                  const SliverToBoxAdapter(child: SmPopularWidget()),
+                    // 8. Daily Essentials (non-scrollable grid inside SliverToBoxAdapter)
+                    const SliverToBoxAdapter(child: SmEssentialsWidget()),
 
-                  const SliverToBoxAdapter(child: _SectionDivider()),
-
-                  // 8. Daily Essentials (non-scrollable grid inside SliverToBoxAdapter)
-                  const SliverToBoxAdapter(child: SmEssentialsWidget()),
-
-                  // Bottom padding — room for FloatingCartBar
-                  const SliverToBoxAdapter(child: SizedBox(height: 90)),
+                    // Keep the last product above the contextual cart bar.
+                    const SliverToBoxAdapter(child: SizedBox(height: 96)),
                   ],
                 ),
               ),
@@ -166,52 +161,12 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
 
 // ─── Private helpers ─────────────────────────────────────────────────────────
 
-/// 8px visual gap + very subtle line between content sections.
 class _SectionDivider extends StatelessWidget {
   const _SectionDivider();
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 8,
+        height: AllineSpacing.xs,
         color: AllineThemeColors.of(context).background,
       );
-}
-
-class _DeliveryPromiseCard extends StatelessWidget {
-  const _DeliveryPromiseCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-        decoration: BoxDecoration(
-          color: const Color(0xFFEAF3FF),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFCFE2FA)),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.verified_rounded, color: Color(0xFF015FC9), size: 22),
-            SizedBox(width: 9),
-            Expanded(
-              child: Text(
-                'تسوق بثقة، وتوصيل سريع إلى موقعك',
-                style: TextStyle(
-                  fontFamily: 'AllineTajawal',
-                  fontSize: 12.5,
-                  color: Color(0xFF071B49),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Icon(Icons.arrow_back_ios_new_rounded,
-                color: Color(0xFF6D85AF), size: 14),
-          ],
-        ),
-      ),
-    );
-  }
 }

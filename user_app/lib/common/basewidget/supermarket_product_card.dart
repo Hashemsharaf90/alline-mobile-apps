@@ -4,10 +4,9 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/quick_add_to_cart_
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:provider/provider.dart';
 
 /// Dense but calm grocery card for quick supermarket browsing.
 class SupermarketProductCard extends StatelessWidget {
@@ -24,15 +23,13 @@ class SupermarketProductCard extends StatelessWidget {
       (product.discount ?? 0) > 0 ||
       (product.clearanceSale?.discountAmount ?? 0) > 0;
 
-  double? get discountAmount =>
-      (product.clearanceSale?.discountAmount ?? 0) > 0
-          ? product.clearanceSale?.discountAmount
-          : product.discount;
+  double? get discountAmount => (product.clearanceSale?.discountAmount ?? 0) > 0
+      ? product.clearanceSale?.discountAmount
+      : product.discount;
 
-  String? get discountType =>
-      (product.clearanceSale?.discountAmount ?? 0) > 0
-          ? product.clearanceSale?.discountType
-          : product.discountType;
+  String? get discountType => (product.clearanceSale?.discountAmount ?? 0) > 0
+      ? product.clearanceSale?.discountType
+      : product.discountType;
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +46,11 @@ class SupermarketProductCard extends StatelessWidget {
     final unit = product.unit?.trim();
 
     return Container(
-      margin: EdgeInsets.all(margin ?? 4),
+      margin: EdgeInsets.all(margin ?? 0),
       decoration: BoxDecoration(
         color: colors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFDCE7F4)),
-        boxShadow: [
-          BoxShadow(
-            color: AllineColors.primaryDark.withValues(alpha: .045),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AllineRadius.card),
+        border: Border.all(color: colors.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -75,12 +65,12 @@ class SupermarketProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 112,
+              height: 104,
               child: Stack(
                 children: [
                   Positioned.fill(
                     child: Container(
-                      color: const Color(0xFFF7FAFE),
+                      color: colors.background,
                       padding: const EdgeInsets.all(8),
                       child: product.thumbnailFullUrl?.path?.isNotEmpty == true
                           ? CustomImageWidget(
@@ -104,7 +94,7 @@ class SupermarketProductCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AllineColors.accent,
+                          color: colors.accent,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -112,40 +102,19 @@ class SupermarketProductCard extends StatelessWidget {
                                   discountType == 'percentage'
                               ? '${discountAmount?.toStringAsFixed(0)}٪ خصم'
                               : 'عرض',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'AllineTajawal',
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSecondary,
                           ),
                         ),
                       ),
                     ),
-                  PositionedDirectional(
-                    top: 8,
-                    end: 8,
-                    child: Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: .92),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        product.wishList == 1
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        size: 17,
-                        color: product.wishList == 1
-                            ? AllineColors.error
-                            : colors.textSecondary,
-                      ),
-                    ),
-                  ),
                   if (soldOut)
                     Positioned.fill(
                       child: Container(
-                        color: Colors.white.withValues(alpha: .72),
+                        color: colors.surface.withValues(alpha: .82),
                         alignment: Alignment.center,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -156,12 +125,12 @@ class SupermarketProductCard extends StatelessWidget {
                             color: colors.textSecondary,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
+                          child: Text(
                             'غير متوفر',
                             style: TextStyle(
                               fontFamily: 'AllineTajawal',
                               fontSize: 11,
-                              color: Colors.white,
+                              color: colors.surface,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -171,71 +140,72 @@ class SupermarketProductCard extends StatelessWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 9, 10, 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    product.name ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: textMedium.copyWith(
-                      color: colors.textPrimary,
-                      fontSize: 13,
-                      height: 1.25,
-                    ),
-                  ),
-                  if (unit?.isNotEmpty == true) ...[
-                    const SizedBox(height: 3),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 9, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      'لكل $unit',
-                      maxLines: 1,
+                      product.name ?? '',
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: textRegular.copyWith(
-                        color: colors.textSecondary,
-                        fontSize: 10.5,
+                      style: textMedium.copyWith(
+                        color: colors.textPrimary,
+                        fontSize: 13,
+                        height: 1.25,
                       ),
                     ),
-                  ],
-                  const SizedBox(height: 5),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (hasDiscount)
-                              Text(
-                                oldPrice,
-                                style: textRegular.copyWith(
-                                  color: colors.textSecondary,
-                                  fontSize: 10,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                            Text(
-                              price,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: textBold.copyWith(
-                                color: AllineColors.primary,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
+                    if (unit?.isNotEmpty == true) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        'لكل $unit',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textRegular.copyWith(
+                          color: colors.textSecondary,
+                          fontSize: 10.5,
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      QuickAddToCartWidget(
-                        product: product,
-                        height: 32,
-                        iconSize: 17,
-                      ),
                     ],
-                  ),
-                ],
+                    const Spacer(),
+                    if (hasDiscount)
+                      Text(
+                        oldPrice,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textRegular.copyWith(
+                          color: colors.textSecondary,
+                          fontSize: 11,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    Text(
+                      price,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textBold.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: AllineSpacing.xs),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: soldOut
+                          ? Text('غير متوفر',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: colors.textSecondary))
+                          : QuickAddToCartWidget(
+                              product: product,
+                              height: AllineTouchTarget.minimum,
+                              iconSize: 20,
+                            ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

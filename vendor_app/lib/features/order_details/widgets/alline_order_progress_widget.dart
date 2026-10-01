@@ -1,239 +1,237 @@
 import 'package:flutter/material.dart';
 import 'package:sixvalley_vendor_app/utill/color_resources.dart';
-import 'package:sixvalley_vendor_app/utill/dimensions.dart';
-import 'package:sixvalley_vendor_app/utill/styles.dart';
 
 class AllineOrderProgressWidget extends StatelessWidget {
   final String? status;
   const AllineOrderProgressWidget({super.key, required this.status});
 
+  static const _steps = <(String, String, IconData)>[
+    ('pending', 'تم إنشاء الطلب', Icons.receipt_long_outlined),
+    ('confirmed', 'تم تأكيد الطلب', Icons.check_rounded),
+    ('processing', 'قيد التجهيز', Icons.inventory_2_outlined),
+    ('out_for_delivery', 'قيد التوصيل', Icons.local_shipping_outlined),
+    ('delivered', 'مكتمل', Icons.task_alt_rounded),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final currentStatus = status?.toLowerCase() ?? 'pending';
+    final terminal = switch (currentStatus) {
+      'canceled' || 'cancelled' => (
+          'تم إلغاء الطلب',
+          'أُلغي هذا الطلب، ولا توجد إجراءات تشغيلية متبقية.',
+          AllineColors.error,
+          Icons.cancel_outlined,
+        ),
+      'returned' => (
+          'الطلب مرتجع',
+          'تم تسجيل هذا الطلب كمرتجع.',
+          AllineColors.warning,
+          Icons.assignment_return_outlined,
+        ),
+      'failed' => (
+          'تعذر التسليم',
+          'لم تكتمل عملية تسليم هذا الطلب.',
+          AllineColors.error,
+          Icons.error_outline_rounded,
+        ),
+      _ => null,
+    };
 
-    // Handle terminal negative statuses
-    if (currentStatus == 'canceled' || currentStatus == 'cancelled') {
-      return _buildAlertBanner(
+    if (terminal != null) {
+      return _card(
         context,
-        title: 'الطلب ملغي',
-        message: 'تم إلغاء هذا الطلب ولم تعد هناك إجراءات تشغيلية مطلوبة.',
-        icon: Icons.cancel_rounded,
-        color: AllineColors.danger,
+        child: Row(
+          children: [
+            _iconCircle(terminal.$3, terminal.$4),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(terminal.$1, style: _titleStyle(context)),
+                  const SizedBox(height: 3),
+                  Text(terminal.$2, style: _bodyStyle(context)),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
     }
-    if (currentStatus == 'returned') {
-      return _buildAlertBanner(
-        context,
-        title: 'الطلب مرتجع',
-        message: 'تم تسجيل هذا الطلب كمرتجع من قبل العميل أو الإدارة.',
-        icon: Icons.assignment_return_rounded,
-        color: const Color(0xFFD97706),
-      );
-    }
-    if (currentStatus == 'failed') {
-      return _buildAlertBanner(
-        context,
-        title: 'تعذر التسليم',
-        message: 'فشلت محاولة تسليم هذا الطلب للعميل.',
-        icon: Icons.error_outline_rounded,
-        color: AllineColors.danger,
-      );
-    }
 
-    final steps = [
-      {'key': 'pending', 'label': 'طلب جديد', 'icon': Icons.fiber_new_rounded},
-      {'key': 'confirmed', 'label': 'تم التأكيد', 'icon': Icons.check_circle_outline_rounded},
-      {'key': 'processing', 'label': 'قيد التجهيز', 'icon': Icons.inventory_2_outlined},
-      {'key': 'out_for_delivery', 'label': 'خرج للتوصيل', 'icon': Icons.two_wheeler_rounded},
-      {'key': 'delivered', 'label': 'تم التسليم', 'icon': Icons.task_alt_rounded},
-    ];
+    final activeIndex = _steps.indexWhere((step) => step.$1 == currentStatus);
+    final currentIndex = activeIndex < 0 ? 0 : activeIndex;
+    final currentLabel = currentStatus == 'pending'
+        ? 'طلب جديد'
+        : _steps[currentIndex].$2;
+    final currentMessage = switch (currentStatus) {
+      'pending' => 'بانتظار مراجعة المتجر وتأكيد الطلب.',
+      'confirmed' => 'تم تأكيد الطلب، وهو بانتظار بدء التجهيز.',
+      'processing' => 'يتم تجهيز الطلب تمهيدًا للتوصيل.',
+      'out_for_delivery' => 'الطلب في طريقه إلى العميل.',
+      'delivered' => 'تم تسليم الطلب للعميل.',
+      _ => 'تتم متابعة حالة الطلب.',
+    };
 
-    int activeIndex = 0;
-    if (currentStatus == 'confirmed') {
-      activeIndex = 1;
-    } else if (currentStatus == 'processing') {
-      activeIndex = 2;
-    } else if (currentStatus == 'out_for_delivery') {
-      activeIndex = 3;
-    } else if (currentStatus == 'delivered') {
-      activeIndex = 4;
-    }
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AllineColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return _card(
+      context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'مسار معالجة الطلب',
-                style: robotoBold.copyWith(
-                  fontSize: Dimensions.fontSizeDefault,
-                  color: AllineColors.textDark,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AllineColors.secondary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'المرحلة ${activeIndex + 1} من ${steps.length}',
-                  style: robotoBold.copyWith(
-                    fontSize: 10,
-                    color: AllineColors.secondary,
-                  ),
+              _iconCircle(AllineColors.primary, Icons.circle),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(currentLabel, style: _titleStyle(context)),
+                    const SizedBox(height: 3),
+                    Text(currentMessage, style: _bodyStyle(context)),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: List.generate(steps.length * 2 - 1, (index) {
-              if (index.isOdd) {
-                final stepBefore = index ~/ 2;
-                final isPassed = stepBefore < activeIndex;
-                return Expanded(
-                  child: Container(
-                    height: 3,
-                    color: isPassed ? AllineColors.success : AllineColors.borderLight,
-                  ),
-                );
-              }
-
-              final stepIndex = index ~/ 2;
-              final isCompleted = stepIndex < activeIndex;
-              final isCurrent = stepIndex == activeIndex;
-
-              Color circleBg;
-              Color circleBorder;
-              Color iconColor;
-
-              if (isCompleted) {
-                circleBg = AllineColors.success;
-                circleBorder = AllineColors.success;
-                iconColor = Colors.white;
-              } else if (isCurrent) {
-                circleBg = AllineColors.secondary;
-                circleBorder = AllineColors.secondary;
-                iconColor = Colors.white;
-              } else {
-                circleBg = AllineColors.backgroundLight;
-                circleBorder = AllineColors.borderLight;
-                iconColor = AllineColors.textLight;
-              }
-
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 28,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: circleBg,
-                      border: Border.all(color: circleBorder, width: 2),
-                    ),
-                    child: Icon(
-                      isCompleted ? Icons.check : (steps[stepIndex]['icon'] as IconData),
-                      size: 14,
-                      color: iconColor,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: 58,
-                    child: Text(
-                      steps[stepIndex]['label'] as String,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: robotoMedium.copyWith(
-                        fontSize: 9,
-                        color: isCurrent
-                            ? AllineColors.secondary
-                            : (isCompleted ? AllineColors.textDark : AllineColors.textLight),
-                        fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ),
+          const SizedBox(height: 18),
+          Text('مسار الطلب', style: _sectionStyle(context)),
+          const SizedBox(height: 12),
+          for (var index = 0; index < _steps.length; index++)
+            _buildStep(context, index, currentIndex),
         ],
       ),
     );
   }
 
-  Widget _buildAlertBanner(
-    BuildContext context, {
-    required String title,
-    required String message,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
+  Widget _buildStep(BuildContext context, int index, int currentIndex) {
+    final isComplete = index < currentIndex;
+    final isCurrent = index == currentIndex;
+    final color = isComplete
+        ? ColorResources.getSuccess(context)
+        : isCurrent
+            ? ColorResources.getPrimary(context)
+            : ColorResources.getTextSubTitle(context).withValues(alpha: .55);
+
+    return SizedBox(
+      height: index == _steps.length - 1 ? 34 : 46,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
+          SizedBox(
+            width: 26,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: robotoBold.copyWith(
-                    fontSize: Dimensions.fontSizeDefault,
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: isComplete || isCurrent
+                        ? color.withValues(alpha: .12)
+                        : Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: color, width: isCurrent ? 2 : 1.4),
+                  ),
+                  child: Icon(
+                    isComplete ? Icons.check_rounded : _steps[index].$3,
+                    size: 13,
                     color: color,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  message,
-                  style: robotoRegular.copyWith(
-                    fontSize: Dimensions.fontSizeSmall,
-                    color: AllineColors.textDark,
+                if (index < _steps.length - 1)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 2),
+                      color: index < currentIndex
+                          ? ColorResources.getSuccess(context).withValues(alpha: .6)
+                          : ColorResources.getBorder(context),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
+          const SizedBox(width: 10),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              _steps[index].$2,
+              style: TextStyle(
+                fontFamily: 'AllineTajawal',
+                fontSize: 13,
+                fontWeight: isCurrent || isComplete ? FontWeight.w700 : FontWeight.w500,
+                color: isCurrent
+                    ? ColorResources.getTextTitle(context)
+                    : isComplete
+                        ? ColorResources.getTextSubTitle(context)
+                        : ColorResources.getTextSubTitle(context).withValues(alpha: .75),
+              ),
+            ),
+          ),
+          if (isCurrent) ...[
+            const SizedBox(width: 7),
+            Container(
+              margin: const EdgeInsets.only(top: 3),
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: ColorResources.getPrimary(context).withValues(alpha: .1),
+                borderRadius: BorderRadius.circular(99),
+              ),
+              child: Text(
+                'الحالية',
+                style: TextStyle(
+                  fontFamily: 'AllineTajawal',
+                  color: ColorResources.getPrimary(context),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
+
+  Widget _card(BuildContext context, {required Widget child}) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(17),
+          border: Border.all(color: ColorResources.getBorder(context)),
+        ),
+        child: child,
+      );
+
+  Widget _iconCircle(Color color, IconData icon) => Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: .1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: color, size: 21),
+      );
+
+  TextStyle _titleStyle(BuildContext context) => TextStyle(
+        fontFamily: 'AllineTajawal',
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+        color: ColorResources.getTextTitle(context),
+      );
+
+  TextStyle _sectionStyle(BuildContext context) => TextStyle(
+        fontFamily: 'AllineTajawal',
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: ColorResources.getTextTitle(context),
+      );
+
+  TextStyle _bodyStyle(BuildContext context) => TextStyle(
+        fontFamily: 'AllineTajawal',
+        fontSize: 12,
+        color: ColorResources.getTextSubTitle(context),
+      );
 }

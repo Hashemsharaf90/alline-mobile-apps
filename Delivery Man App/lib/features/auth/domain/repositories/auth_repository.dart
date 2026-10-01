@@ -43,11 +43,9 @@ class AuthRepository implements AuthRepositoryInterface{
       );
       if(settings.authorizationStatus == AuthorizationStatus.authorized) {
         _deviceToken = await _saveDeviceToken();
-        debugPrint('=========>Device Token ======$_deviceToken');
       }
     }else {
       _deviceToken = await _saveDeviceToken();
-      debugPrint('=========>Device Token ======$_deviceToken');
     }
     if(!GetPlatform.isWeb) {
       FirebaseMessaging.instance.subscribeToTopic('six_valley_delivery');
@@ -83,10 +81,17 @@ class AuthRepository implements AuthRepositoryInterface{
 
   @override
   Future<bool> clearSharedData() async {
+    try {
+      await apiClient.postData(AppConstants.logoutUri, {});
+    } catch (_) {}
     if(!GetPlatform.isWeb) {
-      apiClient.postData(AppConstants.tokenUri, {"_method": "put", "fcm_token": 'no'});
+      try {
+        await apiClient.postData(AppConstants.tokenUri, {"_method": "put", "fcm_token": 'no'});
+      } catch (_) {}
     }
     await sharedPreferences.remove(AppConstants.token);
+    apiClient.token = null;
+    apiClient.updateHeader(null, sharedPreferences.getString(AppConstants.languageCode));
     return true;
   }
 

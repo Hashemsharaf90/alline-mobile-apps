@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/filter_icon_widget.dart';
 import 'package:sixvalley_vendor_app/features/dashboard/screens/dashboard_screen.dart';
-import 'package:sixvalley_vendor_app/features/product/domain/models/filter_model.dart';
 import 'package:sixvalley_vendor_app/features/product/domain/models/product_model.dart';
 import 'package:sixvalley_vendor_app/features/product/widgets/product_filter_bottomsheet_widget.dart';
 import 'package:sixvalley_vendor_app/features/product/widgets/status_filter_widget.dart';
+import 'package:sixvalley_vendor_app/features/product/screens/stock_out_product_screen.dart';
 import 'package:sixvalley_vendor_app/helper/debounce_helper.dart';
 import 'package:sixvalley_vendor_app/localization/controllers/localization_controller.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
 import 'package:sixvalley_vendor_app/features/product/controllers/product_controller.dart';
 import 'package:sixvalley_vendor_app/features/profile/controllers/profile_controller.dart';
 import 'package:sixvalley_vendor_app/main.dart';
-import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_app_bar_widget.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_search_field_widget.dart';
@@ -30,7 +29,7 @@ class ProductListMenuScreen extends StatefulWidget {
 
 class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
   final DebounceHelper _debounce = DebounceHelper(milliseconds: 500);
-  TextEditingController searchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   int? userId;
 
 
@@ -54,6 +53,7 @@ class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
   @override
   void dispose() {
     _debounce.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -75,26 +75,6 @@ class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
       },
 
       child: Scaffold(
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: AllineColors.primary,
-          elevation: 4,
-          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
-          label: const Text(
-            'إضافة منتج',
-            style: TextStyle(
-              fontFamily: 'AllineTajawal',
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Colors.white,
-            ),
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AddProductTabView(fromHome: false)),
-            );
-          },
-        ),
         appBar: CustomAppBarWidget(
           title: getTranslated('product_list', context),
           isBackButtonExist: widget.isBackButtonExist,
@@ -106,73 +86,149 @@ class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
             }
           },
         ),
-        body: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            padding: const EdgeInsets.only(top : Dimensions.paddingSizeMedium),
-            color: Theme.of(context).cardColor,
-            child: StatusFilterWidget(
-              onFilterChanged: (index) {},
-            ),
-          ),
-
-          SizedBox(height: 80,
-            child: Consumer<ProductController>(
-              builder: (context, productController, _) {
-                return Container(
-                  color: Theme.of(context).cardColor,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeMedium, vertical: Dimensions.paddingSizeExtraSmall),
-                    child: Row(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'إدارة منتجات متجرك',
+                    style: TextStyle(
+                      color: ColorResources.getTextSubTitle(context),
+                      fontSize: 14,
+                      fontFamily: 'AllineTajawal',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    height: 48,
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddProductTabView(fromHome: false),
+                          ),
+                        );
+                        if (!context.mounted) return;
+                        _searchProducts(
+                          Provider.of<ProductController>(context, listen: false),
+                          searchController.text,
+                        );
+                      },
+                      icon: const Icon(Icons.add_rounded, size: 22),
+                      label: const Text(
+                        'إضافة منتج',
+                        style: TextStyle(
+                          fontFamily: 'AllineTajawal',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AllineColors.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Consumer<ProductController>(
+                    builder: (context, controller, _) => _ProductSummary(
+                      total: controller.sellerProductModel?.totalSize,
+                      onLowStockTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const StockOutProductScreen(),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  StatusFilterWidget(
+                    onFilterChanged: (_) {},
+                    searchController: searchController,
+                  ),
+                  const SizedBox(height: 12),
+                  Consumer<ProductController>(
+                    builder: (context, productController, _) => Row(
                       children: [
                         Expanded(
-                          child: CustomSearchFieldWidget(
-                            controller: searchController,
-                            hint: getTranslated('search_by_product_name', context),
-                            prefix: Images.iconsSearch,
-                            iconPressed: () => (){},
-                            onSubmit: (text) => (){},
-                            onChanged: (value)=> _debounce.run(() async {
-                              productController.getSellerProductList(
-                                userId.toString(), 1, 'en', value,
-                                filterSearchModel:  FilterModel(
-                                  reload: true
-                                ),
-                              );
-                            }),
+                          child: SizedBox(
+                            height: 48,
+                            child: CustomSearchFieldWidget(
+                              controller: searchController,
+                              hint: 'ابحث عن منتج...',
+                              prefix: Images.iconsSearch,
+                              iconPressed: () => _searchProducts(
+                                productController,
+                                searchController.text,
+                              ),
+                              onSubmit: (text) => _searchProducts(
+                                productController,
+                                text,
+                              ),
+                              onChanged: (value) => _debounce.run(
+                                () => _searchProducts(productController, value),
+                              ),
+                            ),
                           ),
                         ),
-                        const SizedBox(width: Dimensions.paddingSize),
-
-                        ///filter Icon
+                        const SizedBox(width: 10),
                         FilterIconWidget(
-                          filterCount: _getFilterCount(productController.sellerProductModel),
-                          onTap: productController.sellerProductModel == null ? null : () {
+                          filterCount: _getFilterCount(
+                            productController.sellerProductModel,
+                          ),
+                          onTap: productController.sellerProductModel == null
+                              ? null
+                              : () {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
-                              builder: (builder) => const ProductFilterBottomSheet(),
+                              builder: (_) => ProductFilterBottomSheet(
+                                searchController: searchController,
+                              ),
                             );
                           },
                         ),
                       ],
                     ),
                   ),
-                );
-              }
-            )
-          ),
-          const SizedBox(height: Dimensions.paddingSize),
-
-          Expanded(child: ProductViewWidget(
-           sellerId: userId,
-           fromNotification: widget.fromNotification,
-           keyboardHeight: MediaQuery.of(context).viewInsets.bottom,
-          ))
-
+                ],
+              ),
+            ),
+            Expanded(
+              child: ProductViewWidget(
+                sellerId: userId,
+                fromNotification: widget.fromNotification,
+                searchController: searchController,
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  void _searchProducts(ProductController controller, String value) {
+    final localization = Provider.of<LocalizationController>(context, listen: false);
+    final languageCode = localization.locale.languageCode == 'en'
+        ? 'en'
+        : localization.locale.languageCode;
+    controller.getSellerProductList(
+      userId.toString(),
+      1,
+      languageCode,
+      value,
+      filterSearchModel: controller.filterModel.copyWith(reload: true),
     );
   }
 
@@ -205,4 +261,83 @@ class _ProductListMenuScreenState extends State<ProductListMenuScreen> {
         authorCount;
   }
 
+}
+
+class _ProductSummary extends StatelessWidget {
+  const _ProductSummary({this.total, required this.onLowStockTap});
+
+  final int? total;
+  final VoidCallback onLowStockTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = ColorResources.getBorder(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AllineColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.inventory_2_outlined,
+              color: AllineColors.primary,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'إجمالي المنتجات',
+                  style: TextStyle(
+                    color: ColorResources.getTextSubTitle(context),
+                    fontSize: 12,
+                    fontFamily: 'AllineTajawal',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  total == null ? '—' : '$total',
+                  style: TextStyle(
+                    color: ColorResources.getTextTitle(context),
+                    fontSize: 20,
+                    height: 1.1,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'AllineTajawal',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          TextButton.icon(
+            onPressed: onLowStockTap,
+            style: TextButton.styleFrom(
+              foregroundColor: AllineColors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: const Size(44, 44),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            icon: const Icon(Icons.warning_amber_rounded, size: 17),
+            label: const Text(
+              'مخزون محدود',
+              style: TextStyle(fontSize: 11, fontFamily: 'AllineTajawal'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

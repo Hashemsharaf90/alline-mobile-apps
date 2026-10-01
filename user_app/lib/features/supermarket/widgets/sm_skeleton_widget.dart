@@ -1,5 +1,6 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Shared shimmer primitives used across the Supermarket Hub.
@@ -20,14 +21,15 @@ class SmShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     return Shimmer.fromColors(
-      baseColor: const Color(0xFFECF1F8),
-      highlightColor: const Color(0xFFF8FAFD),
+      baseColor: colors.skeletonBase,
+      highlightColor: colors.skeletonHighlight,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: const Color(0xFFECF1F8),
+          color: colors.skeletonBase,
           borderRadius: BorderRadius.circular(radius),
         ),
       ),
@@ -41,12 +43,13 @@ class SmStoreCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     return Container(
       width: 160,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE1E8F2)),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,13 +61,13 @@ class SmStoreCardSkeleton extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Shimmer.fromColors(
-              baseColor: const Color(0xFFECF1F8),
-              highlightColor: const Color(0xFFF8FAFD),
+              baseColor: colors.skeletonBase,
+              highlightColor: colors.skeletonHighlight,
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFECF1F8),
+                decoration: BoxDecoration(
+                  color: colors.skeletonBase,
                   borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(16)),
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                 ),
               ),
             ),
@@ -94,39 +97,45 @@ class SmProductCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     return Container(
-      width: 140,
+      width: 156,
+      height: 268,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE1E8F2)),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Shimmer.fromColors(
-            baseColor: const Color(0xFFECF1F8),
-            highlightColor: const Color(0xFFF8FAFD),
-            child: Container(
-              height: 130,
-              decoration: const BoxDecoration(
-                color: Color(0xFFECF1F8),
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(16)),
+          SizedBox(
+            height: 104,
+            child: Shimmer.fromColors(
+              baseColor: colors.skeletonBase,
+              highlightColor: colors.skeletonHighlight,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: colors.skeletonBase,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
+                ),
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SmShimmerBox(width: 100, height: 11),
-                const SizedBox(height: 5),
-                SmShimmerBox(width: 70, height: 11),
-                const SizedBox(height: 6),
-                SmShimmerBox(width: 120, height: 28, radius: 8),
-              ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SmShimmerBox(width: 100, height: 24),
+                  const SizedBox(height: 5),
+                  SmShimmerBox(width: 70, height: 11),
+                  const Spacer(),
+                  SmShimmerBox(width: 120, height: 28, radius: 8),
+                ],
+              ),
             ),
           ),
         ],
@@ -141,14 +150,15 @@ class SmCategoryChipSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
     return Shimmer.fromColors(
-      baseColor: const Color(0xFFECF1F8),
-      highlightColor: const Color(0xFFF8FAFD),
+      baseColor: colors.skeletonBase,
+      highlightColor: colors.skeletonHighlight,
       child: Container(
         width: 72,
         height: 80,
         decoration: BoxDecoration(
-          color: const Color(0xFFECF1F8),
+          color: colors.skeletonBase,
           borderRadius: BorderRadius.circular(14),
         ),
       ),
@@ -182,7 +192,7 @@ class SmProductListSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 224,
+      height: 268,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),

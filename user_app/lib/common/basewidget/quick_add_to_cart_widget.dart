@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/domain/models/cart_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:provider/provider.dart';
 
 /// Compact quick add-to-cart widget for supermarket product cards.
@@ -23,6 +23,8 @@ class QuickAddToCartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tapHeight =
+        height < AllineTouchTarget.minimum ? AllineTouchTarget.minimum : height;
     return Consumer<CartController>(
       builder: (context, cartController, _) {
         final cartItem = _findInCart(cartController);
@@ -32,7 +34,7 @@ class QuickAddToCartWidget extends StatelessWidget {
 
         if (quantity == 0) {
           return _AddButton(
-            height: height,
+            height: tapHeight,
             iconSize: iconSize,
             isLoading: cartController.addToCartLoading,
             onTap: () => _addToCart(context, cartController),
@@ -40,7 +42,7 @@ class QuickAddToCartWidget extends StatelessWidget {
         }
 
         return _QuantityStepper(
-          height: height,
+          height: tapHeight,
           iconSize: iconSize,
           quantity: quantity,
           isLoading: isLoading,
@@ -125,24 +127,25 @@ class _AddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return SizedBox(
       height: height,
       width: height,
       child: Material(
-        color: Theme.of(context).primaryColor,
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(AllineRadius.control),
         child: InkWell(
-          borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+          borderRadius: BorderRadius.circular(AllineRadius.control),
           onTap: isLoading ? null : onTap,
           child: isLoading
-              ? const Padding(
-                  padding: EdgeInsets.all(6),
+              ? Padding(
+                  padding: const EdgeInsets.all(6),
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: Colors.white,
+                    color: onPrimary,
                   ),
                 )
-              : Icon(Icons.add, color: Colors.white, size: iconSize),
+              : Icon(Icons.add, color: onPrimary, size: iconSize),
         ),
       ),
     );
@@ -169,11 +172,12 @@ class _QuantityStepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: BorderRadius.circular(AllineRadius.control),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -184,21 +188,21 @@ class _QuantityStepper extends StatelessWidget {
             onTap: isLoading ? null : onDecrement,
           ),
           Container(
-            constraints: BoxConstraints(minWidth: height * 0.8),
+            constraints: const BoxConstraints(minWidth: 32),
             alignment: Alignment.center,
             child: isLoading
                 ? SizedBox(
                     width: iconSize,
                     height: iconSize,
-                    child: const CircularProgressIndicator(
+                    child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: onPrimary,
                     ),
                   )
                 : Text(
                     '$quantity',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: onPrimary,
                       fontSize: iconSize * 0.8,
                       fontWeight: FontWeight.w700,
                     ),
@@ -216,13 +220,14 @@ class _QuantityStepper extends StatelessWidget {
 
   Widget _stepperButton(BuildContext context,
       {required IconData icon, VoidCallback? onTap}) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return InkWell(
-      borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+      borderRadius: BorderRadius.circular(AllineRadius.control),
       onTap: onTap,
       child: SizedBox(
         width: height,
         height: height,
-        child: Icon(icon, color: Colors.white, size: iconSize),
+        child: Icon(icon, color: onPrimary, size: iconSize),
       ),
     );
   }

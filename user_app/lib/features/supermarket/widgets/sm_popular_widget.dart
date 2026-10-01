@@ -1,16 +1,17 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
+import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_state_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_section_header.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_skeleton_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 
-/// "الأكثر طلبًا" section.
+/// A first-page discovery rail, with no unsupported sales-ranking claim.
 ///
 /// Shows the first [_max] products from [ProductController.supermarketProductModel]
-/// as a horizontal scroll (acts as "popular / featured" since backend does not
-/// have a separate popularity sort for the supermarket module yet).
+/// as a horizontal scroll. The backend does not provide supermarket ranking.
 class SmPopularWidget extends StatelessWidget {
   const SmPopularWidget({super.key});
 
@@ -24,14 +25,14 @@ class SmPopularWidget extends StatelessWidget {
 
         if (model == null) {
           return Container(
-            color: const Color(0xFFF4F8FE),
+            color: context.allineColors.background,
             padding: const EdgeInsets.only(top: 4, bottom: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 AllineSectionHeader(
-                  title: '\u0627\u0644\u0623\u0643\u062b\u0631 \u0637\u0644\u0628\u064b\u0627',
-                  subtitle: '\u0645\u0646\u062a\u062c\u0627\u062a \u064a\u0637\u0644\u0628\u0647\u0627 \u0627\u0644\u0639\u0645\u0644\u0627\u0621 \u0643\u062b\u064a\u0631\u064b\u0627',
+                  title: 'تسوق من السوبر ماركت',
+                  subtitle: 'منتجات متاحة للتصفح',
                 ),
                 SizedBox(height: 14),
                 SmProductListSkeleton(),
@@ -41,21 +42,44 @@ class SmPopularWidget extends StatelessWidget {
         }
 
         final products = (model.products ?? <Product>[]).take(_max).toList();
-        if (products.isEmpty) return const SizedBox.shrink();
+        if (products.isEmpty) {
+          return Container(
+            color: context.allineColors.background,
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 20),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AllineSectionHeader(
+                  title: 'تسوق من السوبر ماركت',
+                  subtitle: 'منتجات متاحة للتصفح',
+                ),
+                SizedBox(height: 12),
+                SizedBox(
+                  height: 220,
+                  child: AllineEmptyState(
+                    icon: Icons.shopping_basket_outlined,
+                    title: 'لا توجد منتجات حالياً',
+                    message: 'لم تتوفر منتجات من السوبر ماركت لعرضها الآن.',
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
 
         return Container(
-          color: const Color(0xFFF4F8FE),
+          color: context.allineColors.background,
           padding: const EdgeInsets.only(top: 4, bottom: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const AllineSectionHeader(
-                title: '\u0627\u0644\u0623\u0643\u062b\u0631 \u0637\u0644\u0628\u064b\u0627',
-                subtitle: '\u0645\u0646\u062a\u062c\u0627\u062a \u064a\u0637\u0644\u0628\u0647\u0627 \u0627\u0644\u0639\u0645\u0644\u0627\u0621 \u0643\u062b\u064a\u0631\u064b\u0627',
+                title: 'تسوق من السوبر ماركت',
+                subtitle: 'منتجات متاحة للتصفح',
               ),
               const SizedBox(height: 14),
               SizedBox(
-                height: 252,
+                height: 268,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -63,7 +87,7 @@ class SmPopularWidget extends StatelessWidget {
                   itemCount: products.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) => SizedBox(
-                    width: 150,
+                    width: 156,
                     child: SupermarketProductCard(
                       product: products[index],
                       margin: 0,

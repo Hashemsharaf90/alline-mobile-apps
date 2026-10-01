@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:sixvalley_vendor_app/features/order/domain/models/order_model.dart';
 import 'package:sixvalley_vendor_app/helper/date_converter.dart';
 import 'package:sixvalley_vendor_app/utill/color_resources.dart';
-import 'package:sixvalley_vendor_app/utill/dimensions.dart';
-import 'package:sixvalley_vendor_app/utill/styles.dart';
 
 class AllineOrderHeaderCardWidget extends StatelessWidget {
   final Order? order;
@@ -11,187 +9,89 @@ class AllineOrderHeaderCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (order == null) return const SizedBox.shrink();
+    final currentOrder = order;
+    if (currentOrder == null) return const SizedBox.shrink();
 
-    final status = order!.orderStatus?.toLowerCase() ?? 'pending';
-    final paymentStatus = order!.paymentStatus?.toLowerCase() ?? 'unpaid';
-
-    Color statusColor;
-    String statusLabel;
-    IconData statusIcon;
-
-    switch (status) {
-      case 'confirmed':
-        statusColor = AllineColors.secondary;
-        statusLabel = 'تم التأكيد';
-        statusIcon = Icons.check_circle_outline_rounded;
-        break;
-      case 'processing':
-        statusColor = const Color(0xFFF59E0B);
-        statusLabel = 'قيد التجهيز';
-        statusIcon = Icons.inventory_2_outlined;
-        break;
-      case 'out_for_delivery':
-        statusColor = const Color(0xFF0284C7);
-        statusLabel = 'خرج للتوصيل';
-        statusIcon = Icons.two_wheeler_rounded;
-        break;
-      case 'delivered':
-        statusColor = AllineColors.success;
-        statusLabel = 'تم التسليم';
-        statusIcon = Icons.task_alt_rounded;
-        break;
-      case 'canceled':
-      case 'cancelled':
-        statusColor = AllineColors.danger;
-        statusLabel = 'ملغي';
-        statusIcon = Icons.cancel_rounded;
-        break;
-      case 'returned':
-        statusColor = const Color(0xFFD97706);
-        statusLabel = 'مرتجع';
-        statusIcon = Icons.assignment_return_rounded;
-        break;
-      case 'failed':
-        statusColor = AllineColors.danger;
-        statusLabel = 'فشل التسليم';
-        statusIcon = Icons.error_outline_rounded;
-        break;
-      default:
-        statusColor = AllineColors.orange;
-        statusLabel = 'طلب جديد';
-        statusIcon = Icons.fiber_new_rounded;
-    }
-
-    String orderTypeLabel = 'طلب متجر محلي';
-    if (order!.orderType == 'POS') {
-      orderTypeLabel = 'نقطة بيع POS';
-    } else if (order!.orderType == 'supermarket' || (order!.shippingResponsibility != 'sellerwise_shipping')) {
-      orderTypeLabel = 'طلب Alline';
-    }
+    final createdAt = DateTime.tryParse(currentOrder.createdAt ?? '');
+    final dateText = createdAt == null
+        ? null
+        : DateConverter.localDateToIsoStringAMPM(createdAt);
+    final orderType = switch (currentOrder.orderType) {
+      'POS' => 'نقطة بيع',
+      'supermarket' => 'طلب Alline',
+      _ when currentOrder.shippingResponsibility != 'sellerwise_shipping' =>
+        'طلب Alline',
+      _ => 'طلب متجر',
+    };
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(14, 9, 14, 4),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AllineColors.borderLight),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: ColorResources.getBorder(context)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Order Number
-              Row(
-                children: [
-                  Text(
-                    'طلب #${order!.id}',
-                    style: robotoBold.copyWith(
-                      fontSize: Dimensions.fontSizeLarge + 1,
-                      color: AllineColors.textDark,
-                    ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'طلب #${currentOrder.id ?? '—'}',
+                  style: TextStyle(
+                    fontFamily: 'AllineTajawal',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: ColorResources.getTextTitle(context),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: AllineColors.backgroundLight,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AllineColors.borderLight),
-                    ),
-                    child: Text(
-                      orderTypeLabel,
-                      style: robotoRegular.copyWith(
-                        fontSize: 10,
-                        color: AllineColors.textLight,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Status Badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                const SizedBox(height: 7),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 5,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Icon(statusIcon, color: statusColor, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      statusLabel,
-                      style: robotoBold.copyWith(
-                        color: statusColor,
-                        fontSize: Dimensions.fontSizeSmall - 1,
-                      ),
-                    ),
+                    _metaChip(context, orderType, Icons.storefront_outlined),
+                    if (dateText != null)
+                      _metaChip(context, dateText, Icons.schedule_rounded),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: AllineColors.borderLight),
-          const SizedBox(height: 12),
-
-          // Date and Payment Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Order Date & Time
-              Row(
-                children: [
-                  const Icon(Icons.access_time_rounded, size: 15, color: AllineColors.textLight),
-                  const SizedBox(width: 5),
-                  Text(
-                    order!.createdAt != null
-                        ? DateConverter.localDateToIsoStringAMPM(DateTime.parse(order!.createdAt!))
-                        : '',
-                    style: robotoRegular.copyWith(
-                      fontSize: Dimensions.fontSizeSmall,
-                      color: AllineColors.textLight,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Payment Status
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: paymentStatus == 'paid'
-                      ? AllineColors.success.withValues(alpha: 0.1)
-                      : AllineColors.danger.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  paymentStatus == 'paid' ? 'مدفوع 🟢' : 'غير مدفوع 🔴',
-                  style: robotoBold.copyWith(
-                    fontSize: 11,
-                    color: paymentStatus == 'paid' ? AllineColors.success : AllineColors.danger,
-                  ),
-                ),
-              ),
-            ],
+          const SizedBox(width: 8),
+          Icon(
+            Icons.receipt_long_outlined,
+            color: ColorResources.getPrimary(context),
+            size: 25,
           ),
         ],
       ),
     );
   }
+
+  Widget _metaChip(BuildContext context, String label, IconData icon) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: ColorResources.getScaffoldBg(context),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: ColorResources.getTextSubTitle(context)),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'AllineTajawal',
+                fontSize: 11,
+                color: ColorResources.getTextSubTitle(context),
+              ),
+            ),
+          ],
+        ),
+      );
 }

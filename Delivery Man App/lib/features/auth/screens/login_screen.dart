@@ -240,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     showCustomSnackBarWidget('enter_phone_number'.tr);
                   }else if (_password.isEmpty) {
                     showCustomSnackBarWidget('enter_password'.tr);
-                  }else if (_password.length < 6) {
+                  }else if (_password.length < 8) {
                     showCustomSnackBarWidget('password_should_be'.tr);
                   }else {
 

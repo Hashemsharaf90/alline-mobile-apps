@@ -28,6 +28,13 @@ class BankInfoController extends ChangeNotifier {
   BusinessAnalyticsFilterDataModel? _businessAnalyticsFilterData;
   BusinessAnalyticsFilterDataModel? get businessAnalyticsFilterData =>
       _businessAnalyticsFilterData;
+  bool _analyticsFilterFailed = false;
+  bool get analyticsFilterFailed => _analyticsFilterFailed;
+  bool _revenueDataFailed = false;
+  bool get revenueDataFailed => _revenueDataFailed;
+  bool _hasSellerEarningsData = false;
+  bool get hasSellerEarningsData => _hasSellerEarningsData;
+  bool get hasCommissionData => _commission.isNotEmpty;
   BusinessAnalyticsFilterDataModel? _dashboardTodayAnalytics;
   BusinessAnalyticsFilterDataModel? get dashboardTodayAnalytics =>
       _dashboardTodayAnalytics;
@@ -144,50 +151,53 @@ class BankInfoController extends ChangeNotifier {
 
   Future<void> getDashboardRevenueData(
       BuildContext context, String? filterType) async {
-    ApiResponse apiResponse =
-        await bankInfoServiceInterface.chartFilterData(filterType);
-    if (apiResponse.response != null &&
-        apiResponse.response!.data != null &&
-        apiResponse.response!.statusCode == 200) {
-      _userEarnings = [];
-      _userCommissions = [];
-      _earnings = [];
-      _commission = [];
-      _earnings.addAll(apiResponse.response!.data['seller_earn']);
-      _commission.addAll(apiResponse.response!.data['commission_earn']);
-      for (dynamic data in _earnings) {
-        try {
-          _userEarnings!.add(data.toDouble());
-        } catch (e) {
-          _userEarnings!.add(double.parse(data.toString()));
+    _userEarnings = null;
+    _userCommissions = null;
+    _earnings = [];
+    _commission = [];
+    _lim = 0;
+    _revenueDataFailed = false;
+    _hasSellerEarningsData = false;
+    notifyListeners();
+    try {
+      final ApiResponse apiResponse =
+          await bankInfoServiceInterface.chartFilterData(filterType);
+      final data = apiResponse.response?.data;
+      if (apiResponse.response?.statusCode == 200 &&
+          data is Map &&
+          data['seller_earn'] is List &&
+          data['commission_earn'] is List) {
+        _earnings = List<dynamic>.from(data['seller_earn']);
+        _commission = List<dynamic>.from(data['commission_earn']);
+        _hasSellerEarningsData = _earnings.isNotEmpty;
+        final sellerEarnings = _earnings
+            .map((value) => double.tryParse('$value'))
+            .toList(growable: true);
+        final commissions = _commission
+            .map((value) => double.tryParse('$value'))
+            .toList(growable: true);
+        if (sellerEarnings.every((value) => value != null) &&
+            commissions.every((value) => value != null)) {
+          _userEarnings = sellerEarnings;
+          _userCommissions = commissions;
+          _userEarnings!.insert(0, 0);
+          _userCommissions!.insert(0, 0);
+          final maxEarning = _userEarnings!
+              .whereType<double>()
+              .fold<double>(0, (maximum, value) => value > maximum ? value : maximum);
+          final maxCommission = _userCommissions!
+              .whereType<double>()
+              .fold<double>(0, (maximum, value) => value > maximum ? value : maximum);
+          _lim = maxEarning > maxCommission ? maxEarning : maxCommission;
+        } else {
+          _revenueDataFailed = true;
         }
-      }
-      for (dynamic data in _commission) {
-        try {
-          _userCommissions!.add(data.toDouble());
-        } catch (e) {
-          _userCommissions!.add(double.parse(data.toString()));
-        }
-      }
-      _userEarnings!.insert(0, 0);
-      _userCommissions!.insert(0, 0);
-      List<double?> counts = [];
-      List<double?> comCounts = [];
-      counts.addAll(_userEarnings!);
-      comCounts.addAll(_userCommissions!);
-      counts.sort();
-      comCounts.sort();
-      double max = 0;
-      max = counts.isNotEmpty ? counts[counts.length - 1] ?? 0 : 0;
-      double maxx = 0;
-      maxx = counts.isNotEmpty ? comCounts[comCounts.length - 1] ?? 0 : 0;
-      if (max > maxx) {
-        _lim = max;
       } else {
-        _lim = maxx;
+        _revenueDataFailed = true;
+        ApiChecker.checkApi(apiResponse);
       }
-    } else {
-      ApiChecker.checkApi(apiResponse);
+    } catch (_) {
+      _revenueDataFailed = true;
     }
     notifyListeners();
   }
@@ -235,17 +245,26 @@ class BankInfoController extends ChangeNotifier {
   Future<void> getAnalyticsFilterData(
       BuildContext context, String? type) async {
     _isLoading = true;
-    ApiResponse response =
-        await bankInfoServiceInterface.getOrderFilterData(type);
-    if (response.response != null && response.response!.statusCode == 200) {
-      _businessAnalyticsFilterData =
-          BusinessAnalyticsFilterDataModel.fromJson(response.response!.data);
-      _isLoading = false;
-    } else {
-      _isLoading = false;
-      ApiChecker.checkApi(response);
-    }
+    _businessAnalyticsFilterData = null;
+    _analyticsFilterFailed = false;
     notifyListeners();
+    try {
+      final ApiResponse response =
+          await bankInfoServiceInterface.getOrderFilterData(type);
+      if (response.response?.statusCode == 200 &&
+          response.response?.data is Map) {
+        _businessAnalyticsFilterData =
+            BusinessAnalyticsFilterDataModel.fromJson(response.response!.data);
+      } else {
+        _analyticsFilterFailed = true;
+        ApiChecker.checkApi(response);
+      }
+    } catch (_) {
+      _analyticsFilterFailed = true;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void setWarningValue(bool showWarning, {bool isUpdate = false}) {

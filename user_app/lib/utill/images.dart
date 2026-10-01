@@ -1,4 +1,8 @@
 class Images {
+  static const String amazonLogo = 'assets/images/amazon_logo.png';
+  static const String sheinLogo = 'assets/images/shein_logo.jpg';
+  static const String aliexpressLogo = 'assets/images/aliexpress_logo.png';
+  static const String alibabaLogo = 'assets/images/alibaba_logo.webp';
   static const String moreFilledImage = 'assets/images/more_filled.png';
   static const String cartArrowDownImage = 'assets/images/cart_arrow_down.png';
   static const String cartImage = 'assets/images/cart.png';

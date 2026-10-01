@@ -25,8 +25,6 @@ class ApiClient extends GetxService {
 
   ApiClient({required this.appBaseUrl, required this.sharedPreferences}) {
     token = sharedPreferences.getString(AppConstants.token);
-    debugPrint('Token: $token');
-
     updateHeader(token, sharedPreferences.getString(AppConstants.languageCode));
   }
 
@@ -40,7 +38,9 @@ class ApiClient extends GetxService {
 
   Future<Response> getData(String uri, {Map<String, dynamic>? query, Map<String, String>? headers}) async {
     try {
-      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
+      if (foundation.kDebugMode) {
+        debugPrint('====> API GET: $uri');
+      }
       http.Response _response = await http.get(
         Uri.parse(appBaseUrl+uri),
         headers: headers ?? _mainHeaders,
@@ -53,8 +53,9 @@ class ApiClient extends GetxService {
 
   Future<Response> postData(String uri, dynamic body, {Map<String, String>? headers}) async {
     try {
-      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
-      debugPrint('====> API Body: $body');
+      if (foundation.kDebugMode) {
+        debugPrint('====> API POST: $uri');
+      }
       http.Response _response = await http.post(
         Uri.parse(appBaseUrl+uri),
         body: jsonEncode(body),
@@ -68,8 +69,9 @@ class ApiClient extends GetxService {
 
   Future<Response> postMultipartData(String uri, Map<String, String> body, List<MultipartBody> multipartBody, {Map<String, String>? headers, List<PlatformFile>? platformFile}) async {
     try {
-      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
-      debugPrint('====> API Body: $body with ${multipartBody.length} files');
+      if (foundation.kDebugMode) {
+        debugPrint('====> API Multipart: $uri with ${multipartBody.length} files');
+      }
       http.MultipartRequest _request = http.MultipartRequest('POST', Uri.parse(appBaseUrl+uri));
       _request.headers.addAll(headers ?? _mainHeaders as Map<String, String>);
       for(MultipartBody multipart in multipartBody) {
@@ -106,8 +108,9 @@ class ApiClient extends GetxService {
 
   Future<Response> putData(String uri, dynamic body, {Map<String, String>? headers}) async {
     try {
-      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
-      debugPrint('====> API Body: $body');
+      if (foundation.kDebugMode) {
+        debugPrint('====> API PUT: $uri');
+      }
       http.Response _response = await http.put(
         Uri.parse(appBaseUrl+uri),
         body: jsonEncode(body),
@@ -121,7 +124,9 @@ class ApiClient extends GetxService {
 
   Future<Response> deleteData(String uri, {Map<String, String>? headers}) async {
     try {
-      debugPrint('====> API Call: $uri\nHeader: $_mainHeaders');
+      if (foundation.kDebugMode) {
+        debugPrint('====> API DELETE: $uri');
+      }
       http.Response _response = await http.delete(
         Uri.parse(appBaseUrl+uri),
         headers: headers ?? _mainHeaders,
@@ -138,7 +143,8 @@ class ApiClient extends GetxService {
     try {
       _body = jsonDecode(response.body);
     }catch(e) {
-      debugPrint(e.toString());
+      // Body is not JSON (e.g. raw HTML or plain text)
+      _body = null;
     }
     Response _response = Response(
       body: _body ?? response.body, bodyString: response.body.toString(),
@@ -154,10 +160,14 @@ class ApiClient extends GetxService {
       } else if(_response.body.toString().startsWith('{message')) {
         _response = Response(statusCode: _response.statusCode, body: _response.body, statusText: _response.body['message']);
       }
+    }else if(_response.statusCode != 200 && _response.body is String && _response.body.toString().trim().startsWith('<')) {
+      _response = Response(statusCode: _response.statusCode, body: null, statusText: 'Something went wrong. Please try again.');
     }else if(_response.statusCode != 200 && _response.body == null) {
       _response = const Response(statusCode: 0, statusText: noInternetMessage);
     }
-    log('====> API Response: [${_response.statusCode}] $uri\n${_response.body}');
+    if (foundation.kDebugMode) {
+      debugPrint('====> API Response: [${_response.statusCode}] $uri');
+    }
     return _response;
   }
 }

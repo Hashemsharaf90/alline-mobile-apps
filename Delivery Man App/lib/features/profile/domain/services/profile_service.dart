@@ -27,13 +27,22 @@ class ProfileService implements ProfileServiceInterface{
 
 
   @override
-  Future profileStatusOnnOff(int status) async {
+  Future<ResponseModel> profileStatusOnnOff(int status) async {
     Response response = await profileRepoInterface.profileStatusOnnOff(status);
+    Get.back();
     if (response.statusCode == 200) {
-      Get.back();
-      return ResponseModel(true, '');
+      String message = response.body is Map && response.body['message'] != null
+          ? response.body['message'].toString()
+          : 'status_updated_successfully'.tr;
+      showCustomSnackBarWidget(message, isError: false);
+      return ResponseModel(true, message);
     } else {
-      ApiChecker.checkApi(response);
+      String message = response.statusText ?? 'failed_to_update_status'.tr;
+      if (response.body is Map && response.body['message'] != null) {
+        message = response.body['message'].toString();
+      }
+      showCustomSnackBarWidget(message);
+      return ResponseModel(false, message);
     }
   }
 
