@@ -10,8 +10,8 @@ import 'package:sixvalley_vendor_app/utill/styles.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class TransactionChart extends StatefulWidget {
-
-  const TransactionChart({super.key});
+  final bool showPeriodSelector;
+  const TransactionChart({super.key, this.showPeriodSelector = true});
 
   @override
   State<StatefulWidget> createState() => TransactionChartState();
@@ -28,6 +28,15 @@ class TransactionChartState extends State<TransactionChart> {
   List<ChartData> _expanseChartList = [];
 
   List<ChartData> _incomeChartList = [];
+
+  List<ChartData> _toChartData(List<double> values, List<String> labels) {
+    return values.asMap().entries.map((entry) {
+      final label = entry.key < labels.length
+          ? labels[entry.key]
+          : entry.key.toString();
+      return ChartData(label, entry.value);
+    }).toList(growable: false);
+  }
 
 
   @override
@@ -47,42 +56,22 @@ class TransactionChartState extends State<TransactionChart> {
         List<double> earnings = [];
         List<double> commissions = [];
         if(bankInfoProvider.userCommissions != null && bankInfoProvider.userEarnings != null){
-          for(double? earn in bankInfoProvider.userCommissions!) {
+          for(double? earn in bankInfoProvider.userEarnings!) {
             earnings.add(PriceConverter.convertAmount(earn!, context));
           }
-          for(double? commission in bankInfoProvider.userEarnings!) {
+          for(double? commission in bankInfoProvider.userCommissions!) {
             commissions.add(PriceConverter.convertAmount(commission!, context));
           }
         }
 
 
-        if(earnings.length < 9){
-
-          _expanseChartList = commissions.asMap().entries.map((e) {
-            return ChartData(weeks[e.key.toInt()], e.value);
-          }).toList();
-
-          _incomeChartList = earnings.asMap().entries.map((e) {
-            return ChartData(weeks[e.key.toInt()], e.value);
-          }).toList();
-
-        }else if( earnings.length < 15){
-          _expanseChartList = commissions.asMap().entries.map((e) {
-            return ChartData(months[e.key.toInt()], e.value);
-          }).toList();
-
-          _incomeChartList = earnings.asMap().entries.map((e) {
-            return ChartData(months[e.key.toInt()], e.value);
-          }).toList();
-        }else{
-          _expanseChartList = commissions.asMap().entries.map((e) {
-            return ChartData(e.key.toString(), e.value);
-          }).toList();
-
-          _incomeChartList = earnings.asMap().entries.map((e) {
-            return ChartData(e.key.toString(), e.value);
-          }).toList();
-        }
+        final labels = earnings.length <= weeks.length
+            ? weeks
+            : earnings.length <= months.length
+                ? months
+                : const <String>[];
+        _expanseChartList = _toChartData(commissions, labels);
+        _incomeChartList = _toChartData(earnings, labels);
 
         return AspectRatio(
           aspectRatio: isEarningEmpty ? 1.3 : 1,
@@ -105,7 +94,7 @@ class TransactionChartState extends State<TransactionChart> {
                         ),
 
                         const Expanded(child: SizedBox(width: Dimensions.paddingSizeExtraLarge,)),
-                        Container(
+                        if (widget.showPeriodSelector) Container(
                           height: 40,width: 120,
                           padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
                           decoration: BoxDecoration(
@@ -164,21 +153,41 @@ class TransactionChartState extends State<TransactionChart> {
                 (!isEarningEmpty) ?
                 Expanded(
                   child: SfCartesianChart(
-
+                    backgroundColor: Colors.transparent,
+                    plotAreaBorderWidth: 0,
                     tooltipBehavior: TooltipBehavior(enable: true),
-                    primaryXAxis: const CategoryAxis(),
-                    primaryYAxis: const NumericAxis(),
+                    primaryXAxis: CategoryAxis(
+                      majorGridLines: const MajorGridLines(width: 0),
+                      axisLine: const AxisLine(width: 0),
+                      majorTickLines: const MajorTickLines(width: 0),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        fontSize: 10,
+                      ),
+                    ),
+                    primaryYAxis: NumericAxis(
+                      majorGridLines: MajorGridLines(
+                        color: Theme.of(context).dividerColor.withValues(alpha: .35),
+                        dashArray: const <double>[3, 3],
+                      ),
+                      axisLine: const AxisLine(width: 0),
+                      majorTickLines: const MajorTickLines(width: 0),
+                      labelStyle: TextStyle(
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                        fontSize: 10,
+                      ),
+                    ),
                     series:[
                       SplineSeries<ChartData, String>(
                         name: getTranslated('earnings', context)!,
-                        color: comisssionColor,
+                      color: earningColor,
                         dataSource: _incomeChartList,
                         xValueMapper: (ChartData data,_)=> data.x,
                         yValueMapper: (ChartData data,_)=> data.y,
                       ),
                       SplineSeries<ChartData, String>(
                         name: getTranslated('commission_given', context)!,
-                        color: earningColor,
+                      color: comisssionColor,
                         dataSource: _expanseChartList,
                         xValueMapper: (ChartData data,_)=> data.x,
                         yValueMapper: (ChartData data,_)=> data.y,

@@ -7,6 +7,7 @@ import 'package:flutter_sixvalley_ecommerce/localization/controllers/localizatio
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_store_logo_widget.dart';
 import 'package:provider/provider.dart';
 
 class GlobalProductPreviewCard extends StatefulWidget {
@@ -27,7 +28,12 @@ class GlobalProductPreviewCard extends StatefulWidget {
 class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
   int _quantity = 1;
   final TextEditingController _notesController = TextEditingController();
-  bool _showCostBreakdown = false;
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,15 +42,6 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
     final isDark =
         Provider.of<ThemeController>(context, listen: false).darkTheme;
     final globalCtrl = Provider.of<GlobalShoppingController>(context);
-
-    final shippingCost = widget.preview.airShippingCost;
-    final deliveryTime = widget.preview.deliveryTimeAir;
-    final totalUsd = widget.preview.totalEstimatedUsd == null
-        ? null
-        : widget.preview.totalEstimatedUsd! * _quantity;
-    final totalYer = widget.preview.totalEstimatedYer == null
-        ? null
-        : widget.preview.totalEstimatedYer! * _quantity;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
@@ -76,16 +73,32 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
             ),
             child: Row(
               children: [
-                Icon(Icons.check_circle_outline,
-                    color: Theme.of(context).primaryColor, size: 18),
-                const SizedBox(width: 6),
-                Text(
-                  isLtr
-                      ? 'Product Identified from ${widget.preview.storeName}'
-                      : 'تم التعرف على المنتج من ${widget.preview.storeName}',
-                  style: textBold.copyWith(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: Dimensions.fontSizeSmall),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: GlobalStoreLogoWidget(
+                    storeName: widget.preview.storeName,
+                    height: 14,
+                    width: 32,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isLtr
+                        ? 'Product from ${widget.preview.storeName}'
+                        : 'تم التعرف على المنتج من ${widget.preview.storeName}',
+                    style: textBold.copyWith(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: Dimensions.fontSizeSmall),
+                  ),
                 ),
               ],
             ),
@@ -129,25 +142,28 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                                 height: 1.3),
                           ),
                           const SizedBox(height: 6),
-                          if (widget.preview.estimatedWeightKg != null)
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'وزن تقريبي: ${widget.preview.estimatedWeightKg} كجم',
-                                    style: textRegular.copyWith(
-                                        fontSize: 10,
-                                        color: Theme.of(context).hintColor),
-                                  ),
-                                ),
-                              ],
+                          if (widget.preview.currentPrice != null &&
+                              widget.preview.originalCurrency != null) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              '${widget.preview.currentPrice!.toStringAsFixed(2)} ${widget.preview.originalCurrency}',
+                              textDirection: TextDirection.ltr,
+                              style: textBold.copyWith(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: Dimensions.fontSizeSmall,
+                              ),
                             ),
+                            if (widget.preview.convertedCurrentPrice != null &&
+                                widget.preview.convertedCurrency != null)
+                              Text(
+                                '≈ ${widget.preview.convertedCurrentPrice!.toStringAsFixed(0)} ${widget.preview.convertedCurrency}',
+                                textDirection: TextDirection.ltr,
+                                style: textRegular.copyWith(
+                                  fontSize: 11,
+                                  color: Theme.of(context).hintColor,
+                                ),
+                              ),
+                          ],
                         ],
                       ),
                     ),
@@ -156,78 +172,33 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
 
                 const Divider(height: 24),
 
-                // Shipping Method
-                Text(
-                  isLtr
-                      ? 'International shipping to Yemen'
-                      : 'الشحن الدولي لليمن',
-                  style: textBold.copyWith(fontSize: Dimensions.fontSizeSmall),
-                ),
-                const SizedBox(height: 8),
+                // Pricing is intentionally manual; no shipping or fees are fabricated.
                 Container(
                   width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.06),
                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                     border: Border.all(
-                        color: Theme.of(context)
-                            .primaryColor
-                            .withValues(alpha: 0.25)),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.18),
+                    ),
                   ),
-                  child: Column(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.flight_takeoff,
-                              color: Theme.of(context).primaryColor, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  isLtr ? 'Air Express' : 'شحن جوي سريع',
-                                  style: textBold.copyWith(
-                                    fontSize: Dimensions.fontSizeSmall,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  deliveryTime == null
-                                      ? (isLtr
-                                          ? 'Calculated after review'
-                                          : 'تحدد المدة بعد مراجعة الطلب')
-                                      : (isLtr
-                                          ? 'Estimated arrival: $deliveryTime'
-                                          : 'مدة الوصول المتوقعة: $deliveryTime'),
-                                  style: textRegular.copyWith(
-                                      fontSize: 11,
-                                      color: Theme.of(context).hintColor),
-                                ),
-                              ],
-                            ),
+                      Icon(Icons.info_outline,
+                          color: Theme.of(context).primaryColor, size: 19),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isLtr
+                              ? 'The displayed amount is the source product price only. Shipping, customs, and service fees are quoted by Alline after review.'
+                              : 'السعر الظاهر هو سعر المنتج في المتجر فقط. يحدد فريق Alline الشحن والجمارك ورسوم الخدمة بعد مراجعة الطلب.',
+                          style: textRegular.copyWith(
+                            fontSize: 11,
+                            height: 1.4,
+                            color: Theme.of(context).hintColor,
                           ),
-                          if (shippingCost != null)
-                            Text(
-                              '\$${shippingCost.toStringAsFixed(2)}',
-                              style: textBold.copyWith(
-                                  fontSize: Dimensions.fontSizeSmall),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        isLtr
-                            ? 'This is an estimate. Admin confirms the final price before checkout.'
-                            : 'هذه تكلفة تقديرية، وسيعتمد المسؤول السعر النهائي قبل إتمام الشراء.',
-                        style: textRegular.copyWith(
-                          fontSize: 11,
-                          color: Theme.of(context).hintColor,
                         ),
                       ),
                     ],
@@ -302,7 +273,7 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
 
                 const SizedBox(height: 14),
 
-                // Price Summary & Breakdown Accordion
+                // Manual quote status; never imply this is the landed total.
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -311,84 +282,29 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                   ),
                   child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isLtr
-                                    ? 'Total Landed Cost (Est.)'
-                                    : 'التكلفة الإجمالية التقديرية الواصلة:',
-                                style: textRegular.copyWith(
-                                    fontSize: Dimensions.fontSizeExtraSmall,
-                                    color: Theme.of(context).hintColor),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                totalYer == null
-                                    ? 'السعر النهائي يحدد عند تأكيد الطلب'
-                                    : '${totalYer.toStringAsFixed(0)} ر.ي',
-                                style: textBold.copyWith(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: Dimensions.fontSizeLarge),
-                              ),
-                              if (totalUsd != null)
-                                Text(
-                                  '≈ \$${totalUsd.toStringAsFixed(2)} USD',
-                                  style: textRegular.copyWith(
-                                      fontSize: 11,
-                                      color: Theme.of(context).hintColor),
-                                ),
-                            ],
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isLtr ? 'Price confirmation' : 'تأكيد السعر النهائي',
+                          style: textBold.copyWith(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: Dimensions.fontSizeDefault,
                           ),
-                          TextButton.icon(
-                            onPressed: () => setState(
-                                () => _showCostBreakdown = !_showCostBreakdown),
-                            icon: Icon(
-                                _showCostBreakdown
-                                    ? Icons.expand_less
-                                    : Icons.expand_more,
-                                size: 18),
-                            label: Text(
-                              isLtr ? 'Details' : 'التفاصيل',
-                              style: textMedium.copyWith(fontSize: 12),
-                            ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          isLtr
+                              ? 'Submit this product for manual review. It will be added to your Alline cart after the quote is approved.'
+                              : 'أرسل المنتج للمراجعة اليدوية. سيظهر في سلة Alline بعد اعتماد السعر والمنتج.',
+                          style: textRegular.copyWith(
+                            fontSize: Dimensions.fontSizeSmall,
+                            height: 1.4,
+                            color: Theme.of(context).hintColor,
                           ),
-                        ],
-                      ),
-                      if (_showCostBreakdown) ...[
-                        const Divider(height: 16),
-                        if (widget.preview.originalPrice != null)
-                          _breakdownRow(
-                              context,
-                              isLtr
-                                  ? 'Product Base Price'
-                                  : 'سعر السلعة الأصلي',
-                              '\$${((widget.preview.originalPrice ?? 0.0) * _quantity).toStringAsFixed(2)}'),
-                        if (shippingCost != null)
-                          _breakdownRow(
-                              context,
-                              isLtr ? 'International Shipping' : 'الشحن الدولي',
-                              '\$${(shippingCost * _quantity).toStringAsFixed(2)}'),
-                        if (widget.preview.customsFee != null)
-                          _breakdownRow(
-                              context,
-                              isLtr
-                                  ? 'Customs & Handling'
-                                  : 'الجمارك والمناولة',
-                              '\$${((widget.preview.customsFee ?? 0.0) * _quantity).toStringAsFixed(2)}'),
-                        if (widget.preview.serviceFee != null)
-                          _breakdownRow(
-                              context,
-                              isLtr ? 'Service Fee' : 'عمولة الخدمة',
-                              '\$${((widget.preview.serviceFee ?? 0.0) * _quantity).toStringAsFixed(2)}'),
+                        ),
                       ],
-                    ],
+                    ),
                   ),
-                ),
 
                 const SizedBox(height: 16),
 
@@ -411,11 +327,8 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                               storeName: widget.preview.storeName,
                               quantity: _quantity,
                               customerNotes: _notesController.text.trim(),
-                              estimatedTotalUsd: totalUsd,
-                              estimatedTotalYer: totalYer,
-                              estimatedDeliveryTime: deliveryTime,
                               onSuccess: () => showCustomSnackBarWidget(
-                                  'تم إرسال طلب الشراء بنجاح! سيتم تسعيره وتأكيده خلال دقائق.',
+                                  'تم إرسال طلب التسعير. ستتم إضافته للسلة بعد اعتماد السعر.',
                                   context,
                                   snackBarType: SnackBarType.success),
                             );
@@ -428,13 +341,13 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.shopping_bag_outlined,
+                              const Icon(Icons.add_shopping_cart_rounded,
                                   color: Colors.white, size: 20),
                               const SizedBox(width: 8),
                               Text(
                                 isLtr
-                                    ? 'Confirm & Send Request'
-                                    : 'تأكيد وإرسال طلب الشراء',
+                                    ? 'Add to Alline Cart 🛒'
+                                    : 'أضف إلى سلة Alline 🛒',
                                 style: textBold.copyWith(
                                     color: Colors.white,
                                     fontSize: Dimensions.fontSizeDefault),
@@ -451,18 +364,4 @@ class _GlobalProductPreviewCardState extends State<GlobalProductPreviewCard> {
     );
   }
 
-  Widget _breakdownRow(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: textRegular.copyWith(
-                  fontSize: 11, color: Theme.of(context).hintColor)),
-          Text(value, style: textMedium.copyWith(fontSize: 11)),
-        ],
-      ),
-    );
-  }
 }

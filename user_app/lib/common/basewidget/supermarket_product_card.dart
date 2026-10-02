@@ -1,231 +1,219 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/discount_tag_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/quick_add_to_cart_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
-import 'package:provider/provider.dart';
 
-/// A compact, high-density product card designed specifically for fast grocery/supermarket browsing.
-/// Fits 2 or 3 cards per row, displaying item image, discount badge, name, price, and a quick +/- cart stepper.
+/// Dense but calm grocery card for quick supermarket browsing.
 class SupermarketProductCard extends StatelessWidget {
   final Product product;
   final double? margin;
+  final Future<void> Function()? onAdd;
 
   const SupermarketProductCard({
     super.key,
     required this.product,
     this.margin,
+    this.onAdd,
   });
+
+  bool get hasDiscount =>
+      (product.discount ?? 0) > 0 ||
+      (product.clearanceSale?.discountAmount ?? 0) > 0;
+
+  double? get discountAmount => (product.clearanceSale?.discountAmount ?? 0) > 0
+      ? product.clearanceSale?.discountAmount
+      : product.discount;
+
+  String? get discountType => (product.clearanceSale?.discountAmount ?? 0) > 0
+      ? product.clearanceSale?.discountType
+      : product.discountType;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.allineColors;
-    final isDark =
-        Provider.of<ThemeController>(context, listen: false).darkTheme;
+    final soldOut =
+        product.productType == 'physical' && product.currentStock == 0;
+    final price = PriceConverter.convertPrice(
+      context,
+      product.unitPrice,
+      discountType: discountType,
+      discount: discountAmount,
+    );
+    final oldPrice = PriceConverter.convertPrice(context, product.unitPrice);
+    final unit = product.unit?.trim();
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-      onTap: () {
-        RouterHelper.getProductDetailsRoute(
-          action: RouteAction.push,
-          productId: product.id,
-          slug: product.slug,
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.all(margin ?? Dimensions.paddingSizeExtraSmall),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          border: Border.all(
-            color: colors.border,
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: isDark
-                  ? Colors.black.withValues(alpha: 0.18)
-                  : AllineColors.primaryDark.withValues(alpha: 0.04),
-              spreadRadius: 0,
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-          child: Stack(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      margin: EdgeInsets.all(margin ?? 0),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AllineRadius.card),
+        border: Border.all(color: colors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: product.id == null
+            ? null
+            : () => RouterHelper.getProductDetailsRoute(
+                  action: RouteAction.push,
+                  productId: product.id,
+                  slug: product.slug,
+                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 104,
+              child: Stack(
                 children: [
-                  // Product Image
-                  AspectRatio(
-                    aspectRatio: 1.0,
+                  Positioned.fill(
                     child: Container(
-                      padding: const EdgeInsets.all(
-                          Dimensions.paddingSizeExtraSmall),
-                      color: isDark
-                          ? Theme.of(context).highlightColor
-                          : colors.background,
-                      child: ClipRRect(
-                        borderRadius:
-                            BorderRadius.circular(Dimensions.radiusSmall),
-                        child: CustomImageWidget(
-                          image: '${product.thumbnailFullUrl?.path}',
-                          fit: BoxFit.cover,
+                      color: colors.background,
+                      padding: const EdgeInsets.all(8),
+                      child: product.thumbnailFullUrl?.path?.isNotEmpty == true
+                          ? CustomImageWidget(
+                              image: product.thumbnailFullUrl!.path!,
+                              fit: BoxFit.contain,
+                            )
+                          : Icon(
+                              Icons.local_grocery_store_outlined,
+                              color: colors.textSecondary,
+                              size: 40,
+                            ),
+                    ),
+                  ),
+                  if (hasDiscount)
+                    PositionedDirectional(
+                      top: 8,
+                      start: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colors.accent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          discountType == 'percent' ||
+                                  discountType == 'percentage'
+                              ? '${discountAmount?.toStringAsFixed(0)}٪ خصم'
+                              : 'عرض',
+                          style: TextStyle(
+                            fontFamily: 'AllineTajawal',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-
-                  // Details
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: Dimensions.paddingSizeSmall,
-                        vertical: Dimensions.paddingSizeExtraSmall,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Title
-                          Text(
-                            product.name ?? '',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: textMedium.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              height: 1.2,
-                              color: colors.textPrimary,
+                  if (soldOut)
+                    Positioned.fill(
+                      child: Container(
+                        color: colors.surface.withValues(alpha: .82),
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 9,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colors.textSecondary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'غير متوفر',
+                            style: TextStyle(
+                              fontFamily: 'AllineTajawal',
+                              fontSize: 11,
+                              color: colors.surface,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
-
-                          const SizedBox(height: 2),
-
-                          // Price & Quick-Add Row
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              // Prices
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (hasDiscount())
-                                      Text(
-                                        PriceConverter.convertPrice(
-                                          context,
-                                          product.unitPrice,
-                                        ),
-                                        style: textRegular.copyWith(
-                                          color: colors.textSecondary,
-                                          decoration:
-                                              TextDecoration.lineThrough,
-                                          fontSize:
-                                              Dimensions.fontSizeExtraSmall,
-                                        ),
-                                      ),
-                                    Text(
-                                      PriceConverter.convertPrice(
-                                        context,
-                                        product.unitPrice,
-                                        discountType: (product.clearanceSale
-                                                        ?.discountAmount ??
-                                                    0) >
-                                                0
-                                            ? product
-                                                .clearanceSale?.discountType
-                                            : product.discountType,
-                                        discount: (product.clearanceSale
-                                                        ?.discountAmount ??
-                                                    0) >
-                                                0
-                                            ? product
-                                                .clearanceSale?.discountAmount
-                                            : product.discount,
-                                      ),
-                                      style: textBold.copyWith(
-                                        color: isDark
-                                            ? colors.textPrimary
-                                            : AllineColors.primary,
-                                        fontSize: Dimensions.fontSizeDefault,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Quick Add-to-cart button
-                              QuickAddToCartWidget(
-                                product: product,
-                                height: 30,
-                                iconSize: 16,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              // Out of Stock Overlay
-              if (product.currentStock == 0 &&
-                  product.productType == 'physical')
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      borderRadius:
-                          BorderRadius.circular(Dimensions.radiusDefault),
-                    ),
-                    alignment: Alignment.center,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.error,
-                        borderRadius:
-                            BorderRadius.circular(Dimensions.radiusSmall),
-                      ),
-                      child: Text(
-                        'Out of Stock',
-                        style: textBold.copyWith(
-                          color: Colors.white,
-                          fontSize: Dimensions.fontSizeExtraSmall,
                         ),
                       ),
                     ),
-                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(10, 9, 10, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: textMedium.copyWith(
+                        color: colors.textPrimary,
+                        fontSize: 14,
+                        height: 1.35,
+                      ),
+                    ),
+                    if (unit?.isNotEmpty == true) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        'لكل $unit',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textRegular.copyWith(
+                          color: colors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    if (hasDiscount)
+                      Text(
+                        oldPrice,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textRegular.copyWith(
+                          color: colors.textSecondary,
+                          fontSize: 12,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                    Text(
+                      price,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: textBold.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: AllineSpacing.xs),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: soldOut
+                          ? Text('غير متوفر',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(color: colors.textSecondary))
+                          : QuickAddToCartWidget(
+                              product: product,
+                              onAdd: onAdd,
+                              height: AllineTouchTarget.minimum,
+                              iconSize: 20,
+                            ),
+                    ),
+                  ],
                 ),
-
-              // Discount Tag
-              if (hasDiscount())
-                DiscountTagWidget(
-                  productModel: product,
-                  positionedTop: 0,
-                  topLeftBorderRadius: Dimensions.radiusDefault,
-                  bottomRightBorderRadius: Dimensions.radiusDefault,
-                ),
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  bool hasDiscount() =>
-      (product.discount != null && product.discount! > 0) ||
-      (product.clearanceSale?.discountAmount ?? 0) > 0;
 }

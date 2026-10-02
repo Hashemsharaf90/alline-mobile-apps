@@ -1,10 +1,11 @@
-﻿import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/common/basewidget/supermarket_product_card.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_product_card.dart';
 import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_section_header.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_skeleton_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
 
 /// "عروض السوبر ماركت" section.
 ///
@@ -26,7 +27,8 @@ class SmOffersWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const AllineSectionHeader(
-                  title: '\u0639\u0631\u0648\u0636 \u0627\u0644\u0633\u0648\u0628\u0631 \u0645\u0627\u0631\u0643\u062a',
+                  title:
+                      '\u0639\u0631\u0648\u0636 \u0627\u0644\u0633\u0648\u0628\u0631 \u0645\u0627\u0631\u0643\u062a',
                 ),
                 const SizedBox(height: 14),
                 const SmProductListSkeleton(),
@@ -48,26 +50,27 @@ class SmOffersWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AllineSectionHeader(
-                title: '\u0639\u0631\u0648\u0636 \u0627\u0644\u0633\u0648\u0628\u0631 \u0645\u0627\u0631\u0643\u062a',
-                subtitle: '\u062e\u0635\u0648\u0645\u0627\u062a \u062d\u0635\u0631\u064a\u0629 \u0639\u0644\u0649 \u0627\u0644\u0645\u0646\u062a\u062c\u0627\u062a \u0627\u0644\u0623\u0633\u0627\u0633\u064a\u0629',
+                title:
+                    '\u0639\u0631\u0648\u0636 \u0627\u0644\u0633\u0648\u0628\u0631 \u0645\u0627\u0631\u0643\u062a',
+                subtitle: 'منتجات بأسعار مخفضة',
               ),
               const SizedBox(height: 14),
               SizedBox(
-                height: 220,
+                height:
+                    300 + (MediaQuery.textScalerOf(context).scale(14) - 14) * 8,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: offers.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) =>
-                      SizedBox(
-                        width: 150,
-                        child: SupermarketProductCard(
-                          product: offers[index],
-                          margin: 0,
-                        ),
-                      ),
+                  itemBuilder: (context, index) => SizedBox(
+                    width: 176,
+                    child: AllineProductCard(
+                      grocery: true,
+                      product: offers[index],
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -84,7 +87,7 @@ class _Section extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: Colors.white,
+        color: context.allineColors.surface,
         padding: const EdgeInsets.only(top: 4, bottom: 20),
         child: child,
       );

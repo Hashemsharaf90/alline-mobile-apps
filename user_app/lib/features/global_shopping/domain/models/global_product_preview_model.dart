@@ -5,16 +5,13 @@ class GlobalProductPreviewModel {
   String? thumbnail;
   List<String>? images;
   double? originalPrice;
+  double? currentPrice;
+  double? convertedCurrentPrice;
+  double? convertedOriginalPrice;
+  double? exchangeRate;
   String? originalCurrency;
-  double? estimatedWeightKg;
-  double? airShippingCost;
-  double? seaShippingCost;
-  double? customsFee;
-  double? serviceFee;
-  double? totalEstimatedUsd;
-  double? totalEstimatedYer;
-  String? deliveryTimeAir;
-  String? deliveryTimeSea;
+  String? convertedCurrency;
+  String? feesStatus;
 
   GlobalProductPreviewModel({
     this.storeName,
@@ -23,16 +20,13 @@ class GlobalProductPreviewModel {
     this.thumbnail,
     this.images,
     this.originalPrice,
+    this.currentPrice,
+    this.convertedCurrentPrice,
+    this.convertedOriginalPrice,
+    this.exchangeRate,
     this.originalCurrency,
-    this.estimatedWeightKg,
-    this.airShippingCost,
-    this.seaShippingCost,
-    this.customsFee,
-    this.serviceFee,
-    this.totalEstimatedUsd,
-    this.totalEstimatedYer,
-    this.deliveryTimeAir,
-    this.deliveryTimeSea,
+    this.convertedCurrency,
+    this.feesStatus,
   });
 
   factory GlobalProductPreviewModel.fromJson(Map<String, dynamic> json) {
@@ -45,16 +39,13 @@ class GlobalProductPreviewModel {
       thumbnail: json['thumbnail'],
       images: json['images'] != null ? List<String>.from(json['images']) : [],
       originalPrice: number('original_price'),
+      currentPrice: number('current_price'),
+      convertedCurrentPrice: number('converted_current_price'),
+      convertedOriginalPrice: number('converted_original_price'),
+      exchangeRate: number('exchange_rate'),
       originalCurrency: json['original_currency'],
-      estimatedWeightKg: number('estimated_weight_kg'),
-      airShippingCost: number('air_shipping_cost'),
-      seaShippingCost: number('sea_shipping_cost'),
-      customsFee: number('customs_fee'),
-      serviceFee: number('service_fee'),
-      totalEstimatedUsd: number('total_estimated_usd'),
-      totalEstimatedYer: number('total_estimated_yer'),
-      deliveryTimeAir: json['delivery_time_air'],
-      deliveryTimeSea: json['delivery_time_sea'],
+      convertedCurrency: json['converted_currency'],
+      feesStatus: json['fees_status'],
     );
   }
 }

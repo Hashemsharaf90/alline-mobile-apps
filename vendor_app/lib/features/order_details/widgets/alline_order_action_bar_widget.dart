@@ -28,23 +28,25 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           confirmTitle,
-          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: AllineColors.textDark),
+          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: ColorResources.getTextTitle(context)),
         ),
         content: Text(
           confirmMessage,
-          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: AllineColors.textDark),
+          style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: ColorResources.getTextTitle(context)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               'إلغاء',
-              style: robotoMedium.copyWith(color: AllineColors.textLight),
+              style: robotoMedium.copyWith(color: ColorResources.getTextSubTitle(context)),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: newStatus == 'canceled' ? AllineColors.danger : AllineColors.secondary,
+              backgroundColor: newStatus == 'canceled'
+                  ? ColorResources.getError(context)
+                  : ColorResources.getPrimary(context),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -85,7 +87,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+          color: Theme.of(context).cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -101,13 +103,13 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
             // Advanced Setup Icon Button
             Container(
               decoration: BoxDecoration(
-                color: AllineColors.backgroundLight,
+                color: ColorResources.getScaffoldBg(context),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AllineColors.borderLight),
+                border: Border.all(color: ColorResources.getBorder(context)),
               ),
               child: IconButton(
                 tooltip: 'إعدادات الطلب وتعيين المندوب',
-                icon: const Icon(Icons.tune_rounded, color: AllineColors.secondary, size: 20),
+                icon: Icon(Icons.tune_rounded, color: ColorResources.getPrimary(context), size: 20),
                 onPressed: () {
                   showModalBottomSheet(
                     backgroundColor: Theme.of(context).cardColor,
@@ -128,34 +130,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
             ),
             const SizedBox(width: 8),
 
-            // Invoice Download Button
-            Consumer<OrderDetailsController>(
-              builder: (ctx, detailsCtrl, _) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: AllineColors.backgroundLight,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AllineColors.borderLight),
-                  ),
-                  child: IconButton(
-                    tooltip: 'تحميل الفاتورة PDF',
-                    icon: detailsCtrl.isInvoiceLoading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AllineColors.secondary),
-                          )
-                        : const Icon(Icons.picture_as_pdf_outlined, color: AllineColors.secondary, size: 20),
-                    onPressed: detailsCtrl.isInvoiceLoading
-                        ? null
-                        : () {
-                            detailsCtrl.getOrderInvoice(widget.order!.id.toString(), context);
-                          },
-                  ),
-                );
-              },
-            ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 2),
 
             // Contextual Primary Action Button
             Expanded(
@@ -172,7 +147,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
       return Container(
         height: 48,
         decoration: BoxDecoration(
-          color: AllineColors.secondary.withValues(alpha: 0.7),
+          color: ColorResources.getPrimary(context).withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(
@@ -219,7 +194,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
             flex: 3,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AllineColors.secondary,
+                backgroundColor: ColorResources.getPrimary(context),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 12),
               ),
@@ -244,7 +219,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
     } else if (status == 'confirmed') {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AllineColors.secondary,
+          backgroundColor: ColorResources.getPrimary(context),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
@@ -263,7 +238,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
     } else if (status == 'processing') {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF0284C7),
+          backgroundColor: ColorResources.getPrimary(context),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
@@ -295,7 +270,7 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
           context,
           'delivered',
           'تأكيد استلام العميل',
-          'هل تم تسليم الطلب للعميل واستلام القيمة المالية بنجاح؟',
+              'هل تم تسليم الطلب للعميل؟',
         ),
       );
     } else if (status == 'delivered') {
@@ -332,13 +307,13 @@ class _AllineOrderActionBarWidgetState extends State<AllineOrderActionBarWidget>
       return Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: AllineColors.backgroundLight,
+          color: ColorResources.getScaffoldBg(context),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
           child: Text(
             'حالة الطلب: $status',
-            style: robotoBold.copyWith(color: AllineColors.textLight, fontSize: Dimensions.fontSizeDefault),
+            style: robotoBold.copyWith(color: ColorResources.getTextSubTitle(context), fontSize: Dimensions.fontSizeDefault),
           ),
         ),
       );

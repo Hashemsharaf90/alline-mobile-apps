@@ -18,7 +18,7 @@ class ChatRepository implements ChatRepositoryInterface{
 
   @override
   Future<Response> searchConversationList(String name) async {
-    return apiClient.getData('${AppConstants.searchConversationListUri}?name=$name&limit=20&offset=1');
+    return apiClient.getData('${AppConstants.chatSearch}customer?search=${Uri.encodeComponent(name)}');
   }
 
   @override
@@ -28,7 +28,7 @@ class ChatRepository implements ChatRepositoryInterface{
 
   @override
   Future<Response> searchChatList(String userType, String search) async {
-    return await apiClient.getData('${AppConstants.chatSearch}$userType?search=$search');
+    return await apiClient.getData('${AppConstants.chatSearch}$userType?search=${Uri.encodeComponent(search)}');
   }
 
   @override

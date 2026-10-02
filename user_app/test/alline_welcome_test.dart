@@ -12,19 +12,24 @@ void main() {
       (tester) async {
     final capture = Platform.environment['WELCOME_CAPTURE'];
     final key = GlobalKey();
-    var starts = 0, logins = 0, languages = 0;
+    var registers = 0, logins = 0, guests = 0, languages = 0;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.runAsync(() async {
-      await (FontLoader('AllineTajawal')
-            ..addFont(
-                rootBundle.load('assets/fonts/tajawal/Tajawal-Regular.ttf'))
-            ..addFont(rootBundle.load('assets/fonts/tajawal/Tajawal-Bold.ttf')))
-          .load();
-      await (FontLoader('MaterialIcons')
-            ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf')))
-          .load();
+      try {
+        await (FontLoader('AllineTajawal')
+              ..addFont(
+                  rootBundle.load('assets/fonts/tajawal/Tajawal-Regular.ttf'))
+              ..addFont(
+                  rootBundle.load('assets/fonts/tajawal/Tajawal-Bold.ttf')))
+            .load();
+      } catch (_) {}
+      try {
+        await (FontLoader('MaterialIcons')
+              ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf')))
+            .load();
+      } catch (_) {}
     });
     for (final scenario in [
       (size: const Size(390, 844), ar: true, scale: 1.0),
@@ -42,8 +47,9 @@ void main() {
             key: key,
             child: AllineWelcomeView(
               isArabic: scenario.ar,
-              onStart: () => starts++,
+              onRegister: () => registers++,
               onLogin: () => logins++,
+              onGuest: () => guests++,
               onLanguage: () => languages++,
             )),
       ));
@@ -71,17 +77,20 @@ void main() {
         });
         debugDisableShadows = true;
       }
-      await tester.ensureVisible(find.byType(OutlinedButton));
-      await tester.tap(find.byType(OutlinedButton));
       await tester.ensureVisible(find.byType(ElevatedButton));
       await tester.tap(find.byType(ElevatedButton));
-      await tester.ensureVisible(find.byType(TextButton));
-      await tester.tap(find.byType(TextButton));
+      await tester.ensureVisible(find.byType(OutlinedButton));
+      await tester.tap(find.byType(OutlinedButton));
+      await tester.ensureVisible(find.byType(TextButton).first);
+      await tester.tap(find.byType(TextButton).first);
+      await tester.ensureVisible(find.byType(TextButton).last);
+      await tester.tap(find.byType(TextButton).last);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     }
-    expect(starts, 3);
+    expect(registers, 3);
     expect(logins, 3);
+    expect(guests, 3);
     expect(languages, 3);
   });
 }

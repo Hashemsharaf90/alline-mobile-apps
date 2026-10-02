@@ -57,7 +57,12 @@ class ProductDetailsController extends ChangeNotifier {
     ApiResponseModel apiResponse = await productDetailsServiceInterface.get(slug);
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _isDetails = false;
-      _productDetailsModel = ProductDetailsModel.fromJson(apiResponse.response!.data);
+      try {
+        _productDetailsModel = ProductDetailsModel.fromJson(apiResponse.response!.data);
+      } catch (e, stack) {
+        log("=====ProductDetailsModel parse error===>$e\n$stack");
+        _productDetailsModel = null;
+      }
       if(_productDetailsModel != null){
         log("=====slug===>$slug/ $productId");
         // Provider.of<SellerProductController>(Get.context!, listen: false).

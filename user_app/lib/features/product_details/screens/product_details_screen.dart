@@ -71,7 +71,9 @@ class _ProductDetailsState extends State<ProductDetails> {
   }
 
   Future<void> _loadData() async {
-    final slug = widget.slug.toString();
+    final String slug = (widget.slug != null && widget.slug!.isNotEmpty && widget.slug != 'null')
+        ? widget.slug!
+        : (widget.productId?.toString() ?? '');
     final detailsCtrl =
         Provider.of<ProductDetailsController>(context, listen: false);
     final reviewCtrl = Provider.of<ReviewController>(context, listen: false);
@@ -79,12 +81,12 @@ class _ProductDetailsState extends State<ProductDetails> {
     final shopCtrl = Provider.of<ShopController>(context, listen: false);
     final splashCtrl = Provider.of<SplashController>(context, listen: false);
 
-    await detailsCtrl.getProductDetails(context, slug, slug);
+    await detailsCtrl.getProductDetails(context, widget.productId?.toString() ?? slug, slug);
     if (!mounted) return;
 
     reviewCtrl.removePrevReview();
     detailsCtrl.removePrevLink();
-    reviewCtrl.getReviewList(1, productSlug: widget.slug);
+    reviewCtrl.getReviewList(1, productSlug: slug);
     productCtrl.removePrevRelatedProduct();
     productCtrl.initRelatedProductList(slug, context);
     detailsCtrl.getCount(slug, context);

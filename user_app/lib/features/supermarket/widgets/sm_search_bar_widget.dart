@@ -1,54 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/search_product/screens/search_product_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 
-/// Prominent tappable search bar for the Supermarket Hub.
-/// Navigates to [SearchScreen] when tapped.
+/// Search entry point for the supermarket. Uses the existing search flow.
 class SmSearchBarWidget extends StatelessWidget {
   const SmSearchBarWidget({super.key});
 
+  void _openSearch(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const SearchScreen()),
+    );
+  }
+
   @override
-  Widget build(BuildContext context) => Container(
-        color: Colors.white,
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 14),
-        child: InkWell(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SearchScreen()),
+  Widget build(BuildContext context) {
+    final colors = context.allineColors;
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
+      color: colors.surface,
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 16),
+      child: InkWell(
+        onTap: () => _openSearch(context),
+        borderRadius: BorderRadius.circular(AllineRadius.input),
+        child: Container(
+          height: AllineTouchTarget.buttonHeight,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colors.background,
+            borderRadius: BorderRadius.circular(AllineRadius.input),
+            border: Border.all(color: colors.border),
           ),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            height: 54,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFE1E8F2)),
-              boxShadow: [
-                BoxShadow(
-                  color: AllineColors.primaryDark.withValues(alpha: .04),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
+          child: Row(
+            children: [
+              Icon(Icons.search_rounded, color: primary, size: 24),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'ابحث عن منتج',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: colors.textSecondary),
                 ),
-              ],
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.search_rounded,
-                    color: AllineColors.primary, size: 23),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'ابحث في السوبر ماركت',
-                    style: TextStyle(
-                      fontFamily: 'AllineTajawal',
-                      fontSize: 14,
-                      color: Color(0xFF6D85AF),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 }

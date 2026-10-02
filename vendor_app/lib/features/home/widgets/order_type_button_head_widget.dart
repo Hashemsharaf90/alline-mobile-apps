@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sixvalley_vendor_app/common/basewidgets/custom_asset_image_widget.dart';
-import 'package:sixvalley_vendor_app/localization/controllers/localization_controller.dart';
 import 'package:sixvalley_vendor_app/features/order/controllers/order_controller.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
@@ -15,16 +14,23 @@ class OrderTypeButtonHeadWidget extends StatelessWidget {
   final Function? callback;
   final int? numberOfOrder;
   final String? image;
-  const OrderTypeButtonHeadWidget({
-    super.key, required this.text,this.subText,this.color, required this.index, required this.callback,
-    required this.numberOfOrder, required this.circleColor, required this.image
-  });
+  const OrderTypeButtonHeadWidget(
+      {super.key,
+      required this.text,
+      this.subText,
+      this.color,
+      required this.index,
+      required this.callback,
+      required this.numberOfOrder,
+      required this.circleColor,
+      required this.image});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Provider.of<OrderController>(context, listen: false).setIndex(context, index);
+        Provider.of<OrderController>(context, listen: false)
+            .setIndex(context, index);
         callback!();
       },
       child: Container(
@@ -67,7 +73,6 @@ class OrderTypeButtonHeadWidget extends StatelessWidget {
                 child: CustomAssetImageWidget(image!, color: Colors.white),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
               child: Column(
@@ -89,7 +94,11 @@ class OrderTypeButtonHeadWidget extends StatelessWidget {
                         child: Text(
                           text!,
                           style: robotoMedium.copyWith(
-                            color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.85),
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyLarge
+                                ?.color
+                                ?.withValues(alpha: 0.85),
                             fontSize: Dimensions.fontSizeSmall,
                             fontWeight: FontWeight.w600,
                           ),

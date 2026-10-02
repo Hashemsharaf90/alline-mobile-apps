@@ -68,10 +68,8 @@ class ProfileController extends GetxController implements GetxService {
 
 
   Future <void> profileStatusChange(BuildContext context, int status) async {
-    ResponseModel response = await profileServiceInterface.profileStatusOnnOff(status);
-    if(response.isSuccess){
-      getProfile();
-    }
+    await profileServiceInterface.profileStatusOnnOff(status);
+    await getProfile();
     update();
   }
 

@@ -1,124 +1,153 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/controllers/cart_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/location/controllers/location_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/location/screens/location_setup_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:provider/provider.dart';
 
-/// Compact header for the Supermarket Hub.
-///
-/// Layout (RTL):
-///   [Back] | [Title + Subtitle row] | [Location pill] | [Cart badge]
-///
-/// The location pill is tappable and opens [LocationSetupScreen].
+/// Branded Supermarket header: logo, title, delivery location and cart.
 class SmHeaderWidget extends StatelessWidget {
   const SmHeaderWidget({super.key});
 
-  static const _bg = Colors.white;
-  static const _text = Color(0xFF071B49);
-  static const _secondary = Color(0xFF6D85AF);
-  static const _primary = AllineColors.primary;
-  static const _border = Color(0xFFE1E8F2);
-  static const _orange = AllineColors.accent;
-
   @override
   Widget build(BuildContext context) {
+    final colors = context.allineColors;
+    final primary = Theme.of(context).colorScheme.primary;
     return Container(
-      color: _bg,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + 8,
-        bottom: 10,
-        left: 8,
-        right: 8,
+      color: colors.surface,
+      padding: EdgeInsetsDirectional.only(
+        start: AllineSpacing.md,
+        end: AllineSpacing.md,
+        top: MediaQuery.paddingOf(context).top + AllineSpacing.xs,
+        bottom: AllineSpacing.sm,
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Back button
-          _IconBtn(
-            icon: Icons.arrow_back_ios_new_rounded,
-            onTap: () => Navigator.of(context).pop(),
-          ),
-          const SizedBox(width: 6),
-
-          // Title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
+          Row(
+            children: [
+              _IconButton(
+                icon: Directionality.of(context) == TextDirection.rtl
+                    ? Icons.arrow_forward_ios_rounded
+                    : Icons.arrow_back_ios_new_rounded,
+                tooltip: 'رجوع',
+                onTap: () => Navigator.of(context).pop(),
+              ),
+              Expanded(
+                child: Text(
                   'السوبر ماركت',
-                  style: TextStyle(
-                    fontFamily: 'AllineTajawal',
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: _text,
-                    height: 1.2,
-                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
-                Consumer<LocationController>(
-                  builder: (context, loc, _) {
-                    final label = loc.deliveryLabel?.trim();
-                    return GestureDetector(
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const LocationSetupScreen(),
+              ),
+              Selector<CartController, int>(
+                selector: (_, cart) => cart.cartList.length,
+                builder: (context, count, _) => count > 0
+                    ? const SizedBox(width: 48, height: 48)
+                    : _IconButton(
+                        icon: Icons.shopping_cart_outlined,
+                        tooltip: 'السلة',
+                        onTap: () => RouterHelper.getCartScreenRoute(
+                          action: RouteAction.push,
+                          showBackButton: true,
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.location_on_rounded,
-                              color: _primary, size: 14),
-                          const SizedBox(width: 2),
-                          Flexible(
-                            child: Text(
-                              label?.isNotEmpty == true
+              ),
+            ],
+          ),
+          const SizedBox(height: AllineSpacing.xs),
+          Consumer<LocationController>(
+            builder: (context, location, _) {
+              final label = location.deliveryLabel?.trim();
+              final hasLocation = label?.isNotEmpty == true;
+              return InkWell(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const LocationSetupScreen(),
+                  ),
+                ),
+                borderRadius: BorderRadius.circular(AllineRadius.control),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AllineSpacing.sm,
+                    vertical: AllineSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colors.background,
+                    borderRadius: BorderRadius.circular(AllineRadius.control),
+                    border: Border.all(color: colors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: colors.surface,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.location_on_rounded,
+                          color: primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'موقع التوصيل',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: colors.textSecondary),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              hasLocation
                                   ? label!
-                                  : 'حدد موقعك',
+                                  : 'حدد موقعك لعرض المتاجر القريبة',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'AllineTajawal',
-                                fontSize: 12,
-                                color: label?.isNotEmpty == true
-                                    ? _secondary
-                                    : _primary,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: hasLocation
+                                        ? colors.textPrimary
+                                        : primary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            'تغيير',
-                            style: TextStyle(
-                              fontFamily: 'AllineTajawal',
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: _primary,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                      const SizedBox(width: 8),
+                      Text(
+                        hasLocation ? 'تغيير' : 'تحديد',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelMedium
+                            ?.copyWith(color: primary),
+                      ),
+                      Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_left_rounded
+                            : Icons.chevron_right_rounded,
+                        color: primary,
+                        size: 20,
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-
-          const SizedBox(width: 8),
-
-          // Cart button with badge
-          Selector<CartController, int>(
-            selector: (_, cart) => cart.cartList.length,
-            builder: (context, count, _) => _IconBtn(
-              icon: Icons.shopping_cart_outlined,
-              badge: count,
-              onTap: () => RouterHelper.getCartScreenRoute(
-                action: RouteAction.push,
-                showBackButton: true,
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
@@ -126,55 +155,40 @@ class SmHeaderWidget extends StatelessWidget {
   }
 }
 
-class _IconBtn extends StatelessWidget {
+class _IconButton extends StatelessWidget {
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
-  final int badge;
 
-  const _IconBtn({required this.icon, required this.onTap, this.badge = 0});
+  const _IconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) {
+    final colors = context.allineColors;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(13),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(13),
-                border: Border.all(color: SmHeaderWidget._border),
-              ),
-              child: Icon(icon, color: SmHeaderWidget._text, size: 21),
+        borderRadius: BorderRadius.circular(AllineRadius.control),
+        child: SizedBox(
+          width: 48,
+          height: 48,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AllineRadius.control),
+              border: Border.all(color: colors.border),
             ),
-            if (badge > 0)
-              PositionedDirectional(
-                top: -4,
-                end: -4,
-                child: Container(
-                  constraints:
-                      const BoxConstraints(minWidth: 18, minHeight: 18),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: SmHeaderWidget._orange,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    badge > 9 ? '9+' : '$badge',
-                    style: const TextStyle(
-                      fontFamily: 'AllineTajawal',
-                      fontSize: 10,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-          ],
+            child: Icon(icon, color: colors.textPrimary, size: 21),
+          ),
         ),
-      );
+      ),
+    );
+  }
 }

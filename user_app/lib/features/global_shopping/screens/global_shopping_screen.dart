@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/controllers/global_shopping_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/models/global_shopping_store_model.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/models/global_showcase_product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/global_store_webview_screen.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_product_preview_card.dart';
-import 'package:flutter_sixvalley_ecommerce/localization/controllers/localization_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
-import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/add_link_bottom_sheet.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_curated_products_section.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_hero_banner_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_how_it_works_accordion.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_product_details_modal.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_search_and_link_bar.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_shopping_states.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_stores_grid.dart';
 import 'package:provider/provider.dart';
 
 class GlobalShoppingScreen extends StatefulWidget {
@@ -19,420 +23,254 @@ class GlobalShoppingScreen extends StatefulWidget {
 }
 
 class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
-  final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  String _selectedFilter = 'all';
+  String _searchQuery = '';
 
-  final List<Map<String, String>> _stores = [
-    {
-      'name': 'أمازون',
-      'en': 'Amazon',
-      'logo': 'assets/svg/global_store_amazon.svg',
-      'url': 'https://www.amazon.com/'
-    },
-    {
-      'name': 'علي إكسبريس',
-      'en': 'AliExpress',
-      'logo': 'assets/svg/global_store_aliexpress.svg',
-      'url': 'https://www.aliexpress.com/'
-    },
-    {
-      'name': 'علي بابا',
-      'en': 'Alibaba',
-      'logo': 'assets/svg/global_store_alibaba.svg',
-      'url': 'https://www.alibaba.com/'
-    },
-    {
-      'name': 'شي إن',
-      'en': 'SHEIN',
-      'logo': 'assets/svg/global_store_shein.svg',
-      'url': 'https://www.shein.com/'
-    },
-    {
-      'name': 'ترينديول',
-      'en': 'Trendyol',
-      'logo': 'assets/svg/global_store_trendyol.svg',
-      'url': 'https://www.trendyol.com/'
-    },
-    {
-      'name': 'آي هيرب',
-      'en': 'iHerb',
-      'logo': 'assets/svg/global_store_iherb.svg',
-      'url': 'https://www.iherb.com/'
-    },
-  ];
 
   @override
-  Widget build(BuildContext context) {
-    final isLtr =
-        Provider.of<LocalizationController>(context, listen: false).isLtr;
-    final isDark =
-        Provider.of<ThemeController>(context, listen: false).darkTheme;
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final ctrl = Provider.of<GlobalShoppingController>(context, listen: false);
+        ctrl.fetchSupportedStores();
+        ctrl.getMyRequests();
+      }
+    });
+  }
 
-    return Scaffold(
-      backgroundColor:
-          isDark ? Theme.of(context).cardColor : const Color(0xFFF4F8FE),
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          isLtr ? 'Global Shopping Service' : 'الشراء من المواقع العالمية',
-          style: textBold.copyWith(
-              color: Colors.white, fontSize: Dimensions.fontSizeLarge),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history, color: Colors.white),
-            tooltip: isLtr ? 'My Requests' : 'طلباتي السابقة',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const MyGlobalOrdersScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Consumer<GlobalShoppingController>(
-        builder: (context, globalCtrl, _) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Hero Banner
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).primaryColor,
-                        const Color(0xFF1E3C72),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius:
-                        BorderRadius.circular(Dimensions.radiusDefault),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.public,
-                              color: Colors.white, size: 28),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              isLtr
-                                  ? 'Shop from Any Store Worldwide!'
-                                  : 'اطلب من أي متجر في العالم ونوصله لبيتك!',
-                              style: textBold.copyWith(
-                                  color: Colors.white,
-                                  fontSize: Dimensions.fontSizeLarge),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        isLtr
-                            ? 'Paste the link of any product from Amazon, SHEIN, AliExpress, Alibaba, etc. and get instant pricing with air/sea shipping to Yemen.'
-                            : 'انسخ رابط أي منتج تريده من أمازون، شي إن، علي إكسبريس، أو علي بابا، واحصل على تسعير فوري وتوصيل سريع حتى بابك في اليمن.',
-                        style: textRegular.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: Dimensions.fontSizeSmall,
-                            height: 1.3),
-                      ),
-                    ],
-                  ),
-                ),
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-                const SizedBox(height: Dimensions.paddingSizeDefault),
+  List<GlobalShowcaseProduct> get _filteredProducts {
+    return GlobalShowcaseRepository.curatedProducts.where((product) {
+      final matchesFilter = _selectedFilter == 'all' ||
+          _selectedFilter == 'الكل' ||
+          product.store.toLowerCase() == _selectedFilter.toLowerCase();
+      if (!matchesFilter) return false;
 
-                // Supported Stores Chips
-                Text(
-                  isLtr
-                      ? 'Supported Global Stores:'
-                      : 'المتاجر العالمية المدعومة:',
-                  style:
-                      textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 86,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _stores.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
-                    itemBuilder: (context, index) {
-                      final store = _stores[index];
-                      return Material(
-                        color: Colors.transparent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => GlobalStoreWebViewScreen(
-                                storeName: store['en']!,
-                                initialUrl: store['url']!,
-                              ),
-                            ),
-                          ),
-                          child: SizedBox(
-                            width: 118,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 10),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: 42,
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.white
-                                          : const Color(0xFFF7FAFF),
-                                      borderRadius: BorderRadius.circular(11),
-                                      border: Border.all(
-                                          color: const Color(0xFFE5ECF6)),
-                                    ),
-                                    child: SvgPicture.asset(
-                                      store['logo']!,
-                                      fit: BoxFit.contain,
-                                      semanticsLabel: store['en'],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 7),
-                                  Text(
-                                    isLtr ? store['en']! : store['name']!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: textBold.copyWith(
-                                        fontSize:
-                                            Dimensions.fontSizeExtraSmall),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                          isLtr ? 'Browse' : 'تسوق عالمي',
-                                          style: textRegular.copyWith(
-                                              fontSize: 9,
-                                              color: const Color(0xFF6D85AF))),
-                                      const SizedBox(width: 3),
-                                      const Icon(Icons.arrow_forward_ios,
-                                          size: 8, color: Color(0xFF2B83E8)),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+      if (_searchQuery.trim().isEmpty) return true;
+      final q = _searchQuery.trim().toLowerCase();
+      return product.name.toLowerCase().contains(q) ||
+          product.nameEn.toLowerCase().contains(q) ||
+          product.category.toLowerCase().contains(q) ||
+          product.store.toLowerCase().contains(q);
+    }).toList();
+  }
 
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                // Smart URL Input Box
-                Text(
-                  isLtr
-                      ? 'Paste Product Link:'
-                      : 'ألصق رابط المنتج المراد شراؤه:',
-                  style:
-                      textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius:
-                        BorderRadius.circular(Dimensions.radiusDefault),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _urlController,
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          hintText:
-                              'https://www.amazon.com/dp/... or https://shein.com/...',
-                          hintStyle: textRegular.copyWith(
-                              fontSize: Dimensions.fontSizeSmall,
-                              color: Theme.of(context).hintColor),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.all(12),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.content_paste),
-                            tooltip: isLtr
-                                ? 'Paste from Clipboard'
-                                : 'لصق من الحافظة',
-                            onPressed: () async {
-                              final data =
-                                  await Clipboard.getData('text/plain');
-                              if (data != null && data.text != null) {
-                                _urlController.text = data.text!;
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 1),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      Dimensions.radiusSmall)),
-                            ),
-                            onPressed: globalCtrl.isPreviewLoading
-                                ? null
-                                : () {
-                                    globalCtrl.previewProduct(
-                                        _urlController.text, context);
-                                  },
-                            child: globalCtrl.isPreviewLoading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white)
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.bolt,
-                                          color: Colors.white, size: 20),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        isLtr
-                                            ? 'Inspect & Price Instantly ⚡'
-                                            : 'فحص وتسعير المنتج فوراً ⚡',
-                                        style: textBold.copyWith(
-                                            color: Colors.white,
-                                            fontSize:
-                                                Dimensions.fontSizeDefault),
-                                      ),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Live Preview Card
-                if (globalCtrl.productPreview != null) ...[
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
-                  GlobalProductPreviewCard(
-                    preview: globalCtrl.productPreview!,
-                    onSubmit: () {
-                      _urlController.clear();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (_) => const MyGlobalOrdersScreen()),
-                      );
-                    },
-                  ),
-                ],
-
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                // How it works steps
-                Container(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Theme.of(context).highlightColor
-                        : Colors.white,
-                    borderRadius:
-                        BorderRadius.circular(Dimensions.radiusDefault),
-                    border: Border.all(
-                        color: Theme.of(context)
-                            .dividerColor
-                            .withValues(alpha: 0.5)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isLtr
-                            ? 'How to order from global sites?'
-                            : 'كيف تطلب من المواقع العالمية؟',
-                        style: textBold.copyWith(
-                            fontSize: Dimensions.fontSizeDefault),
-                      ),
-                      const SizedBox(height: 10),
-                      _stepRow(
-                          '1',
-                          isLtr
-                              ? 'Copy link from Amazon, SHEIN, etc.'
-                              : 'انسخ رابط السلعة من المتجر العالمي'),
-                      _stepRow(
-                          '2',
-                          isLtr
-                              ? 'Paste here and get instant price estimate'
-                              : 'الصق الرابط هنا لمعاينة السعر والشحن لليمن'),
-                      _stepRow(
-                          '3',
-                          isLtr
-                              ? 'Confirm order & receive at your door!'
-                              : 'أكد الطلب واستلم شحنتك عند باب بيتك!'),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-              ],
-            ),
-          );
+  void _showAddLinkBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => AddLinkBottomSheet(
+        onProductResolved: (product) {
+          _openProductDetails(product);
         },
       ),
     );
   }
 
-  Widget _stepRow(String num, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 10,
-            backgroundColor: Theme.of(context).primaryColor,
-            child: Text(num,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold)),
+  void _openProductDetails(GlobalShowcaseProduct product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GlobalProductDetailsModal(product: product),
+      ),
+    );
+  }
+
+  void _openStore(GlobalShoppingStoreModel store) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GlobalStoreWebViewScreen(
+          storeName: store.name,
+          initialUrl: store.url,
+        ),
+      ),
+    );
+  }
+
+  void _scrollToStores() {
+    _scrollController.animateTo(
+      220,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    const primaryBlue = Color(0xFF015FC9);
+    const navyColor = Color(0xFF071B49);
+    const borderColor = Color(0xFFE1E8F2);
+    const canvasBg = Color(0xFFF4F8FE);
+
+    return Scaffold(
+      backgroundColor: canvasBg,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: InkWell(
+            onTap: () => Navigator.of(context).pop(),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              decoration: BoxDecoration(
+                color: canvasBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                color: navyColor,
+                size: 18,
+              ),
+            ),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-              child: Text(text,
-                  style: textRegular.copyWith(
-                      fontSize: Dimensions.fontSizeSmall))),
+        ),
+        title: const Text(
+          'التسوق العالمي',
+          style: TextStyle(
+            fontFamily: 'AllineTajawal',
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: navyColor,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const MyGlobalOrdersScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: primaryBlue.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: primaryBlue.withValues(alpha: 0.2)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.inventory_2_outlined, color: primaryBlue, size: 16),
+                    SizedBox(width: 4),
+                    Text(
+                      'طلباتي',
+                      style: TextStyle(
+                        fontFamily: 'AllineTajawal',
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: primaryBlue,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+      body: Consumer<GlobalShoppingController>(
+        builder: (context, globalCtrl, _) {
+          // 1. Loading Skeleton State
+          if (globalCtrl.isStoresLoading && globalCtrl.supportedStores.isEmpty) {
+            return const SingleChildScrollView(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: GlobalShoppingSkeletonWidget(),
+            );
+          }
+
+          // 2. Error State
+          if (globalCtrl.hasStoresError && globalCtrl.supportedStores.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: GlobalShoppingErrorWidget(
+                  onRetry: () => globalCtrl.fetchSupportedStores(),
+                ),
+              ),
+            );
+          }
+
+          final products = _filteredProducts;
+
+          // 3. Normal Active State (Full Long Scroll)
+          return RefreshIndicator(
+            color: primaryBlue,
+            onRefresh: () async {
+              await globalCtrl.fetchSupportedStores();
+              await globalCtrl.getMyRequests();
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // A. Compact Hero Section (Registered Hero Banner Image)
+                  GlobalHeroBannerWidget(
+                    onTap: _showAddLinkBottomSheet,
+                  ),
+                  const SizedBox(height: 14),
+
+                  // B. Search & Add Link Action Row
+                  GlobalSearchAndLinkBar(
+                    searchController: _searchController,
+                    onSearchChanged: (val) => setState(() => _searchQuery = val),
+                    onAddLinkTap: _showAddLinkBottomSheet,
+                    onClearSearch: () {
+                      _searchController.clear();
+                      setState(() => _searchQuery = '');
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  // C. Official 4 Global Stores (2x2 Grid)
+                  GlobalStoresGrid(
+                    stores: globalCtrl.supportedStores,
+                    onStoreTap: _openStore,
+                  ),
+                  const SizedBox(height: 18),
+
+                  // D. How It Works Accordion (Expandable 3 Progressive Steps)
+                  const GlobalHowItWorksAccordion(),
+                  const SizedBox(height: 18),
+
+                  // E. Curated Global Products Section or Empty Search Result
+                  if (products.isNotEmpty)
+                    GlobalCuratedProductsSection(
+                      products: products,
+                      selectedFilter: _selectedFilter,
+                      onFilterChanged: (filter) => setState(() => _selectedFilter = filter),
+                      onProductTap: _openProductDetails,
+                    )
+                  else
+                    GlobalShoppingEmptyWidget(
+                      onAddLinkTap: _showAddLinkBottomSheet,
+                      onBrowseStoresTap: _scrollToStores,
+                    ),
+
+                  const SizedBox(height: 32),
+
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

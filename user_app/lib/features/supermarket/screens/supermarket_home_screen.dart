@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/custom_theme_colors.dart';
+import 'package:flutter_sixvalley_ecommerce/theme/alline_tokens.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/alline_state_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/floating_cart_bar.dart';
 import 'package:flutter_sixvalley_ecommerce/features/category/controllers/category_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_categories_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_essentials_widget.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_product_card.dart';
+import 'package:flutter_sixvalley_ecommerce/features/home/widgets/alline_section_header.dart';
+import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_skeleton_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_header_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_nearby_stores_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_offers_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_popular_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/supermarket/widgets/sm_search_bar_widget.dart';
-import 'package:flutter_sixvalley_ecommerce/main.dart';
 import 'package:provider/provider.dart';
 
 /// Alline Supermarket Hub — the dedicated grocery shopping experience.
@@ -23,9 +24,8 @@ import 'package:provider/provider.dart';
 ///   3. [SmCategoriesWidget]   — horizontal icon category chips
 ///   4. [SmNearbyStoresWidget] — nearby supermarket store cards
 ///   5. [SmOffersWidget]       — discounted products
-///   6. [SmPopularWidget]      — most demanded products
-///   7. [SmEssentialsWidget]   — daily essentials 2-col grid
-///   8. [FloatingCartBar]      — persistent bottom cart summary
+///   6. Lazy product grid     — complete catalog with pagination
+///   7. [FloatingCartBar]      — persistent bottom cart summary
 class SupermarketHomeScreen extends StatefulWidget {
   const SupermarketHomeScreen({super.key});
 
@@ -40,7 +40,10 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
+    _scrollController.addListener(_loadNextPage);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadData();
+    });
   }
 
   @override
@@ -54,12 +57,9 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
       _hasError = false;
     });
 
+    final productCtrl = context.read<ProductController>();
+    final catCtrl = context.read<CategoryController>();
     try {
-      final productCtrl =
-          Provider.of<ProductController>(Get.context!, listen: false);
-      final catCtrl =
-          Provider.of<CategoryController>(Get.context!, listen: false);
-
       await Future.wait([
         productCtrl.getSupermarketProductList(
           1,
@@ -73,13 +73,34 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
           longitude: productCtrl.supermarketLongitude,
         ),
         catCtrl.getCategoryList(false),
-      ]);
+      ].map((request) => request.then<void>((_) {}, onError: (Object _) {})));
     } catch (_) {
       if (mounted) setState(() => _hasError = true);
       return;
     }
 
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {
+        _hasError = productCtrl.supermarketProductModel == null;
+      });
+    }
+  }
+
+  void _loadNextPage() {
+    if (!mounted || !_scrollController.hasClients) return;
+    final controller = context.read<ProductController>();
+    final model = controller.supermarketProductModel;
+    if (model == null ||
+        controller.supermarketLoading ||
+        controller.supermarketHasError ||
+        (model.products?.length ?? 0) >= (model.totalSize ?? 0)) {
+      return;
+    }
+    if (_scrollController.position.extentAfter < 500) {
+      controller.getSupermarketProductList((model.offset ?? 1) + 1,
+          latitude: controller.supermarketLatitude,
+          longitude: controller.supermarketLongitude);
+    }
   }
 
   @override
@@ -95,16 +116,12 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
         backgroundColor: colors.background,
         body: Stack(
           children: [
-            if (_hasError)
-              AllineErrorState(
-                title: 'تعذّر تحميل المتاجر',
-                message: 'تحقّق من اتصالك بالإنترنت وحاول مرة أخرى.',
-                onRetry: () => _loadData(forceReload: true),
-              )
-            else
-              CustomScrollView(
+            RefreshIndicator(
+              color: Theme.of(context).colorScheme.primary,
+              onRefresh: () => _loadData(forceReload: true),
+              child: CustomScrollView(
                 controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
+                physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   // 1. Header
                   const SliverToBoxAdapter(child: SmHeaderWidget()),
@@ -112,36 +129,106 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
                   // 2. Search
                   const SliverToBoxAdapter(child: SmSearchBarWidget()),
 
-                  // Divider between white header zone and rest
-                  const SliverToBoxAdapter(child: _SectionDivider()),
-
-                  // 3. Categories
+                  // Categories come from the existing catalog taxonomy.
                   const SliverToBoxAdapter(child: SmCategoriesWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 4. Nearby Stores
+                  // 5. Nearby Stores
                   const SliverToBoxAdapter(child: SmNearbyStoresWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 5. Offers
+                  // 6. Offers
                   const SliverToBoxAdapter(child: SmOffersWidget()),
 
                   const SliverToBoxAdapter(child: _SectionDivider()),
 
-                  // 6. Popular
-                  const SliverToBoxAdapter(child: SmPopularWidget()),
+                  const SliverToBoxAdapter(
+                      child: AllineSectionHeader(
+                    title: 'جميع المنتجات',
+                    subtitle:
+                        'تصفح منتجات السوبر ماركت وأضف احتياجاتك إلى السلة',
+                  )),
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  Consumer<ProductController>(
+                      builder: (context, controller, _) {
+                    final model = controller.supermarketProductModel;
+                    final products = model?.products ?? [];
+                    if (model == null) {
+                      return SliverToBoxAdapter(
+                          child: _hasError || controller.supermarketHasError
+                              ? AllineErrorState(
+                                  title: 'تعذر تحميل المنتجات',
+                                  message:
+                                      'تحقق من اتصالك بالإنترنت وحاول مرة أخرى.',
+                                  onRetry: () => _loadData(forceReload: true))
+                              : const SmProductListSkeleton());
+                    }
+                    if (products.isEmpty) {
+                      return const SliverToBoxAdapter(
+                          child: AllineEmptyState(
+                        icon: Icons.shopping_basket_outlined,
+                        title: 'لا توجد منتجات متاحة حاليًا',
+                        message:
+                            'جرّب تغيير موقع التوصيل أو أعد المحاولة لاحقًا.',
+                      ));
+                    }
+                    return SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                              MediaQuery.sizeOf(context).width < 340 ? 1 : 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          mainAxisExtent: 300 +
+                              (MediaQuery.textScalerOf(context).scale(14) -
+                                      14) *
+                                  8,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => AllineProductCard(
+                              grocery: true,
+                              key: ValueKey(products[index].id),
+                              product: products[index]),
+                          childCount: products.length,
+                        ),
+                      ),
+                    );
+                  }),
+                  SliverToBoxAdapter(child: Consumer<ProductController>(
+                    builder: (context, controller, _) {
+                      if (controller.supermarketProductModel == null) {
+                        return const SizedBox.shrink();
+                      }
+                      if (controller.supermarketLoading) {
+                        return const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: SmProductListSkeleton());
+                      }
+                      if (controller.supermarketHasError) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(children: [
+                            const Text('تعذر تحديث المنتجات. حاول مرة أخرى.'),
+                            TextButton(
+                                onPressed: () => _loadData(forceReload: true),
+                                child: const Text('إعادة المحاولة')),
+                          ]),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  )),
 
-                  const SliverToBoxAdapter(child: _SectionDivider()),
-
-                  // 7. Daily Essentials (non-scrollable grid inside SliverToBoxAdapter)
-                  const SliverToBoxAdapter(child: SmEssentialsWidget()),
-
-                  // Bottom padding — room for FloatingCartBar
-                  const SliverToBoxAdapter(child: SizedBox(height: 90)),
+                  // Keep the last product above the contextual cart bar.
+                  SliverToBoxAdapter(
+                      child: SizedBox(
+                          height: 120 + MediaQuery.paddingOf(context).bottom)),
                 ],
               ),
+            ),
 
             // Floating Cart Bar (shows only when cart has items)
             const Positioned(
@@ -159,13 +246,12 @@ class _SupermarketHomeScreenState extends State<SupermarketHomeScreen> {
 
 // ─── Private helpers ─────────────────────────────────────────────────────────
 
-/// 8px visual gap + very subtle line between content sections.
 class _SectionDivider extends StatelessWidget {
   const _SectionDivider();
 
   @override
   Widget build(BuildContext context) => Container(
-        height: 8,
+        height: AllineSpacing.xs,
         color: AllineThemeColors.of(context).background,
       );
 }

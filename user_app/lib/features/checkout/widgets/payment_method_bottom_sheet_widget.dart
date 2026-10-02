@@ -142,46 +142,72 @@ class PaymentMethodBottomSheetWidget extends StatelessWidget {
                         ],
                         if (localWallets.isNotEmpty) ...[
                           const SizedBox(height: 20),
-                          Align(
-                            alignment: isLtr
-                                ? Alignment.centerLeft
-                                : Alignment.centerRight,
-                            child: Text(
-                              isLtr ? 'Local wallets' : 'المحافظ المحلية',
-                              style: textBold.copyWith(
-                                fontSize: 15,
-                                color: const Color(0xFF071B49),
-                              ),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF8FBFF),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: const Color(0xFFDCE7F4)),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          ...localWallets.map(
-                            (entry) {
-                              final logoAsset = Images.getWalletLogo(entry.value.methodName);
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: _PaymentOptionCard(
-                                  title: _cleanWalletName(entry.value.methodName ?? '', isLtr),
-                                  subtitle: isLtr
-                                      ? 'Local wallet payment'
-                                      : 'الدفع عبر محفظة محلية',
-                                  imageAsset: logoAsset,
-                                  imageUrl: entry.value.methodName != null ? wallet.localWalletMethods.where((m) => m.name?.trim().toLowerCase() == entry.value.methodName?.trim().toLowerCase()).firstOrNull?.logoUrl : null,
-                                  icon: logoAsset == null ? Icons.phone_android_rounded : null,
-                                  selected: checkout.isOfflineChecked &&
-                                      checkout.offlineMethodSelectedIndex ==
-                                          entry.key,
-                                  onTap: () {
-                                    if (!checkout.isOfflineChecked) {
-                                      checkout.setOfflineChecked('offline');
-                                    }
-                                    checkout.setOfflinePaymentMethodSelectedIndex(
-                                      entry.key,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.account_balance_wallet_rounded,
+                                        color: AllineColors.primary, size: 20),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      isLtr ? 'Local wallets' : 'المحافظ المحلية',
+                                      style: textBold.copyWith(
+                                        fontSize: 15,
+                                        color: const Color(0xFF071B49),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  isLtr
+                                      ? 'Choose a local wallet to complete your payment.'
+                                      : 'اختر محفظتك المحلية لإتمام الدفع بسهولة.',
+                                  style: textRegular.copyWith(
+                                    fontSize: 11,
+                                    color: const Color(0xFF6D85AF),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ...localWallets.map(
+                                  (entry) {
+                                    final logoAsset = Images.getWalletLogo(entry.value.methodName);
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 10),
+                                      child: _PaymentOptionCard(
+                                        title: _cleanWalletName(entry.value.methodName ?? '', isLtr),
+                                        subtitle: isLtr
+                                            ? 'Local wallet payment'
+                                            : 'الدفع عبر محفظة محلية',
+                                        imageAsset: logoAsset,
+                                        imageUrl: entry.value.methodName != null ? wallet.localWalletMethods.where((m) => m.name?.trim().toLowerCase() == entry.value.methodName?.trim().toLowerCase()).firstOrNull?.logoUrl : null,
+                                        icon: logoAsset == null ? Icons.phone_android_rounded : null,
+                                        selected: checkout.isOfflineChecked &&
+                                            checkout.offlineMethodSelectedIndex ==
+                                                entry.key,
+                                        onTap: () {
+                                          if (!checkout.isOfflineChecked) {
+                                            checkout.setOfflineChecked('offline');
+                                          }
+                                          checkout.setOfflinePaymentMethodSelectedIndex(
+                                            entry.key,
+                                          );
+                                        },
+                                      ),
                                     );
                                   },
                                 ),
-                              );
-                            },
+                              ],
+                            ),
                           ),
                         ],
                         if (!hasCod && !hasWallet && localWallets.isEmpty)

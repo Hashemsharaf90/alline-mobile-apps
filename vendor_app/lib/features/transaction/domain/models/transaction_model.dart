@@ -41,16 +41,19 @@ class TransactionModel {
   Map<String, dynamic>? get withdrawalMethodFields => _withdrawalMethodFields;
 
   TransactionModel.fromJson(Map<String, dynamic> json) {
-    _id = json['id'];
-    _sellerId = int.parse(json['seller_id'].toString());
-    _adminId = json['admin_id'];
-    _amount = double.parse(json['amount'].toString());
+    _id = int.tryParse(json['id']?.toString() ?? '');
+    _sellerId = int.tryParse(json['seller_id']?.toString() ?? '');
+    _adminId = int.tryParse(json['admin_id']?.toString() ?? '');
+    _amount = double.tryParse(json['amount']?.toString() ?? '');
     _transactionNote = json['transaction_note'];
-    _approved = json['approved'];
+    _approved = int.tryParse(json['approved']?.toString() ?? '');
     _createdAt = json['created_at'];
     _updatedAt = json['updated_at'];
-    _withdrawalMethodId = json['withdrawal_method_id'];
-    _withdrawalMethodFields = (json['withdrawal_method_fields'] != null  && json['withdrawal_method_fields'] is! String) ? Map<String, dynamic>.from(json['withdrawal_method_fields']) : null;
+    _withdrawalMethodId =
+        int.tryParse(json['withdrawal_method_id']?.toString() ?? '');
+    _withdrawalMethodFields = json['withdrawal_method_fields'] is Map
+        ? Map<String, dynamic>.from(json['withdrawal_method_fields'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/controllers/product_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/featured_deal_controller.dart';
+import 'package:flutter_sixvalley_ecommerce/features/deal/controllers/flash_deal_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/domain/models/product_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/product/enums/product_type.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
@@ -14,8 +16,10 @@ class AllineHomeProductDiscovery extends StatelessWidget {
   const AllineHomeProductDiscovery({super.key});
 
   @override
-  Widget build(BuildContext context) => Consumer<ProductController>(
-        builder: (context, controller, _) {
+  Widget build(BuildContext context) =>
+      Consumer3<ProductController, FeaturedDealController, FlashDealController>(
+        builder: (context, controller, featuredDealController,
+            flashDealController, _) {
           final used = <String>{};
           final pickedSource = controller.featuredProductModel?.products ??
               controller.selectedProductModel?.products;
@@ -24,8 +28,64 @@ class AllineHomeProductDiscovery extends StatelessWidget {
               _unique(controller.homeBestSellingModel?.products, used);
           final arrivals =
               _unique(controller.latestProductModel?.products, used);
-          final offers =
-              _unique(controller.discountedProductModel?.products, used);
+
+          // 1. Featured Deals from backend (Admin configured)
+          final featuredDeals = featuredDealController.featuredDealProductList;
+          // 2. Flash Deals products
+          final flashDeals = flashDealController.flashDealList;
+          // 3. Discounted products
+          final discountedList = controller.discountedProductModel?.products;
+
+          List<Product>? offersSource;
+          VoidCallback? customOnViewAll;
+          ProductType offersType = ProductType.discountedProduct;
+
+          if (featuredDeals != null && featuredDeals.isNotEmpty) {
+            offersSource = featuredDeals;
+            offersType = ProductType.discountedProduct;
+            customOnViewAll =
+                () => RouterHelper.getFeaturedDealScreenViewRoute();
+          } else if (flashDeals.isNotEmpty) {
+            offersSource = flashDeals;
+            offersType = ProductType.discountedProduct;
+            customOnViewAll = () => RouterHelper.getFlashDealScreenViewRoute();
+          } else if (discountedList != null && discountedList.isNotEmpty) {
+            offersSource = discountedList;
+            customOnViewAll = () => RouterHelper.getViewAllProductScreenRoute(
+                  productType: ProductType.discountedProduct,
+                  action: RouteAction.push,
+                );
+          } else {
+            // Scan all loaded products for any item with a discount or clearance
+            final allLoaded = [
+              ...?controller.homeBestSellingModel?.products,
+              ...?controller.latestProductModel?.products,
+              ...?controller.homeAllProductModel?.products,
+              ...?controller.featuredProductModel?.products,
+            ];
+            final withDiscount = allLoaded
+                .where((p) =>
+                    (p.discount != null && p.discount! > 0) ||
+                    p.clearanceSale != null)
+                .toList();
+
+            if (withDiscount.isNotEmpty) {
+              offersSource = withDiscount;
+            } else {
+              // Graceful fallback so "عروض مميزة" shelf is NEVER blank or hidden
+              offersSource = controller.featuredProductModel?.products ??
+                  controller.latestProductModel?.products;
+            }
+
+            customOnViewAll = () => RouterHelper.getViewAllProductScreenRoute(
+                  productType: ProductType.discountedProduct,
+                  action: RouteAction.push,
+                );
+          }
+
+          // Dedicated deduplication set for offers so they are never suppressed by previous shelves
+          final offersUsed = <String>{};
+          final offers = _unique(offersSource, offersUsed);
 
           return Column(
             children: [
@@ -49,7 +109,8 @@ class AllineHomeProductDiscovery extends StatelessWidget {
               AllineProductShelf(
                 title: 'عروض مميزة',
                 products: offers,
-                type: ProductType.discountedProduct,
+                type: offersType,
+                customOnViewAll: customOnViewAll,
               ),
             ],
           );
@@ -76,12 +137,14 @@ class AllineProductShelf extends StatelessWidget {
   final String title;
   final List<Product>? products;
   final ProductType type;
+  final VoidCallback? customOnViewAll;
 
   const AllineProductShelf({
     super.key,
     required this.title,
     required this.products,
     required this.type,
+    this.customOnViewAll,
   });
 
   @override
@@ -96,10 +159,11 @@ class AllineProductShelf extends StatelessWidget {
         children: [
           AllineSectionHeader(
             title: title,
-            onViewAll: () => RouterHelper.getViewAllProductScreenRoute(
-              productType: type,
-              action: RouteAction.push,
-            ),
+            onViewAll: customOnViewAll ??
+                () => RouterHelper.getViewAllProductScreenRoute(
+                      productType: type,
+                      action: RouteAction.push,
+                    ),
           ),
           const SizedBox(height: 4),
           SizedBox(

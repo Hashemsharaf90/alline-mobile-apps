@@ -61,6 +61,8 @@ class ProductController extends ChangeNotifier {
 
   ProductModel? _sellerProductModel;
   ProductModel? get sellerProductModel => _sellerProductModel;
+  bool _sellerProductsError = false;
+  bool get sellerProductsError => _sellerProductsError;
 
   StockLimitStatus? _stockLimitStatus;
   StockLimitStatus? get stockLimitStatus => _stockLimitStatus;
@@ -169,13 +171,18 @@ class ProductController extends ChangeNotifier {
 
 
   Future <void> getSellerProductList(String sellerId, int offset, String languageCode,String search, {FilterModel? filterSearchModel}) async {
-    if((filterSearchModel?.reload ?? false) || offset == 1) {
+    final bool isReload = (filterSearchModel?.reload ?? false) || offset == 1;
+    if(isReload) {
       _sellerProductModel = null;
-
-      if(filterSearchModel?.reload ?? false) {
-        notifyListeners();
-      }
+      _sellerProductsError = false;
+      _isLoading = true;
+      _isPaginationLoading = false;
+      notifyListeners();
+    } else {
+      _isPaginationLoading = true;
+      notifyListeners();
     }
+    try {
       ApiResponse apiResponse = await productServiceInterface.getSellerProductList(
         sellerId: sellerId,  offset: offset,
         languageCode: languageCode, search: search,
@@ -183,25 +190,42 @@ class ProductController extends ChangeNotifier {
       );
 
       if(apiResponse.response?.statusCode == 200) {
-
+        final ProductModel page = ProductModel.fromJson(
+          apiResponse.response?.data,
+          fromGetProducts: true,
+        );
         if(offset == 1){
-          _sellerProductModel = ProductModel.fromJson(apiResponse.response?.data, fromGetProducts: true);
-
+          _sellerProductModel = page;
         }else{
-          _sellerProductModel?.products?.addAll(ProductModel.fromJson(apiResponse.response?.data, fromGetProducts: true).products ?? []);
-          _sellerProductModel?.offset = ProductModel.fromJson(apiResponse.response?.data).offset;
-          _sellerProductModel?.totalSize = ProductModel.fromJson(apiResponse.response?.data).totalSize;
+          final List<Product>? existing = _sellerProductModel?.products;
+          final Set<int> existingIds = (existing ?? <Product>[])
+              .map((product) => product.id)
+              .whereType<int>()
+              .toSet();
+          if (existing != null) {
+            for (final product in page.products ?? <Product>[]) {
+              if (product.id == null || existingIds.add(product.id!)) {
+                existing.add(product);
+              }
+            }
+          }
+          _sellerProductModel?.offset = page.offset;
+          _sellerProductModel?.totalSize = page.totalSize;
         }
         if(filterSearchModel != null){
           filterModel = filterSearchModel;
         }
       } else {
+        if (isReload) _sellerProductsError = true;
         ApiChecker.checkApi(apiResponse);
 
       }
 
+    } finally {
       _isLoading = false;
+      _isPaginationLoading = false;
       notifyListeners();
+    }
   }
 
   List<int?> _cartQuantity = [];
@@ -360,17 +384,29 @@ class ProductController extends ChangeNotifier {
       notifyListeners();
   }
 
-  Future<void> deleteProduct(BuildContext context, int? productID) async {
+  Future<bool> deleteProduct(BuildContext context, int? productID) async {
     _isLoading = true;
     notifyListeners();
-    ApiResponse response = await productServiceInterface.deleteProduct(productID);
-    if(response.response!.statusCode == 200) {
-      Navigator.pop(Get.context!);
-      showCustomSnackBarWidget(getTranslated('product_deleted_successfully', Get.context!),Get.context!, isError: false);
-    }else {
-      ApiChecker.checkApi(response);
+    try {
+      final ApiResponse response = await productServiceInterface.deleteProduct(productID);
+      if (response.response?.statusCode == 200) {
+        if (context.mounted) {
+          Navigator.pop(context);
+          showCustomSnackBarWidget(
+            getTranslated('product_deleted_successfully', context),
+            context,
+            isError: false,
+          );
+        }
+        return true;
+      } else {
+        ApiChecker.checkApi(response);
+        return false;
+      }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
 

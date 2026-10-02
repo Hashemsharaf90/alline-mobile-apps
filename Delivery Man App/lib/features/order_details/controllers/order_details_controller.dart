@@ -157,7 +157,10 @@ class OrderDetailsController extends GetxController implements GetxService {
   }
 
   Future<Response?> updatePaymentStatus({int? orderId, String? status}) async {
+    _isLoading = true;
+    update();
     Response apiResponse = await orderDetailsServiceInterface.updatePaymentStatus(orderId: orderId, status: status);
+    _isLoading = false;
     update();
     return apiResponse;
   }

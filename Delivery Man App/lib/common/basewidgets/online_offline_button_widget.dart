@@ -46,14 +46,14 @@ class OnlineOfflineButtonWidget extends StatelessWidget {
             child: CustomImageWidget(
               image: '${Get.find<ProfileController>().profileModel!.imageFullUrl?.path}',
               height: 30, width: 30, fit: BoxFit.cover)),
-          value: profileController.profileModel!.isActive == 1? true : false,
-          onToggle: (bool isActive) async {
+          value: (profileController.profileModel!.isOnline ?? 0) == 1,
+          onToggle: (bool isOnline) async {
               Get.dialog(ConfirmationDialogWidget(
                 icon: Images.logo,
-                description:profileController.profileModel!.isActive == 1?
+                description: (profileController.profileModel!.isOnline ?? 0) == 1 ?
                 'are_you_sure_go_to_offline'.tr : 'are_you_sure_go_to_online'.tr,
                 onYesPressed: () {
-                  if(isActive){
+                  if(isOnline){
                     profileController.profileStatusChange(context, 1);
                   }else{
                     profileController.profileStatusChange(context, 0);

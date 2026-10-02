@@ -11,6 +11,7 @@ import 'package:flutter_sixvalley_ecommerce/localization/controllers/localizatio
 import 'package:flutter_sixvalley_ecommerce/theme/controllers/theme_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/dimensions.dart';
+import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_store_logo_widget.dart';
 import 'package:provider/provider.dart';
 
 class MyGlobalOrdersScreen extends StatefulWidget {
@@ -155,9 +156,30 @@ class _MyGlobalOrdersScreenState extends State<MyGlobalOrdersScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
-            '${req.storeName ?? "Global Store"} (الكمية: ${req.quantity})',
-            style: textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F4FA),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Theme.of(context).dividerColor),
+                ),
+                child: GlobalStoreLogoWidget(
+                  storeName: req.storeName,
+                  height: 14,
+                  width: 32,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${req.storeName ?? "Global Store"} (الكمية: ${req.quantity})',
+                  style: textBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(

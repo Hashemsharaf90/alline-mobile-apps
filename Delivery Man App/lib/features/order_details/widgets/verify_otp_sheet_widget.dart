@@ -24,6 +24,7 @@ class VerifyDeliverySheetWidget extends StatefulWidget {
 class _VerifyDeliverySheetWidgetState extends State<VerifyDeliverySheetWidget> {
  String otp = '';
  bool invalidOtp = false;
+ bool _isSubmitting = false;
   @override
   Widget build(BuildContext context) {
     return Container(decoration: BoxDecoration(color: Theme.of(context).canvasColor,
@@ -102,22 +103,32 @@ class _VerifyDeliverySheetWidgetState extends State<VerifyDeliverySheetWidget> {
               Text('collect_otp_from_customer'.tr, style: rubikRegular, textAlign: TextAlign.center),
                SizedBox(height: Dimensions.paddingSizeLarge)]),
 
-            orderController.isLoading ? const Center(child: CircularProgressIndicator()) :
+            (orderController.isLoading || _isSubmitting) ? const Center(child: CircularProgressIndicator()) :
             CustomButtonWidget(
               btnTxt: orderController.otpVerified? 'ok'.tr : 'submit'.tr,
               onTap: () async {
+              if (_isSubmitting) return;
               if(orderController.otpVerified){
-                orderController.updatePaymentStatus(orderId: widget.orderModel!.id, status: 'paid').then((value) {
+                setState(() { _isSubmitting = true; });
+                try {
+                  final value = await orderController.updatePaymentStatus(orderId: widget.orderModel!.id, status: 'paid');
                   if (value?.statusCode == 200) {
-                    orderController.updateOrderStatus(orderId: widget.orderModel!.id,
-                        context: Get.context!, status: 'delivered').then((value) {
-                      Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(
-                          builder: (_) => OrderDeliveredScreen(
-                            orderID: widget.orderModel!.id.toString(), orderModel: widget.orderModel)));
-                        });}});
+                    await orderController.updateOrderStatus(orderId: widget.orderModel!.id,
+                        context: Get.context!, status: 'delivered');
+                    Navigator.of(Get.context!).pushReplacement(MaterialPageRoute(
+                        builder: (_) => OrderDeliveredScreen(
+                          orderID: widget.orderModel!.id.toString(), orderModel: widget.orderModel)));
+                  } else {
+                    setState(() { _isSubmitting = false; });
+                  }
+                } catch (e) {
+                  setState(() { _isSubmitting = false; });
+                }
               }else{
                 if(otp.length == 6) {
+                 setState(() { _isSubmitting = true; });
                  orderController.otpVerificationForOrderVerification(orderId: widget.orderModel!.id, otp: otp).then((value){
+                   setState(() { _isSubmitting = false; });
                    if(value?.statusCode == 200){
                      if(widget.orderModel?.paymentStatus != 'paid' || widget.editOrderPayment!) {
                        orderController.toggleProceedToNext();
@@ -129,6 +140,8 @@ class _VerifyDeliverySheetWidgetState extends State<VerifyDeliverySheetWidget> {
                                orderModel: widget.orderModel,)));
                        });}
                    }else{setState(() {invalidOtp = true;});}
+                 }).catchError((_) {
+                   setState(() { _isSubmitting = false; });
                  });
                 }else{showCustomSnackBarWidget('input_valid_otp'.tr);}}}
             ),

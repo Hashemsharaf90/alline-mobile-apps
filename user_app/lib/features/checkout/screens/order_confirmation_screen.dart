@@ -6,6 +6,7 @@ import 'package:flutter_sixvalley_ecommerce/common/basewidget/show_custom_snakba
 import 'package:flutter_sixvalley_ecommerce/features/order/domain/models/order_model.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order_details/controllers/order_details_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/order_details/domain/models/order_details_model.dart';
+import 'package:flutter_sixvalley_ecommerce/helper/date_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/price_converter.dart';
 import 'package:flutter_sixvalley_ecommerce/helper/route_healper.dart';
 import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
@@ -26,7 +27,8 @@ class OrderConfirmationScreen extends StatefulWidget {
   });
 
   @override
-  State<OrderConfirmationScreen> createState() => _OrderConfirmationScreenState();
+  State<OrderConfirmationScreen> createState() =>
+      _OrderConfirmationScreenState();
 }
 
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
@@ -49,7 +51,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     super.initState();
     _parseOrderIds();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<CartController>(context, listen: false).getCartData(context, reload: true);
+      Provider.of<CartController>(context, listen: false)
+          .getCartData(context, reload: true);
       if (_selectedOrderId.isNotEmpty) {
         _fetchOrderData(_selectedOrderId);
       }
@@ -69,7 +72,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
   Future<void> _fetchOrderData(String id) async {
     setState(() => _isLoading = true);
-    final orderDetailsController = Provider.of<OrderDetailsController>(context, listen: false);
+    final orderDetailsController =
+        Provider.of<OrderDetailsController>(context, listen: false);
     try {
       await Future.wait([
         orderDetailsController.getOrderFromOrderId(id),
@@ -92,7 +96,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   }
 
   Future<void> _openWhatsApp(String? id) async {
-    final orderText = (id != null && id.isNotEmpty) ? ' رقم الطلب: #ALN-$id' : '';
+    final orderText =
+        (id != null && id.isNotEmpty) ? ' رقم الطلب: #ALN-$id' : '';
     final message = 'مرحبًا، لدي استفسار بخصوص طلبي من Alline.$orderText';
     final appUri = Uri.parse(
       'whatsapp://send?phone=967775667733&text=${Uri.encodeComponent(message)}',
@@ -377,8 +382,15 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   }
 
   Widget _buildOrderIdCard(Orders? order) {
-    final displayId = _selectedOrderId.isNotEmpty ? _selectedOrderId : (order?.id?.toString() ?? '');
+    final displayId = _selectedOrderId.isNotEmpty
+        ? _selectedOrderId
+        : (order?.id?.toString() ?? '');
     final statusText = _mapOrderStatusToArabic(order?.orderStatus);
+    final orderDate = order?.createdAt == null
+        ? '—'
+        : DateConverter.localDateToIsoStringAMPMOrder(
+            DateTime.parse(order!.createdAt!),
+          );
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -387,83 +399,89 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: cardBorder),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'رقم الطلب',
-                style: textMedium.copyWith(
-                  fontSize: 13,
-                  color: secondaryText,
-                  fontFamily: 'AllineTajawal',
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getOrderStatusBgColor(order?.orderStatus),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  statusText,
-                  style: textBold.copyWith(
-                    fontSize: 12,
-                    color: _getOrderStatusTextColor(order?.orderStatus),
-                    fontFamily: 'AllineTajawal',
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '#ALN-$displayId',
-                  style: textBold.copyWith(
-                    fontSize: 20,
-                    color: primaryBlue,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              InkWell(
-                borderRadius: BorderRadius.circular(8),
+          Expanded(
+            child: _InfoColumn(
+              label: 'رقم الطلب',
+              value: '#ALN-$displayId',
+              valueColor: primaryBlue,
+              trailing: InkWell(
                 onTap: () => _copyOrderId(displayId),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: screenBg,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: cardBorder),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.copy_rounded,
-                        size: 15,
-                        color: primaryBlue,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'نسخ',
-                        style: textBold.copyWith(
-                          fontSize: 12,
-                          color: primaryBlue,
-                          fontFamily: 'AllineTajawal',
-                        ),
-                      ),
-                    ],
-                  ),
+                borderRadius: BorderRadius.circular(8),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Icon(Icons.copy_rounded, size: 17, color: primaryBlue),
                 ),
               ),
+            ),
+          ),
+          Container(width: 1, height: 58, color: cardBorder),
+          Expanded(
+            child: _InfoColumn(
+              label: 'تاريخ الطلب',
+              value: orderDate,
+              valueColor: primaryText,
+              status: statusText,
+              statusColor: _getOrderStatusTextColor(order?.orderStatus),
+              statusBackground: _getOrderStatusBgColor(order?.orderStatus),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _InfoColumn({
+    required String label,
+    required String value,
+    required Color valueColor,
+    Widget? trailing,
+    String? status,
+    Color? statusColor,
+    Color? statusBackground,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(label,
+              style: textMedium.copyWith(
+                  fontSize: 12,
+                  color: secondaryText,
+                  fontFamily: 'AllineTajawal')),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: textBold.copyWith(
+                        fontSize: 15,
+                        color: valueColor,
+                        fontFamily: 'AllineTajawal')),
+              ),
+              if (trailing != null) trailing,
             ],
           ),
+          if (status != null) ...[
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                  color: statusBackground,
+                  borderRadius: BorderRadius.circular(12)),
+              child: Text(status,
+                  style: textBold.copyWith(
+                      fontSize: 10,
+                      color: statusColor,
+                      fontFamily: 'AllineTajawal')),
+            ),
+          ],
         ],
       ),
     );
@@ -485,6 +503,12 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
       'جاري التجهيز',
       'قيد التوصيل',
       'تم التسليم',
+    ];
+    final stepIcons = [
+      Icons.check_circle_outline_rounded,
+      Icons.inventory_2_outlined,
+      Icons.local_shipping_outlined,
+      Icons.done_all_rounded,
     ];
 
     return InkWell(
@@ -544,7 +568,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                   return Expanded(
                     child: Container(
                       height: 3,
-                      color: isPassed ? successGreen : cardBorder,
+                      color: isPassed ? primaryBlue : cardBorder,
                     ),
                   );
                 }
@@ -558,29 +582,27 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                       width: 24,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: isCompleted ? successGreen : Colors.white,
+                        color: isCompleted ? primaryBlue : Colors.white,
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: isCompleted ? successGreen : cardBorder,
+                          color: isCompleted ? primaryBlue : cardBorder,
                           width: 2,
                         ),
                         boxShadow: isCurrent
                             ? [
                                 BoxShadow(
-                                  color: successGreen.withValues(alpha: 0.35),
+                                  color: primaryBlue.withValues(alpha: 0.35),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
                               ]
                             : null,
                       ),
-                      child: isCompleted
-                          ? const Icon(
-                              Icons.check_rounded,
-                              size: 14,
-                              color: Colors.white,
-                            )
-                          : null,
+                      child: Icon(
+                        stepIcons[stepIndex],
+                        size: 14,
+                        color: isCompleted ? Colors.white : secondaryText,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -638,7 +660,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
             ],
           ),
           const SizedBox(height: 14),
-          _buildSummaryRow('عدد المنتجات', '$count ${count == 1 ? 'منتج' : 'منتجات'}'),
+          _buildSummaryRow(
+              'عدد المنتجات', '$count ${count == 1 ? 'منتج' : 'منتجات'}'),
           const SizedBox(height: 8),
           _buildSummaryRow(
             'إجمالي المنتجات',
@@ -655,7 +678,9 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
           const SizedBox(height: 8),
           _buildSummaryRow(
             'رسوم التوصيل',
-            shipping == 0 ? 'مجاني' : PriceConverter.convertPrice(context, shipping),
+            shipping == 0
+                ? 'مجاني'
+                : PriceConverter.convertPrice(context, shipping),
             valueColor: shipping == 0 ? successGreen : primaryText,
           ),
           if (tax > 0) ...[
@@ -830,7 +855,8 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
   Widget _buildDeliveryAddressCard(Orders? order) {
     final shipping = order?.shippingAddressData;
     final billing = order?.billingAddressData;
-    final contactPerson = (shipping?.contactPersonName != null && shipping!.contactPersonName!.isNotEmpty)
+    final contactPerson = (shipping?.contactPersonName != null &&
+            shipping!.contactPersonName!.isNotEmpty)
         ? shipping.contactPersonName!
         : (billing?.contactPersonName ?? '');
     final phone = (shipping?.phone != null && shipping!.phone!.isNotEmpty)
@@ -839,9 +865,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     final city = (shipping?.city != null && shipping!.city!.isNotEmpty)
         ? shipping.city!
         : (billing?.city ?? '');
-    final addressLine = (shipping?.address != null && shipping!.address!.isNotEmpty)
-        ? shipping.address!
-        : (billing?.address ?? '');
+    final addressLine =
+        (shipping?.address != null && shipping!.address!.isNotEmpty)
+            ? shipping.address!
+            : (billing?.address ?? '');
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1287,11 +1314,18 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     final lower = key.toLowerCase();
     if (lower == 'wallet') return 'رصيد محفظة Alline';
     if (lower.contains('jeeb') || lower.contains('جيب')) return 'محفظة جيب';
-    if (lower.contains('jawali') || lower.contains('جوالي')) return 'محفظة جوالي';
-    if (lower.contains('one_cash') || lower.contains('onecash') || lower.contains('ون كاش') || lower.contains('ونكاش')) return 'محفظة ون كاش';
-    if (lower.contains('floosak') || lower.contains('فلوسك')) return 'محفظة فلوسك';
-    if (lower.contains('cash_wallet') || lower.contains('كاش') && !lower.contains('استلام')) return 'محفظة كاش';
-    if (lower.contains('cash') || lower.contains('cod')) return 'الدفع عند الاستلام';
+    if (lower.contains('jawali') || lower.contains('جوالي'))
+      return 'محفظة جوالي';
+    if (lower.contains('one_cash') ||
+        lower.contains('onecash') ||
+        lower.contains('ون كاش') ||
+        lower.contains('ونكاش')) return 'محفظة ون كاش';
+    if (lower.contains('floosak') || lower.contains('فلوسك'))
+      return 'محفظة فلوسك';
+    if (lower.contains('cash_wallet') ||
+        lower.contains('كاش') && !lower.contains('استلام')) return 'محفظة كاش';
+    if (lower.contains('cash') || lower.contains('cod'))
+      return 'الدفع عند الاستلام';
     if (lower.contains('offline')) return 'المحافظ المحلية';
     return key.isNotEmpty ? key : 'الدفع عند الاستلام';
   }

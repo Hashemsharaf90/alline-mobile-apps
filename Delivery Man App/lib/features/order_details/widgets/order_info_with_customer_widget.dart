@@ -74,8 +74,8 @@ class OrderInfoWithDeliveryInfoWidget extends StatelessWidget {
                   }),isFlip: true),)),
 
 
-                Expanded(child: OrderActionItemWidget(icon: Images.reachedIcon,title:  'reached'.tr,
-                  onTap: () => showAnimatedDialogWidget(context,  OrderStatusUpdateDialogWidget(icon: Images.reachedIcon,
+                Expanded(child: OrderActionItemWidget(icon: Images.calenderIcon, title: 'reschedule'.tr,
+                  onTap: () => showAnimatedDialogWidget(context,  OrderStatusUpdateDialogWidget(icon: Images.calenderIcon,
                     isReschedule: true,
                     title:  'why_you_want_to_reschedule_this_delivery'.tr,
                     actionType: OrderActionType.reschedule,

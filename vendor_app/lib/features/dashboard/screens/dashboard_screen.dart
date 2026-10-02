@@ -8,14 +8,12 @@ import 'package:sixvalley_vendor_app/features/addProduct/controllers/digital_pro
 import 'package:sixvalley_vendor_app/features/ai/controllers/ai_controller.dart';
 import 'package:sixvalley_vendor_app/features/pos/controllers/cart_controller.dart';
 import 'package:sixvalley_vendor_app/features/product/controllers/category_controller.dart';
-import 'package:sixvalley_vendor_app/features/shop/controllers/shop_controller.dart';
 import 'package:sixvalley_vendor_app/features/splash/controllers/splash_controller.dart';
 import 'package:sixvalley_vendor_app/features/transaction/controllers/transaction_controller.dart';
 import 'package:sixvalley_vendor_app/features/wallet/controllers/wallet_controller.dart';
 import 'package:sixvalley_vendor_app/helper/network_info.dart';
 import 'package:sixvalley_vendor_app/localization/controllers/localization_controller.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
-import 'package:sixvalley_vendor_app/features/profile/controllers/profile_controller.dart';
 import 'package:sixvalley_vendor_app/utill/dimensions.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
 import 'package:sixvalley_vendor_app/utill/styles.dart';
@@ -42,30 +40,40 @@ class DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    String languageCode = Provider.of<LocalizationController>(context, listen: false).locale.countryCode == 'US'?
-    'en':Provider.of<LocalizationController>(context, listen: false).locale.countryCode!.toLowerCase();
-    Provider.of<ProfileController>(context, listen: false).getSellerInfo();
-    Provider.of<DigitalProductController>(context, listen: false).getDigitalAuthor();
-    Provider.of<DigitalProductController>(context, listen: false).getPublishingHouse();
-    Provider.of<CategoryController>(context,listen: false).getCategoryList(context, null, languageCode);
-    Provider.of<CartController>(context,listen: false).getCartData();
-    Provider.of<ShopController>(context, listen: false).getShopInfo();
+    String languageCode =
+        Provider.of<LocalizationController>(context, listen: false)
+                    .locale
+                    .countryCode ==
+                'US'
+            ? 'en'
+            : Provider.of<LocalizationController>(context, listen: false)
+                .locale
+                .countryCode!
+                .toLowerCase();
+    Provider.of<DigitalProductController>(context, listen: false)
+        .getDigitalAuthor();
+    Provider.of<DigitalProductController>(context, listen: false)
+        .getPublishingHouse();
+    Provider.of<CategoryController>(context, listen: false)
+        .getCategoryList(context, null, languageCode);
+    Provider.of<CartController>(context, listen: false).getCartData();
 
-    Provider.of<TransactionController>(context, listen: false).getTransactionList(context,'all','','');
+    Provider.of<TransactionController>(context, listen: false)
+        .getTransactionList(context, 'all', '', '');
     Provider.of<WalletController>(context, listen: false).getPaymentInfoList();
 
-    if(Provider.of<SplashController>(context,listen: false).configModel?.isAiFeatureActive == 1) {
-      Provider.of<AiController>(context,listen: false).generateLimitCheck();
+    if (Provider.of<SplashController>(context, listen: false)
+            .configModel
+            ?.isAiFeatureActive ==
+        1) {
+      Provider.of<AiController>(context, listen: false).generateLimitCheck();
     }
 
     _screens = [
-      HomePageScreen(callback: () {
-        setState(() {
-          setPage(1);
-        });
-      }),
+      HomePageScreen(onNavigate: setPage),
       const OrderScreen(isBacButtonExist: false),
-      const ProductListMenuScreen(fromNotification: false, isBackButtonExist: false),
+      const ProductListMenuScreen(
+          fromNotification: false, isBackButtonExist: false),
       const SellerAnalyticsScreen(isBackButtonExist: false),
       const SellerAccountScreen(),
     ];
@@ -83,9 +91,8 @@ class DashboardScreenState extends State<DashboardScreen> {
         } else {
           _onWillPop(context);
         }
-        if(didPop) return;
+        if (didPop) return;
       },
-
       child: Scaffold(
         key: _scaffoldKey,
         bottomNavigationBar: BottomNavigationBar(
@@ -98,11 +105,16 @@ class DashboardScreenState extends State<DashboardScreen> {
           currentIndex: _pageIndex,
           type: BottomNavigationBarType.fixed,
           items: [
-            _barItem(Images.home, getTranslated('nav_home', context) ?? 'الرئيسية', 0),
-            _barItem(Images.order, getTranslated('nav_orders', context) ?? 'الطلبات', 1),
-            _barItem(Images.productIcon, getTranslated('nav_products', context) ?? 'المنتجات', 2),
-            _barItem(Images.pieChart, getTranslated('nav_analytics', context) ?? 'الإحصائيات', 3),
-            _barItem(Images.profile, getTranslated('nav_account', context) ?? 'حسابي', 4),
+            _barItem(Images.home,
+                getTranslated('nav_home', context) ?? 'الرئيسية', 0),
+            _barItem(Images.order,
+                getTranslated('nav_orders', context) ?? 'الطلبات', 1),
+            _barItem(Images.productIcon,
+                getTranslated('nav_products', context) ?? 'المنتجات', 2),
+            _barItem(Images.pieChart,
+                getTranslated('nav_analytics', context) ?? 'الإحصائيات', 3),
+            _barItem(Images.profile,
+                getTranslated('nav_account', context) ?? 'حسابي', 4),
           ],
           onTap: (int index) {
             setPage(index);
@@ -123,15 +135,24 @@ class DashboardScreenState extends State<DashboardScreen> {
   BottomNavigationBarItem _barItem(String icon, String? label, int index) {
     return BottomNavigationBarItem(
       icon: Padding(
-        padding: const EdgeInsets.only(bottom : Dimensions.paddingSizeExtraSmall),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            SizedBox(width: index == _pageIndex ? Dimensions.iconSizeLarge : Dimensions.iconSizeMedium,
-              child: Image.asset(icon, color: index == _pageIndex ?
-              Theme.of(context).primaryColor : Theme.of(context).hintColor)
-            ),
-          ],
+        padding:
+            const EdgeInsets.only(bottom: Dimensions.paddingSizeExtraSmall),
+        child: Container(
+          width: 48,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: index == _pageIndex
+                ? Theme.of(context).primaryColor.withValues(alpha: .11)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Image.asset(icon,
+              width: 22,
+              height: 22,
+              color: index == _pageIndex
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).hintColor),
         ),
       ),
       label: label,
@@ -145,17 +166,19 @@ class DashboardScreenState extends State<DashboardScreen> {
     });
   }
 
-
   Future<bool> _onWillPop(BuildContext context) async {
-    showAnimatedDialogWidget(context,  ConfirmationDialogWidget(icon: Images.logOut,
-      title: getTranslated('exit_app', context),
-      description: getTranslated('do_you_want_to_exit_the_app', context),
-      onYesPressed: () {
-        SystemNavigator.pop();
-      },
-    ), isFlip: true);
+    showAnimatedDialogWidget(
+        context,
+        ConfirmationDialogWidget(
+          icon: Images.logOut,
+          title: getTranslated('exit_app', context),
+          description: getTranslated('do_you_want_to_exit_the_app', context),
+          onYesPressed: () {
+            SystemNavigator.pop();
+          },
+        ),
+        isFlip: true);
 
     return true;
   }
-
 }

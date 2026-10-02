@@ -32,12 +32,13 @@ class CustomEditDialogWidgetState extends State<CustomEditDialogWidget> {
 
   final TextEditingController _balanceController = TextEditingController();
   final List<String> groupItems = ['my_methods', 'other'];
-  final WalletController walletController = Provider.of<WalletController>(Get.context!, listen: false);
+  late WalletController walletController;
+  bool _isConfirming = false;
 
   @override
   void initState() {
     super.initState();
-    final walletController = Provider.of<WalletController>(context, listen: false);
+    walletController = Provider.of<WalletController>(context, listen: false);
     final existing = widget.existingTransaction;
 
     if (existing?.withdrawalMethodId != null && existing?.withdrawalMethodFields != null) {
@@ -61,7 +62,7 @@ class CustomEditDialogWidgetState extends State<CustomEditDialogWidget> {
       walletController.setDefaultPaymentMethod();
     }
 
-    _balanceController.text = PriceConverter.convertPriceWithoutSymbol(Get.context!, widget.totalEarning);
+    _balanceController.text = PriceConverter.convertPriceWithoutSymbol(context, widget.totalEarning);
     _listenTextController();
 
     if(walletController.methodSelected != null && existing == null) {
@@ -72,9 +73,18 @@ class CustomEditDialogWidgetState extends State<CustomEditDialogWidget> {
 
 
   void _listenTextController() {
-    _balanceController.addListener((){
-      setState(() {});
-    });
+    _balanceController.addListener(_onBalanceChanged);
+  }
+
+  void _onBalanceChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _balanceController.removeListener(_onBalanceChanged);
+    _balanceController.dispose();
+    super.dispose();
   }
 
   @override
@@ -428,54 +438,175 @@ class CustomEditDialogWidgetState extends State<CustomEditDialogWidget> {
       }
     }
     if (withdraw.methodSelected == null) {
-      Navigator.of(context).pop();
       showCustomSnackBarWidget(getTranslated('select_withdraw_method', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
     } else if (withdraw.methodSelected?.type == 'my_methods' && withdraw.methodSelected?.methodFields != null && withdraw.inputFieldControllerList.isEmpty) {
-      Navigator.of(context).pop();
       showCustomSnackBarWidget(getTranslated('please_fill_all_the_field', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
     } else if (haveBlankTitle && withdraw.methodSelected?.type != 'my_methods') {
-      Navigator.of(context).pop();
       showCustomSnackBarWidget(getTranslated('please_fill_all_the_field', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
     } else if (_balanceController.text.trim() == '') {
-      Navigator.of(context).pop();
       showCustomSnackBarWidget(getTranslated('please_enter_amount', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
     } else if ((double.tryParse(_balanceController.text) ?? 0) <= 0) {
-      Navigator.of(context).pop();
       showCustomSnackBarWidget(getTranslated('withdraw_amount_should_be_grater_then', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
     } else {
       withdrawBalance();
     }
   }
 
-  void withdrawBalance() async {
-    String balance = '0';
-    double bal = 0;
-    balance = _balanceController.text.trim();
-    if (balance.isNotEmpty) {
-      bal = double.parse(balance);
-    }
-    if (balance.isEmpty) {
-      Navigator.of(context).pop();
-      showCustomSnackBarWidget(getTranslated('enter_balance', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
-    }
-
-    // else if (bal > double.parse(PriceConverter.convertPriceWithoutSymbol(context, Provider.of<ProfileController>(context, listen: false).userInfoModel!.wallet!.totalEarning))) {
-    //   Navigator.of(context).pop();
-    //   showCustomSnackBarWidget(getTranslated('insufficient_balance', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
-    // }
-
-    else if (bal <= 1) {
-      Navigator.of(context).pop();
+  Future<void> withdrawBalance() async {
+    final balance = _balanceController.text.trim();
+    final amount = double.tryParse(balance);
+    if (amount == null || amount <= 1) {
       showCustomSnackBarWidget(getTranslated('minimum_amount', context), context, isToaster: true, sanckBarType: SnackBarType.warning);
-    } else {
-      final walletController = Provider.of<WalletController>(context, listen: false);
-      if (widget.existingTransaction != null) {
-        await walletController.updateWithdrawRequest(bal.toString(), widget.existingTransaction!.id!, context);
-      } else {
-        await walletController.updateBalance(bal.toString(), context);
+      return;
+    }
+
+    if (widget.existingTransaction == null) {
+      final amountInBaseCurrency = double.tryParse(
+        PriceConverter.reverseConvertPriceWithoutSymbol(context, amount),
+      );
+      if (amountInBaseCurrency != null &&
+          amountInBaseCurrency > widget.totalEarning) {
+        showCustomSnackBarWidget(
+          getTranslated('insufficient_balance', context),
+          context,
+          isToaster: true,
+          sanckBarType: SnackBarType.warning,
+        );
+        return;
       }
     }
+
+    if (_isConfirming) return;
+    setState(() => _isConfirming = true);
+    bool confirmed = false;
+    try {
+      confirmed = await _showWithdrawalConfirmation(amount);
+    } finally {
+      if (mounted) setState(() => _isConfirming = false);
+    }
+    if (!mounted || !confirmed) return;
+
+    if (widget.existingTransaction != null) {
+      final requestId = widget.existingTransaction!.id;
+      if (requestId == null) return;
+      await walletController.updateWithdrawRequest(
+        amount.toString(),
+        requestId,
+        context,
+      );
+    } else {
+      await walletController.updateBalance(amount.toString(), context);
+    }
   }
+
+  Future<bool> _showWithdrawalConfirmation(double amount) async {
+    final isEdit = widget.existingTransaction != null;
+    final baseAmount = double.tryParse(
+      PriceConverter.reverseConvertPriceWithoutSymbol(context, amount),
+    );
+    final expectedBalance = baseAmount == null
+        ? null
+        : (widget.totalEarning - baseAmount).clamp(0, double.infinity).toDouble();
+    final methodName = walletController.methodSelected?.inputName ?? '—';
+
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            title: Text(
+              isEdit ? 'تأكيد تعديل طلب السحب' : 'تأكيد طلب السحب',
+              textAlign: TextAlign.start,
+              style: const TextStyle(
+                fontFamily: 'AllineTajawal',
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ConfirmationDetailRow(
+                  label: 'المبلغ',
+                  value: PriceConverter.convertPrice(context, amount),
+                ),
+                const SizedBox(height: 10),
+                _ConfirmationDetailRow(
+                  label: 'طريقة الاستلام',
+                  value: methodName,
+                ),
+                if (!isEdit && expectedBalance != null) ...[
+                  const SizedBox(height: 10),
+                  _ConfirmationDetailRow(
+                    label: 'الرصيد المتبقي المتوقع',
+                    value: PriceConverter.convertPrice(context, expectedBalance),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Text(
+                  'لا تتوفر تفاصيل رسوم منفصلة لهذا الطلب.',
+                  style: TextStyle(
+                    color: Theme.of(context).hintColor,
+                    fontFamily: 'AllineTajawal',
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(getTranslated('cancel', context) ?? 'إلغاء'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(isEdit ? 'تأكيد التعديل' : 'تأكيد السحب'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+}
+
+class _ConfirmationDetailRow extends StatelessWidget {
+  const _ConfirmationDetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+                fontFamily: 'AllineTajawal',
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+                fontFamily: 'AllineTajawal',
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      );
 }
 
 

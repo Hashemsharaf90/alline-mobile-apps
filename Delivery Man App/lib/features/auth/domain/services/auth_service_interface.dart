@@ -2,7 +2,7 @@ import 'package:sixvalley_delivery_boy/features/auth/domain/models/response_mode
 
 abstract class AuthServiceInterface  {
   Future<ResponseModel> login(String countryCode, String phone, String password);
-  void saveUserToken(String token);
+  void saveUserToken(String token, [String? approvalStatus]);
   Future<dynamic> updateToken();
   Future<dynamic> setLanguageCode(String currentLanguage);
   bool isLoggedIn();

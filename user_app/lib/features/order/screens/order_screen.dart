@@ -126,23 +126,27 @@ class _OrderScreenState extends State<OrderScreen> {
                             return _buildEmptyStateForFilters(context, orderCtrl, isLtr);
                           }
 
-                          return PaginatedListView(
-                            scrollController: _scrollController,
-                            onPaginate: (int? offset) async {
-                              await orderCtrl.getOrderList(offset!, orderCtrl.selectedType);
-                            },
-                            totalSize: orderCtrl.orderModel?.totalSize,
-                            offset: orderCtrl.orderModel?.offset != null
-                                ? int.parse(orderCtrl.orderModel!.offset!)
-                                : 1,
-                            itemView: ListView.builder(
-                              controller: _scrollController,
-                              physics: const AlwaysScrollableScrollPhysics(),
-                              padding: const EdgeInsets.only(top: 6, bottom: 24),
-                              itemCount: filteredOrders.length,
-                              itemBuilder: (context, index) {
-                                return OrderWidget(orderModel: filteredOrders[index]);
+                          return SingleChildScrollView(
+                            controller: _scrollController,
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: PaginatedListView(
+                              scrollController: _scrollController,
+                              onPaginate: (int? offset) async {
+                                await orderCtrl.getOrderList(offset!, orderCtrl.selectedType);
                               },
+                              totalSize: orderCtrl.orderModel?.totalSize,
+                              offset: orderCtrl.orderModel?.offset != null
+                                  ? int.parse(orderCtrl.orderModel!.offset!)
+                                  : 1,
+                              itemView: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: const EdgeInsets.only(top: 6, bottom: 24),
+                                itemCount: filteredOrders.length,
+                                itemBuilder: (context, index) {
+                                  return OrderWidget(orderModel: filteredOrders[index]);
+                                },
+                              ),
                             ),
                           );
                         },
@@ -257,6 +261,15 @@ class _OrderScreenState extends State<OrderScreen> {
       padding: const EdgeInsets.only(top: 10, bottom: 10),
       child: Column(
         children: [
+          Consumer<OrderController>(
+            builder: (context, orderCtrl, _) => _buildOrdersSummary(
+              context,
+              orderCtrl,
+              isDark,
+              isLtr,
+            ),
+          ),
+          const SizedBox(height: 10),
           // 1. Search Box
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
@@ -352,6 +365,68 @@ class _OrderScreenState extends State<OrderScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOrdersSummary(
+    BuildContext context,
+    OrderController orderCtrl,
+    bool isDark,
+    bool isLtr,
+  ) {
+    int allCount = orderCtrl.orderCounts?.all ?? (orderCtrl.orderModel?.totalSize ?? 0);
+    int activeCount = orderCtrl.orderCounts?.ongoing ?? 0;
+    int deliveredCount = orderCtrl.orderCounts?.delivered ?? 0;
+
+    // Fallback if counts not yet populated from backend
+    if (orderCtrl.orderCounts == null && orderCtrl.orderModel?.orders != null) {
+      final orders = orderCtrl.orderModel!.orders!;
+      final activeStatuses = {
+        'pending',
+        'confirmed',
+        'processing',
+        'out_for_delivery',
+      };
+      allCount = orders.length;
+      activeCount = orders.where((order) => activeStatuses.contains(order.orderStatus?.toLowerCase())).length;
+      deliveredCount = orders.where((order) => order.orderStatus?.toLowerCase() == 'delivered').length;
+    }
+
+    final labels = isLtr ? ['All', 'Active', 'Delivered'] : ['الكل', 'جارية', 'مكتملة'];
+    final values = [allCount, activeCount, deliveredCount];
+    final icons = [Icons.receipt_long_rounded, Icons.local_shipping_rounded, Icons.check_circle_rounded];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
+      child: Row(
+        children: List.generate(labels.length, (index) {
+          return Expanded(
+            child: Container(
+              margin: EdgeInsets.only(left: index == labels.length - 1 ? 0 : 8),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white10 : const Color(0xFFF4F8FE),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: isDark ? Colors.white12 : const Color(0xFFE1E8F2)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icons[index], size: 16, color: index == 1 ? AllineColors.accent : AllineColors.primary),
+                  const SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('${values[index]}', style: titilliumBold.copyWith(fontSize: 16, color: isDark ? Colors.white : const Color(0xFF071B49))),
+                      Text(labels[index], style: titilliumRegular.copyWith(fontSize: 10, color: const Color(0xFF6D85AF))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

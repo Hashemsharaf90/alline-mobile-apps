@@ -22,10 +22,13 @@ class AllineWelcomeView extends StatelessWidget {
   static const _ink = Color(0xFF071B49);
   static const _orange = Color(0xFFF59A0B);
   static const _muted = Color(0xFF4F5870);
-  static const _heroAsset =
+  static const heroAsset =
       'assets/images/alline/welcome_reference_hero.png';
-  static const _logoAsset =
+  static const logoAsset =
       'assets/images/alline/login_logo_transparent.png';
+  static const _heroAsset = heroAsset;
+  static const _logoAsset = logoAsset;
+
 
   String tr(String ar, String en) => isArabic ? ar : en;
 

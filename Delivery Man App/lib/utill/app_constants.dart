@@ -7,13 +7,15 @@ class AppConstants {
   static const bool demo = false;
   static const int imageQuality = 100;
   static const String appVersion = '5.1'; ///flutter SDK : 3.44.2
-  static const String polylineMapKey = 'YOUR_MAP_KEY_HERE';
+  // Polyline routing uses server-side proxy routePolylineApi; client map key is configured via AndroidManifest
+  static const String polylineMapKey = '';
 
-  static const String baseUrl = 'https://new.allinye.com';
+  static const String baseUrl = 'https://allinye.com';
 
   static const String profileUri = '/api/v2/delivery-man/info';
   static const String configUri = '/api/v1/config';
   static const String loginUri = '/api/v2/delivery-man/auth/login';
+  static const String logoutUri = '/api/v2/delivery-man/logout';
 
   static const String notificationUri = '/api/v2/delivery-man/notifications';
   static const String currentOrderUri = '/api/v2/delivery-man/current-orders';
@@ -25,7 +27,7 @@ class AppConstants {
   static const String pauseAndResumeOrderStatusUri = '/api/v2/delivery-man/order-update-is-pause';
   static const String updatePaymentStatusUri = '/api/v2/delivery-man/update-payment-status';
   static const String tokenUri = '/api/v2/delivery-man/update-fcm-token';
-  static const String searchConversationListUri = '/api/v2/delivery-man/update-fcm-token';
+  static const String searchConversationListUri = '/api/v2/delivery-man/messages/search/';
   static const String statusOnOffUri = '/api/v2/delivery-man/is-online';
   static const String withdrawRequestUri = '/api/v2/delivery-man/withdraw-request';
   static const String walletInfoUri = '/api/v2/delivery-man/wallet';
@@ -56,10 +58,22 @@ class AppConstants {
   static const String singleOrderHistoryUri = '/api/v2/delivery-man/order-item';
   static const String businessPagesUri = '/api/v1/business-pages?type=';
 
+  // Driver Onboarding Endpoints
+  static const String driverRegisterUri = '/api/v2/delivery-man/auth/register';
+  static const String driverVerifyRegistrationOtpUri = '/api/v2/delivery-man/auth/verify-registration-otp';
+  static const String driverResendRegistrationOtpUri = '/api/v2/delivery-man/auth/resend-registration-otp';
+  static const String driverOnboardingProfileUri = '/api/v2/delivery-man/onboarding/profile';
+  static const String driverOnboardingDocumentsUri = '/api/v2/delivery-man/onboarding/documents';
+  static const String driverOnboardingDeleteDocumentUri = '/api/v2/delivery-man/onboarding/documents/';
+  static const String driverOnboardingVehicleUri = '/api/v2/delivery-man/onboarding/vehicle';
+  static const String driverOnboardingLocationUri = '/api/v2/delivery-man/onboarding/location';
+  static const String driverOnboardingSubmitUri = '/api/v2/delivery-man/onboarding/submit';
+  static const String driverOnboardingStatusUri = '/api/v2/delivery-man/onboarding/status';
 
   // Shared Key
   static const String theme = 'theme';
   static const String token = 'token';
+  static const String driverApprovalStatus = 'driver_approval_status';
   static const String countryCode = 'country_code';
   static const String languageCode = 'language_code';
   static const String cartList = 'cart_list';

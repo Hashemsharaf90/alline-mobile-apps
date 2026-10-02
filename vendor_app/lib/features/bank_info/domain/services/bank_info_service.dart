@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +12,7 @@ import 'package:sixvalley_vendor_app/helper/api_checker.dart';
 import 'package:sixvalley_vendor_app/localization/language_constrants.dart';
 import 'package:sixvalley_vendor_app/main.dart';
 
-class BankInfoService implements BankInfoServiceInterface{
+class BankInfoService implements BankInfoServiceInterface {
   BankInfoRepositoryInterface bankInfoRepoInterface;
   BankInfoService({required this.bankInfoRepoInterface});
 
@@ -23,13 +22,13 @@ class BankInfoService implements BankInfoServiceInterface{
   }
 
   @override
-  Future getBankList() async{
+  Future getBankList() async {
     ApiResponse apiResponse = await bankInfoRepoInterface.getList();
     if (apiResponse.response != null &&
         apiResponse.response!.statusCode == 200) {
-    return ProfileInfoModel.fromJson(apiResponse.response!.data);
+      return ProfileInfoModel.fromJson(apiResponse.response!.data);
     } else {
-    ApiChecker.checkApi(apiResponse);
+      ApiChecker.checkApi(apiResponse);
     }
   }
 
@@ -39,17 +38,24 @@ class BankInfoService implements BankInfoServiceInterface{
   }
 
   @override
-  Future updateBank(ProfileInfoModel userInfoModel, ProfileBody seller, String token) async{
-    http.StreamedResponse response = await bankInfoRepoInterface.updateBank(userInfoModel, seller, token);
+  Future updateBank(
+      ProfileInfoModel userInfoModel, ProfileBody seller, String token) async {
+    http.StreamedResponse response =
+        await bankInfoRepoInterface.updateBank(userInfoModel, seller, token);
     if (response.statusCode == 200) {
       Navigator.pop(Get.context!);
-      showCustomSnackBarWidget(getTranslated('bank_info_updated_successfully', Get.context!), Get.context!, isToaster: true, isError: false);
+      showCustomSnackBarWidget(
+          getTranslated('bank_info_updated_successfully', Get.context!),
+          Get.context!,
+          isToaster: true,
+          isError: false);
       return ResponseModel(true, '');
     } else {
       if (kDebugMode) {
         print('${response.statusCode} ${response.reasonPhrase}');
       }
-      return ResponseModel(false, '${response.statusCode} ${response.reasonPhrase}');
+      return ResponseModel(
+          false, '${response.statusCode} ${response.reasonPhrase}');
     }
   }
 
@@ -57,5 +63,9 @@ class BankInfoService implements BankInfoServiceInterface{
   Future getOrderFilterData(String? type) {
     return bankInfoRepoInterface.getOrderFilterData(type);
   }
-  
+
+  @override
+  Future getDashboardSalesSummary() {
+    return bankInfoRepoInterface.getDashboardSalesSummary();
+  }
 }

@@ -11,18 +11,30 @@ import 'package:flutter_sixvalley_ecommerce/utill/custom_themes.dart';
 class AllineCategoriesGridWidget extends StatelessWidget {
   const AllineCategoriesGridWidget({super.key});
 
+  static List<CategoryModel> get _fallbackCategories => [
+        CategoryModel(id: 7, name: 'الالكترونيات'),
+        CategoryModel(id: 4, name: 'مستلزمات البيت والمطبخ'),
+        CategoryModel(id: 12, name: 'الاثاث والديكور'),
+        CategoryModel(id: 9, name: 'الملابس والاكسسوارات'),
+        CategoryModel(id: 2, name: 'العطور'),
+        CategoryModel(id: 6, name: 'الاجهزة المنزلية'),
+        CategoryModel(id: 1, name: 'الصحة والعناية'),
+        CategoryModel(id: 11, name: 'اكسسوارات السيارات'),
+        CategoryModel(id: 3, name: 'مستحضرات التجميل'),
+        CategoryModel(id: 12124, name: 'الرياضة واللياقة'),
+      ];
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isLtr = Provider.of<LocalizationController>(context, listen: false).isLtr;
+    final isLtr =
+        Provider.of<LocalizationController>(context, listen: false).isLtr;
 
     return Consumer<CategoryController>(
       builder: (context, categoryController, _) {
-        final categories = categoryController.categoryList;
-
-        if (categories.isEmpty) {
-          return const SizedBox.shrink();
-        }
+        final categories = categoryController.categoryList.isNotEmpty
+            ? categoryController.categoryList
+            : _fallbackCategories;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
@@ -38,7 +50,7 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isLtr ? 'Categories' : 'التصنيفات السريعة',
+                      isLtr ? 'Categories' : 'التصنيفات',
                       style: textBold.copyWith(
                         fontSize: 17,
                         color: isDark ? Colors.white : const Color(0xFF071B49),
@@ -47,11 +59,13 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                     InkWell(
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CategoryScreen()),
+                        MaterialPageRoute(
+                            builder: (_) => const CategoryScreen()),
                       ),
                       borderRadius: BorderRadius.circular(20),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
                         child: Row(
                           children: [
                             Text(
@@ -104,7 +118,7 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                             Container(
                               width: 68,
                               height: 68,
-                              padding: const EdgeInsets.all(7),
+                              padding: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: isDark
@@ -120,14 +134,13 @@ class AllineCategoriesGridWidget extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: CategoryAssetHelper.buildContainedCategoryArtwork(
+                              child: CategoryAssetHelper
+                                  .buildCircularCategoryAvatar(
                                 category: category,
-                                size: 54,
+                                size: 63,
                               ),
                             ),
-
                             const SizedBox(height: 7),
-
                             SizedBox(
                               height: 34,
                               child: Center(

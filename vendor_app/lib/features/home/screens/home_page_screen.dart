@@ -1,215 +1,283 @@
-import 'package:sixvalley_vendor_app/features/home/widgets/alline_vendor_dashboard_widget.dart';
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:sixvalley_vendor_app/features/notification/controllers/notification_controller.dart';
-import 'package:sixvalley_vendor_app/features/product/domain/models/product_model.dart';
 import 'package:sixvalley_vendor_app/features/bank_info/controllers/bank_info_controller.dart';
 import 'package:sixvalley_vendor_app/features/delivery_man/controllers/delivery_man_controller.dart';
+import 'package:sixvalley_vendor_app/features/delivery_man/widgets/top_delivery_man_view_widget.dart';
+import 'package:sixvalley_vendor_app/features/home/widgets/seller_dashboard_content.dart';
+import 'package:sixvalley_vendor_app/features/notification/controllers/notification_controller.dart';
+import 'package:sixvalley_vendor_app/features/notification/screens/notification_screen.dart';
 import 'package:sixvalley_vendor_app/features/order/controllers/order_controller.dart';
 import 'package:sixvalley_vendor_app/features/product/controllers/product_controller.dart';
 import 'package:sixvalley_vendor_app/features/profile/controllers/profile_controller.dart';
 import 'package:sixvalley_vendor_app/features/review/controllers/product_review_controller.dart';
 import 'package:sixvalley_vendor_app/features/shipping/controllers/shipping_controller.dart';
+import 'package:sixvalley_vendor_app/features/shop/controllers/shop_controller.dart';
 import 'package:sixvalley_vendor_app/features/splash/controllers/splash_controller.dart';
-import 'package:sixvalley_vendor_app/utill/dimensions.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:sixvalley_vendor_app/utill/color_resources.dart';
 import 'package:sixvalley_vendor_app/utill/images.dart';
-import 'package:sixvalley_vendor_app/utill/styles.dart';
-import 'package:sixvalley_vendor_app/features/home/widgets/chart_widget.dart';
-import 'package:sixvalley_vendor_app/features/home/widgets/completed_order_widget.dart';
-import 'package:sixvalley_vendor_app/features/home/widgets/on_going_order_widget.dart';
-import 'package:sixvalley_vendor_app/features/product/widgets/stock_out_product_widget.dart';
-import 'package:sixvalley_vendor_app/features/notification/screens/notification_screen.dart';
-import 'package:sixvalley_vendor_app/features/product/screens/most_popular_product_screen.dart';
-import 'package:sixvalley_vendor_app/features/product/screens/top_selling_product_screen.dart';
-import 'package:sixvalley_vendor_app/features/delivery_man/widgets/top_delivery_man_view_widget.dart';
-
 
 class HomePageScreen extends StatefulWidget {
-  final Function? callback;
-  const HomePageScreen({super.key, this.callback});
+  const HomePageScreen({super.key, required this.onNavigate});
+  final ValueChanged<int> onNavigate;
 
   @override
   State<HomePageScreen> createState() => _HomePageScreenState();
 }
 
 class _HomePageScreenState extends State<HomePageScreen> {
-  final ScrollController _scrollController = ScrollController();
-  Future<void> _loadData(BuildContext context, bool reload) async {
-    Provider.of<ProfileController>(context, listen: false).getSellerInfo();
-    Provider.of<BankInfoController>(context, listen: false).getBankInfo(context);
-    if(Provider.of<OrderController>(context, listen: false).orderModel == null || reload) {
-      Provider.of<OrderController>(context, listen: false).getOrderList(context,1,'all', null, reload: reload);
+  bool _initialLoading = true;
+  bool _essentialLoadFailed = false;
+
+  Future<void> _safe(Future<dynamic> request) async {
+    try {
+      await request;
+    } catch (_) {
+      // A failed panel does not hide other successfully loaded panels.
     }
-    Provider.of<BankInfoController>(context, listen: false).getAnalyticsFilterData(context, 'overall');
-    Provider.of<SplashController>(context,listen: false).getColorList();
-    Provider.of<ProductController>(context,listen: false).getStockOutProductList(1, 'en', reload: reload);
+  }
 
-    Provider.of<ProductController>(context,listen: false).getTopSellingProductList(1, context, 'en', reload: reload);
-    Provider.of<ShippingController>(context,listen: false).getCategoryWiseShippingMethod();
-    Provider.of<ShippingController>(context,listen: false).getSelectedShippingMethodType(context);
-    Provider.of<DeliveryManController>(context, listen: false).getTopDeliveryManList(context);
-    Provider.of<BankInfoController>(context, listen: false).getDashboardRevenueData(context,'yearEarn');
-
-    Provider.of<BankInfoController>(context, listen: false).setRevenueFilterType(0, false);
-    Provider.of<NotificationController>(context, listen: false).getNotificationList(1);
-    Provider.of<ProductController>(context, listen: false).getStockLimitStatus(context);
-    Provider.of<ProductController>(context,listen: false).setShowCookie(true, notify: false);
-
-    Provider.of<ProductController>(context,listen: false).getMostPopularProductList(1, context, 'en', reload: reload);
-
-    Provider.of<ProductReviewController>(context, listen: false).getReviewList(context);
+  Future<void> _loadData(bool reload) async {
+    final bank = context.read<BankInfoController>();
+    final orders = context.read<OrderController>();
+    final products = context.read<ProductController>();
+    final profile = context.read<ProfileController>();
+    final shop = context.read<ShopController>();
+    final essential = <Future<void>>[
+      if (reload || profile.userInfoModel == null)
+        _safe(profile.getSellerInfo()),
+      if (reload || shop.shopModel == null) _safe(shop.getShopInfo()),
+      _safe(bank.getDashboardSalesSummary()),
+      _safe(bank.getDashboardTodayAnalytics()),
+      _safe(bank.getDashboardActionAnalytics()),
+      _safe(orders.getDashboardRecentOrders()),
+      _safe(products.getStockLimitStatus(context)),
+      _safe(context.read<NotificationController>().getNotificationList(1)),
+    ];
+    final secondary = <Future<void>>[
+      _safe(products.getStockOutProductList(1, 'en', reload: reload)),
+      _safe(
+          products.getTopSellingProductList(1, context, 'en', reload: reload)),
+      _safe(bank.getDashboardWeekEarnings()),
+      _safe(bank.getBankInfo(context)),
+      _safe(context.read<SplashController>().getColorList()),
+      _safe(context.read<ShippingController>().getCategoryWiseShippingMethod()),
+      _safe(context
+          .read<ShippingController>()
+          .getSelectedShippingMethodType(context)),
+      _safe(
+          context.read<DeliveryManController>().getTopDeliveryManList(context)),
+      _safe(
+          products.getMostPopularProductList(1, context, 'en', reload: reload)),
+      _safe(context.read<ProductReviewController>().getReviewList(context)),
+    ];
+    await Future.wait(essential);
+    if (reload) {
+      await Future.wait(secondary);
+    } else {
+      unawaited(Future.wait(secondary).then((_) {}));
+    }
+    if (!mounted) return;
+    setState(() {
+      _initialLoading = false;
+      _essentialLoadFailed = shop.shopModel == null &&
+          profile.userInfoModel == null &&
+          orders.dashboardRecentOrders == null &&
+          bank.dashboardTodayAnalytics == null;
+    });
   }
 
   @override
   void initState() {
-    _loadData(context, false);
-    Provider.of<BankInfoController>(context, listen: false).setAnalyticsFilterName(context,'overall', false);
-    Provider.of<BankInfoController>(context, listen: false).setAnalyticsFilterType(0, false);
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadData(false);
+    });
   }
-
 
   @override
   Widget build(BuildContext context) {
-    double limitedStockCardHeight = MediaQuery.of(context).size.width / 1.4;
-
-
+    final notificationCount = context.select<NotificationController, int>(
+        (controller) => controller.notificationModel?.newNotificationItem ?? 0);
     return Scaffold(
-      // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      //   shape: RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.only(
-      //       topRight: Radius.circular( isLtr ? Dimensions.radiusDefault : 0),
-      //       topLeft: Radius.circular(isLtr ? 0 : Dimensions.radiusDefault),
-      //       bottomLeft: const Radius.circular(Dimensions.radiusDefault),
-      //       bottomRight: const Radius.circular(Dimensions.radiusDefault),
-      //     ),
-      //   ),
-      //   child: const CustomAssetImageWidget(Images.tutorialFlowIcon, width: 20, height: 20),
-      //   onPressed: () {
-      //   }
-      // ),
-
-      body: Consumer<OrderController>(builder: (context, order, child) {
-          return RefreshIndicator(
-            onRefresh: () async {
-              Provider.of<BankInfoController>(context, listen: false).setAnalyticsFilterName(context, 'overall',true);
-              Provider.of<BankInfoController>(context, listen: false).setAnalyticsFilterType(0,true);
-              await _loadData(context, true);
-            },
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  floating: true,
-                  elevation: 0,
-                  centerTitle: false,
-                  automaticallyImplyLeading: false,
-                  surfaceTintColor: Theme.of(context).highlightColor,
-                  backgroundColor: Theme.of(context).highlightColor,
-                  snap: true,
-                  title: Image.asset(Images.logoWithAppName, height: 35),
-                  actions: [
-                    Consumer<NotificationController>(
-                      builder: (context, notificationController, _) {
-                        return InkWell(onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (_)=> const NotificationScreen())),
-                          child: Stack(
-                            children: [
-                              Padding(padding: const EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault, Dimensions.paddingSizeSmall, Dimensions.paddingSizeDefault, 0),
-                                child: Icon(CupertinoIcons.bell, color: Theme.of(context).primaryColor),
-                              ),
-                              Positioned(top: 5,right: 18,child: Align(alignment: Alignment.topRight,
-                                child: CircleAvatar(backgroundColor: Theme.of(context).colorScheme.error,
-                                  radius: 8,child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(1.0),
-                                      child: Text('${notificationController.notificationModel?.newNotificationItem??0}',
-                                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Colors.white),),
-                                    ),
-                                  ),)
-                                )
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    )
-                  ],
-                ),
-
-                SliverToBoxAdapter(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      AllineVendorDashboardWidget(callback: widget.callback),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-                      OngoingOrderWidget(callback: widget.callback),
-
-                      CompletedOrderWidget(callback: widget.callback),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      Consumer<ProductController>(
-                        builder: (context, prodProvider, child) {
-                          List<Product> productList;
-                          productList = prodProvider.stockOutProductList ?? [];
-                          return productList.isNotEmpty ?
-                          Container(
-                            height: limitedStockCardHeight,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).cardColor,
-                              boxShadow: [
-                                BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha:.05),
-                                  spreadRadius: -3, blurRadius: 12, offset: Offset.fromDirection(0,6))],
-                            ),
-                            child: StockOutProductView( isHome: true)
-                          ) : const SizedBox();
-                        }
-                      ),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      const ChartWidget(),
-
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      const TopSellingProductScreen(isMain: true),
-                     // const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      const MostPopularProductScreen(isMain: true),
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      Provider.of<SplashController>(context, listen: false).configModel!.shippingMethod != 'inhouse_shipping' ?
-                      const TopDeliveryManViewWidget(isMain: true) : const SizedBox()
-
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
-        },
-
+      backgroundColor: ColorResources.getScaffoldBg(context),
+      body: RefreshIndicator(
+        onRefresh: () => _loadData(true),
+        child: CustomScrollView(slivers: [
+          SliverAppBar(
+            pinned: true,
+            elevation: 0,
+            backgroundColor: ColorResources.getCardBg(context),
+            surfaceTintColor: ColorResources.getCardBg(context),
+            automaticallyImplyLeading: false,
+            title: Image.asset(Images.logoWithAppName, height: 29),
+            actions: [
+              IconButton(
+                tooltip:
+                    'الإشعارات${notificationCount > 0 ? '، $notificationCount جديدة' : ''}',
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const NotificationScreen())),
+                icon: Badge(
+                    isLabelVisible: notificationCount > 0,
+                    label: Text(
+                        notificationCount > 99 ? '99+' : '$notificationCount'),
+                    child: const Icon(CupertinoIcons.bell,
+                        color: AllineColors.primary)),
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          SliverToBoxAdapter(
+              child: _initialLoading
+                  ? const _DashboardSkeleton()
+                  : _essentialLoadFailed
+                      ? _DashboardError(onRetry: () {
+                          setState(() => _initialLoading = true);
+                          _loadData(true);
+                        })
+                      : Column(children: [
+                          SellerDashboardContent(onNavigate: widget.onNavigate),
+                          if (context
+                                  .read<SplashController>()
+                                  .configModel
+                                  ?.shippingMethod !=
+                              'inhouse_shipping')
+                            const TopDeliveryManViewWidget(isMain: true),
+                          const SizedBox(height: 16),
+                        ])),
+        ]),
       ),
     );
   }
 }
 
-
-
-
-
-
-
-class TutorialFlowDialogWidget extends StatelessWidget {
-  const TutorialFlowDialogWidget({super.key});
+class _DashboardSkeleton extends StatelessWidget {
+  const _DashboardSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      width: 200,
-      color: Colors.red,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor =
+        isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
+    final highlightColor =
+        isDark ? const Color(0xFF334155) : const Color(0xFFF8FAFC);
+
+    Widget box(double height, double width, {double radius = 12}) => Container(
+          height: height,
+          width: width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(radius),
+          ),
+        );
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                box(52, 52, radius: 26),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      box(18, 160, radius: 8),
+                      const SizedBox(height: 6),
+                      box(13, 110, radius: 6),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // Store Status
+            box(58, double.infinity, radius: 16),
+            const SizedBox(height: 16),
+
+            // Hero Sales Card
+            box(185, double.infinity, radius: 22),
+            const SizedBox(height: 16),
+
+            // 2x2 KPI Grid
+            Row(
+              children: [
+                Expanded(child: box(78, double.infinity, radius: 16)),
+                const SizedBox(width: 12),
+                Expanded(child: box(78, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: box(78, double.infinity, radius: 16)),
+                const SizedBox(width: 12),
+                Expanded(child: box(78, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Quick Actions
+            box(18, 120, radius: 8),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(child: box(68, double.infinity, radius: 16)),
+                const SizedBox(width: 10),
+                Expanded(child: box(68, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: box(68, double.infinity, radius: 16)),
+                const SizedBox(width: 10),
+                Expanded(child: box(68, double.infinity, radius: 16)),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Recent Orders
+            box(18, 140, radius: 8),
+            const SizedBox(height: 12),
+            box(72, double.infinity, radius: 16),
+            const SizedBox(height: 10),
+            box(72, double.infinity, radius: 16),
+          ],
+        ),
+      ),
     );
   }
+}
+
+class _DashboardError extends StatelessWidget {
+  const _DashboardError({required this.onRetry});
+  final VoidCallback onRetry;
+  @override
+  Widget build(BuildContext context) => Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(children: [
+        const Icon(Icons.wifi_off_rounded,
+            color: AllineColors.primary, size: 40),
+        const SizedBox(height: 12),
+        Text('تعذر تحميل بيانات المتجر',
+            style: TextStyle(
+                color: ColorResources.getTextTitle(context),
+                fontSize: 17,
+                fontWeight: FontWeight.w700)),
+        const SizedBox(height: 10),
+        FilledButton(onPressed: onRetry, child: const Text('إعادة المحاولة')),
+      ]));
 }

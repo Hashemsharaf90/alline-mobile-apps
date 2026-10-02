@@ -236,6 +236,37 @@ class ShopController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Updates the store's accepting-orders state without changing navigation.
+  /// The API's `status` parameter represents temporary-close (1 = close,
+  /// 0 = open), while ShopModel.temporaryClose is normalized as its inverse.
+  Future<bool> updateStoreOpenStatus({required bool isOpen}) async {
+    if (_isLoading) return false;
+
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final ApiResponse apiResponse =
+          await shopServiceInterface.temporaryClose(isOpen ? 0 : 1);
+      if (apiResponse.response?.statusCode != 200) {
+        ApiChecker.checkApi(apiResponse);
+        return false;
+      }
+
+      final refreshResult = await getShopInfo();
+      return refreshResult.isSuccess &&
+          shopModel?.temporaryClose == isOpen &&
+          !(shopModel?.vacationStatus ?? false);
+    } catch (error) {
+      if (kDebugMode) {
+        print('Unable to confirm store availability update: $error');
+      }
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
 
   Future<void> shopVacation(BuildContext context, VacationModel vacationModel) async {
 

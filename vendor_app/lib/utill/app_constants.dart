@@ -3,7 +3,7 @@ import 'package:sixvalley_vendor_app/utill/images.dart';
 import '../features/shop/domain/models/guideline_model.dart';
 
 class AppConstants {
-  static const String appName = 'Alline Vendor';
+  static const String appName = 'Alline Seller';
 
   ///Flutter SDK 3.41.4
   static const String appVersion = '16.2';
@@ -16,6 +16,7 @@ class AppConstants {
   static const String loginUri = '/api/v3/seller/auth/login';
   static const String configUri = '/api/v1/config';
   static const String sellerUri = '/api/v3/seller/seller-info';
+  static const String dashboardSalesSummary = '/api/v3/seller/dashboard-sales-summary';
   static const String sellerAndBankUpdate = '/api/v3/seller/seller-update';
   static const String shopUri = '/api/v3/seller/shop-info';
 

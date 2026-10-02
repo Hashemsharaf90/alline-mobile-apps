@@ -70,6 +70,10 @@ class ProductController extends ChangeNotifier {
 
   ProductModel? _supermarketProductModel;
   ProductModel? get supermarketProductModel => _supermarketProductModel;
+  bool _supermarketLoading = false;
+  bool _supermarketHasError = false;
+  bool get supermarketLoading => _supermarketLoading;
+  bool get supermarketHasError => _supermarketHasError;
 
   List<dynamic> _nearbySupermarkets = [];
   List<dynamic> get nearbySupermarkets => _nearbySupermarkets;
@@ -85,6 +89,8 @@ class ProductController extends ChangeNotifier {
 
   bool _nearbySupermarketLoading = false;
   bool get nearbySupermarketLoading => _nearbySupermarketLoading;
+  bool _nearbySupermarketHasError = false;
+  bool get nearbySupermarketHasError => _nearbySupermarketHasError;
 
   final List<HomeCategoryProduct> _homeCategoryProductList = [];
   List<HomeCategoryProduct> get homeCategoryProductList =>
@@ -373,66 +379,78 @@ class ProductController extends ChangeNotifier {
 
   Future<void> getSupermarketProductList(int offset,
       {bool isUpdate = false, String? latitude, String? longitude}) async {
-    if (offset == 1) {
-      _supermarketProductModel = null;
-
-      if (isUpdate) {
-        notifyListeners();
-      }
-    }
-
-    final ApiResponseModel? apiResponse =
-        await productServiceInterface?.getSupermarketProductList(
-      offset.toString(),
-      latitude: latitude,
-      longitude: longitude,
-    );
-
-    if (apiResponse?.response?.statusCode == 200) {
-      final ProductModel parsedProductModel =
-          ProductModel.fromJson(apiResponse?.response?.data);
-
-      if (offset == 1 || _supermarketProductModel == null) {
-        _supermarketProductModel = parsedProductModel;
-      } else {
-        _supermarketProductModel?.totalSize = parsedProductModel.totalSize;
-        _supermarketProductModel?.offset = parsedProductModel.offset;
-        _supermarketProductModel?.products
-            ?.addAll(parsedProductModel.products ?? []);
-      }
-    } else if (apiResponse != null) {
-      ApiChecker.checkApi(apiResponse);
-    }
-
+    if (_supermarketLoading) return;
+    _supermarketLoading = true;
+    _supermarketHasError = false;
     notifyListeners();
+    try {
+      final ApiResponseModel? apiResponse =
+          await productServiceInterface?.getSupermarketProductList(
+        offset.toString(),
+        latitude: latitude,
+        longitude: longitude,
+      );
+
+      if (apiResponse?.response?.statusCode == 200) {
+        final ProductModel parsedProductModel =
+            ProductModel.fromJson(apiResponse?.response?.data);
+
+        if (offset == 1 || _supermarketProductModel == null) {
+          _supermarketProductModel = parsedProductModel;
+        } else {
+          _supermarketProductModel?.totalSize = parsedProductModel.totalSize;
+          _supermarketProductModel?.offset = parsedProductModel.offset;
+          _supermarketProductModel?.products
+              ?.addAll(parsedProductModel.products ?? []);
+        }
+      } else if (apiResponse != null) {
+        _supermarketHasError = true;
+        ApiChecker.checkApi(apiResponse);
+      } else {
+        _supermarketHasError = true;
+      }
+    } catch (_) {
+      _supermarketHasError = true;
+    } finally {
+      _supermarketLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> getNearbySupermarkets(
       {bool isUpdate = false, String? latitude, String? longitude}) async {
     _nearbySupermarketLoading = true;
+    _nearbySupermarketHasError = false;
     if (isUpdate) {
       notifyListeners();
     }
 
-    final ApiResponseModel? apiResponse =
-        await productServiceInterface?.getNearbySupermarkets(
-      latitude: latitude,
-      longitude: longitude,
-    );
+    try {
+      final ApiResponseModel? apiResponse =
+          await productServiceInterface?.getNearbySupermarkets(
+        latitude: latitude,
+        longitude: longitude,
+      );
 
-    if (apiResponse?.response?.statusCode == 200) {
-      final data = apiResponse?.response?.data;
-      if (data is Map && data['stores'] is List) {
-        _nearbySupermarkets = List<dynamic>.from(data['stores']);
+      if (apiResponse?.response?.statusCode == 200) {
+        final data = apiResponse?.response?.data;
+        if (data is Map && data['stores'] is List) {
+          _nearbySupermarkets = List<dynamic>.from(data['stores']);
+        } else {
+          _nearbySupermarkets = [];
+        }
       } else {
-        _nearbySupermarkets = [];
+        _nearbySupermarketHasError = true;
+        if (apiResponse != null) {
+          ApiChecker.checkApi(apiResponse);
+        }
       }
-    } else if (apiResponse != null) {
-      ApiChecker.checkApi(apiResponse);
+    } catch (_) {
+      _nearbySupermarketHasError = true;
+    } finally {
+      _nearbySupermarketLoading = false;
+      notifyListeners();
     }
-
-    _nearbySupermarketLoading = false;
-    notifyListeners();
   }
 
   void setSupermarketLocationSource({

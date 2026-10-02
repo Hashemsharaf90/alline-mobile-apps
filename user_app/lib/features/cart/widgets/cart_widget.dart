@@ -41,6 +41,10 @@ class CartWidget extends StatelessWidget {
     final belowMinimum = quantity < minimum;
     final hasProblem = outOfStock || belowMinimum;
     final discounted = (item.discount ?? 0) > 0;
+    final storeName = item.shoppingSource == 'global' ||
+            item.globalShoppingRequestId != null
+        ? item.globalStoreName
+        : item.shopInfo;
 
     return Consumer<CartController>(builder: (context, controller, _) {
       return Padding(
@@ -61,44 +65,68 @@ class CartWidget extends StatelessWidget {
             child: Column(children: [
               Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 SizedBox(
-                  width: 44,
-                  height: 44,
-                  child: Center(
-                    child: CustomCheckbox(
-                      key: ValueKey('cart-selection-${item.id}'),
-                      visualDensity: VisualDensity.compact,
-                      fillColor: WidgetStateProperty.resolveWith((states) =>
-                          states.contains(WidgetState.selected)
-                              ? primary
-                              : colors.surface),
-                      side: WidgetStateBorderSide.resolveWith((states) =>
-                          BorderSide(
-                              width: 1.7,
-                              color: (item.isChecked ?? false)
-                                  ? primary
-                                  : colors.textSecondary)),
-                      checkColor: Colors.white,
-                      value: item.isChecked ?? false,
-                      onChanged: (_) async {
-                        showDialog<void>(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (_) => const CustomLoaderWidget());
-                        await controller.addRemoveCartSelectedItem(
-                            [item.id!], !(item.isChecked ?? false));
-                        if (context.mounted) Navigator.of(context).pop();
-                      },
-                    ),
+                  width: 84,
+                  height: 84,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                          child: _ProductImage(
+                              item: item, outOfStock: outOfStock)),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: Material(
+                          color: colors.surface,
+                          shape: const CircleBorder(),
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Center(
+                              child: CustomCheckbox(
+                                key: ValueKey('cart-selection-${item.id}'),
+                                visualDensity: VisualDensity.compact,
+                                fillColor: WidgetStateProperty.resolveWith(
+                                    (states) =>
+                                        states.contains(WidgetState.selected)
+                                            ? primary
+                                            : colors.surface),
+                                side: WidgetStateBorderSide.resolveWith(
+                                    (states) => BorderSide(
+                                          width: 1.7,
+                                          color: (item.isChecked ?? false)
+                                              ? primary
+                                              : colors.textSecondary,
+                                        )),
+                                checkColor: Colors.white,
+                                value: item.isChecked ?? false,
+                                onChanged: (_) async {
+                                  showDialog<void>(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (_) => const CustomLoaderWidget(),
+                                  );
+                                  await controller.addRemoveCartSelectedItem(
+                                      [item.id!], !(item.isChecked ?? false));
+                                  if (context.mounted) {
+                                    Navigator.of(context).pop();
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                _ProductImage(item: item, outOfStock: outOfStock),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 Expanded(
                   child: InkWell(
                     onTap: () => RouterHelper.getProductDetailsRoute(
                         action: RouteAction.push,
                         productId: item.productId,
                         slug: item.slug),
+                    borderRadius: BorderRadius.circular(8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -121,49 +149,50 @@ class CartWidget extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF9A5A00))),
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 4),
                         ],
                         Text(item.name ?? 'منتج',
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.titleSmall),
+                        if (storeName?.trim().isNotEmpty == true) ...[
+                          const SizedBox(height: 3),
+                          Text('من ${storeName!.trim()}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: colors.textSecondary)),
+                        ],
                         if (item.variant?.isNotEmpty == true) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(item.variant!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: Theme.of(context).textTheme.bodySmall),
                         ],
-                        const SizedBox(height: 8),
-                        Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          runSpacing: 3,
-                          children: [
-                            Text(
-                              PriceConverter.convertPrice(context,
-                                  (item.price ?? 0) - (item.discount ?? 0)),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(color: primary),
-                            ),
-                            if (discounted)
-                              Text(
-                                PriceConverter.convertPrice(
-                                    context, item.price ?? 0),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: colors.textSecondary,
-                                      decoration: TextDecoration.lineThrough,
-                                    ),
-                              ),
-                          ],
-                        ),
                       ],
                     ),
+                  ),
+                ),
+                SizedBox(
+                  width: 44,
+                  height: 44,
+                  child: IconButton(
+                    tooltip: 'حذف المنتج',
+                    onPressed: item.decrement == true
+                        ? null
+                        : () => controller.removeFromCartAPI(item.id, index),
+                    padding: EdgeInsets.zero,
+                    icon: item.decrement == true
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(Icons.delete_outline_rounded,
+                            size: 21, color: colors.textSecondary),
                   ),
                 ),
               ]),
@@ -189,38 +218,54 @@ class CartWidget extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 10),
-              Divider(height: 1, color: colors.border),
-              const SizedBox(height: 8),
-              Row(children: [
-                TextButton.icon(
-                  onPressed: item.decrement == true
-                      ? null
-                      : () => controller.removeFromCartAPI(item.id, index),
-                  style: TextButton.styleFrom(
-                      foregroundColor: colors.error,
-                      minimumSize: const Size(44, 44),
-                      padding: const EdgeInsets.symmetric(horizontal: 4)),
-                  icon: item.decrement == true
-                      ? const SizedBox(
-                          width: 15,
-                          height: 15,
-                          child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.delete_outline_rounded, size: 19),
-                  label: const Text('حذف',
-                      style: TextStyle(
-                          fontFamily: 'AllineTajawal',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600)),
-                ),
-                const Spacer(),
-                _QuantitySelector(
-                    item: item,
-                    index: index,
-                    quantity: quantity,
-                    minimum: minimum,
-                    stock: stock),
-              ]),
+              const SizedBox(height: 12),
+              Row(
+                textDirection: TextDirection.ltr,
+                children: [
+                  _QuantitySelector(
+                      item: item,
+                      index: index,
+                      quantity: quantity,
+                      minimum: minimum,
+                      stock: stock),
+                  const Spacer(),
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          PriceConverter.convertPrice(context,
+                              (item.price ?? 0) - (item.discount ?? 0)),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                color: primary,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        if (discounted)
+                          Text(
+                            PriceConverter.convertPrice(
+                                context, item.price ?? 0),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: colors.textSecondary,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ]),
           ),
         ),

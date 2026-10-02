@@ -91,9 +91,7 @@ class ChoosePaymentWidget extends StatelessWidget {
               // Option 2: Available Wallet Balance
               if (hasWallet) ...[
                 _PaymentMethodRow(
-                  title: isLtr
-                      ? 'Alline wallet balance'
-                      : 'الرصيد المتاح في المحفظة',
+                  title: isLtr ? 'Alline wallet balance' : 'محفظة Alline',
                   subtitle: isLtr
                       ? 'Available balance: ${PriceConverter.convertPrice(context, balance)}'
                       : 'الرصيد المتاح: ${PriceConverter.convertPrice(context, balance)}',
@@ -351,18 +349,28 @@ class ChoosePaymentWidget extends StatelessWidget {
 
   String? _walletCode(String value) {
     final text = value.trim().toLowerCase().replaceAll('_', ' ');
-    if (text.contains('جيب') || text.contains('jeeb')) return 'jeeb';
+    if (text.contains('جيب') || text.contains('jeeb')) {
+      return 'jeeb';
+    }
     if (text.contains('جوالي') ||
         text.contains('jawali') ||
-        text.contains('jawwali')) return 'jawali';
+        text.contains('jawwali')) {
+      return 'jawali';
+    }
     if (text.contains('ون كاش') ||
         text.contains('ونكاش') ||
         text.contains('one cash') ||
-        text.contains('onecash')) return 'one_cash';
+        text.contains('onecash')) {
+      return 'one_cash';
+    }
     if (text.contains('فلوسك') ||
         text.contains('floosak') ||
-        text.contains('flousak')) return 'floosak';
-    if (text.contains('كاش') || text.contains('cash')) return 'cash';
+        text.contains('flousak')) {
+      return 'floosak';
+    }
+    if (text.contains('كاش') || text.contains('cash')) {
+      return 'cash';
+    }
     return null;
   }
 
