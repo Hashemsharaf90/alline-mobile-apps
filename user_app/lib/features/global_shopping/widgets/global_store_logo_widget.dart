@@ -96,7 +96,7 @@ class GlobalStoreLogoWidget extends StatelessWidget {
       return 'assets/images/global_aliexpress_logo.png';
     }
     if (_name.contains('alibaba')) {
-      return 'assets/svg/global_store_alibaba.svg';
+      return 'assets/images/global_alibaba_logo.png';
     }
     return null;
   }
