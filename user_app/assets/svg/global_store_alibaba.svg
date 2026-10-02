@@ -1,1 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 80"><text x="130" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#ff6a00">Alibaba.com</text><path d="M48 61c29 8 135 8 164 0" fill="none" stroke="#ff6a00" stroke-width="3" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 84" role="img" aria-label="Alibaba.com">
+  <title>Alibaba.com</title>
+  <g fill="none" stroke="#FF6A00" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 61c22-20 37-27 54-31-7 9-10 17-8 25 3 11 14 15 28 12 19-4 37-17 51-29" stroke-width="7"/>
+    <path d="M28 68c38 7 156 7 264 0" stroke-width="3"/>
+  </g>
+  <text x="160" y="49" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="700" fill="#FF6A00">Alibaba.com</text>
+</svg>

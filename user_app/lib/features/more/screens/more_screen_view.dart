@@ -28,7 +28,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// Pixel-perfect, high-end reference implementation for Alline e-commerce marketplace.
 /// Designed according to the Alline design system:
 /// - Brand Blue: #0757D5 / #032C75
-/// - Accent Orange: #FF7A00 / #FF6B00
+/// - Accent: restrained blue tones with semantic colors only
 /// - Arabic RTL First, responsive typography & soft diffused shadows.
 class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
@@ -41,7 +41,7 @@ class _MoreScreenState extends State<MoreScreen> {
   // Brand color tokens
   static const Color brandBlue = Color(0xFF0757D5);
   static const Color brandDarkBlue = Color(0xFF032C75);
-  static const Color brandOrange = Color(0xFFFF7A00);
+  static const Color brandAccent = Color(0xFF1675D1);
   static const Color brandGreen = Color(0xFF25D366);
 
   @override
@@ -198,7 +198,7 @@ class _MoreScreenState extends State<MoreScreen> {
                 title: 'رصيد محفظة Alline',
                 subtitle: 'دفع فوري بضغطة زر واحدة مع خصومات خاصة',
                 colors: colors,
-                color: brandOrange,
+                color: brandAccent,
               ),
               const Divider(height: 16),
               _buildPaymentOptionRow(
@@ -440,7 +440,7 @@ class _MoreScreenState extends State<MoreScreen> {
                                       physics: const AlwaysScrollableScrollPhysics(
                                         parent: BouncingScrollPhysics(),
                                       ),
-                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.stretch,
                                         children: [
@@ -516,15 +516,19 @@ class _MoreScreenState extends State<MoreScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Left (Logo)
-          Image.asset(
-            'assets/images/alline_logo_with_name.png',
-            height: 28,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Image.asset(
-              Images.logoWithNameImage,
-              height: 28,
-              fit: BoxFit.contain,
+          // Left: restrained account mark (no oversized Alline logo image).
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: brandBlue.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: brandBlue.withValues(alpha: 0.14)),
+            ),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              color: brandBlue,
+              size: 20,
             ),
           ),
 
@@ -571,7 +575,7 @@ class _MoreScreenState extends State<MoreScreen> {
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: brandOrange,
+                              color: brandAccent,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -945,22 +949,16 @@ class _MoreScreenState extends State<MoreScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Orange "شحن الرصيد" Pill Button
+              // Secondary "شحن الرصيد" action
               InkWell(
                 onTap: () => _onRechargeWallet(context, isGuest),
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                   decoration: BoxDecoration(
-                    color: brandOrange,
+                    color: Colors.white.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: brandOrange.withValues(alpha: 0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
@@ -1043,7 +1041,7 @@ class _MoreScreenState extends State<MoreScreen> {
           child: _buildQuickActionItem(
             icon: Icons.account_balance_wallet_outlined,
             title: 'المحافظ المحلية',
-            iconColor: brandOrange,
+            iconColor: brandAccent,
             colors: colors,
             onTap: () => _openLocalWalletsBottomSheet(context, isGuest),
           ),
@@ -1055,7 +1053,7 @@ class _MoreScreenState extends State<MoreScreen> {
           child: _buildQuickActionItem(
             icon: Icons.favorite_border_rounded,
             title: 'المفضلة',
-            iconColor: brandOrange,
+            iconColor: brandAccent,
             colors: colors,
             onTap: () {
               _navigateOrLogin(
@@ -1232,7 +1230,7 @@ class _MoreScreenState extends State<MoreScreen> {
                 ? Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                     decoration: BoxDecoration(
-                      color: brandOrange,
+                      color: brandAccent,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(

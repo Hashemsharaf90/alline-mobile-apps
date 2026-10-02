@@ -39,11 +39,17 @@ class GlobalStoreLogoWidget extends StatelessWidget {
       return SizedBox(
         width: width,
         height: height,
-        child: Image.asset(
-          localAsset,
-          fit: fit,
-          errorBuilder: (_, __, ___) => fallback,
-        ),
+        child: localAsset.endsWith('.svg')
+            ? SvgPicture.asset(
+                localAsset,
+                fit: fit,
+                placeholderBuilder: (_) => fallback,
+              )
+            : Image.asset(
+                localAsset,
+                fit: fit,
+                errorBuilder: (_, __, ___) => fallback,
+              ),
       );
     }
 
@@ -90,7 +96,7 @@ class GlobalStoreLogoWidget extends StatelessWidget {
       return 'assets/images/global_aliexpress_logo.png';
     }
     if (_name.contains('alibaba')) {
-      return 'assets/images/global_alibaba_logo.png';
+      return 'assets/svg/global_store_alibaba.svg';
     }
     return null;
   }
