@@ -50,7 +50,17 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
     super.dispose();
   }
 
+  String _arabicStoreTitle(String storeName) {
+    final lower = storeName.toLowerCase();
+    if (lower.contains('alibaba')) return 'علي بابا';
+    if (lower.contains('amazon')) return 'أمازون';
+    if (lower.contains('aliexpress')) return 'علي إكسبريس';
+    if (lower.contains('shein')) return 'شي إن';
+    return storeName;
+  }
+
   void _onAddToOrder() async {
+
     setState(() => _isSubmitting = true);
 
     final req = GlobalShoppingRequestModel(

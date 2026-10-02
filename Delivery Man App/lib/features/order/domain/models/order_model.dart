@@ -37,6 +37,7 @@ class OrderModel {
   String? bringChangeAmountCurrency;
   double? referAndEarnDiscount;
   double? totalTaxAmount;
+  String? driverJourneyStatus;
 
   OrderModel(
       {this.id,
@@ -72,7 +73,8 @@ class OrderModel {
         this.bringChangeAmount,
         this.bringChangeAmountCurrency,
         this.referAndEarnDiscount,
-        this.totalTaxAmount
+        this.totalTaxAmount,
+        this.driverJourneyStatus
       });
 
   OrderModel.fromJson(Map<String, dynamic> json) {
@@ -136,6 +138,7 @@ class OrderModel {
     bringChangeAmountCurrency = json['bring_change_amount_currency'];
     referAndEarnDiscount = double.tryParse(json['refer_and_earn_discount'].toString());
     totalTaxAmount = double.tryParse(json['total_tax_amount'].toString());
+    driverJourneyStatus = json['driver_journey_status'];
   }
 
   Map<String, dynamic> toJson() {
@@ -178,6 +181,7 @@ class OrderModel {
     bringChangeAmountCurrency = data['bring_change_amount_currency'];
     data['refer_and_earn_discount'] = referAndEarnDiscount;
     data['total_tax_amount'] = totalTaxAmount;
+    data['driver_journey_status'] = driverJourneyStatus;
     return data;
   }
 }

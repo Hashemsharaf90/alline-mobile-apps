@@ -173,7 +173,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       physics: const BouncingScrollPhysics(),
                       padding:  EdgeInsets.all(Dimensions.paddingSizeSmall), children: [
 
-                      orderModel!.orderStatus == 'processing' || orderModel!.orderStatus == 'out_for_delivery'?
+                      ['processing', 'out_for_delivery'].contains(orderModel!.orderStatus) || orderModel!.driverJourneyStatus != null?
                       OrderInfoWithDeliveryInfoWidget(orderModel: orderModel) : const SizedBox(),
 
                       orderModel!.sellerInfo != null ?
@@ -342,7 +342,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 return (orderDetailsController.orderDetails != null && orderModel?.orderStatus != null) ?
 
                 SizedBox(
-                  height: (orderModel?.orderStatus == 'processing' || orderModel?.orderStatus == 'out_for_delivery') && !orderModel!.isPause! ? showCollectAmount() ? 94 : 74 : 0,
+                  height: (['processing', 'out_for_delivery'].contains(orderModel!.orderStatus) || orderModel!.driverJourneyStatus != null) && !orderModel!.isPause! ? showCollectAmount() ? 94 : 74 : 0,
                   child : isEndOfPage || (imageUploadOff && isNotProcessing && !hasNoVerificationAndNoUpload) ?
                   Padding(padding: EdgeInsets.all(Dimensions.paddingSizeDefault),
                     child: orderDetailsController.uploading ? const Center(child: CircularProgressIndicator()) :

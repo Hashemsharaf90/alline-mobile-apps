@@ -60,7 +60,7 @@ class OrderInfoWithDeliveryInfoWidget extends StatelessWidget {
                       Theme.of(context).hintColor : ColorHelper.darken(Theme.of(context).primaryColor, 0.1)))))),
 
               ReceiverWidget(orderModel: orderModel),
-              (orderModel?.orderStatus == 'processing' || orderModel?.orderStatus == 'out_for_delivery') ?
+              (['processing', 'out_for_delivery'].contains(orderModel!.orderStatus) || orderModel!.driverJourneyStatus != null) ?
               Row(children:  [
                 Expanded(child: OrderActionItemWidget(icon: Images.cancelIcon, title: 'cancel'.tr,
                   onTap: () => showAnimatedDialogWidget(context,  OrderStatusUpdateDialogWidget(icon: Images.cancelIcon,

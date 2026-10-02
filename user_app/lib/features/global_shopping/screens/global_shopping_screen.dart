@@ -28,13 +28,13 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
   String _selectedFilter = 'all';
   String _searchQuery = '';
 
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        final ctrl = Provider.of<GlobalShoppingController>(context, listen: false);
+        final ctrl =
+            Provider.of<GlobalShoppingController>(context, listen: false);
         ctrl.fetchSupportedStores();
         ctrl.getMyRequests();
       }
@@ -104,8 +104,6 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     const primaryBlue = Color(0xFF015FC9);
@@ -153,7 +151,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const MyGlobalOrdersScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const MyGlobalOrdersScreen()),
                 );
               },
               borderRadius: BorderRadius.circular(12),
@@ -166,7 +165,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.inventory_2_outlined, color: primaryBlue, size: 16),
+                    Icon(Icons.inventory_2_outlined,
+                        color: primaryBlue, size: 16),
                     SizedBox(width: 4),
                     Text(
                       'طلباتي',
@@ -187,7 +187,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
       body: Consumer<GlobalShoppingController>(
         builder: (context, globalCtrl, _) {
           // 1. Loading Skeleton State
-          if (globalCtrl.isStoresLoading && globalCtrl.supportedStores.isEmpty) {
+          if (globalCtrl.isStoresLoading &&
+              globalCtrl.supportedStores.isEmpty) {
             return const SingleChildScrollView(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: GlobalShoppingSkeletonWidget(),
@@ -230,7 +231,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                   // B. Search & Add Link Action Row
                   GlobalSearchAndLinkBar(
                     searchController: _searchController,
-                    onSearchChanged: (val) => setState(() => _searchQuery = val),
+                    onSearchChanged: (val) =>
+                        setState(() => _searchQuery = val),
                     onAddLinkTap: _showAddLinkBottomSheet,
                     onClearSearch: () {
                       _searchController.clear();
@@ -255,7 +257,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                     GlobalCuratedProductsSection(
                       products: products,
                       selectedFilter: _selectedFilter,
-                      onFilterChanged: (filter) => setState(() => _selectedFilter = filter),
+                      onFilterChanged: (filter) =>
+                          setState(() => _selectedFilter = filter),
                       onProductTap: _openProductDetails,
                     )
                   else
@@ -265,7 +268,6 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                     ),
 
                   const SizedBox(height: 32),
-
                 ],
               ),
             ),

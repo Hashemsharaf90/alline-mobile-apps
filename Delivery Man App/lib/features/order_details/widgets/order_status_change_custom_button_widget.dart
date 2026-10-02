@@ -26,8 +26,43 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isLtr = Get.find<LocalizationController>().isLtr;
     const double rotateAnglePi = 3.1416;
-    return (orderModel!.orderStatus == 'processing' || orderModel!.orderStatus == 'out_for_delivery') && !orderModel!.isPause! ?
-    Container(
+
+    if (orderModel == null || orderModel!.isPause == true) {
+      return const SizedBox();
+    }
+
+    String currentStatus = orderModel!.driverJourneyStatus ?? 
+        (orderModel!.orderStatus == 'processing' ? 'assigned' : orderModel!.orderStatus) ?? '';
+
+    String label = '';
+    String nextStatus = '';
+
+    if (currentStatus == 'assigned') {
+      label = 'swipe_to_accept_order'.tr;
+      nextStatus = 'accepted';
+    } else if (currentStatus == 'accepted') {
+      label = 'swipe_to_head_to_store'.tr;
+      nextStatus = 'heading_to_store';
+    } else if (currentStatus == 'heading_to_store') {
+      label = 'swipe_to_arrived_at_store'.tr;
+      nextStatus = 'arrived_at_store';
+    } else if (currentStatus == 'arrived_at_store') {
+      label = 'swipe_to_picked_up'.tr;
+      nextStatus = 'picked_up';
+    } else if (currentStatus == 'picked_up' || currentStatus == 'out_for_delivery') {
+      label = 'swipe_to_heading_to_customer'.tr;
+      nextStatus = 'heading_to_customer';
+    } else if (currentStatus == 'heading_to_customer') {
+      label = 'swipe_to_arrived_at_customer'.tr;
+      nextStatus = 'arrived_at_customer';
+    } else if (currentStatus == 'arrived_at_customer') {
+      label = 'swip_to_deliver_order'.tr;
+      nextStatus = 'delivered';
+    }
+
+    if (nextStatus.isEmpty) return const SizedBox();
+
+    return Container(
       color: Theme.of(context).cardColor,
       padding:  EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault,vertical: Dimensions.paddingSizeSmall),
       child: Column(
@@ -69,13 +104,13 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
             child: SliderButtonWidget(
                 isRtl: !isLtr,
                 action:  ()  {
-                  if(orderModel!.orderStatus == 'processing') {
-                    _handleProcessingStatus(context);
-                  } else if(orderModel!.orderStatus == 'out_for_delivery') {
-                    _handleOutForDeliveryStatus(context);
+                  if(nextStatus == 'delivered') {
+                    _handleDeliveredStatus(context);
+                  } else {
+                    _handleStatusChange(context, nextStatus);
                   }
                 },
-                label: Text(orderModel!.orderStatus == 'processing'? 'swipe_to_out_for_delivery_order'.tr : 'swip_to_deliver_order'.tr,
+                label: Text(label,
                   style: rubikMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall),),
                 dismissThresholds: 0.5,
                 icon: RotationTransition(
@@ -92,10 +127,10 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
           )
         ],
       )
-    ) : const SizedBox();
+    );
   }
 
-  void _handleProcessingStatus(BuildContext context) {
+  void _handleStatusChange(BuildContext context, String nextStatus) {
     showDialog(
       context: context,
       builder: (ctx) => const CustomLoaderWidget(),
@@ -103,7 +138,7 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
 
     Get.find<OrderDetailsController>().updateOrderStatus(
       orderId: orderModel!.id,
-      status: 'out_for_delivery',
+      status: nextStatus,
       context: context,
     );
 
@@ -112,7 +147,7 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
   }
 
 
-  void _handleOutForDeliveryStatus(BuildContext context) {
+  void _handleDeliveredStatus(BuildContext context) {
     final splashController = Get.find<SplashController>();
     final orderDetailsController = Get.find<OrderDetailsController>();
 
