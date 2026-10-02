@@ -58,7 +58,7 @@ class GlobalStoresGrid extends StatelessWidget {
             crossAxisCount: 2,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            mainAxisExtent: 122,
+            mainAxisExtent: 148,
           ),
           itemCount: 4,
           itemBuilder: (context, index) {
@@ -149,7 +149,7 @@ class _StoreCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -167,11 +167,12 @@ class _StoreCard extends StatelessWidget {
           children: [
             // Store Logo
             SizedBox(
-              height: 26,
+              height: 38,
               child: Center(
                 child: GlobalStoreLogoWidget(
                   store: store,
-                  height: 24,
+                  width: 132,
+                  height: 38,
                   fit: BoxFit.contain,
                 ),
               ),
