@@ -217,10 +217,10 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
                                 },
                               ),
                             ),
-                            // Favorite Button
+                            // Favorite Button (Top-Right matching Stitch c250a066)
                             Positioned(
-                              top: 0,
-                              left: 0,
+                              top: 8,
+                              right: 8,
                               child: InkWell(
                                 onTap: () => setState(() => _isFavorite = !_isFavorite),
                                 borderRadius: BorderRadius.circular(20),
@@ -316,7 +316,7 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
                           widget.product.name,
                           style: const TextStyle(
                             fontFamily: 'AllineTajawal',
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: navyColor,
                             height: 1.3,
@@ -339,7 +339,7 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
                         const Divider(color: Color(0xFFF0F4FA), height: 1),
                         const SizedBox(height: 10),
 
-                        // Store Source Row
+                        // Store Source Row (Matching Stitch: Logo | StoreName      عرض متجر >)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -347,14 +347,20 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
                               children: [
                                 GlobalStoreLogoWidget(
                                   storeName: widget.product.store,
-                                  height: 20,
+                                  height: 22,
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: 10),
+                                Container(
+                                  width: 1,
+                                  height: 16,
+                                  color: borderColor,
+                                ),
+                                const SizedBox(width: 10),
                                 Text(
-                                  '${widget.product.store} (${isAlibaba ? 'علي بابا الجملة' : widget.product.store})',
+                                  _arabicStoreTitle(widget.product.store),
                                   style: const TextStyle(
                                     fontFamily: 'AllineTajawal',
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w700,
                                     color: navyColor,
                                   ),
@@ -375,15 +381,15 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
                               child: Row(
                                 children: [
                                   Text(
-                                    'عرض متجر ${widget.product.store}',
+                                    'عرض متجر ${_arabicStoreTitle(widget.product.store)}',
                                     style: const TextStyle(
                                       fontFamily: 'AllineTajawal',
-                                      fontSize: 11.5,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w700,
                                       color: primaryBlue,
                                     ),
                                   ),
-                                  const SizedBox(width: 3),
+                                  const SizedBox(width: 4),
                                   const Icon(Icons.arrow_forward_ios_rounded, size: 11, color: primaryBlue),
                                 ],
                               ),
@@ -394,39 +400,34 @@ class _GlobalProductDetailsModalState extends State<GlobalProductDetailsModal> {
                         const Divider(color: Color(0xFFF0F4FA), height: 1),
                         const SizedBox(height: 10),
 
-                        // Price Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        // Price Row (Bold Navy USD price matching Stitch c250a066)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Text(
+                              isAlibaba
+                                  ? 'يتطلب طلب عرض سعر (RFQ)'
+                                  : 'USD ${widget.product.priceUsd.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontFamily: 'AllineTajawal',
+                                fontSize: 22,
+                                fontWeight: FontWeight.w900,
+                                color: isAlibaba ? orangeAccent : navyColor,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            const Row(
                               children: [
+                                Icon(Icons.access_time_rounded, size: 12, color: secondaryTextColor),
+                                SizedBox(width: 4),
                                 Text(
-                                  isAlibaba
-                                      ? 'يتطلب طلب عرض سعر (RFQ)'
-                                      : 'USD ${widget.product.priceUsd.toStringAsFixed(2)}',
+                                  'آخر تحديث للسعر: اليوم 10:45 ص',
                                   style: TextStyle(
                                     fontFamily: 'AllineTajawal',
-                                    fontSize: 19,
-                                    fontWeight: FontWeight.w900,
-                                    color: isAlibaba ? orangeAccent : primaryBlue,
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: secondaryTextColor,
                                   ),
-                                ),
-                                const SizedBox(height: 2),
-                                const Row(
-                                  children: [
-                                    Icon(Icons.access_time_rounded, size: 12, color: secondaryTextColor),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'آخر تحديث للسعر: اليوم 10:45 ص',
-                                      style: TextStyle(
-                                        fontFamily: 'AllineTajawal',
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w500,
-                                        color: secondaryTextColor,
-                                      ),
-                                    ),
-                                  ],
                                 ),
                               ],
                             ),

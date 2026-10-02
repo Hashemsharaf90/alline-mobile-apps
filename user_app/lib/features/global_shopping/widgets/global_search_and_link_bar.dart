@@ -26,10 +26,10 @@ class GlobalSearchAndLinkBar extends StatelessWidget {
       children: [
         Row(
           children: [
-            // Search Input Field (takes available space)
+            // Search Input Field (takes available space, height 54px)
             Expanded(
               child: Container(
-                height: 48,
+                height: 54,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
@@ -60,32 +60,31 @@ class GlobalSearchAndLinkBar extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                       color: Color(0xFF8EA5C8),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                     border: InputBorder.none,
                     isDense: true,
-                    prefixIcon: const Icon(
-                      Icons.search_rounded,
-                      color: Color(0xFF8EA5C8),
-                      size: 20,
-                    ),
                     suffixIcon: searchController.text.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.close_rounded, size: 18, color: Color(0xFF8EA5C8)),
+                            icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF8EA5C8)),
                             onPressed: onClearSearch,
                           )
-                        : null,
+                        : const Icon(
+                            Icons.search_rounded,
+                            color: Color(0xFF8EA5C8),
+                            size: 22,
+                          ),
                   ),
                 ),
               ),
             ),
             const SizedBox(width: 8),
 
-            // Add Link Primary Button
+            // Add Link Primary Button (height 54px matching design token)
             InkWell(
               onTap: onAddLinkTap,
               borderRadius: BorderRadius.circular(16),
               child: Container(
-                height: 48,
+                height: 54,
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 decoration: BoxDecoration(
                   color: primaryBlue,
@@ -101,12 +100,6 @@ class GlobalSearchAndLinkBar extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.add_link_rounded,
-                      color: Colors.white,
-                      size: 19,
-                    ),
-                    SizedBox(width: 6),
                     Text(
                       'إضافة رابط منتج',
                       style: TextStyle(
@@ -115,6 +108,12 @@ class GlobalSearchAndLinkBar extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
+                    ),
+                    SizedBox(width: 6),
+                    Icon(
+                      Icons.add_link_rounded,
+                      color: Colors.white,
+                      size: 20,
                     ),
                   ],
                 ),

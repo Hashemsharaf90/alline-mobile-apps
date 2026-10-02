@@ -57,6 +57,52 @@ class GlobalShowcaseProduct {
     if (originalPriceUsd == null || originalPriceUsd! <= priceUsd) return null;
     return (((originalPriceUsd! - priceUsd) / originalPriceUsd!) * 100).round();
   }
+
+  GlobalShowcaseProduct copyWith({
+    String? id,
+    String? name,
+    String? nameEn,
+    String? store,
+    String? category,
+    String? categoryEn,
+    double? priceUsd,
+    double? originalPriceUsd,
+    String? imageUrl,
+    List<String>? galleryImages,
+    double? rating,
+    int? reviewsCount,
+    String? productUrl,
+    String? description,
+    String? descriptionEn,
+    List<String>? features,
+    String? badge,
+    Color? badgeColor,
+    bool? isRfq,
+    int? moq,
+  }) {
+    return GlobalShowcaseProduct(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      nameEn: nameEn ?? this.nameEn,
+      store: store ?? this.store,
+      category: category ?? this.category,
+      categoryEn: categoryEn ?? this.categoryEn,
+      priceUsd: priceUsd ?? this.priceUsd,
+      originalPriceUsd: originalPriceUsd ?? this.originalPriceUsd,
+      imageUrl: imageUrl ?? this.imageUrl,
+      galleryImages: galleryImages ?? this.galleryImages,
+      rating: rating ?? this.rating,
+      reviewsCount: reviewsCount ?? this.reviewsCount,
+      productUrl: productUrl ?? this.productUrl,
+      description: description ?? this.description,
+      descriptionEn: descriptionEn ?? this.descriptionEn,
+      features: features ?? this.features,
+      badge: badge ?? this.badge,
+      badgeColor: badgeColor ?? this.badgeColor,
+      isRfq: isRfq ?? this.isRfq,
+      moq: moq ?? this.moq,
+    );
+  }
 }
 
 class GlobalShowcaseRepository {
@@ -74,6 +120,9 @@ class GlobalShowcaseRepository {
       imageUrl: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=80',
       galleryImages: [
         'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=600&auto=format&fit=crop&q=80',
       ],
       rating: 4.8,
       reviewsCount: 3200,
@@ -103,6 +152,9 @@ class GlobalShowcaseRepository {
       imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
       galleryImages: [
         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&auto=format&fit=crop&q=80',
       ],
       rating: 4.7,
       reviewsCount: 1850,
@@ -131,6 +183,9 @@ class GlobalShowcaseRepository {
       imageUrl: 'https://images.unsplash.com/photo-1539533018447-63fcce667823?w=600&auto=format&fit=crop&q=80',
       galleryImages: [
         'https://images.unsplash.com/photo-1539533018447-63fcce667823?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&auto=format&fit=crop&q=80',
       ],
       rating: 4.9,
       reviewsCount: 5200,
@@ -159,6 +214,9 @@ class GlobalShowcaseRepository {
       imageUrl: 'https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=600&auto=format&fit=crop&q=80',
       galleryImages: [
         'https://images.unsplash.com/photo-1581783898377-1c85bf937427?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=600&auto=format&fit=crop&q=80',
       ],
       rating: 4.9,
       reviewsCount: 3100,

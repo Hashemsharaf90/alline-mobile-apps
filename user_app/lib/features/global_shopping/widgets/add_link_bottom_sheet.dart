@@ -27,9 +27,9 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
   }
 
   void _validateAndProcessUrl(String rawUrl) async {
-    final url = rawUrl.trim().toLowerCase();
+    var trimmed = rawUrl.trim();
 
-    if (url.isEmpty) {
+    if (trimmed.isEmpty) {
       setState(() {
         _statusType = 'error';
         _statusMessage = 'الرجاء إدخال أو لصق رابط المنتج أولاً.';
@@ -37,15 +37,27 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
       return;
     }
 
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      setState(() {
-        _statusType = 'error';
-        _statusMessage = 'رابط غير صالح: تأكد من نسخ رابط يبدأ بـ https://';
-      });
-      return;
+    // Auto-prepend https:// if user pasted domain without scheme
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      if (trimmed.contains('.') && !trimmed.contains(' ')) {
+        trimmed = 'https://$trimmed';
+      } else {
+        setState(() {
+          _statusType = 'error';
+          _statusMessage = 'رابط غير صالح: تأكد من نسخ رابط ويب صحيح يبدأ بـ https://';
+        });
+        return;
+      }
     }
 
-    if (url.contains('amazon.')) {
+    final lower = trimmed.toLowerCase();
+
+    final isAmazon = lower.contains('amazon.') || lower.contains('amzn.to') || lower.contains('a.co/');
+    final isAliExpress = lower.contains('aliexpress.') || lower.contains('ali.ski') || lower.contains('a.aliexpress.com');
+    final isShein = lower.contains('shein.') || lower.contains('shein.top');
+    final isAlibaba = lower.contains('alibaba.') || lower.contains('ali.pub') || lower.contains('1688.com');
+
+    if (isAmazon) {
       setState(() {
         _statusType = 'success';
         _statusMessage = '✓ تم التعرف على المتجر: Amazon. جاري قراءة بيانات المنتج...';
@@ -53,8 +65,8 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
       });
       await Future.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      _resolveProduct('huawei_band');
-    } else if (url.contains('aliexpress.')) {
+      _resolveProduct('huawei_band', trimmed);
+    } else if (isAliExpress) {
       setState(() {
         _statusType = 'success';
         _statusMessage = '✓ تم التعرف على المتجر: AliExpress. جاري قراءة بيانات المنتج...';
@@ -62,8 +74,8 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
       });
       await Future.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      _resolveProduct('wireless_headphones');
-    } else if (url.contains('shein.')) {
+      _resolveProduct('wireless_headphones', trimmed);
+    } else if (isShein) {
       setState(() {
         _statusType = 'success';
         _statusMessage = '✓ تم التعرف على المتجر: SHEIN. جاري قراءة بيانات المنتج...';
@@ -71,8 +83,8 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
       });
       await Future.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      _resolveProduct('shein_coat');
-    } else if (url.contains('alibaba.')) {
+      _resolveProduct('shein_coat', trimmed);
+    } else if (isAlibaba) {
       setState(() {
         _statusType = 'warning';
         _statusMessage = '✓ تم التعرف على المتجر: Alibaba (طلبات الجملة والمصانع). جاري تجهيز نموذج طلب السعر...';
@@ -80,7 +92,7 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
       });
       await Future.delayed(const Duration(milliseconds: 600));
       if (!mounted) return;
-      _resolveProduct('alibaba_tools');
+      _resolveProduct('alibaba_tools', trimmed);
     } else {
       setState(() {
         _statusType = 'warning';
@@ -90,13 +102,14 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
     }
   }
 
-  void _resolveProduct(String productId) {
+  void _resolveProduct(String productId, String originalPastedUrl) {
     Navigator.of(context).pop();
     final matched = GlobalShowcaseRepository.curatedProducts.firstWhere(
       (p) => p.id == productId,
       orElse: () => GlobalShowcaseRepository.curatedProducts.first,
     );
-    widget.onProductResolved?.call(matched);
+    final resolvedWithUrl = matched.copyWith(productUrl: originalPastedUrl);
+    widget.onProductResolved?.call(resolvedWithUrl);
   }
 
   void _pasteFromClipboard() async {
@@ -362,6 +375,12 @@ class _AddLinkBottomSheetState extends State<AddLinkBottomSheet> {
                       bgColor: const Color(0xFFEFF6FF),
                       textColor: primaryBlue,
                       url: 'https://www.amazon.com/dp/B0BYZ28W4X',
+                    ),
+                    _buildQuickChip(
+                      label: 'رابط مختصر (amzn.to)',
+                      bgColor: const Color(0xFFEFF6FF),
+                      textColor: primaryBlue,
+                      url: 'https://amzn.to/3B4XY1Z',
                     ),
                     _buildQuickChip(
                       label: 'متجر غير مدعوم (eBay)',
