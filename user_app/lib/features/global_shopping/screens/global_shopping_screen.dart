@@ -6,11 +6,9 @@ import 'package:flutter_sixvalley_ecommerce/features/global_shopping/domain/mode
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/global_store_webview_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/screens/my_global_orders_screen.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/add_link_bottom_sheet.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_curated_products_section.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_hero_banner_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_how_it_works_accordion.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_product_details_modal.dart';
-import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_search_and_link_bar.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_shopping_states.dart';
 import 'package:flutter_sixvalley_ecommerce/features/global_shopping/widgets/global_stores_grid.dart';
 import 'package:provider/provider.dart';
@@ -23,10 +21,7 @@ class GlobalShoppingScreen extends StatefulWidget {
 }
 
 class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
-  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  String _selectedFilter = 'all';
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -43,25 +38,8 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
-  }
-
-  List<GlobalShowcaseProduct> get _filteredProducts {
-    return GlobalShowcaseRepository.curatedProducts.where((product) {
-      final matchesFilter = _selectedFilter == 'all' ||
-          _selectedFilter == 'الكل' ||
-          product.store.toLowerCase() == _selectedFilter.toLowerCase();
-      if (!matchesFilter) return false;
-
-      if (_searchQuery.trim().isEmpty) return true;
-      final q = _searchQuery.trim().toLowerCase();
-      return product.name.toLowerCase().contains(q) ||
-          product.nameEn.toLowerCase().contains(q) ||
-          product.category.toLowerCase().contains(q) ||
-          product.store.toLowerCase().contains(q);
-    }).toList();
   }
 
   void _showAddLinkBottomSheet() {
@@ -93,14 +71,6 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
           initialUrl: store.url,
         ),
       ),
-    );
-  }
-
-  void _scrollToStores() {
-    _scrollController.animateTo(
-      220,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
     );
   }
 
@@ -207,8 +177,6 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
             );
           }
 
-          final products = _filteredProducts;
-
           // 3. Normal Active State (Full Long Scroll)
           return RefreshIndicator(
             color: primaryBlue,
@@ -228,16 +196,32 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                   ),
                   const SizedBox(height: 14),
 
-                  // B. Search & Add Link Action Row
-                  GlobalSearchAndLinkBar(
-                    searchController: _searchController,
-                    onSearchChanged: (val) =>
-                        setState(() => _searchQuery = val),
-                    onAddLinkTap: _showAddLinkBottomSheet,
-                    onClearSearch: () {
-                      _searchController.clear();
-                      setState(() => _searchQuery = '');
-                    },
+                  // B. Single primary action: products are requested by link,
+                  // not presented as unverified catalog data.
+                  SizedBox(
+                    height: 54,
+                    child: ElevatedButton.icon(
+                      onPressed: _showAddLinkBottomSheet,
+                      icon: const Icon(Icons.add_link_rounded,
+                          color: Colors.white, size: 21),
+                      label: const Text(
+                        'أضف رابط المنتج الذي تريده',
+                        style: TextStyle(
+                          fontFamily: 'AllineTajawal',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        elevation: 2,
+                        shadowColor: primaryBlue.withValues(alpha: 0.28),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
 
@@ -251,21 +235,6 @@ class _GlobalShoppingScreenState extends State<GlobalShoppingScreen> {
                   // D. How It Works Accordion (Expandable 3 Progressive Steps)
                   const GlobalHowItWorksAccordion(),
                   const SizedBox(height: 18),
-
-                  // E. Curated Global Products Section or Empty Search Result
-                  if (products.isNotEmpty)
-                    GlobalCuratedProductsSection(
-                      products: products,
-                      selectedFilter: _selectedFilter,
-                      onFilterChanged: (filter) =>
-                          setState(() => _selectedFilter = filter),
-                      onProductTap: _openProductDetails,
-                    )
-                  else
-                    GlobalShoppingEmptyWidget(
-                      onAddLinkTap: _showAddLinkBottomSheet,
-                      onBrowseStoresTap: _scrollToStores,
-                    ),
 
                   const SizedBox(height: 32),
                 ],

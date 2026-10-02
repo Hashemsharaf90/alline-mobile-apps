@@ -89,34 +89,6 @@ class _GlobalShoppingSkeletonWidgetState extends State<GlobalShoppingSkeletonWid
           ),
           const SizedBox(height: 20),
 
-          // Filter Chips Skeleton
-          Row(
-            children: [
-              _shimmerBox(width: 50, height: 32, borderRadius: 20),
-              const SizedBox(width: 6),
-              _shimmerBox(width: 70, height: 32, borderRadius: 20),
-              const SizedBox(width: 6),
-              _shimmerBox(width: 65, height: 32, borderRadius: 20),
-              const SizedBox(width: 6),
-              _shimmerBox(width: 75, height: 32, borderRadius: 20),
-            ],
-          ),
-          const SizedBox(height: 14),
-
-          // Products 2 Cards Skeleton
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            padding: EdgeInsets.zero,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.68,
-            ),
-            itemCount: 2,
-            itemBuilder: (_, __) => _shimmerBox(width: double.infinity, height: double.infinity, borderRadius: 16),
-          ),
           const SizedBox(height: 24),
         ],
       ),
