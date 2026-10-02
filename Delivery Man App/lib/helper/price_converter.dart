@@ -39,11 +39,6 @@ class PriceConverter {
         '$formatted'
         '${inRight ? Get.find<SplashController>().myCurrency!.symbol : ''}';
 
-      return '${inRight ? '' : Get.find<SplashController>().myCurrency!.symbol}'
-          '${(singleCurrency? price : price! * Get.find<SplashController>().myCurrency!.exchangeRate!
-          * (1/Get.find<SplashController>().usdCurrency!.exchangeRate!))!.toStringAsFixed(Get.find<SplashController>().configModel!.decimalPointSettings??1).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}'
-          '${inRight ? Get.find<SplashController>().myCurrency!.symbol : ''}';
-
     }catch(e) {
       return price.toString();
       // print(e.toString());

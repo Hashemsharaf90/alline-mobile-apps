@@ -1,43 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
+import 'package:sixvalley_delivery_boy/features/notification/screens/notification_screen.dart';
 import 'package:sixvalley_delivery_boy/utill/images.dart';
-import 'package:sixvalley_delivery_boy/utill/styles.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/online_offline_button_widget.dart';
 
-
-class CustomAppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+class CustomAppBarWidget extends StatelessWidget
+    implements PreferredSizeWidget {
   final String? title;
-  final bool isBack;
+  final bool isBack, isSwitch, isCenterTitle;
   final Function()? onTap;
-  final bool isSwitch;
-  final bool isCenterTitle;
-
-  const CustomAppBarWidget({super.key, this.title, this.isBack = false, this.onTap, this.isSwitch  = false, this.isCenterTitle = true});
-
+  const CustomAppBarWidget(
+      {super.key,
+      this.title,
+      this.isBack = false,
+      this.onTap,
+      this.isSwitch = false,
+      this.isCenterTitle = true});
   @override
-  Widget build(BuildContext context) {
-    return  PreferredSize(
-      preferredSize: preferredSize,
-      child: AppBar(
-        centerTitle: isCenterTitle,
-        leading: isBack ? InkWell(onTap: onTap  ?? () => Get.back(),
-            child: Icon(Icons.arrow_back_ios,color: Get.isDarkMode ? Theme.of(context).hintColor.withValues(alpha:.5) : Theme.of(context).textTheme.bodyLarge?.color)) :
-        Padding(padding:  EdgeInsets.all(Dimensions.paddingSizeSmall),
-          child: Image.asset(Images.logo, height: 30, width: 30),),
-        titleSpacing: 0,
-        elevation: 1,
-        title: Text(title!.tr, maxLines: 1, overflow: TextOverflow.ellipsis, style: rubikMedium.copyWith(
-          color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: Dimensions.fontSizeLarge,)),
-        actions:  [
-          isSwitch?
-          const OnlineOfflineButtonWidget(): const SizedBox(),
-           SizedBox(width: Dimensions.paddingSizeSmall),
-        ],
-      ),
-    );
-  }
-
+  Widget build(BuildContext context) => AppBar(
+          centerTitle: isCenterTitle,
+          leading: isBack
+              ? IconButton(
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  onPressed: onTap ?? () => Get.back(),
+                  icon: const BackButtonIcon())
+              : Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Image.asset(Images.logo)),
+          title: Text((title ?? '').tr,
+              style: Theme.of(context).textTheme.titleSmall),
+          actions: [
+            if (isSwitch) const OnlineOfflineButtonWidget(),
+            if (!isBack)
+              IconButton(
+                  tooltip: 'notification'.tr,
+                  onPressed: () => Get.to(
+                      () => const NotificationScreen(fromNotification: false)),
+                  icon: const Icon(Icons.notifications_outlined)),
+            const SizedBox(width: 4)
+          ]);
   @override
-  Size get preferredSize => const Size(1170, 50);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

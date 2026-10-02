@@ -525,7 +525,7 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
               ),
             ),
 
-            _ButtonWidget(minPriceController, maxPriceController)
+            _ButtonWidget(minPriceController, maxPriceController, searchController: widget.searchController)
           ]),
         );
       }),
@@ -898,8 +898,9 @@ class FilterTitleWidget extends StatelessWidget {
 class _ButtonWidget extends StatelessWidget {
   final TextEditingController minPriceController;
   final TextEditingController maxPriceController;
+  final TextEditingController? searchController;
 
-  const _ButtonWidget(this.minPriceController, this.maxPriceController);
+  const _ButtonWidget(this.minPriceController, this.maxPriceController, {this.searchController});
 
   @override
   Widget build(BuildContext context) {
@@ -923,7 +924,7 @@ class _ButtonWidget extends StatelessWidget {
                 1,
                 Provider.of<LocalizationController>(context, listen: false)
                     .locale.languageCode,
-                widget.searchController?.text.trim() ??
+                searchController?.text.trim() ??
                     productController.sellerProductModel?.search ?? '',
                   filterSearchModel: FilterModel(reload: true, isUpdate: true),
                 );
@@ -949,7 +950,7 @@ class _ButtonWidget extends StatelessWidget {
                 1,
                 Provider.of<LocalizationController>(context, listen: false)
                     .locale.languageCode,
-                widget.searchController?.text.trim() ??
+                searchController?.text.trim() ??
                     productController.sellerProductModel?.search ?? '',
                   filterSearchModel: productController.filterModel.copyWith(
                   reload: true,

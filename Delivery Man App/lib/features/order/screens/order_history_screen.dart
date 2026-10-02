@@ -8,7 +8,7 @@ import 'package:sixvalley_delivery_boy/features/order/domain/models/order_model.
 import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/no_data_screen_widget.dart';
 import 'package:sixvalley_delivery_boy/features/order/widgets/order_history_header_widget.dart';
-import 'package:sixvalley_delivery_boy/features/order/widgets/order_history_item_widget.dart';
+import 'package:sixvalley_delivery_boy/features/order/widgets/alline_order_history_item_widget.dart';
 
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -53,8 +53,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
         SliverToBoxAdapter(child: Column(children: [
           const OrderHistoryHeaderWidget(),
 
-          Container(transform: Matrix4.translationValues(0.0, -00.0, 0.0),
-            child: GetBuilder<OrderController>(builder: (orderController) {
+          GetBuilder<OrderController>(builder: (orderController) {
 
               List<OrderModel>? orders;
               if(orderController.orderTypeIndex == 2) {
@@ -73,15 +72,14 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   itemCount: orders.length,
                   padding:  EdgeInsets.all(Dimensions.paddingSizeSmall),
                   itemBuilder: (context, index) {
-                    return OrderHistoryItemWidget(orderModel: orders?[index]);
+                    return AllineOrderHistoryItemWidget(order: orders![index]);
                   }
                 ),
               ) : !orderController.isLoading && orders != null && orders.isEmpty ?
                Padding(padding: EdgeInsets.only(top: Dimensions.paddingSizeOverLarge),
                child: const NoDataScreenWidget()) : const OrderHistoryShimmer();
               }
-            ),
-          )
+            )
         ]))
       ]),
       ),

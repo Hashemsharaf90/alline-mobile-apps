@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sixvalley_delivery_boy/common/controllers/localization_controller.dart';
 import 'package:sixvalley_delivery_boy/features/auth/domain/services/auth_service_interface.dart';
+import 'package:sixvalley_delivery_boy/features/live_tracking/controllers/location_tracking_controller.dart';
 import 'package:sixvalley_delivery_boy/features/auth/domain/models/response_model.dart';
 import 'package:sixvalley_delivery_boy/utill/app_constants.dart';
 
@@ -97,7 +98,9 @@ class AuthController extends GetxController implements GetxService {
   }
 
   Future<bool> clearSharedData() async {
-    return await authServiceInterface.clearSharedData();
+    final success = await authServiceInterface.clearSharedData();
+    if(success) Get.find<LocationTrackingController>().stopTracking();
+    return success;
   }
 
   void saveUserCredentials(String countryCode, String number, String password) {
@@ -134,21 +137,21 @@ class AuthController extends GetxController implements GetxService {
   Future <Response> forgotPassword(String? identity) async {
     _isLoading = true;
     update();
-    Response _response = await authServiceInterface.forgotPassword(identity);
+    Response response = await authServiceInterface.forgotPassword(identity);
 
     _isLoading = false;
     update();
-    return _response;
+    return response;
   }
 
 
   Future <Response> verifyOtp (String otp ,String? identity) async {
     _willPhoneNumberVerificationButtonLoading = true;
     update();
-    Response _response = await authServiceInterface.verifyOtp(otp, identity);
+    Response response = await authServiceInterface.verifyOtp(otp, identity);
     _willPhoneNumberVerificationButtonLoading = false;
     update();
-    return _response;
+    return response;
   }
 
 

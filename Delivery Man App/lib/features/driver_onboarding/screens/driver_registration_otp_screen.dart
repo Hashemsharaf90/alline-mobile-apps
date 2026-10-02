@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -12,10 +13,12 @@ class DriverRegistrationOtpScreen extends StatefulWidget {
   const DriverRegistrationOtpScreen({super.key, required this.phone});
 
   @override
-  State<DriverRegistrationOtpScreen> createState() => _DriverRegistrationOtpScreenState();
+  State<DriverRegistrationOtpScreen> createState() =>
+      _DriverRegistrationOtpScreenState();
 }
 
-class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScreen> {
+class _DriverRegistrationOtpScreenState
+    extends State<DriverRegistrationOtpScreen> {
   final TextEditingController _otpController = TextEditingController();
   String _currentOtp = '';
 
@@ -35,21 +38,23 @@ class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScree
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B2430), size: 20),
+          icon: Icon(Icons.arrow_back,
+              color: Get.theme.colorScheme.onSurface, size: 20),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'driver_phone_verification'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -68,7 +73,7 @@ class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScree
                   color: primaryBlue.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.mark_email_read_outlined,
                   size: 46,
                   color: primaryBlue,
@@ -78,13 +83,16 @@ class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScree
 
               Text(
                 'driver_phone_verification'.tr,
-                style: rubikBold.copyWith(fontSize: 22, color: const Color(0xFF1B2430)),
+                style: rubikBold.copyWith(
+                    fontSize: 22, color: Get.theme.colorScheme.onSurface),
               ),
               const SizedBox(height: 8),
 
               Text(
                 '${'otp_sent_to'.tr} ${widget.phone}',
-                style: rubikRegular.copyWith(fontSize: 14, color: const Color(0xFF5D6B82)),
+                style: rubikRegular.copyWith(
+                    fontSize: 14,
+                    color: Get.theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -109,7 +117,7 @@ class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScree
                       inactiveFillColor: Colors.white,
                       selectedFillColor: Colors.white,
                       activeColor: primaryBlue,
-                      inactiveColor: const Color(0xFFDDE4EE),
+                      inactiveColor: Get.theme.colorScheme.outline,
                       selectedColor: primaryBlue,
                     ),
                     enableActiveFill: true,
@@ -135,19 +143,24 @@ class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScree
                     children: [
                       Text(
                         'did_not_receive_code'.tr,
-                        style: rubikRegular.copyWith(fontSize: 14, color: const Color(0xFF757D8A)),
+                        style: rubikRegular.copyWith(
+                            fontSize: 14,
+                            color: Get.theme.colorScheme.onSurfaceVariant),
                       ),
                       const SizedBox(width: 4),
                       controller.resendCooldown > 0
                           ? Text(
                               '${controller.resendCooldown} ${'seconds'.tr}',
-                              style: rubikBold.copyWith(fontSize: 14, color: primaryBlue),
+                              style: rubikBold.copyWith(
+                                  fontSize: 14, color: primaryBlue),
                             )
                           : TextButton(
-                              onPressed: () => controller.resendRegistrationOtp(),
+                              onPressed: () =>
+                                  controller.resendRegistrationOtp(),
                               child: Text(
                                 'resend_code'.tr,
-                                style: rubikBold.copyWith(fontSize: 14, color: primaryBlue),
+                                style: rubikBold.copyWith(
+                                    fontSize: 14, color: primaryBlue),
                               ),
                             ),
                     ],
@@ -166,18 +179,21 @@ class _DriverRegistrationOtpScreenState extends State<DriverRegistrationOtpScree
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryBlue,
                         elevation: 2,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: controller.isLoading ? null : _verify,
                       child: controller.isLoading
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2.5),
                             )
                           : Text(
                               'verify_and_continue'.tr,
-                              style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                              style: rubikBold.copyWith(
+                                  fontSize: 16, color: Colors.white),
                             ),
                     ),
                   );

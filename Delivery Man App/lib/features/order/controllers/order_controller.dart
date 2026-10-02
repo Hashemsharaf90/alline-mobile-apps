@@ -7,6 +7,7 @@ import 'package:sixvalley_delivery_boy/features/order/domain/models/date_type.da
 import 'package:sixvalley_delivery_boy/features/order/domain/services/order_service_interface.dart';
 import 'package:sixvalley_delivery_boy/data/api/api_checker.dart';
 import 'package:sixvalley_delivery_boy/features/order/domain/models/order_model.dart';
+import 'package:sixvalley_delivery_boy/features/live_tracking/controllers/location_tracking_controller.dart';
 
 class OrderController extends GetxController implements GetxService {
   final OrderServiceInterface orderServiceInterface;
@@ -24,8 +25,8 @@ class OrderController extends GetxController implements GetxService {
   List<OrderModel>? deliveredOrderHistory;
   List<OrderModel>? get allOrderHistory => _allOrderHistory;
 
-  String? selectedOrderLat = '23.83721';
-  String? selectedOrderLng = '90.363715';
+  String? selectedOrderLat;
+  String? selectedOrderLng;
 
   void setSelectedOrderLatLng(LatLng latLng) {
     selectedOrderLat = latLng.latitude.toString();
@@ -50,10 +51,36 @@ class OrderController extends GetxController implements GetxService {
 
 
 
+  bool _currentOrdersFailed=false;
+  bool get currentOrdersFailed=>_currentOrdersFailed;
   Future<void> getCurrentOrders() async {
     _isLoading = true;
-    _currentOrders = await orderServiceInterface.getCurrentOrders();
+    update();
+    final result = await orderServiceInterface.getCurrentOrders();
     _isLoading = false;
+    _currentOrdersFailed=result==null;
+    if(result==null){update();return;}
+    _currentOrders=result;
+
+    final activeStatuses = [
+      'assigned', 'accepted', 'heading_to_store',
+      'arrived_at_store', 'picked_up', 'heading_to_customer',
+      'arrived_at_customer', 'out_for_delivery'
+    ];
+    bool hasActiveDelivery = false;
+    for (var order in _currentOrders) {
+      if (activeStatuses.contains(order.driverJourneyStatus) || activeStatuses.contains(order.orderStatus)) {
+        hasActiveDelivery = true;
+        break;
+      }
+    }
+
+    if (hasActiveDelivery) {
+      Get.find<LocationTrackingController>().startTracking();
+    } else {
+      Get.find<LocationTrackingController>().stopTracking();
+    }
+
     update();
   }
 
@@ -90,7 +117,6 @@ class OrderController extends GetxController implements GetxService {
 
 
   Future orderRefresh(BuildContext context) async{
-    getCurrentOrders();
     return getCurrentOrders();
   }
 

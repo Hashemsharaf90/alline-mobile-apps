@@ -1,6 +1,7 @@
+import 'package:sixvalley_delivery_boy/features/help_and_support/screens/help_and_support_screen.dart';
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
 import 'package:sixvalley_delivery_boy/utill/styles.dart';
 import '../controllers/driver_onboarding_controller.dart';
@@ -11,31 +12,30 @@ class DriverSuspendedScreen extends StatelessWidget {
   const DriverSuspendedScreen({super.key, this.reviewNote});
 
   Future<void> _contactSupport() async {
-    const String whatsappUrl = 'https://wa.me/967770000000';
-    if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
-      await launchUrl(Uri.parse(whatsappUrl), mode: LaunchMode.externalApplication);
-    }
+    Get.to(() => const HelpAndSupportScreen());
   }
 
   @override
   Widget build(BuildContext context) {
-    const Color orangeColor = Color(0xFFFF9800);
-    const Color bgLight = Color(0xFFF4F8FE);
-    const Color primaryBlue = Color(0xFF015FC9);
+    const Color orangeColor = AllineColors.warning;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
+    final Color primaryBlue = AllineColors.primaryBlue;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         title: Text(
           'account_status_title'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
+            child: Padding(
           padding: EdgeInsets.all(Dimensions.paddingSizeLarge),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -59,17 +59,20 @@ class DriverSuspendedScreen extends StatelessWidget {
 
               Text(
                 'driver_suspended'.tr,
-                style: rubikBold.copyWith(fontSize: 22, color: const Color(0xFF1B2430)),
+                style: rubikBold.copyWith(
+                    fontSize: 22, color: Get.theme.colorScheme.onSurface),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
 
               Text(
                 'driver_suspended_desc'.tr,
-                style: rubikRegular.copyWith(fontSize: 14, color: const Color(0xFF5D6B82)),
+                style: rubikRegular.copyWith(
+                    fontSize: 14,
+                    color: Get.theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
               // Note Card
               if (reviewNote != null && reviewNote!.isNotEmpty)
@@ -77,48 +80,57 @@ class DriverSuspendedScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF7E6),
+                    color: Get.theme.colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFFFD591)),
+                    border: Border.all(color: Get.theme.colorScheme.outline),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.info_outline, color: orangeColor, size: 20),
+                          const Icon(Icons.info_outline,
+                              color: orangeColor, size: 20),
                           const SizedBox(width: 8),
-                          Text(
+                          Expanded(
+                              child: Text(
                             'suspension_reason_label'.tr,
-                            style: rubikBold.copyWith(fontSize: 14, color: const Color(0xFFD46B08)),
-                          ),
+                            style: rubikBold.copyWith(
+                                fontSize: 14,
+                                color: Get.theme.colorScheme.onSurface),
+                          )),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Text(
                         reviewNote!,
-                        style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF873800), height: 1.5),
+                        style: rubikMedium.copyWith(
+                            fontSize: 14,
+                            color: Get.theme.colorScheme.onSurface,
+                            height: 1.5),
                       ),
                     ],
                   ),
                 ),
 
-              const Spacer(),
+              const SizedBox(height: 24),
 
               SizedBox(
                 width: double.infinity,
-                height: 52,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryBlue,
                     elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: _contactSupport,
-                  icon: const Icon(Icons.support_agent, color: Colors.white, size: 20),
+                  icon: const Icon(Icons.support_agent,
+                      color: Colors.white, size: 20),
                   label: Text(
                     'contact_support'.tr,
-                    style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                    style:
+                        rubikBold.copyWith(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
@@ -126,26 +138,28 @@ class DriverSuspendedScreen extends StatelessWidget {
 
               SizedBox(
                 width: double.infinity,
-                height: 52,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: Color(0xFFDDE4EE)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: Get.theme.colorScheme.surface,
+                    side: BorderSide(color: Get.theme.colorScheme.outline),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () {
                     Get.find<DriverOnboardingController>().logoutCandidate();
                   },
                   child: Text(
                     'logout'.tr,
-                    style: rubikBold.copyWith(fontSize: 15, color: const Color(0xFF5D6B82)),
+                    style: rubikBold.copyWith(
+                        fontSize: 15,
+                        color: Get.theme.colorScheme.onSurfaceVariant),
                   ),
                 ),
               ),
               const SizedBox(height: 20),
             ],
           ),
-        ),
+        )),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import 'package:sixvalley_delivery_boy/features/chat/domain/enums/vacation_duration_type.dart';
 import 'package:sixvalley_delivery_boy/features/splash/controllers/splash_controller.dart';
 
@@ -30,7 +30,7 @@ class ShopHelper {
 
   static bool _checkInHouseVacation(BuildContext context, DateTime currentDate) {
     try {
-      final configModel = Provider.of<SplashController>(context, listen: false).configModel;
+      final configModel = Get.find<SplashController>().configModel;
 
       if (!(configModel?.inHouseVacationAdd?.status ?? false)) return false;
 

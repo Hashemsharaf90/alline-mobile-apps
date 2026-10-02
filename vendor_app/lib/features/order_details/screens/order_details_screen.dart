@@ -500,6 +500,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     OrderDetailsModel details,
   ) {
     final images = details.verificationImages;
+    if (images == null || images.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

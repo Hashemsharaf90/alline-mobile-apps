@@ -75,7 +75,7 @@ class CustomSearchWidget extends StatefulWidget {
   });
 
   @override
-  _CustomSearchWidgetState createState() => _CustomSearchWidgetState();
+  State<CustomSearchWidget> createState() => _CustomSearchWidgetState();
 }
 
 ///toggle - 0 => false or closed
@@ -182,7 +182,7 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget>
                       },
 
                       ///suffixIcon is of type Icon
-                      child: widget.suffixIcon ?? const Icon(
+                      child: widget.suffixIcon ?? Icon(
                         Icons.close,
                         size: 20.0,
                       ),
@@ -232,13 +232,13 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget>
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       // labelText: widget.helpText,
                       hintText: widget.helpText,
-                      hintStyle: widget.hintStyle ?? const TextStyle(
-                        color: Color(0xff5B5B5B),
+                      hintStyle: widget.hintStyle ?? TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 17.0,
                         fontWeight: FontWeight.w500,
                       ),
-                      labelStyle: widget.style ?? const TextStyle(
-                        color: Color(0xff5B5B5B),
+                      labelStyle: widget.style ?? TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 17.0,
                         fontWeight: FontWeight.w500,
                       ),
@@ -270,7 +270,7 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget>
                   ///prefixIcon is of type Icon
                   icon: widget.prefixIcon != null
                       ? toggle == 1
-                      ? const Icon(Icons.arrow_back_ios)
+                      ? Icon(Icons.arrow_back_ios)
                       : widget.prefixIcon!
                       :Icon(toggle == 1 ? Icons.arrow_back_ios : Icons.search),
                   onPressed: () {

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sixvalley_delivery_boy/common/basewidgets/custom_loader_widget.dart';
-import 'package:sixvalley_delivery_boy/common/controllers/localization_controller.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/controllers/order_details_controller.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/screens/order_delivered_screen.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/camera_or_gallery_widget.dart';
-import 'package:sixvalley_delivery_boy/features/order_details/widgets/slider_button_widget.dart';
+import 'package:sixvalley_delivery_boy/common/basewidgets/alline/alline_swipe_action.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/verify_otp_sheet_widget.dart';
 import 'package:sixvalley_delivery_boy/features/splash/controllers/splash_controller.dart';
 import 'package:sixvalley_delivery_boy/features/order/domain/models/order_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:sixvalley_delivery_boy/features/order/controllers/order_controller.dart';
 import 'package:sixvalley_delivery_boy/helper/price_converter.dart';
 import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
@@ -24,14 +21,12 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isLtr = Get.find<LocalizationController>().isLtr;
-    const double rotateAnglePi = 3.1416;
 
     if (orderModel == null || orderModel!.isPause == true) {
       return const SizedBox();
     }
 
-    String currentStatus = orderModel!.driverJourneyStatus ?? 
+    String currentStatus = orderModel!.driverJourneyStatus ??
         (orderModel!.orderStatus == 'processing' ? 'assigned' : orderModel!.orderStatus) ?? '';
 
     String label = '';
@@ -68,7 +63,7 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
       child: Column(
         children: [
 
-          if(showCollectAmount!)...[
+          if(showCollectAmount == true)...[
             GetBuilder<OrderController>(
                 builder: (orderController) {
                   return GetBuilder<OrderDetailsController>(
@@ -99,53 +94,27 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
             SizedBox(height: Dimensions.paddingSizeExtraSmall),
           ],
 
-          Directionality(
-            textDirection: isLtr ? TextDirection.ltr :  TextDirection.rtl,
-            child: SliderButtonWidget(
-                isRtl: !isLtr,
-                action:  ()  {
-                  if(nextStatus == 'delivered') {
-                    _handleDeliveredStatus(context);
-                  } else {
-                    _handleStatusChange(context, nextStatus);
-                  }
-                },
-                label: Text(label,
-                  style: rubikMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall),),
-                dismissThresholds: 0.5,
-                icon: RotationTransition(
-                    turns: const AlwaysStoppedAnimation(45 / 360),
-                    child: Center(child: isLtr ? Icon(CupertinoIcons.paperplane, size: 20, color: Theme.of(context).cardColor,) :
-                    Transform.rotate(angle: rotateAnglePi, child: Icon(CupertinoIcons.paperplane, size: 20, color: Theme.of(context).cardColor,)))
-                ),
-                radius: 100,
-                width: MediaQuery.of(context).size.width-55,
-                boxShadow: const BoxShadow(blurRadius: 0.0),
-                buttonColor: Theme.of(context).primaryColor,
-                backgroundColor: Get.isDarkMode ? Theme.of(context).hintColor : Theme.of(context).primaryColor.withValues(alpha:.05),
-                baseColor: Theme.of(context).primaryColor),
+          AllineSwipeAction(
+            key: ValueKey(currentStatus),
+            label: label,
+            onSwipe: () async {
+              if (nextStatus == 'delivered') {
+                _handleDeliveredStatus(context);
+                // Opens verification; delivery has not been confirmed yet.
+                return false;
+              } else {
+                return await _handleStatusChange(context, nextStatus);
+              }
+            },
           )
         ],
       )
     );
   }
 
-  void _handleStatusChange(BuildContext context, String nextStatus) {
-    showDialog(
-      context: context,
-      builder: (ctx) => const CustomLoaderWidget(),
-    );
-
-    Get.find<OrderDetailsController>().updateOrderStatus(
-      orderId: orderModel!.id,
-      status: nextStatus,
-      context: context,
-    );
-
-    Navigator.of(context).pop();
-    Get.find<OrderController>().getCurrentOrders();
+  Future<bool> _handleStatusChange(BuildContext context, String nextStatus) async {
+    return Get.find<OrderDetailsController>().updateOrderStatus(orderId:orderModel!.id,status:nextStatus,context:context);
   }
-
 
   void _handleDeliveredStatus(BuildContext context) {
     final splashController = Get.find<SplashController>();
@@ -294,6 +263,7 @@ class OrderStatusChangeCustomButtonWidget extends StatelessWidget {
       context: context,
       status: 'delivered',
     ).then((value) {
+      if (!value || !context.mounted) return;
       Navigator.of(Get.context!).pushReplacement(
         MaterialPageRoute(
           builder: (_) => OrderDeliveredScreen(

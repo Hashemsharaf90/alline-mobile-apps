@@ -1,22 +1,22 @@
-
 import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sixvalley_delivery_boy/data/api/api_client.dart';
 import 'package:sixvalley_delivery_boy/features/notification/domain/repositories/notification_repository_interface.dart';
 import 'package:sixvalley_delivery_boy/utill/app_constants.dart';
 
-class NotificationRepository implements NotificationRepositoryInterface{
+class NotificationRepository implements NotificationRepositoryInterface {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
-  NotificationRepository({required this.apiClient, required this.sharedPreferences});
+  NotificationRepository(
+      {required this.apiClient, required this.sharedPreferences});
 
   @override
   Future<Response> getNotificationList(int offset) async {
-    return await apiClient.getData('${AppConstants.notificationUri}?limit=20&offset=$offset');
+    return await apiClient
+        .getData('${AppConstants.notificationUri}?limit=20&offset=$offset');
   }
 
-
-@override
+  @override
   void saveSeenNotificationCount(int count) {
     sharedPreferences.setInt(AppConstants.notificationCount, count);
   }

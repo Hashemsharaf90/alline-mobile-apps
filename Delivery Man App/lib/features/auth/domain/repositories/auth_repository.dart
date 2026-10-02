@@ -37,24 +37,25 @@ class AuthRepository implements AuthRepositoryInterface{
 
   @override
   Future<Response> updateToken() async {
-    String? _deviceToken;
+    if (AppConstants.localQa) return const Response(statusCode: 200);
+    String? deviceToken;
     if (GetPlatform.isIOS) {
       NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
         alert: true, announcement: false, badge: true, carPlay: false,
         criticalAlert: false, provisional: false, sound: true,
       );
       if(settings.authorizationStatus == AuthorizationStatus.authorized) {
-        _deviceToken = await _saveDeviceToken();
+        deviceToken = await _saveDeviceToken();
       }
     }else {
-      _deviceToken = await _saveDeviceToken();
+      deviceToken = await _saveDeviceToken();
     }
     if(!GetPlatform.isWeb) {
       FirebaseMessaging.instance.subscribeToTopic('six_valley_delivery');
     }
     return await apiClient.postData(AppConstants.tokenUri,
 
-        {"_method": "put", "fcm_token": _deviceToken},
+        {"_method": "put", "fcm_token": deviceToken},
       headers:  {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer ${sharedPreferences.get(AppConstants.token)}'
@@ -64,11 +65,11 @@ class AuthRepository implements AuthRepositoryInterface{
 
 
   Future<String?> _saveDeviceToken() async {
-    String? _deviceToken = '';
+    String? deviceToken = '';
     if(!GetPlatform.isWeb) {
-      _deviceToken = await (FirebaseMessaging.instance.getToken());
+      deviceToken = await (FirebaseMessaging.instance.getToken());
     }
-    return _deviceToken;
+    return deviceToken;
   }
 
   @override
@@ -166,21 +167,21 @@ class AuthRepository implements AuthRepositoryInterface{
 
   @override
   Future<Response> forgotPassword(String? identity) async {
-    Response _response = await apiClient.postData(AppConstants.forgotPassword,
+    Response response = await apiClient.postData(AppConstants.forgotPassword,
         {
           'identity': identity
         });
-    return _response;
+    return response;
   }
 
   @override
   Future<Response> verifyOtp(String otp ,String? identity) async {
-    Response _response = await apiClient.postData(AppConstants.verifyOtp,
+    Response response = await apiClient.postData(AppConstants.verifyOtp,
         {
           'otp' : otp,
           'identity': identity
         });
-    return _response;
+    return response;
   }
 
   @override

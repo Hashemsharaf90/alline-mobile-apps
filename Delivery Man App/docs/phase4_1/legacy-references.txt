@@ -1,0 +1,6 @@
+lib/common/basewidgets/animated_custom_dialog_widget.dart:51: final Matrix4 transform = Matrix4.identity()
+lib/features/order_details/widgets/slider_button_widget.dart:7: class SliderButtonWidget extends StatefulWidget {
+lib/features/order_details/widgets/slider_button_widget.dart:29: const SliderButtonWidget({super.key,
+lib/features/order_details/widgets/slider_button_widget.dart:43: this.backgroundColor = const Color(0xffe0e0e0),
+lib/features/order_details/widgets/slider_button_widget.dart:63: State<SliderButtonWidget> createState() => _SliderButtonWidgetState();
+lib/features/order_details/widgets/slider_button_widget.dart:66: class _SliderButtonWidgetState extends State<SliderButtonWidget> {

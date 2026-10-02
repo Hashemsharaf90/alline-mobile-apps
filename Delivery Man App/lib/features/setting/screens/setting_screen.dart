@@ -1,96 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sixvalley_delivery_boy/common/basewidgets/custom_asset_image_widget.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/theme_botton_widget.dart';
-import 'package:sixvalley_delivery_boy/features/language/controllers/language_controller.dart';
-import 'package:sixvalley_delivery_boy/common/controllers/localization_controller.dart';
-import 'package:sixvalley_delivery_boy/utill/app_constants.dart';
-import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
-import 'package:sixvalley_delivery_boy/utill/images.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/custom_app_bar_widget.dart';
 import 'package:sixvalley_delivery_boy/features/language/screens/choose_language_screen.dart';
-import 'package:sixvalley_delivery_boy/utill/styles.dart';
+import 'package:sixvalley_delivery_boy/utill/app_constants.dart';
 
-class SettingScreen extends StatefulWidget {
+class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
-
   @override
-  State<SettingScreen> createState() => _SettingScreenState();
-}
-
-class _SettingScreenState extends State<SettingScreen> {
-  late final bool isLtr;
-
-  @override
-  void initState() {
-    isLtr = Get.find<LocalizationController>().isLtr;
-
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  Widget build(BuildContext context) => Scaffold(
       appBar: CustomAppBarWidget(title: 'setting'.tr, isBack: true),
-      body: Column(children: [
-
-        GestureDetector(onTap: ()=> Get.to(()=> const ChooseLanguageScreen()),
-          child: Padding(padding:  EdgeInsets.fromLTRB(Dimensions.paddingSizeDefault,
-              Dimensions.paddingSizeDefault, Dimensions.paddingSizeDefault,Dimensions.paddingSizeDefault),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeLarge),
-              color: Theme.of(context).hintColor.withValues(alpha: .075),
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-                Row(children: [
-                  const SizedBox(width: Dimensions.iconSizeDefault, child: CustomAssetImageWidget(Images.languageIcon)),
-
-                  SizedBox(width: isLtr? 0: Dimensions.paddingSizeSmall),
-
-                  Padding(padding:  EdgeInsets.only(left: Dimensions.paddingSizeSmall),
-                    child: Text('language'.tr))]),
-
-                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(AppConstants.languages[Get.find<LanguageController>().selectIndex!].languageName!, style: rubikRegular.copyWith(fontSize: Dimensions.paddingSizeDefault),),
-
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
-                      child: const Icon(Icons.keyboard_arrow_down_outlined, size: 15,),
-                    )
-                  ],
-                ),
-              ]),
-            ))),
-
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
-            color: Theme.of(context).hintColor.withValues(alpha: .075),
-            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Row(
-                children: [
-                  const SizedBox(width: Dimensions.iconSizeDefault, child: CustomAssetImageWidget(Images.themeIcon)),
-
-                  SizedBox(width: isLtr ? 0 : Dimensions.paddingSizeSmall),
-
-                  Padding(padding:  EdgeInsets.only(left: Dimensions.paddingSizeSmall),
-                    child: Text('theme'.tr),
-                  ),
-                ],
-              ),
-
-              const ThemeButtonWidget()
-
-            ]),
-          ),
-        ),
-
-
-      ]),
-    );
-  }
+      body: ListView(padding: const EdgeInsets.all(16), children: [
+        Text('alline_appearance'.tr,
+            style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        Card(
+            child: Column(children: [
+          ListTile(
+              leading: const Icon(Icons.dark_mode_outlined),
+              title: Text('theme'.tr),
+              trailing: const ThemeButtonWidget()),
+          ListTile(
+              leading: const Icon(Icons.language),
+              title: Text('language'.tr),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Get.to(() => const ChooseLanguageScreen()))
+        ])),
+        const SizedBox(height: 24),
+        Text('alline_app_info'.tr,
+            style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        const Card(
+            child: ListTile(
+                leading: Icon(Icons.info_outline),
+                title: Text(AppConstants.appName),
+                subtitle: Text(AppConstants.appVersion))),
+      ]));
 }
-
-
-enum Theming {light, dark }
-

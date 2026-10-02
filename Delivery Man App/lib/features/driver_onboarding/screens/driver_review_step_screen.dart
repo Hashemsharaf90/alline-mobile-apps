@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/custom_snackbar_widget.dart';
@@ -36,21 +37,23 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B2430), size: 20),
+          icon: Icon(Icons.arrow_back,
+              color: Get.theme.colorScheme.onSurface, size: 20),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'driver_onboarding_title'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -78,29 +81,51 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                         _buildSectionCard(
                           title: 'personal_info_section'.tr,
                           icon: Icons.person_outline,
-                          onEdit: () => Get.to(() => const DriverProfileStepScreen()),
+                          onEdit: () =>
+                              Get.to(() => const DriverProfileStepScreen()),
                           items: [
-                            {'label': 'full_name'.tr, 'value': '${candidate?.fName ?? ''} ${candidate?.lName ?? ''}'},
-                            {'label': 'phone_number'.tr, 'value': candidate?.fullPhone ?? candidate?.phone ?? ''},
-                            {'label': 'identity_number'.tr, 'value': candidate?.identityNumber ?? ''},
-                            {'label': 'residential_address'.tr, 'value': candidate?.address ?? ''},
+                            {
+                              'label': 'full_name'.tr,
+                              'value':
+                                  '${candidate?.fName ?? ''} ${candidate?.lName ?? ''}'
+                            },
+                            {
+                              'label': 'phone_number'.tr,
+                              'value':
+                                  candidate?.fullPhone ?? candidate?.phone ?? ''
+                            },
+                            {
+                              'label': 'identity_number'.tr,
+                              'value': candidate?.identityNumber ?? ''
+                            },
+                            {
+                              'label': 'residential_address'.tr,
+                              'value': candidate?.address ?? ''
+                            },
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
 
                         // Card 2: Documents
                         _buildSectionCard(
                           title: 'documents_section'.tr,
                           icon: Icons.description_outlined,
-                          onEdit: () => Get.to(() => const DriverDocumentsStepScreen()),
+                          onEdit: () =>
+                              Get.to(() => const DriverDocumentsStepScreen()),
                           items: [
                             {
                               'label': 'national_id_card'.tr,
-                              'value': docs.any((d) => d.documentType == 'identity') ? 'uploaded_verified'.tr : 'not_uploaded'.tr,
+                              'value':
+                                  docs.any((d) => d.documentType == 'identity')
+                                      ? 'uploaded_verified'.tr
+                                      : 'not_uploaded'.tr,
                             },
                             {
                               'label': 'drivers_license_doc'.tr,
-                              'value': docs.any((d) => d.documentType == 'drivers_license') ? 'uploaded_verified'.tr : 'not_uploaded'.tr,
+                              'value': docs.any((d) =>
+                                      d.documentType == 'drivers_license')
+                                  ? 'uploaded_verified'.tr
+                                  : 'not_uploaded'.tr,
                             },
                             {
                               'label': 'total_documents'.tr,
@@ -108,27 +133,41 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                             },
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
 
                         // Card 3: Vehicle Info
                         _buildSectionCard(
                           title: 'vehicle_section'.tr,
                           icon: Icons.two_wheeler,
-                          onEdit: () => Get.to(() => const DriverVehicleStepScreen()),
+                          onEdit: () =>
+                              Get.to(() => const DriverVehicleStepScreen()),
                           items: [
-                            {'label': 'vehicle_type'.tr, 'value': (vehicle?.vehicleType ?? 'motorcycle').tr},
-                            {'label': 'vehicle_brand_model'.tr, 'value': vehicle?.brandOrModel ?? ''},
-                            {'label': 'plate_number'.tr, 'value': vehicle?.plateNumber ?? ''},
-                            {'label': 'vehicle_color'.tr, 'value': vehicle?.color ?? ''},
+                            {
+                              'label': 'vehicle_type'.tr,
+                              'value': (vehicle?.vehicleType ?? 'motorcycle').tr
+                            },
+                            {
+                              'label': 'vehicle_brand_model'.tr,
+                              'value': vehicle?.brandOrModel ?? ''
+                            },
+                            {
+                              'label': 'plate_number'.tr,
+                              'value': vehicle?.plateNumber ?? ''
+                            },
+                            {
+                              'label': 'vehicle_color'.tr,
+                              'value': vehicle?.color ?? ''
+                            },
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 16),
 
                         // Card 4: Location Info
                         _buildSectionCard(
                           title: 'coverage_location_section'.tr,
                           icon: Icons.location_on_outlined,
-                          onEdit: () => Get.to(() => const DriverLocationStepScreen()),
+                          onEdit: () =>
+                              Get.to(() => const DriverLocationStepScreen()),
                           items: [
                             {
                               'label': 'coordinates'.tr,
@@ -136,7 +175,10 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                                   ? '${candidate!.latitude!.toStringAsFixed(4)}, ${candidate.longitude!.toStringAsFixed(4)}'
                                   : 'not_set'.tr,
                             },
-                            {'label': 'address'.tr, 'value': candidate?.address ?? ''},
+                            {
+                              'label': 'address'.tr,
+                              'value': candidate?.address ?? ''
+                            },
                           ],
                         ),
                         const SizedBox(height: 20),
@@ -145,21 +187,25 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF9FBFF),
+                            color: Get.theme.colorScheme.surface,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFDDE4EE)),
+                            border: Border.all(
+                                color: Get.theme.colorScheme.outline),
                           ),
                           child: Row(
                             children: [
                               Checkbox(
                                 value: _declarationAccepted,
                                 activeColor: primaryBlue,
-                                onChanged: (val) => setState(() => _declarationAccepted = val ?? false),
+                                onChanged: (val) => setState(
+                                    () => _declarationAccepted = val ?? false),
                               ),
                               Expanded(
                                 child: Text(
                                   'driver_declaration_agreement'.tr,
-                                  style: rubikRegular.copyWith(fontSize: 13, color: const Color(0xFF2C3E50)),
+                                  style: rubikRegular.copyWith(
+                                      fontSize: 13,
+                                      color: Get.theme.colorScheme.onSurface),
                                 ),
                               ),
                             ],
@@ -173,25 +219,30 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                           height: 52,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF04BB7B), // Success Green
+                              backgroundColor:
+                                  AllineColors.success, // Success Green
                               elevation: 2,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: controller.isSubmitting ? null : _submit,
                             child: controller.isSubmitting
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2.5),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                                      const Icon(Icons.send_rounded,
+                                          color: Colors.white, size: 20),
                                       const SizedBox(width: 8),
                                       Text(
                                         'submit_application_now'.tr,
-                                        style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                                        style: rubikBold.copyWith(
+                                            fontSize: 16, color: Colors.white),
                                       ),
                                     ],
                                   ),
@@ -216,14 +267,14 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
     required VoidCallback onEdit,
     required List<Map<String, String>> items,
   }) {
-    const Color primaryBlue = Color(0xFF015FC9);
+    final Color primaryBlue = AllineColors.primaryBlue;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Get.theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5EDF8)),
+        border: Border.all(color: Get.theme.colorScheme.outline),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -242,7 +293,8 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
               Expanded(
                 child: Text(
                   title,
-                  style: rubikBold.copyWith(fontSize: 15, color: const Color(0xFF1B2430)),
+                  style: rubikBold.copyWith(
+                      fontSize: 15, color: Get.theme.colorScheme.onSurface),
                 ),
               ),
               InkWell(
@@ -253,14 +305,15 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                     const SizedBox(width: 4),
                     Text(
                       'edit'.tr,
-                      style: rubikMedium.copyWith(fontSize: 13, color: primaryBlue),
+                      style: rubikMedium.copyWith(
+                          fontSize: 13, color: primaryBlue),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const Divider(height: 18, color: Color(0xFFF0F0F0)),
+          Divider(height: 18, color: Get.theme.colorScheme.outline),
           ...items.map((item) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(
@@ -270,13 +323,17 @@ class _DriverReviewStepScreenState extends State<DriverReviewStepScreen> {
                       width: 120,
                       child: Text(
                         item['label'] ?? '',
-                        style: rubikRegular.copyWith(fontSize: 13, color: const Color(0xFF757D8A)),
+                        style: rubikRegular.copyWith(
+                            fontSize: 13,
+                            color: Get.theme.colorScheme.onSurfaceVariant),
                       ),
                     ),
                     Expanded(
                       child: Text(
                         item['value'] ?? '',
-                        style: rubikMedium.copyWith(fontSize: 13, color: const Color(0xFF1B2430)),
+                        style: rubikMedium.copyWith(
+                            fontSize: 13,
+                            color: Get.theme.colorScheme.onSurface),
                       ),
                     ),
                   ],

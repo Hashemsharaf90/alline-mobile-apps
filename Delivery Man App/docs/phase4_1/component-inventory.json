@@ -1,0 +1,150 @@
+[
+  {
+    "Component": "CalculationWidget",
+    "File": "lib/common/basewidgets/calculation_widget.dart"
+  },
+  {
+    "Component": "ConfirmationDialogWidget",
+    "File": "lib/common/basewidgets/confirmation_dialog_widget.dart"
+  },
+  {
+    "Component": "CustomActionButtonWidget",
+    "File": "lib/common/basewidgets/custom_action_button_widget.dart"
+  },
+  {
+    "Component": "CustomAlertDialogWidget",
+    "File": "lib/common/basewidgets/custom_alert_dialog_widget.dart"
+  },
+  {
+    "Component": "CustomAppBarWidget",
+    "File": "lib/common/basewidgets/custom_app_bar_widget.dart"
+  },
+  {
+    "Component": "CustomAssetImageWidget",
+    "File": "lib/common/basewidgets/custom_asset_image_widget.dart"
+  },
+  {
+    "Component": "BottomNavBarWidget",
+    "File": "lib/common/basewidgets/custom_botom_navy_bar_widget.dart"
+  },
+  {
+    "Component": "_ItemWidget",
+    "File": "lib/common/basewidgets/custom_botom_navy_bar_widget.dart"
+  },
+  {
+    "Component": "CustomButtonWidget",
+    "File": "lib/common/basewidgets/custom_button_widget.dart"
+  },
+  {
+    "Component": "CustomCalendarWidget",
+    "File": "lib/common/basewidgets/custom_calender_widget.dart"
+  },
+  {
+    "Component": "CustomDatePickerWidget",
+    "File": "lib/common/basewidgets/custom_date_picker_widget.dart"
+  },
+  {
+    "Component": "CustomDividerWidget",
+    "File": "lib/common/basewidgets/custom_divider_widget.dart"
+  },
+  {
+    "Component": "CustomImageWidget",
+    "File": "lib/common/basewidgets/custom_image_widget.dart"
+  },
+  {
+    "Component": "CustomInkWellWidget",
+    "File": "lib/common/basewidgets/custom_ink_well_widget.dart"
+  },
+  {
+    "Component": "CustomLoaderWidget",
+    "File": "lib/common/basewidgets/custom_loader_widget.dart"
+  },
+  {
+    "Component": "CustomSearchWidget",
+    "File": "lib/common/basewidgets/custom_search_widget.dart"
+  },
+  {
+    "Component": "CustomSingleChildListWidget",
+    "File": "lib/common/basewidgets/custom_single_child_list_widget.dart"
+  },
+  {
+    "Component": "CustomStepperWidget",
+    "File": "lib/common/basewidgets/custom_stepper_widget.dart"
+  },
+  {
+    "Component": "CustomTextFieldWidget",
+    "File": "lib/common/basewidgets/custom_text_field_widget.dart"
+  },
+  {
+    "Component": "CustomTitleWidget",
+    "File": "lib/common/basewidgets/custom_title_widget.dart"
+  },
+  {
+    "Component": "FlutterCustomSwitchWidget",
+    "File": "lib/common/basewidgets/flutter_custom_switch_widget.dart"
+  },
+  {
+    "Component": "ImageDialog",
+    "File": "lib/common/basewidgets/image_diaglog_widget.dart"
+  },
+  {
+    "Component": "NoDataScreenWidget",
+    "File": "lib/common/basewidgets/no_data_screen_widget.dart"
+  },
+  {
+    "Component": "OnlineOfflineButtonWidget",
+    "File": "lib/common/basewidgets/online_offline_button_widget.dart"
+  },
+  {
+    "Component": "PaginatedListViewWidget",
+    "File": "lib/common/basewidgets/paginated_list_view_widget.dart"
+  },
+  {
+    "Component": "RatingBarWidget",
+    "File": "lib/common/basewidgets/rating_bar_widget.dart"
+  },
+  {
+    "Component": "ThemeButtonWidget",
+    "File": "lib/common/basewidgets/theme_botton_widget.dart"
+  },
+  {
+    "Component": "TitleWidget",
+    "File": "lib/common/basewidgets/title_widget_widget.dart"
+  },
+  {
+    "Component": "AllineEmptyState",
+    "File": "lib/common/basewidgets/alline/alline_empty_state.dart"
+  },
+  {
+    "Component": "AllineOfflineBanner",
+    "File": "lib/common/basewidgets/alline/alline_offline_banner.dart"
+  },
+  {
+    "Component": "AllinePrimaryButton",
+    "File": "lib/common/basewidgets/alline/alline_primary_button.dart"
+  },
+  {
+    "Component": "AllineSkeleton",
+    "File": "lib/common/basewidgets/alline/alline_states.dart"
+  },
+  {
+    "Component": "AllineErrorState",
+    "File": "lib/common/basewidgets/alline/alline_states.dart"
+  },
+  {
+    "Component": "AllineMoneyRow",
+    "File": "lib/common/basewidgets/alline/alline_states.dart"
+  },
+  {
+    "Component": "AllineStatusBadge",
+    "File": "lib/common/basewidgets/alline/alline_status_badge.dart"
+  },
+  {
+    "Component": "AllineSwipeAction",
+    "File": "lib/common/basewidgets/alline/alline_swipe_action.dart"
+  },
+  {
+    "Component": "AllineTrackingIndicator",
+    "File": "lib/common/basewidgets/alline/alline_tracking_indicator.dart"
+  }
+]

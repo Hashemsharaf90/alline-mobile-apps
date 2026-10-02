@@ -39,6 +39,8 @@ class OrderModel {
   double? totalTaxAmount;
   String? driverJourneyStatus;
 
+  SellerInfo? get seller => sellerInfo;
+
   OrderModel(
       {this.id,
         this.customerId,
@@ -322,6 +324,8 @@ class Customer {
         this.paymentCardFawryToken,
         this.isEmailVerified});
 
+  String? get address => streetAddress;
+
   Customer.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
@@ -445,6 +449,8 @@ class Shop {
   String? createdAt;
   String? updatedAt;
   String? banner;
+  String? latitude;
+  String? longitude;
   VacationDurationType? vacationDurationType;
 
   Shop(
@@ -501,6 +507,8 @@ class Shop {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     banner = json['banner'];
+    latitude = json['latitude']?.toString();
+    longitude = json['longitude']?.toString();
 
     if(json['vacation_duration_type'] != null) {
       vacationDurationType =  VacationDurationType.fromJson(json['vacation_duration_type']);

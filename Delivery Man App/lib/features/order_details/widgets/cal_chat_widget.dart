@@ -79,8 +79,8 @@ class CallAndChatWidget extends StatelessWidget {
   }
 }
 
-Future<void> _launchUrl(String _url) async {
-  if (!await launchUrl(Uri.parse(_url))) {
-    throw 'Could not launch $_url';
+Future<void> _launchUrl(String url) async {
+  if (!await launchUrl(Uri.parse(url))) {
+    throw 'Could not launch $url';
   }
 }

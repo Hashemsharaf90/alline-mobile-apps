@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,7 +16,8 @@ class DriverDocumentsStepScreen extends StatelessWidget {
 
   Future<void> _pickAndUpload(BuildContext context, String docType) async {
     final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final XFile? file =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (file != null) {
       Get.find<DriverOnboardingController>().uploadDocument(
         documentType: docType,
@@ -27,7 +29,8 @@ class DriverDocumentsStepScreen extends StatelessWidget {
   void _onNext() {
     final controller = Get.find<DriverOnboardingController>();
     bool hasId = controller.documents.any((d) => d.documentType == 'identity');
-    bool hasLicense = controller.documents.any((d) => d.documentType == 'drivers_license');
+    bool hasLicense =
+        controller.documents.any((d) => d.documentType == 'drivers_license');
 
     if (!hasId) {
       showCustomSnackBarWidget('please_upload_identity_doc'.tr);
@@ -43,21 +46,23 @@ class DriverDocumentsStepScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B2430), size: 20),
+          icon: Icon(Icons.arrow_back,
+              color: Get.theme.colorScheme.onSurface, size: 20),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'driver_onboarding_title'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -87,7 +92,7 @@ class DriverDocumentsStepScreen extends StatelessWidget {
                           documents: controller.documents,
                           controller: controller,
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
                         // Document 2: Driving License (Required)
                         _buildDocCard(
@@ -99,7 +104,7 @@ class DriverDocumentsStepScreen extends StatelessWidget {
                           documents: controller.documents,
                           controller: controller,
                         ),
-                        const SizedBox(height: 18),
+                        const SizedBox(height: 16),
 
                         // Document 3: Commercial Guarantee (Optional)
                         _buildDocCard(
@@ -121,24 +126,28 @@ class DriverDocumentsStepScreen extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryBlue,
                               elevation: 2,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: controller.isUploading ? null : _onNext,
                             child: controller.isUploading
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2.5),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         'continue_to_vehicle'.tr,
-                                        style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                                        style: rubikBold.copyWith(
+                                            fontSize: 16, color: Colors.white),
                                       ),
                                       const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                                      const Icon(Icons.arrow_forward_ios,
+                                          size: 16, color: Colors.white),
                                     ],
                                   ),
                           ),
@@ -165,17 +174,19 @@ class DriverDocumentsStepScreen extends StatelessWidget {
     required List<OnboardingDocument> documents,
     required DriverOnboardingController controller,
   }) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    final uploadedDocs = documents.where((d) => d.documentType == docType).toList();
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final uploadedDocs =
+        documents.where((d) => d.documentType == docType).toList();
     final bool isUploaded = uploadedDocs.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Get.theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isUploaded ? const Color(0xFF04BB7B) : const Color(0xFFE5EDF8),
+          color:
+              isUploaded ? AllineColors.success : Get.theme.colorScheme.outline,
           width: isUploaded ? 1.5 : 1,
         ),
         boxShadow: [
@@ -193,26 +204,29 @@ class DriverDocumentsStepScreen extends StatelessWidget {
             children: [
               Icon(
                 isUploaded ? Icons.check_circle : Icons.upload_file_outlined,
-                color: isUploaded ? const Color(0xFF04BB7B) : primaryBlue,
+                color: isUploaded ? AllineColors.success : primaryBlue,
                 size: 22,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   title,
-                  style: rubikBold.copyWith(fontSize: 15, color: const Color(0xFF1B2430)),
+                  style: rubikBold.copyWith(
+                      fontSize: 15, color: Get.theme.colorScheme.onSurface),
                 ),
               ),
               if (isRequired)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3CD),
+                    color: Get.theme.colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     'required'.tr,
-                    style: rubikMedium.copyWith(fontSize: 11, color: const Color(0xFF856404)),
+                    style: rubikMedium.copyWith(
+                        fontSize: 11, color: AllineColors.warning),
                   ),
                 ),
             ],
@@ -220,34 +234,40 @@ class DriverDocumentsStepScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: rubikRegular.copyWith(fontSize: 12, color: const Color(0xFF757D8A)),
+            style: rubikRegular.copyWith(
+                fontSize: 12, color: Get.theme.colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 12),
-
           if (isUploaded)
             ...uploadedDocs.map((doc) => Container(
                   margin: const EdgeInsets.only(bottom: 8),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF7FBF9),
+                    color: Get.theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFD4EDDA)),
+                    border: Border.all(color: Get.theme.colorScheme.outline),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.description_outlined, color: Color(0xFF04BB7B), size: 20),
+                      const Icon(Icons.description_outlined,
+                          color: AllineColors.success, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          doc.filePath ?? 'file_uploaded'.tr,
-                          style: rubikMedium.copyWith(fontSize: 13, color: const Color(0xFF155724)),
+                          'file_uploaded'.tr,
+                          style: rubikMedium.copyWith(
+                              fontSize: 13, color: Get.theme.colorScheme.onSurface),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                        onPressed: doc.id != null ? () => controller.deleteDocument(doc.id!) : null,
+                        icon: const Icon(Icons.delete_outline,
+                            color: Colors.red, size: 20),
+                        onPressed: doc.id != null
+                            ? () => controller.deleteDocument(doc.id!)
+                            : null,
                       ),
                     ],
                   ),
@@ -265,19 +285,22 @@ class DriverDocumentsStepScreen extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 20),
-                  color: const Color(0xFFF9FBFF),
+                  color: Get.theme.colorScheme.surface,
                   child: Column(
                     children: [
-                      Icon(Icons.cloud_upload_outlined, color: primaryBlue, size: 36),
+                      Icon(Icons.cloud_upload_outlined,
+                          color: primaryBlue, size: 36),
                       const SizedBox(height: 6),
                       Text(
                         'tap_to_upload'.tr,
-                        style: rubikBold.copyWith(fontSize: 13, color: primaryBlue),
+                        style: rubikBold.copyWith(
+                            fontSize: 13, color: primaryBlue),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         'supported_formats_desc'.tr,
-                        style: rubikRegular.copyWith(fontSize: 11, color: Colors.grey),
+                        style: rubikRegular.copyWith(
+                            fontSize: 11, color: Colors.grey),
                       ),
                     ],
                   ),

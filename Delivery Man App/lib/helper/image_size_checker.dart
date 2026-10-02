@@ -26,7 +26,7 @@ class ImageValidationHelper{
       final picker = ImagePicker();
       final pickedImage = await picker.pickImage(
         source: source,
-        imageQuality: AppConstants.imageQuality ?? 50,
+        imageQuality: AppConstants.imageQuality,
         maxHeight: maxHeight,
         maxWidth: maxWidth,
       );
@@ -79,7 +79,7 @@ class ImageValidationHelper{
     try {
       final picker = ImagePicker();
       final pickedImages = await picker.pickMultiImage(
-        imageQuality: AppConstants.imageQuality ?? 30,
+        imageQuality: AppConstants.imageQuality,
       );
 
       if (pickedImages.isEmpty) return [];

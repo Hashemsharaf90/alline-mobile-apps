@@ -49,7 +49,6 @@ class ChatController extends GetxController implements GetxService{
   ChatModel? _conversationModel;
   MessageModel? _messageModel;
   int _userTypeIndex = 0;
-  int _apiHitCount = 0;
 
 
   bool get isLoading => _isLoading;
@@ -94,49 +93,38 @@ class ChatController extends GetxController implements GetxService{
 
 
 
-  Future<void> getConversationList(int offset, {bool isUpdate = true}) async{
-    _apiHitCount ++;
-    if(offset == 1){
-      _conversationModel = null;
-      if(isUpdate){
-        update();
-      }
-    }
-    _isLoading = true;
-    Response response = await chatServiceInterFace.getConversationList(offset, _userTypeIndex == 0 ? 'seller' : _userTypeIndex == 1 ? 'customer' : 'admin');
-    if(response.statusCode == 200) {
-      if(offset == 1) {
-        _conversationModel = null;
-        _conversationModel = ChatModel.fromJson(response.body);
-      }else {
-        _conversationModel!.totalSize = ChatModel.fromJson(response.body).totalSize;
-        _conversationModel!.offset = ChatModel.fromJson(response.body).offset;
-        _conversationModel!.chat!.addAll(ChatModel.fromJson(response.body).chat!);
-      }
-    }else {
-      ApiChecker.checkApi(response);
-    }
-    _apiHitCount--;
-    _isLoading = false;
-
-    if(_apiHitCount == 0){
-      update();
-    }
+  bool _conversationLoadFailed=false;
+  bool get conversationLoadFailed=>_conversationLoadFailed;
+  int _conversationRequest=0;
+  Future<void> getConversationList(int offset, {bool isUpdate = true}) async {
+    final request=++_conversationRequest;
+    _isLoading=true;
+    _conversationLoadFailed=false;
+    if(isUpdate)update();
+    try {
+      final response=await chatServiceInterFace.getConversationList(offset,_userTypeIndex==0?'seller':_userTypeIndex==1?'customer':'admin');
+      if(request!=_conversationRequest)return;
+      if(response.statusCode==200){
+        final next=ChatModel.fromJson(response.body);
+        if(offset>1)next.chat=[...?_conversationModel?.chat,...?next.chat];
+        _conversationModel=next;
+      }else{_conversationLoadFailed=true;ApiChecker.checkApi(response);}
+    }catch(_){if(request==_conversationRequest)_conversationLoadFailed=true;}
+    finally{if(request==_conversationRequest){_isLoading=false;update();}}
   }
 
-  bool isSearching = false;
-  Future<void> searchConversationList(String searchChat) async{
-
-    if(searchChat.isNotEmpty){
-      isSearching = true;
-    } else {
-      setUserTypeIndex(_userTypeIndex);
-    }
-
-    _isLoading = true;
-    _conversationModel = await chatServiceInterFace.searchChatList(_userTypeIndex == 0 ? 'seller' : _userTypeIndex == 1 ? 'customer':'admin', searchChat);
-    _isLoading = false;
-    update();
+  bool isSearching=false;
+  Future<void> searchConversationList(String searchChat) async {
+    if(searchChat.trim().isEmpty){isSearching=false;await getConversationList(1);return;}
+    final request=++_conversationRequest;
+    isSearching=true;_isLoading=true;_conversationLoadFailed=false;update();
+    try{
+      final result=await chatServiceInterFace.searchChatList(_userTypeIndex==0?'seller':_userTypeIndex==1?'customer':'admin',searchChat);
+      if(request!=_conversationRequest)return;
+      _conversationLoadFailed=result==null;
+      if(result!=null)_conversationModel=result;
+    }catch(_){if(request==_conversationRequest)_conversationLoadFailed=true;}
+    finally{if(request==_conversationRequest){_isLoading=false;update();}}
   }
 
   Future<void> getChats(int offset, int? userId, {bool firstLoad = false}) async {
@@ -144,21 +132,21 @@ class ChatController extends GetxController implements GetxService{
       _isLoading = true;
       _messageModel = null;
     }
-    Response _response = await chatServiceInterFace.getChatList(offset, userId);
-    if (_response.body != {} && _response.statusCode == 200) {
+    Response response = await chatServiceInterFace.getChatList(offset, userId);
+    if (response.body != {} && response.statusCode == 200) {
       if(offset == 1 ){
         _messageModel = null;
-        _messageModel = MessageModel.fromJson(_response.body);
+        _messageModel = MessageModel.fromJson(response.body);
 
 
       }else{
-        _messageModel?.totalSize =  MessageModel.fromJson(_response.body).totalSize;
-        _messageModel?.offset =  MessageModel.fromJson(_response.body).offset;
-        _messageModel?.message?.addAll(MessageModel.fromJson(_response.body).message ?? []) ;
+        _messageModel?.totalSize =  MessageModel.fromJson(response.body).totalSize;
+        _messageModel?.offset =  MessageModel.fromJson(response.body).offset;
+        _messageModel?.message?.addAll(MessageModel.fromJson(response.body).message ?? []) ;
 
       }
     } else {
-      ApiChecker.checkApi(_response);
+      ApiChecker.checkApi(response);
     }
     _isLoading = false;
     update();
@@ -173,31 +161,34 @@ class ChatController extends GetxController implements GetxService{
 
   Future<ResponseModel> sendMessage(String message, int userId) async {
 
+    if (_isSending) return ResponseModel(false, 'loading'.tr);
     _isSending = true;
     update();
     
-    ResponseModel _response = await chatServiceInterFace.sendMessage(message, userId, getXFileFromMediaFileModel(pickedMediaFileModelList ?? []) ?? [], _pickedFiles ?? []);
-    
-    if(_response.isSuccess){
-      _isSendButtonActive = false;
-      
-      getChats(1, userId);
-      
-      _emptyAllPickedData();
-      
-    }else{
-      _isSendButtonActive = false;
+    try {
+      final ResponseModel response = await chatServiceInterFace.sendMessage(message, userId, getXFileFromMediaFileModel(pickedMediaFileModelList ?? []) ?? [], _pickedFiles ?? []);
+      if (response.isSuccess) {
+        _isSendButtonActive = false;
+        getChats(1, userId);
+        _emptyAllPickedData();
+      } else {
+        _isSendButtonActive = true;
+      }
+      return response;
+    } catch (_) {
+      _isSendButtonActive = true;
+      return ResponseModel(false, 'alline_load_failed'.tr);
+    } finally {
+      _isSending = false;
+      update();
     }
-    
-    _isSending = false;
-    update();
-    
-    return _response;
   }
 
 
   void setUserTypeIndex(int index, {bool isUpdate = true}) {
     _userTypeIndex = index;
+    _conversationModel = null;
+    isSearching = false;
     getConversationList(1, isUpdate: isUpdate);
     if(isUpdate) {
       update();
@@ -365,13 +356,13 @@ class ChatController extends GetxController implements GetxService{
           showCustomSnackBarWidget('invalid_file_type'.tr);
         }
 
-        validatedFiles.forEach((element) {
+        for (var element in validatedFiles) {
           if(ImageValidationHelper.getFileSizeFromPlatformFileToDouble(element) > AppConstants.maxSizeOfASingleFile) {
             _singleFIleCrossMaxLimit = true;
           } else{
             _pickedFiles!.add(element);
           }
-        });
+        }
 
         if(_pickedFiles?.length == AppConstants.maxLimitOfTotalFileSent  &&   validatedFiles.length > AppConstants.maxLimitOfTotalFileSent){
           _pickedFIleCrossMaxLength = true;

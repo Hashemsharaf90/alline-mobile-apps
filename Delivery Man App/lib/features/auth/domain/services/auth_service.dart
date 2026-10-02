@@ -88,25 +88,25 @@ class AuthService implements AuthServiceInterface {
 
   @override
   Future<Response> forgotPassword(String? identity) async{
-    Response _response = await authRepoInterface.forgotPassword(identity);
-    if (_response.statusCode == 200) {
-      showCustomSnackBarWidget(_response.body['message'], isError: false);
+    Response response = await authRepoInterface.forgotPassword(identity);
+    if (response.statusCode == 200) {
+      showCustomSnackBarWidget(response.body['message'], isError: false);
     } else {
-      ApiChecker.checkApi(_response);
+      ApiChecker.checkApi(response);
     }
-    return _response;
+    return response;
   }
 
   @override
   Future<Response> verifyOtp(String otp, String? identity) async{
-    Response _response = await authRepoInterface.verifyOtp(otp, identity);
-    if (_response.statusCode == 200) {
+    Response response = await authRepoInterface.verifyOtp(otp, identity);
+    if (response.statusCode == 200) {
 
       showCustomSnackBarWidget('otp_verified_successfully'.tr, isError: false);
     } else {
-      ApiChecker.checkApi(_response);
+      ApiChecker.checkApi(response);
     }
-    return _response ;
+    return response ;
   }
 
   @override

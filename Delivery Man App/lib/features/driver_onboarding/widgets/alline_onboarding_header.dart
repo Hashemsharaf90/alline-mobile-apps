@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
@@ -17,9 +18,9 @@ class AllineOnboardingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color activeBg = Color(0xFFE8F1FC);
-    const Color inactiveColor = Color(0xFFD6D9E0);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color activeBg = Get.theme.colorScheme.primaryContainer;
+    final Color inactiveColor = Get.theme.colorScheme.outline;
 
     final List<String> stepLabels = [
       'profile_step_label'.tr,
@@ -34,7 +35,7 @@ class AllineOnboardingHeader extends StatelessWidget {
         horizontal: Dimensions.paddingSizeDefault,
         vertical: Dimensions.paddingSizeSmall,
       ),
-      color: Colors.white,
+      color: Get.theme.colorScheme.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -57,7 +58,7 @@ class AllineOnboardingHeader extends StatelessWidget {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               color: isCompleted
-                                  ? const Color(0xFF04BB7B)
+                                  ? AllineColors.success
                                   : isActive
                                       ? primaryBlue
                                       : activeBg,
@@ -68,11 +69,14 @@ class AllineOnboardingHeader extends StatelessWidget {
                             ),
                             child: Center(
                               child: isCompleted
-                                  ? const Icon(Icons.check, size: 18, color: Colors.white)
+                                  ? const Icon(Icons.check,
+                                      size: 18, color: Colors.white)
                                   : Text(
                                       '$stepNum',
                                       style: rubikBold.copyWith(
-                                        color: isActive ? Colors.white : Colors.black54,
+                                        color: isActive
+                                            ? Colors.white
+                                            : Colors.black54,
                                         fontSize: 14,
                                       ),
                                     ),
@@ -95,7 +99,9 @@ class AllineOnboardingHeader extends StatelessWidget {
                       Container(
                         width: 14,
                         height: 2,
-                        color: stepNum < currentStep ? const Color(0xFF04BB7B) : inactiveColor,
+                        color: stepNum < currentStep
+                            ? AllineColors.success
+                            : inactiveColor,
                         margin: const EdgeInsets.only(bottom: 18),
                       ),
                   ],
@@ -110,7 +116,7 @@ class AllineOnboardingHeader extends StatelessWidget {
             title,
             style: rubikBold.copyWith(
               fontSize: Dimensions.fontSizeLarge,
-              color: const Color(0xFF1B2430),
+              color: Get.theme.colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
@@ -118,11 +124,11 @@ class AllineOnboardingHeader extends StatelessWidget {
             subtitle,
             style: rubikRegular.copyWith(
               fontSize: Dimensions.fontSizeSmall,
-              color: const Color(0xFF757D8A),
+              color: Get.theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
-          const Divider(height: 1, color: Color(0xFFEFEFEF)),
+          Divider(height: 1, color: Get.theme.colorScheme.outline),
         ],
       ),
     );

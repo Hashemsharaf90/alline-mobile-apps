@@ -29,7 +29,7 @@ import 'package:sixvalley_delivery_boy/features/driver_onboarding/screens/driver
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -100,55 +100,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 Center(child: Text('to_reach_your_customer_destination'.tr,style: rubikRegular.copyWith(color: Theme.of(context).hintColor)))],),
               SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-              Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Get.isDarkMode ? Theme.of(context).hintColor : Theme.of(context).primaryColor.withValues(alpha:.5)),
-                    borderRadius: BorderRadius.circular(Dimensions.topSpace),
-                    color: Get.isDarkMode ? Theme.of(context).primaryColor.withValues(alpha:.02) : Theme.of(context).primaryColor.withValues(alpha:.02),
-                  ),
-                  child: Stack(children: [
-
-                    Container(width:77, height: 53,
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withValues(alpha:.125),
-                            borderRadius: Get.find<LocalizationController>().isLtr? BorderRadius.only(
-                                topLeft: Radius.circular(Dimensions.topSpace),
-                                bottomLeft: Radius.circular(Dimensions.topSpace)) :
-                            BorderRadius.only(topRight: Radius.circular(Dimensions.topSpace),
-                                bottomRight: Radius.circular(Dimensions.topSpace),
-                            ),
-                        ),
-                    ),
-
-                    Padding(padding: const EdgeInsets.only(top : 4.0),
-                        child: Row(children: [
-                          SizedBox(width: Dimensions.loginColor,
-                              child: CodePickerWidget(
-                                  dialogBackgroundColor:  Theme.of(context).cardColor,
-                                  onChanged: (countryCode) {
-                                    Get.find<AuthController>().updateCountryDialCode(countryCode.dialCode!);
-                                  },
-                                  initialSelection: _countryDialCode,
-                                  favorite: [_countryDialCode!],
-                                  showDropDownButton: true,
-                                  padding: EdgeInsets.only(right: Dimensions.paddingSizeDefault),
-                                  showFlagMain: true,
-                                  flagWidth: 30,
-                                  textStyle: rubikRegular.copyWith(fontSize: Dimensions.fontSizeSmall,
-                                      color: Theme.of(context).textTheme.displayLarge!.color))),
-
-                          Expanded(child: Container(
-                              transform:Get.find<LocalizationController>().isLtr?
-                              Matrix4.translationValues(-25, 0, 0): Matrix4.translationValues(25, 0, 0),
-                              child: CustomTextFieldWidget(
-                                  hintText: '',
-                                  noPadding: true,
-                                  nextFocus: _passwordFocus,
-                                  controller: _emailController,
-                                  focusNode: _emailFocus,
-                                  inputType: TextInputType.phone,
-                                  inputAction: TextInputAction.next))),
-                        ]))])),
+              Directionality(textDirection: TextDirection.ltr, child: Container(
+                decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface,
+                  border: Border.all(color:Theme.of(context).colorScheme.outline),borderRadius:BorderRadius.circular(12)),
+                child:Row(children:[SizedBox(width:120,child:CodePickerWidget(
+                  dialogBackgroundColor:Theme.of(context).cardColor,
+                  onChanged:(countryCode)=>Get.find<AuthController>().updateCountryDialCode(countryCode.dialCode!),
+                  initialSelection:_countryDialCode,favorite:[_countryDialCode!],showDropDownButton:true,
+                  padding:const EdgeInsets.all(4),showFlagMain:true,flagWidth:24,
+                  textStyle:rubikRegular.copyWith(color:Theme.of(context).colorScheme.onSurface))),
+                  Expanded(child:CustomTextFieldWidget(hintText:'phone'.tr,noPadding:true,nextFocus:_passwordFocus,
+                    controller:_emailController,focusNode:_emailFocus,inputType:TextInputType.phone,inputAction:TextInputAction.next))])),
+              ),
 
               SizedBox(height: Dimensions.paddingSizeLarge),
               Container(
@@ -241,20 +204,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 onTap: () async {
                   String countryCode =  Get.find<AuthController>().countryCode.replaceAll('+', '');
                   String phone = _emailController!.text.trim();
-                  String _password = _passwordController!.text.trim();
+                  String password = _passwordController!.text.trim();
                   if (phone.isEmpty) {
                     showCustomSnackBarWidget('enter_phone_number'.tr);
-                  }else if (_password.isEmpty) {
+                  }else if (password.isEmpty) {
                     showCustomSnackBarWidget('enter_password'.tr);
-                  }else if (_password.length < 8) {
+                  }else if (password.length < 8) {
                     showCustomSnackBarWidget('password_should_be'.tr);
                   }else {
 
-                    await authController.login(countryCode, phone, _password).then((status) async {
+                    await authController.login(countryCode, phone, password).then((status) async {
 
                       if (status.isSuccess) {
                         if (authController.isActiveRememberMe) {
-                          authController.saveUserCredentials(Get.find<AuthController>().countryCode, phone, _password);
+                          authController.saveUserCredentials(Get.find<AuthController>().countryCode, phone, password);
                         } else {
                           authController.clearUserEmailAndPassword();
                         }

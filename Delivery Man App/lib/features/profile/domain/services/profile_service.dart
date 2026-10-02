@@ -29,7 +29,7 @@ class ProfileService implements ProfileServiceInterface{
   @override
   Future<ResponseModel> profileStatusOnnOff(int status) async {
     Response response = await profileRepoInterface.profileStatusOnnOff(status);
-    Get.back();
+    if (Get.isDialogOpen == true) Get.back();
     if (response.statusCode == 200) {
       String message = response.body is Map && response.body['message'] != null
           ? response.body['message'].toString()

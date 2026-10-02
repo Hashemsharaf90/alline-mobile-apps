@@ -1,0 +1,51 @@
+[
+  {
+    "check": "config",
+    "status": 200,
+    "json_keys": 103
+  },
+  {
+    "check": "login",
+    "status": 200,
+    "token_present": true,
+    "approval_status": "active",
+    "response_keys": [
+      "token",
+      "approval_status",
+      "is_active"
+    ]
+  },
+  {
+    "check": "profile",
+    "status": 200,
+    "shape": "dict",
+    "online": 1,
+    "active": 1,
+    "financial_fields_present": [
+      "current_balance",
+      "cash_in_hand",
+      "withdrawable_balance",
+      "pending_withdraw",
+      "total_earn",
+      "total_withdraw",
+      "total_deposit"
+    ]
+  },
+  {
+    "check": "orders",
+    "status": 200,
+    "shape": "list",
+    "count": 0,
+    "status_counts": {}
+  },
+  {
+    "check": "notifications",
+    "status": 200,
+    "shape": "dict"
+  },
+  {
+    "check": "onboarding",
+    "status": 200,
+    "shape": "dict"
+  }
+]

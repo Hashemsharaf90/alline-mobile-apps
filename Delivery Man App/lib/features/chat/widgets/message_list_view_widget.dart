@@ -79,12 +79,12 @@ class MessageListViewWidget extends StatelessWidget {
     final Message currentMessage = messageModel!.message![index];
     final nextMessage = index < ((messageModel.message?.length ?? 0) - 1) ? messageModel.message![index + 1] : null;
 
-    DateTime? _currentMessageDate = currentMessage.createdAt == null ? null : DateTime.tryParse(currentMessage.createdAt!);
-    DateTime? _nextMessageDate = nextMessage?.createdAt == null ? null : DateTime.tryParse(nextMessage!.createdAt!);
-    bool _isFirst = index == ((messageModel.message?.length ?? 0) - 1);
+    DateTime? currentMessageDate = currentMessage.createdAt == null ? null : DateTime.tryParse(currentMessage.createdAt!);
+    DateTime? nextMessageDate = nextMessage?.createdAt == null ? null : DateTime.tryParse(nextMessage!.createdAt!);
+    bool isFirst = index == ((messageModel.message?.length ?? 0) - 1);
 
-    if (_isFirst || (_nextMessageDate?.day != _currentMessageDate?.day)) {
-      return DateConverter.dateStringMonthYear(_currentMessageDate);
+    if (isFirst || (nextMessageDate?.day != currentMessageDate?.day)) {
+      return DateConverter.dateStringMonthYear(currentMessageDate);
     }
     return null;
   }

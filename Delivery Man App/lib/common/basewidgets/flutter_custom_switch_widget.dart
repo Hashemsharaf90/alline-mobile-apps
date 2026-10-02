@@ -1,4 +1,4 @@
-library flutter_switch;
+library;
 
 import 'package:flutter/material.dart';
 
@@ -251,7 +251,7 @@ class FlutterCustomSwitchWidget extends StatefulWidget {
   final bool disabled;
 
   @override
-  _FlutterCustomSwitchWidgetState createState() => _FlutterCustomSwitchWidgetState();
+  State<FlutterCustomSwitchWidget> createState() => _FlutterCustomSwitchWidgetState();
 }
 
 class _FlutterCustomSwitchWidgetState extends State<FlutterCustomSwitchWidget>
@@ -299,28 +299,28 @@ class _FlutterCustomSwitchWidgetState extends State<FlutterCustomSwitchWidget>
 
   @override
   Widget build(BuildContext context) {
-    Color _toggleColor = Colors.white;
-    Color _switchColor = Colors.white;
-    Border? _switchBorder;
-    Border? _toggleBorder;
+    Color toggleColor = Colors.white;
+    Color switchColor = Colors.white;
+    Border? switchBorder;
+    Border? toggleBorder;
 
     if (widget.value) {
-      _toggleColor = widget.activeToggleColor ?? widget.toggleColor;
-      _switchColor = widget.activeColor;
-      _switchBorder = widget.activeSwitchBorder as Border? ??
+      toggleColor = widget.activeToggleColor ?? widget.toggleColor;
+      switchColor = widget.activeColor;
+      switchBorder = widget.activeSwitchBorder as Border? ??
           widget.switchBorder as Border?;
-      _toggleBorder = widget.activeToggleBorder as Border? ??
+      toggleBorder = widget.activeToggleBorder as Border? ??
           widget.toggleBorder as Border?;
     } else {
-      _toggleColor = widget.inactiveToggleColor ?? widget.toggleColor;
-      _switchColor = widget.inactiveColor;
-      _switchBorder = widget.inactiveSwitchBorder as Border? ??
+      toggleColor = widget.inactiveToggleColor ?? widget.toggleColor;
+      switchColor = widget.inactiveColor;
+      switchBorder = widget.inactiveSwitchBorder as Border? ??
           widget.switchBorder as Border?;
-      _toggleBorder = widget.inactiveToggleBorder as Border? ??
+      toggleBorder = widget.inactiveToggleBorder as Border? ??
           widget.toggleBorder as Border?;
     }
 
-    double _textSpace = widget.width - widget.toggleSize;
+    double textSpace = widget.width - widget.toggleSize;
 
     return AnimatedBuilder(
       animation: _animationController,
@@ -345,8 +345,8 @@ class _FlutterCustomSwitchWidgetState extends State<FlutterCustomSwitchWidget>
                 height: widget.height,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(widget.borderRadius),
-                  color: _switchColor,
-                  border: _switchBorder,
+                  color: switchColor,
+                  border: switchBorder,
                 ),
                 child: Stack(
                   children: <Widget>[
@@ -354,7 +354,7 @@ class _FlutterCustomSwitchWidgetState extends State<FlutterCustomSwitchWidget>
                       opacity: widget.value ? 1.0 : 0.0,
                       duration: widget.duration,
                       child: Container(
-                        width: _textSpace,
+                        width: textSpace,
                         alignment: Alignment.center,
                         child: _activeText,
                       ),
@@ -365,7 +365,7 @@ class _FlutterCustomSwitchWidgetState extends State<FlutterCustomSwitchWidget>
                         opacity: !widget.value ? 1.0 : 0.0,
                         duration: widget.duration,
                         child: Container(
-                          width: _textSpace,
+                          width: textSpace,
                           padding: const EdgeInsets.symmetric(horizontal: 4.0),
                           alignment: Alignment.center,
                           child: _inactiveText,
@@ -379,8 +379,8 @@ class _FlutterCustomSwitchWidgetState extends State<FlutterCustomSwitchWidget>
                         height: widget.toggleSize,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _toggleColor,
-                          border: _toggleBorder,
+                          color: toggleColor,
+                          border: toggleBorder,
                         ),
                         child: FittedBox(
                           fit: BoxFit.contain,

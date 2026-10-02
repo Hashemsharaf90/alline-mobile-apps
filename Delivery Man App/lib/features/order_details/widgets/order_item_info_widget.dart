@@ -26,7 +26,7 @@ class OrderItemInfoWidget extends StatelessWidget {
       padding:  EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,children: [
-          isCount? Text(title!.tr + ' (*${Get.find<OrderDetailsController>().orderDetails!.length})',
+          isCount? Text('${title!.tr} (*${Get.find<OrderDetailsController>().orderDetails!.length})',
               style: rubikMedium.copyWith(color: Theme.of(context).hintColor)):
           isDeliveryCost?
         Text(title!.tr, style: rubikMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)):

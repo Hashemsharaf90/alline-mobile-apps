@@ -1,0 +1,44 @@
+[
+  {
+    "check": "wallet",
+    "status": 404,
+    "shape": "dict",
+    "count": null
+  },
+  {
+    "check": "chat_customer",
+    "status": 200,
+    "shape": "dict",
+    "count": null
+  },
+  {
+    "check": "chat_seller",
+    "status": 200,
+    "shape": "dict",
+    "count": null
+  },
+  {
+    "check": "chat_admin",
+    "status": 200,
+    "shape": "dict",
+    "count": null
+  },
+  {
+    "check": "reviews",
+    "status": 200,
+    "shape": "dict",
+    "count": null
+  },
+  {
+    "check": "emergency",
+    "status": 200,
+    "shape": "dict",
+    "count": null
+  },
+  {
+    "check": "order_history",
+    "status": 200,
+    "shape": "list",
+    "count": 0
+  }
+]

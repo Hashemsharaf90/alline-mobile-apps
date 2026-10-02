@@ -15,7 +15,7 @@ class GeneralInfoWidget extends StatelessWidget {
     return GetBuilder<ProfileController>(
         builder: (profileController) {
 
-          return ListView(physics: const NeverScrollableScrollPhysics(), children: [
+          return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
             Padding(padding:  EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -34,7 +34,7 @@ class GeneralInfoWidget extends StatelessWidget {
                   controller: profileController.firstNameController,
                   textStyle: robotoRegular.copyWith(
                     fontSize: Dimensions.fontSizeDefault,
-                    color: Get.isDarkMode ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.90) : Theme.of(context).primaryColorDark,
+                    color: Get.isDarkMode ? Theme.of(context).colorScheme.onSurface : Theme.of(context).primaryColorDark,
                   ),
                 ),
                 SizedBox(height: Dimensions.paddingSizeDefault),
@@ -53,7 +53,7 @@ class GeneralInfoWidget extends StatelessWidget {
                   controller: profileController.lastNameController,
                   textStyle: robotoRegular.copyWith(
                     fontSize: Dimensions.fontSizeDefault,
-                    color: Get.isDarkMode ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.90) : Theme.of(context).primaryColorDark,
+                    color: Get.isDarkMode ? Theme.of(context).colorScheme.onSurface : Theme.of(context).primaryColorDark,
                   ),
                 ),
                 SizedBox(height: Dimensions.paddingSizeSmall),
@@ -120,7 +120,7 @@ class GeneralInfoWidget extends StatelessWidget {
                   controller: profileController.addressController,
                   textStyle: robotoRegular.copyWith(
                     fontSize: Dimensions.fontSizeDefault,
-                    color: Get.isDarkMode ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.90) : Theme.of(context).primaryColorDark,
+                    color: Get.isDarkMode ? Theme.of(context).colorScheme.onSurface : Theme.of(context).primaryColorDark,
                   ),
                 ),
               ],

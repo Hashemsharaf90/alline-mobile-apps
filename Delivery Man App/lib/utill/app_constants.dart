@@ -2,6 +2,7 @@ import 'package:sixvalley_delivery_boy/features/language/domain/models/language_
 import 'images.dart';
 
 class AppConstants {
+  static const bool localQa = bool.fromEnvironment('ALLINE_LOCAL_QA', defaultValue: false);
   static const String companyName = 'Alline';
   static const String appName = 'Alline Delivery';
   static const bool demo = false;
@@ -10,7 +11,7 @@ class AppConstants {
   // Polyline routing uses server-side proxy routePolylineApi; client map key is configured via AndroidManifest
   static const String polylineMapKey = '';
 
-  static const String baseUrl = 'https://allinye.com';
+  static const String baseUrl = String.fromEnvironment('ALLINE_API_BASE_URL', defaultValue: 'https://allinye.com');
 
   static const String profileUri = '/api/v2/delivery-man/info';
   static const String configUri = '/api/v1/config';

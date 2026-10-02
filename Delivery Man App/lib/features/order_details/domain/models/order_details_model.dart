@@ -244,7 +244,7 @@ class OfflinePaymentsEdit {
       });
 
   OfflinePaymentsEdit.fromJson(Map<String, dynamic> json) {
-    infoKey = (json.length>0)? json.entries.map((e)=> e.key).toList():[];
-    infoValue = (json.length>0)? json.entries.map((e)=> e.value).toList():[];
+    infoKey = (json.isNotEmpty)? json.entries.map((e)=> e.key).toList():[];
+    infoValue = (json.isNotEmpty)? json.entries.map((e)=> e.value).toList():[];
   }
 }

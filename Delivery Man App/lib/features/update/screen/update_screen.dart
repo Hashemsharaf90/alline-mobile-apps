@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/custom_button_widget.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/custom_snackbar_widget.dart';
 import 'package:sixvalley_delivery_boy/features/splash/controllers/splash_controller.dart';
@@ -19,7 +18,7 @@ class UpdateScreen extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(Dimensions.paddingSizeLarge),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          child: SingleChildScrollView(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
             Image.asset(
               color: Theme.of(context).primaryColor,
@@ -44,20 +43,20 @@ class UpdateScreen extends StatelessWidget {
             SizedBox(height: MediaQuery.of(context).size.height*0.04),
 
             CustomButtonWidget(btnTxt: 'update_now'.tr, onTap: () async {
-              String? appUrl = 'https://google.com';
+              String? appUrl;
               if(Platform.isAndroid) {
                 appUrl = Get.find<SplashController>().configModel?.deliveryManAppVersionControl?.forAndroid.link;
               }else if(Platform.isIOS) {
-                appUrl = Provider.of<SplashController>(context, listen: false).configModel?.deliveryManAppVersionControl?.forIos.link;
+                appUrl = Get.find<SplashController>().configModel?.deliveryManAppVersionControl?.forIos.link;
               }
-              if(await canLaunchUrlString(appUrl!)) {
+              if(appUrl != null && await canLaunchUrlString(appUrl)) {
                 launchUrlString(appUrl, mode: LaunchMode.externalApplication);
               }else {
-                showCustomSnackBarWidget('${'can_not_launch'.tr}  $appUrl');
+                showCustomSnackBarWidget('can_not_launch'.tr);
               }
             }),
 
-          ]),
+          ])),
         ),
       ),
     );

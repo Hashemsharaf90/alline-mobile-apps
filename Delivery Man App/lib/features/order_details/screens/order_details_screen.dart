@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/features/order_details/widgets/alline_journey_timeline.dart';
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ import 'package:sixvalley_delivery_boy/features/order_details/widgets/camera_or_
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/change_amount_widget.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/delivery_info_widget.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/order_details_shimmer_widget.dart';
-import 'package:sixvalley_delivery_boy/features/order_details/widgets/order_info_with_customer_widget.dart';
+import 'package:sixvalley_delivery_boy/features/order_details/widgets/alline_delivery_map.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/order_status_change_custom_button_widget.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/payment_info_widget.dart';
 import 'package:sixvalley_delivery_boy/features/order_details/widgets/seller_info_widget.dart';
@@ -131,38 +132,38 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   if(orderDetailsController.endOfPage && !orderDetailsController.endOfPageScrolled) {
                     _scrollDown();
                   }
-                  double _itemsPrice = 0;
-                  double _discount = 0;
-                  double _tax = 0;
-                  double _subTotal = 0;
-                  double _referAndEarnDiscount = 0;
-                  double _total = 0;
+                  double itemsPrice = 0;
+                  double discount = 0;
+                  double tax = 0;
+                  double subTotal = 0;
+                  double referAndEarnDiscount = 0;
+                  double total = 0;
 
                   if(orderModel?.orderStatus != null){
                     deliveryCharge = orderModel?.shippingCost;
 
                     if (orderDetailsController.orderDetails != null) {
-                      _tax = orderDetailsController.orderDetails?[0].orderModel?.totalTaxAmount ?? 0;
+                      tax = orderDetailsController.orderDetails?[0].orderModel?.totalTaxAmount ?? 0;
                       for (var orderDetails in orderDetailsController.orderDetails!) {
-                        _itemsPrice = _itemsPrice + (orderDetails.price! * orderDetails.qty!);
-                        _discount = _discount + orderDetails.discount!;
+                        itemsPrice = itemsPrice + (orderDetails.price! * orderDetails.qty!);
+                        discount = discount + orderDetails.discount!;
                       }
-                      _referAndEarnDiscount = orderDetailsController.orderDetails?[0].orderModel?.referAndEarnDiscount ?? 0;
+                      referAndEarnDiscount = orderDetailsController.orderDetails?[0].orderModel?.referAndEarnDiscount ?? 0;
                     }
 
                     if(orderModel?.isShippingFree ?? false){
                       deliveryCharge = 0;
                     }
 
-                    _subTotal = _itemsPrice + _tax - _discount - _referAndEarnDiscount;
+                    subTotal = itemsPrice + tax - discount - referAndEarnDiscount;
 
                     if(editOrderPayment()) {
                       orderDetailsController.setTotalPrice = (_editOrderCollectableAmount ?? 0);
                     } else {
-                      orderDetailsController.setTotalPrice = (_subTotal  + (deliveryCharge ?? 0) - (orderModel?.discountAmount ?? 0));
+                      orderDetailsController.setTotalPrice = (subTotal  + (deliveryCharge ?? 0) - (orderModel?.discountAmount ?? 0));
                     }
 
-                    _total = (_subTotal  + (deliveryCharge ?? 0) - (orderModel?.discountAmount ?? 0));
+                    total = (subTotal  + (deliveryCharge ?? 0) - (orderModel?.discountAmount ?? 0));
 
                   }
 
@@ -173,8 +174,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       physics: const BouncingScrollPhysics(),
                       padding:  EdgeInsets.all(Dimensions.paddingSizeSmall), children: [
 
-                      ['processing', 'out_for_delivery'].contains(orderModel!.orderStatus) || orderModel!.driverJourneyStatus != null?
-                      OrderInfoWithDeliveryInfoWidget(orderModel: orderModel) : const SizedBox(),
+                      AllineJourneyTimeline(order:orderModel!),
+                      const SizedBox(height:16),
+                      (['processing', 'out_for_delivery'].contains(orderModel!.orderStatus) || orderModel!.driverJourneyStatus != null) ?
+                      AllineDeliveryMap(order: orderModel!) : const SizedBox(),
+                      SizedBox(height: Dimensions.paddingSizeSmall),
 
                       orderModel!.sellerInfo != null ?
                       SellerInfoWidget(orderModel: orderModel) : const SizedBox(),
@@ -190,14 +194,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         paymentStatus: (orderModel?.paymentStatus == 'paid' && (orderDetails?.latestEditHistory?.orderDueAmount == null || orderDetails?.latestEditHistory?.orderDueAmount == 0) ) ? 'paid' :
                         ((orderDetails?.latestEditHistory?.orderDueAmount ?? 0) >= 0 &&  orderDetails?.latestEditHistory?.orderDuePaymentStatus == 'paid') ? 'paid'
                           : (orderModel?.paymentStatus == 'paid' && (orderDetails?.latestEditHistory?.orderDueAmount ?? 0) > 0) ? 'partially_paid' : 'unpaid',
-                        itemsPrice: _itemsPrice,
-                        tax: _tax,
-                        subTotal: _total,
-                        discount: _discount,
-                        referAndEarnDiscount: _referAndEarnDiscount,
+                        itemsPrice: itemsPrice,
+                        tax: tax,
+                        subTotal: total,
+                        discount: discount,
+                        referAndEarnDiscount: referAndEarnDiscount,
                         deliveryCharge: orderModel?.isShippingFree ?? false ? 0 : deliveryCharge,
-                        totalPrice: _total,
-                        paidAmount: editOrderPayment() ? (_total - _editOrderCollectableAmount!) : 0,
+                        totalPrice: total,
+                        paidAmount: editOrderPayment() ? (total - _editOrderCollectableAmount!) : 0,
                         dueAmount: editOrderPayment() ? (_editOrderCollectableAmount!) : 0,
                       ),
 
@@ -487,6 +491,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       context: context,
       status: 'delivered',
     ).then((value) {
+      if (!value || !context.mounted) return;
       Navigator.of(Get.context!).pushReplacement(
         MaterialPageRoute(
           builder: (_) => OrderDeliveredScreen(

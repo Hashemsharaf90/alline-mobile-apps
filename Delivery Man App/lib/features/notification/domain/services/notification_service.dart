@@ -2,7 +2,7 @@ import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:sixvalley_delivery_boy/features/notification/domain/repositories/notification_repository_interface.dart';
 import 'package:sixvalley_delivery_boy/features/notification/domain/services/notification_service_interface.dart';
 
-class NotificationService implements NotificationServiceInterface{
+class NotificationService implements NotificationServiceInterface {
   NotificationRepositoryInterface notificationRepoInterfcace;
   NotificationService({required this.notificationRepoInterfcace});
 
@@ -20,5 +20,4 @@ class NotificationService implements NotificationServiceInterface{
   void saveSeenNotificationCount(int count) {
     return notificationRepoInterfcace.saveSeenNotificationCount(count);
   }
-
 }

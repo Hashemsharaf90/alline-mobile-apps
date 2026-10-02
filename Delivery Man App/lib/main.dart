@@ -1,5 +1,5 @@
+import 'package:sixvalley_delivery_boy/common/basewidgets/alline/alline_offline_banner.dart';
 import 'dart:async';
-import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -32,13 +32,13 @@ Future<void> main() async {
   await FlutterDownloader.initialize(debug: true, ignoreSsl: true);
 
 
-  if (Firebase.apps.isEmpty) {
+  if (!AppConstants.localQa && Firebase.apps.isEmpty) {
     await Firebase.initializeApp();
   }
 
 
 
-  if(defaultTargetPlatform == TargetPlatform.android) {
+  if(!AppConstants.localQa && defaultTargetPlatform == TargetPlatform.android) {
     await FirebaseMessaging.instance.requestPermission();
   }
 
@@ -49,6 +49,7 @@ Future<void> main() async {
 
   NotificationBody? body;
 
+  if (!AppConstants.localQa) {
   try {
     channel = const AndroidNotificationChannel(
       'high_importance_channel',
@@ -63,6 +64,7 @@ Future<void> main() async {
     FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
     await flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.createNotificationChannel(channel);
   }catch(_) {}
+  }
 
 
   runApp(MyApp(languages: languages, body: body));
@@ -90,7 +92,7 @@ class MyApp extends StatelessWidget {
             defaultTransition: Transition.topLevel,
             transitionDuration: const Duration(milliseconds: 500),
               builder:(context,child) {
-                return MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling), child: SafeArea(top: false, child: child!));
+                return AllineOfflineBanner(child: SafeArea(top: false, child: child!));
               }
           );
         });

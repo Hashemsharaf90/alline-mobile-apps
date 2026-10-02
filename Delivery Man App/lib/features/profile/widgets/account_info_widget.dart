@@ -14,7 +14,7 @@ class AccountInfoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetBuilder<ProfileController>(
         builder: (profileController) {
-          return ListView(physics: const NeverScrollableScrollPhysics(), children: [
+          return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
               Padding(padding:  EdgeInsets.only(bottom: Dimensions.paddingSizeDefault),
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start,

@@ -23,6 +23,10 @@ class ProfileController extends GetxController implements GetxService {
   final picker = ImagePicker();
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+  bool _isStatusChanging = false;
+  bool get isStatusChanging => _isStatusChanging;
+  bool _profileLoadFailed = false;
+  bool get profileLoadFailed => _profileLoadFailed;
 
 
   UserInfoModel? _userInfoModel;
@@ -58,7 +62,9 @@ class ProfileController extends GetxController implements GetxService {
 
 
   Future<void> getProfile({bool isUpdate = true}) async {
-    _profileModel = await profileServiceInterface.getProfileInfo();
+    final result = await profileServiceInterface.getProfileInfo();
+    _profileLoadFailed = result == null;
+    if (result != null) _profileModel = result;
     _profileImage = _profileModel?.imageFullUrl?.path;
 
     if(isUpdate) {
@@ -68,18 +74,28 @@ class ProfileController extends GetxController implements GetxService {
 
 
   Future <void> profileStatusChange(BuildContext context, int status) async {
-    await profileServiceInterface.profileStatusOnnOff(status);
-    await getProfile();
+    if (_isStatusChanging || _profileModel == null) return;
+    _isStatusChanging = true;
     update();
+    try {
+      final result = await profileServiceInterface.profileStatusOnnOff(status);
+      if (result is ResponseModel && result.isSuccess) {
+        _profileModel?.isOnline = status;
+        await getProfile();
+      }
+    } finally {
+      _isStatusChanging = false;
+      update();
+    }
   }
 
   Future <Response> resetPassword (String? phone, String password ,String confirmPassword) async {
     _isLoading = true;
     update();
-    Response _response = await profileServiceInterface.resetPassword(phone, password, confirmPassword);
+    Response response = await profileServiceInterface.resetPassword(phone, password, confirmPassword);
     _isLoading = false;
     update();
-    return _response;
+    return response;
   }
 
   Future<ResponseModel> updateUserInfo(UserInfoModel updateUserModel, String pass) async {
@@ -90,7 +106,7 @@ class ProfileController extends GetxController implements GetxService {
     if(responseModel.isSuccess){
       _showPassView = false;
     }
-    showCustomSnackBarWidget(responseModel.message, isError: false);
+    showCustomSnackBarWidget(responseModel.message, isError: !responseModel.isSuccess);
     _isLoading = false;
 
     update();

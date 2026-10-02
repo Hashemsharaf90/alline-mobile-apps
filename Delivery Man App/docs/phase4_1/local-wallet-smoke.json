@@ -1,0 +1,30 @@
+[
+  {
+    "check": "earnings",
+    "status": 200,
+    "shape": "dict",
+    "response_keys": [
+      "total_size",
+      "limit",
+      "offset",
+      "orders"
+    ]
+  },
+  {
+    "check": "deposits",
+    "status": 200,
+    "shape": "dict",
+    "response_keys": [
+      "total_size",
+      "limit",
+      "offset",
+      "deposit"
+    ]
+  },
+  {
+    "check": "withdrawals",
+    "status": 403,
+    "shape": "dict",
+    "response_keys": []
+  }
+]

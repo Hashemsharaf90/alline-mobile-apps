@@ -1,7 +1,6 @@
 
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/custom_image_widget.dart';
@@ -56,6 +55,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
+  void dispose(){_scrollController.dispose();super.dispose();}
+
+  @override
   Widget build(BuildContext context) {
     return GetBuilder<ChatController>(builder: (chatController) {
       return PopScope(
@@ -73,7 +75,7 @@ class _ChatScreenState extends State<ChatScreen> {
               highlightColor: Theme.of(context).primaryColor.withValues(alpha:0),
               splashColor: Theme.of(context).primaryColor.withValues(alpha:0),
               onTap: ()=> Navigator.pop(context),
-              child: Icon(CupertinoIcons.back, color: Theme.of(context).textTheme.bodyLarge?.color),
+              child: const BackButtonIcon(),
             ),
             title: Row(children: [
 
@@ -86,10 +88,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
 
-              Padding(
+              Expanded(child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-                child: Text(widget.name??'', style: rubikBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyLarge?.color)),
-              ),
+                child: Text(widget.name??'', style: rubikBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyLarge?.color), maxLines: 1, overflow: TextOverflow.ellipsis),
+              )),
             ]),
           ),
 
@@ -287,7 +289,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 if(widget.isShopOnVacation && !isClosed)
                   Container(padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault, vertical: Dimensions.paddingSizeSmall),
-                    decoration: const BoxDecoration(color: Color(0xFFFEF7D1)),
+                    decoration: BoxDecoration(color: Theme.of(context).colorScheme.tertiaryContainer),
                     child: Row(children: [
                       Expanded(child: Text("shop_close_message".tr,
                           style: rubikRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).textTheme.bodyLarge?.color))),

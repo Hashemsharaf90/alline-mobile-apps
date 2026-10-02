@@ -270,7 +270,7 @@ class _RefundFilterActionState extends State<RefundFilterAction> {
                 : Theme.of(context).textTheme.headlineLarge?.color,
             ),
           ),
-          if (value == 'all_time')  SizedBox(width: Dimensions.paddingSizeExtraLarge),
+          if (value.key == 'all_time')  SizedBox(width: Dimensions.paddingSizeExtraLarge),
         ],
       ),
     );

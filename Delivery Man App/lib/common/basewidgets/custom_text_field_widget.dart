@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
 
 class CustomTextFieldWidget extends StatefulWidget {
   final String? hintText;
@@ -27,35 +26,35 @@ class CustomTextFieldWidget extends StatefulWidget {
   final Function? onChanged;
   final TextStyle? textStyle;
 
-
-  const CustomTextFieldWidget(
-      {super.key, this.hintText = 'Write something...',
-      this.controller,
-      this.focusNode,
-      this.nextFocus,
-      this.inputType = TextInputType.text,
-      this.inputAction = TextInputAction.next,
-      this.maxLines = 1,
-      this.fillColor,
-      this.isCountryPicker = false,
-      this.isShowBorder = false,
-      this.isShowSuffixIcon = false,
-      this.isShowPrefixIcon = false,
-      this.onTap,
-      this.isIcon = false,
-      this.isPassword = false,
-      this.suffixIconUrl,
-      this.prefixIconUrl,
-      this.isSearch = false,
-        this.isDisable = true,
-        this.noBg = false,
-        this.noPadding = false,
-        this.onChanged,
-        this.textStyle,
-      });
+  const CustomTextFieldWidget({
+    super.key,
+    this.hintText = 'Write something...',
+    this.controller,
+    this.focusNode,
+    this.nextFocus,
+    this.inputType = TextInputType.text,
+    this.inputAction = TextInputAction.next,
+    this.maxLines = 1,
+    this.fillColor,
+    this.isCountryPicker = false,
+    this.isShowBorder = false,
+    this.isShowSuffixIcon = false,
+    this.isShowPrefixIcon = false,
+    this.onTap,
+    this.isIcon = false,
+    this.isPassword = false,
+    this.suffixIconUrl,
+    this.prefixIconUrl,
+    this.isSearch = false,
+    this.isDisable = true,
+    this.noBg = false,
+    this.noPadding = false,
+    this.onChanged,
+    this.textStyle,
+  });
 
   @override
-  _CustomTextFieldWidgetState createState() => _CustomTextFieldWidgetState();
+  State<CustomTextFieldWidget> createState() => _CustomTextFieldWidgetState();
 }
 
 class _CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
@@ -63,62 +62,62 @@ class _CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-        Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(Dimensions.topSpace),
-              border: Border.all(color: widget.isShowBorder ? Get.isDarkMode? Theme.of(context).hintColor.withValues(alpha:.5):Theme.of(context).primaryColor.withValues(alpha:.125) : Colors.transparent)),
-          child: TextField(
-            onTapOutside: (PointerDownEvent event) {
-              FocusManager.instance.primaryFocus?.unfocus();
-            },
-           enabled: widget.isDisable,
-            maxLines: widget.maxLines,
-            controller: widget.controller,
-            focusNode: widget.focusNode,
-            style: widget.textStyle ?? Theme.of(context).textTheme.displayMedium!.copyWith(
-              color: Get.isDarkMode
-                  ? Theme.of(context).textTheme.bodyLarge?.color
-                  : Theme.of(context).primaryColorDark,
-              fontSize: Dimensions.fontSizeDefault,
-            ),
-            textInputAction: widget.inputAction,
-            keyboardType: widget.inputType,
-            cursorColor: Get.isDarkMode ? Theme.of(context).primaryColorLight : Theme.of(context).primaryColor,
-            obscureText: widget.isPassword ? _obscureText : false,
-            decoration: InputDecoration(contentPadding:  EdgeInsets.symmetric(vertical: Get.context!.width <= 400 ? 14 : 16, horizontal: 22),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(Dimensions.topSpace),
-                borderSide: const BorderSide(style: BorderStyle.none, width: 0)),
-              isDense: true,
-              hintText: widget.hintText,
-              // fillColor: widget.fillColor ?? Theme.of(context).canvasColor,
-              hintStyle: Theme.of(context).textTheme.displayMedium!.copyWith(fontSize: Dimensions.fontSizeDefault,
-                  color:Get.isDarkMode? Theme.of(context).hintColor.withValues(alpha:.5) : Theme.of(context).hintColor),
-              // filled: true,
-              prefixIcon: widget.isShowPrefixIcon ?
-              Padding(padding:  EdgeInsets.only(left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeSmall),
-                child: Image.asset(widget.prefixIconUrl!),) :
-              widget.noBg ? Image.asset(widget.prefixIconUrl!, color: Get.isDarkMode
-                  ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.70)
-                  : Theme.of(context).primaryColor)
-                  : const SizedBox.shrink(),
-              prefixIconConstraints:  BoxConstraints(minWidth:  widget.noPadding ? 5 : 50, maxHeight: Get.context!.width <= 400? 15: 20),
-              suffixIcon: widget.isShowSuffixIcon ?
-              widget.isPassword ?
-              IconButton(icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility , color: Get.isDarkMode ? Theme.of(context).hintColor : Theme.of(context).primaryColor),
-                  onPressed: _toggle) : widget.isIcon ?
-              Padding(padding:  EdgeInsets.only(left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeSmall),
-                child: Image.asset(widget.suffixIconUrl!, width: 15, height: 15,),) : null : null),
-            onTap: widget.onTap as void Function()?,
-            onSubmitted: (text) => widget.nextFocus != null ? FocusScope.of(context).requestFocus(widget.nextFocus) : null,
-            onChanged: widget.onChanged as void Function(String)?,
-          ),
-        ),
-        widget.isShowPrefixIcon?
-        Container(width: 50, height: 53, decoration: BoxDecoration(
-          color: Get.isDarkMode? Theme.of(context).hintColor.withValues(alpha:.5) : Theme.of(context).primaryColor.withValues(alpha:.125),
-          borderRadius:  BorderRadius.only(topLeft: Radius.circular(Dimensions.topSpace),bottomLeft: Radius.circular(Dimensions.topSpace))
-        )):const SizedBox()
-      ],
+    final scheme = Theme.of(context).colorScheme;
+    return TextField(
+      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      enabled: widget.isDisable,
+      maxLines: widget.isPassword ? 1 : widget.maxLines,
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      style: widget.textStyle ?? Theme.of(context).textTheme.bodyLarge,
+      textInputAction: widget.inputAction,
+      keyboardType: widget.inputType,
+      textDirection: widget.inputType == TextInputType.phone ||
+              widget.inputType == TextInputType.number
+          ? TextDirection.ltr
+          : null,
+      cursorColor: scheme.primary,
+      obscureText: widget.isPassword && _obscureText,
+      decoration: InputDecoration(
+        hintText: widget.hintText,
+        filled: true,
+        fillColor: widget.fillColor ?? scheme.surface,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        hintStyle: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: scheme.onSurfaceVariant),
+        prefixIcon: (widget.isShowPrefixIcon || widget.noBg) &&
+                widget.prefixIconUrl != null
+            ? Padding(
+                padding: const EdgeInsets.all(12),
+                child: Image.asset(widget.prefixIconUrl!,
+                    width: 20, height: 20, color: scheme.primary))
+            : null,
+        suffixIcon: widget.isShowSuffixIcon && widget.isPassword
+            ? IconButton(
+                tooltip: (_obscureText ? 'show_password' : 'hide_password').tr,
+                icon: Icon(_obscureText
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined),
+                onPressed: _toggle)
+            : widget.isShowSuffixIcon &&
+                    widget.isIcon &&
+                    widget.suffixIconUrl != null
+                ? Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Image.asset(widget.suffixIconUrl!,
+                        width: 20, height: 20))
+                : null,
+      ),
+      onTap: widget.onTap as void Function()?,
+      onSubmitted: (_) {
+        if (widget.nextFocus != null) {
+          FocusScope.of(context).requestFocus(widget.nextFocus);
+        }
+      },
+      onChanged: widget.onChanged as void Function(String)?,
     );
   }
 

@@ -9,8 +9,8 @@ class NotificationModel {
 
   NotificationModel.fromJson(Map<String, dynamic> json) {
     totalSize = json['total_size'];
-    limit = json['limit'];
-    offset = json['offset'];
+    limit = json['limit']?.toString();
+    offset = json['offset']?.toString();
     if (json['notifications'] != null) {
       notifications = <Notifications>[];
       json['notifications'].forEach((v) {
@@ -25,8 +25,7 @@ class NotificationModel {
     data['limit'] = limit;
     data['offset'] = offset;
     if (notifications != null) {
-      data['notifications'] =
-          notifications!.map((v) => v.toJson()).toList();
+      data['notifications'] = notifications!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -39,19 +38,19 @@ class Notifications {
   String? description;
   String? createdAt;
   String? updatedAt;
-  Notifications(
-      {this.id,
-        this.deliveryManId,
-        this.orderId,
-        this.description,
-        this.createdAt,
-        this.updatedAt,
-      });
+  Notifications({
+    this.id,
+    this.deliveryManId,
+    this.orderId,
+    this.description,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Notifications.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    deliveryManId = int.parse(json['delivery_man_id'].toString());
-    orderId = int.parse(json['order_id'].toString());
+    deliveryManId = int.tryParse(json['delivery_man_id']?.toString() ?? '');
+    orderId = int.tryParse(json['order_id']?.toString() ?? '');
     description = json['description'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -69,5 +68,3 @@ class Notifications {
     return data;
   }
 }
-
-

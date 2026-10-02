@@ -1,0 +1,303 @@
+[
+  {
+    "File": "lib\\features\\auth\\screens\\forget_password_screen.dart",
+    "Screen": "ForgotPasswordScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\auth\\screens\\login_screen.dart",
+    "Screen": "LoginScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 2
+  },
+  {
+    "File": "lib\\features\\auth\\screens\\otp_verification_screen.dart",
+    "Screen": "VerificationScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 1,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\auth\\screens\\reset_password_screen.dart",
+    "Screen": "ResetPasswordWidget",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\chat\\screens\\chat_screen.dart",
+    "Screen": "ChatScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 2,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\chat\\screens\\conversation_screen.dart",
+    "Screen": "ConversationScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\chat\\screens\\media_viewer_screen.dart",
+    "Screen": "MediaViewerScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 5,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\dashboard\\screens\\dashboard_screen.dart",
+    "Screen": "DashboardScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 2,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_changes_requested_screen.dart",
+    "Screen": "DriverChangesRequestedScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 13,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_documents_step_screen.dart",
+    "Screen": "DriverDocumentsStepScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 23,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_location_step_screen.dart",
+    "Screen": "DriverLocationStepScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 24,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_pending_approval_screen.dart",
+    "Screen": "DriverPendingApprovalScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 18,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_profile_step_screen.dart",
+    "Screen": "DriverProfileStepScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 15,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_registration_otp_screen.dart",
+    "Screen": "DriverRegistrationOtpScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 14,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_registration_screen.dart",
+    "Screen": "DriverRegistrationScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 19,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_rejected_screen.dart",
+    "Screen": "DriverRejectedScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 16,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_review_step_screen.dart",
+    "Screen": "DriverReviewStepScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 20,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_suspended_screen.dart",
+    "Screen": "DriverSuspendedScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 16,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_vehicle_step_screen.dart",
+    "Screen": "DriverVehicleStepScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 20,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\driver_onboarding\\screens\\driver_welcome_screen.dart",
+    "Screen": "DriverWelcomeScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 15,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\earning_statement\\screens\\earning_statement_screen.dart",
+    "Screen": "EarningStatementScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\emergency_contact\\screens\\emergency_contact_screen.dart",
+    "Screen": "EmergencyContactScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\help_and_support\\screens\\help_and_support_screen.dart",
+    "Screen": "HelpAndSupportScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\home\\screens\\home_screen.dart",
+    "Screen": "HomeScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\language\\screens\\choose_language_screen.dart",
+    "Screen": "ChooseLanguageScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\live_tracking\\screens\\order_tracking_screen.dart",
+    "Screen": "OrderLiveTrackingScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\maintenance\\maintenance_screen.dart",
+    "Screen": "MaintenanceScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\notification\\screens\\notification_screen.dart",
+    "Screen": "NotificationScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\onboard\\screens\\onboarding_screen.dart",
+    "Screen": "OnBoardingScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\order\\screens\\order_history_screen.dart",
+    "Screen": "OrderHistoryScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 0,
+    "ManualTransforms": 1
+  },
+  {
+    "File": "lib\\features\\order_details\\screens\\order_delivered_screen.dart",
+    "Screen": "OrderDeliveredScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\order_details\\screens\\order_details_screen.dart",
+    "Screen": "OrderDetailsScreen",
+    "PreviousState": "PARTIALLY REDESIGNED",
+    "RawColors": 4,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\profile\\screens\\bank_info_edit_screen.dart",
+    "Screen": "BankInfoEditScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\profile\\screens\\bank_info_screen.dart",
+    "Screen": "BankInfoScreen, CardItem",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\profile\\screens\\edit_profile_screen.dart",
+    "Screen": "ProfileEditScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\profile\\screens\\html_view_screen.dart",
+    "Screen": "HtmlViewScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\profile\\screens\\profile_screen.dart",
+    "Screen": "ProfileScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 1,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\review\\screens\\review_screen.dart",
+    "Screen": "ReviewScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\setting\\screens\\setting_screen.dart",
+    "Screen": "SettingScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\splash\\screens\\splash_screen.dart",
+    "Screen": "SplashScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\update\\screen\\update_screen.dart",
+    "Screen": "UpdateScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 0,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\wallet\\screens\\wallet_screen.dart",
+    "Screen": "WalletScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 1,
+    "ManualTransforms": 0
+  },
+  {
+    "File": "lib\\features\\withdraw\\screens\\withdraw_request_screen.dart",
+    "Screen": "BalanceWithdrawScreen",
+    "PreviousState": "LEGACY",
+    "RawColors": 5,
+    "ManualTransforms": 1
+  }
+]

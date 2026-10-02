@@ -1,0 +1,22 @@
+[
+  {
+    "type": "pending",
+    "status": 200,
+    "response_keys": [
+      "total_size",
+      "limit",
+      "offset",
+      "withdraws"
+    ]
+  },
+  {
+    "type": "withdrawn",
+    "status": 200,
+    "response_keys": [
+      "total_size",
+      "limit",
+      "offset",
+      "withdraws"
+    ]
+  }
+]

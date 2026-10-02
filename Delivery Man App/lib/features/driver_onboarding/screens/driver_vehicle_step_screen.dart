@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,8 @@ class DriverVehicleStepScreen extends StatefulWidget {
   const DriverVehicleStepScreen({super.key});
 
   @override
-  State<DriverVehicleStepScreen> createState() => _DriverVehicleStepScreenState();
+  State<DriverVehicleStepScreen> createState() =>
+      _DriverVehicleStepScreenState();
 }
 
 class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
@@ -25,7 +27,11 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
   XFile? _regDocFile;
 
   final List<Map<String, dynamic>> _vehicleTypes = [
-    {'type': 'motorcycle', 'title': 'vehicle_motorcycle', 'icon': Icons.two_wheeler},
+    {
+      'type': 'motorcycle',
+      'title': 'vehicle_motorcycle',
+      'icon': Icons.two_wheeler
+    },
     {'type': 'car', 'title': 'vehicle_car', 'icon': Icons.directions_car},
     {'type': 'van', 'title': 'vehicle_van', 'icon': Icons.local_shipping},
     {'type': 'bicycle', 'title': 'vehicle_bicycle', 'icon': Icons.pedal_bike},
@@ -56,7 +62,8 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
 
   Future<void> _pickRegDoc() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    final XFile? file =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (file != null) {
       setState(() {
         _regDocFile = file;
@@ -97,21 +104,23 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B2430), size: 20),
+          icon: Icon(Icons.arrow_back,
+              color: Get.theme.colorScheme.onSurface, size: 20),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'driver_onboarding_title'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -131,7 +140,8 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                   children: [
                     Text(
                       'select_vehicle_type'.tr,
-                      style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+                      style: rubikMedium.copyWith(
+                          fontSize: 14, color: Get.theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 10),
 
@@ -141,15 +151,20 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                         bool isSelected = _vehicleType == v['type'];
                         return Expanded(
                           child: GestureDetector(
-                            onTap: () => setState(() => _vehicleType = v['type']),
+                            onTap: () =>
+                                setState(() => _vehicleType = v['type']),
                             child: Container(
                               margin: const EdgeInsets.symmetric(horizontal: 4),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFFE8F1FC) : Colors.white,
+                                color: isSelected
+                                    ? Get.theme.colorScheme.primaryContainer
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: isSelected ? primaryBlue : const Color(0xFFDDE4EE),
+                                  color: isSelected
+                                      ? primaryBlue
+                                      : Get.theme.colorScheme.outline,
                                   width: isSelected ? 2 : 1,
                                 ),
                               ),
@@ -157,7 +172,8 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                                 children: [
                                   Icon(
                                     v['icon'] as IconData,
-                                    color: isSelected ? primaryBlue : Colors.grey,
+                                    color:
+                                        isSelected ? primaryBlue : Colors.grey,
                                     size: 28,
                                   ),
                                   const SizedBox(height: 6),
@@ -165,7 +181,9 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                                     (v['title'] as String).tr,
                                     style: rubikMedium.copyWith(
                                       fontSize: 11,
-                                      color: isSelected ? primaryBlue : Colors.black87,
+                                      color: isSelected
+                                          ? primaryBlue
+                                          : Colors.black87,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -205,7 +223,8 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                     // Registration Card (Optional Upload)
                     Text(
                       'vehicle_registration_card_optional'.tr,
-                      style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+                      style: rubikMedium.copyWith(
+                          fontSize: 14, color: Get.theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 6),
                     InkWell(
@@ -220,12 +239,16 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          color: const Color(0xFFF9FBFF),
+                          color: Get.theme.colorScheme.surface,
                           child: Column(
                             children: [
                               Icon(
-                                _regDocFile != null ? Icons.check_circle : Icons.document_scanner_outlined,
-                                color: _regDocFile != null ? const Color(0xFF04BB7B) : primaryBlue,
+                                _regDocFile != null
+                                    ? Icons.check_circle
+                                    : Icons.document_scanner_outlined,
+                                color: _regDocFile != null
+                                    ? AllineColors.success
+                                    : primaryBlue,
                                 size: 32,
                               ),
                               const SizedBox(height: 4),
@@ -235,7 +258,9 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                                     : 'upload_vehicle_card'.tr,
                                 style: rubikBold.copyWith(
                                   fontSize: 13,
-                                  color: _regDocFile != null ? const Color(0xFF04BB7B) : primaryBlue,
+                                  color: _regDocFile != null
+                                      ? AllineColors.success
+                                      : primaryBlue,
                                 ),
                               ),
                             ],
@@ -255,24 +280,28 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryBlue,
                               elevation: 2,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: controller.isSubmitting ? null : _submit,
                             child: controller.isSubmitting
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2.5),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         'continue_to_location'.tr,
-                                        style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                                        style: rubikBold.copyWith(
+                                            fontSize: 16, color: Colors.white),
                                       ),
                                       const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                                      const Icon(Icons.arrow_forward_ios,
+                                          size: 16, color: Colors.white),
                                     ],
                                   ),
                           ),
@@ -300,22 +329,25 @@ class _DriverVehicleStepScreenState extends State<DriverVehicleStepScreen> {
       children: [
         Text(
           label,
-          style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+          style: rubikMedium.copyWith(
+              fontSize: 14, color: Get.theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Get.theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFDDE4EE)),
+            border: Border.all(color: Get.theme.colorScheme.outline),
           ),
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: rubikRegular.copyWith(fontSize: 14, color: Colors.grey.shade400),
+              hintStyle: rubikRegular.copyWith(
+                  fontSize: 14, color: Colors.grey.shade400),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             ),
           ),
         ),

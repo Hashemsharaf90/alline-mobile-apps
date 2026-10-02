@@ -17,7 +17,7 @@ class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});
 
   @override
-  _ProfileEditScreenState createState() => _ProfileEditScreenState();
+  State<ProfileEditScreen> createState() => _ProfileEditScreenState();
 }
 
 class _ProfileEditScreenState extends State<ProfileEditScreen>  with TickerProviderStateMixin {
@@ -41,7 +41,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen>  with TickerProvi
         Get.find<ProfileController>().passwordController.text != Get.find<ProfileController>().confirmPasswordController.text){
       showCustomSnackBarWidget('password_not_match'.tr);
     } else {
-      UserInfoModel updateUserInfoModel = Get.find<ProfileController>().profileModel!;
+      UserInfoModel updateUserInfoModel = UserInfoModel();
       updateUserInfoModel.fName =  Get.find<ProfileController>().firstNameController.text;
       updateUserInfoModel.lName =  Get.find<ProfileController>().lastNameController.text;
       updateUserInfoModel.address =  Get.find<ProfileController>().addressController.text;
@@ -61,6 +61,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen>  with TickerProvi
     if(Get.find<ProfileController>().showPassView){
       Get.find<ProfileController>().showHidePass(isUpdate: false);
     }
+    final profile = Get.find<ProfileController>();
+    profile.firstNameController.text = profile.profileModel?.fName ?? '';
+    profile.lastNameController.text = profile.profileModel?.lName ?? '';
+    profile.addressController.text = profile.profileModel?.address ?? '';
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     _tabController?.addListener((){
       switch (_tabController!.index){
@@ -75,17 +79,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen>  with TickerProvi
   }
 
   @override
+  void dispose(){_tabController?.dispose();super.dispose();}
+
+  @override
   Widget build(BuildContext context) {
 
     return Scaffold(
       body: GetBuilder<ProfileController>(
         builder: (profile) {
-          int idImageSize = profile.profileModel?.identityImageFullUrl?.length ?? 0;
-          if(profile.firstNameController.text.isEmpty ||  profile.lastNameController.text.isEmpty) {
-            profile.firstNameController.text = profile.profileModel!.fName!;
-            profile.lastNameController.text = profile.profileModel!.lName!;
-            profile.addressController.text = profile.profileModel!.address!;
-          }
           return ListView(
             children: [
 
@@ -95,9 +96,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen>  with TickerProvi
                   color: Get.isDarkMode ? Theme.of(context).cardColor : Theme.of(context).canvasColor,
                   child: TabBar(padding:  EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
                     controller: _tabController,
-                    labelColor:Get.isDarkMode ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.8) : Theme.of(context).primaryColor,
+                    labelColor:Get.isDarkMode ? Theme.of(context).colorScheme.primary : Theme.of(context).primaryColor,
                     unselectedLabelColor: Theme.of(context).hintColor,
-                    indicatorColor: Get.isDarkMode ? Theme.of(context).colorScheme.secondaryContainer.withValues(alpha: 0.8) : Theme.of(context).primaryColor,
+                    indicatorColor: Get.isDarkMode ? Theme.of(context).colorScheme.primary : Theme.of(context).primaryColor,
                     dividerColor: Colors.transparent,
                     indicatorWeight: 1,
                     onTap: (val){
@@ -110,14 +111,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen>  with TickerProvi
                     tabs: [Tab(text: 'general_info'.tr), Tab(text: 'login_info'.tr)]))),
 
 
-              SizedBox(height: selectedIndex == 0 ? (idImageSize > 4 ? 950 : idImageSize > 2 ? 815 : 750) : 350,
-                child: Padding(padding:  EdgeInsets.symmetric(vertical: Dimensions.paddingSizeDefault,
-                    horizontal: Dimensions.paddingSizeDefault),
-                  child: TabBarView(physics: const NeverScrollableScrollPhysics(),
-                    controller: _tabController, children: const [
-                      SizedBox(child: GeneralInfoWidget()),
-                      AccountInfoWidget()])),
-              ),
+              Padding(padding:const EdgeInsets.all(16),child:selectedIndex==0?const GeneralInfoWidget():const AccountInfoWidget()),
 
               Padding(padding:  EdgeInsets.symmetric(horizontal:Dimensions.paddingSizeDefault),
                 child: Container(width: MediaQuery.of(context).size.width,

@@ -11,8 +11,8 @@ class ChatService implements ChatServiceInterface{
   ChatService({required this.chatRepoInterface});
 
   @override
-  Future getConversationList(offset, _userTypeIndex) async{
-    return chatRepoInterface.getConversationList(offset, _userTypeIndex);
+  Future getConversationList(offset, userTypeIndex) async{
+    return chatRepoInterface.getConversationList(offset, userTypeIndex);
   }
 
   @override
@@ -27,18 +27,19 @@ class ChatService implements ChatServiceInterface{
   }
 
   @override
-  Future searchChatList(_userTypeIndex, searchChat) async{
-    Response response = await chatRepoInterface.searchChatList(_userTypeIndex, searchChat);
-    ChatModel _conversationModel = ChatModel(totalSize: 1, limit: '1', offset: '1', chat: []);
+  Future searchChatList(userTypeIndex, searchChat) async{
+    Response response = await chatRepoInterface.searchChatList(userTypeIndex, searchChat);
+    ChatModel conversationModel = ChatModel(totalSize: 1, limit: '1', offset: '1', chat: []);
     if(response.statusCode == 200) {
-      _conversationModel = ChatModel(totalSize: 1, limit: '1', offset: '1', chat: []);
+      conversationModel = ChatModel(totalSize: 1, limit: '1', offset: '1', chat: []);
       response.body.forEach((chat) {
-        _conversationModel.chat!.add(Chat.fromJson(chat));
+        conversationModel.chat!.add(Chat.fromJson(chat));
       });
     }else {
       ApiChecker.checkApi(response);
+      return null;
     }
-    return _conversationModel;
+    return conversationModel;
   }
 
   @override
@@ -49,8 +50,8 @@ class ChatService implements ChatServiceInterface{
     }else{
       userType = Get.find<ChatController>().userTypeIndex == 0 ? 'seller' : Get.find<ChatController>().userTypeIndex == 1? "customer" : "admin";
     }
-    Response _response = await chatRepoInterface.sendMessage(message, userId, userType, files, platformFile);
-    if (_response.statusCode == 200) {
+    Response response = await chatRepoInterface.sendMessage(message, userId, userType, files, platformFile);
+    if (response.statusCode == 200) {
       return ResponseModel(true, '');
     }else{
       return ResponseModel(false, '');

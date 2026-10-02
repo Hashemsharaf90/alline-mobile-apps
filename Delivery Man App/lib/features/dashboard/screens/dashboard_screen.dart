@@ -4,25 +4,24 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:sixvalley_delivery_boy/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:sixvalley_delivery_boy/features/order/controllers/order_controller.dart';
-import 'package:sixvalley_delivery_boy/utill/dimensions.dart';
 import 'package:sixvalley_delivery_boy/utill/images.dart';
-import 'package:sixvalley_delivery_boy/utill/styles.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/animated_custom_dialog_widget.dart';
 import 'package:sixvalley_delivery_boy/common/basewidgets/confirmation_dialog_widget.dart';
-import 'package:sixvalley_delivery_boy/common/basewidgets/custom_botom_navy_bar_widget.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   final int pageIndex;
   final int? chatIndex;
   const DashboardScreen({super.key, required this.pageIndex, this.chatIndex});
   @override
-  _DashboardScreenState createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
 
   FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
   final PageStorageBucket bucket = PageStorageBucket();
+  final Map<int, Widget> _pages = {};
 
   OrderController orderController = Get.find<OrderController>();
 
@@ -36,12 +35,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Get.find<OrderController>().getAllOrderHistory('', '', '', '', '',0);
     }
 
+    if(widget.pageIndex == 1) Get.find<DashboardController>().selectOrderHistoryScreen();
+
     if(widget.pageIndex == 2) {
       Get.find<DashboardController>().selectConversationScreen(isUpdate: false, chatIndex: widget.chatIndex);
     }
 
     if(widget.pageIndex == 3) {
-      Get.find<DashboardController>().selectNotificationScreen(isUpdate: false);
+      Get.find<DashboardController>().selectWalletScreen(isUpdate: false);
     }
 
     if(widget.pageIndex == 4) {
@@ -62,33 +63,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
       },
 
       child: GetBuilder<DashboardController>(builder: (menuController) {
+        _pages.putIfAbsent(menuController.currentTab, () => menuController.currentScreen!);
         return Scaffold(
-          resizeToAvoidBottomInset: false,
-          body: PageStorage(bucket: bucket, child: menuController.currentScreen!),
-          bottomNavigationBar: BottomNavBarWidget(
+          body: PageStorage(bucket: bucket, child: IndexedStack(index: menuController.currentTab,
+            children: List.generate(5, (index) => _pages[index] ?? const SizedBox.shrink()))),
+          bottomNavigationBar: NavigationBar(
             selectedIndex: menuController.currentTab,
-            showElevation: true,
-            animationDuration: const Duration(milliseconds: 500),
-            itemCornerRadius: 100,
-            curve: Curves.ease,
-            items: [
-              _barItem(Images.homeIcon, 'home'.tr, 0, menuController),
-              _barItem(Images.orderIcon, 'order_history'.tr, 1, menuController),
-              _barItem(Images.chatIcon, 'message'.tr, 2, menuController),
-              _barItem(Images.notificationMenuIcon, 'notification'.tr, 3, menuController),
-              _barItem(Images.profileIcon, 'profile'.tr, 4, menuController),
+            destinations: [
+              NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home_rounded), label: 'alline_nav_home'.tr),
+              NavigationDestination(icon: const Icon(Icons.local_shipping_outlined), selectedIcon: const Icon(Icons.local_shipping_rounded), label: 'alline_nav_orders'.tr),
+              NavigationDestination(icon: const Icon(Icons.chat_bubble_outline_rounded), selectedIcon: const Icon(Icons.chat_bubble_rounded), label: 'alline_nav_chats'.tr),
+              NavigationDestination(icon: const Icon(Icons.account_balance_wallet_outlined), selectedIcon: const Icon(Icons.account_balance_wallet_rounded), label: 'alline_nav_wallet'.tr),
+              NavigationDestination(icon: const Icon(Icons.person_outline_rounded), selectedIcon: const Icon(Icons.person_rounded), label: 'alline_nav_account'.tr),
             ],
-            onItemSelected: (int index) {
-              if(index == 0){
-                menuController.selectHomePage();
-              }else if(index == 1){
-                menuController.selectOrderHistoryScreen();
-              }else if(index == 2){
-                menuController.selectConversationScreen();
-              }else if(index == 3){
-                menuController.selectNotificationScreen();
-              }else if(index == 4){
-                menuController.selectProfileScreen();
+            onDestinationSelected: (index) {
+              switch(index) {
+                case 0: menuController.selectHomePage();
+                case 1: menuController.selectOrderHistoryScreen();
+                case 2: menuController.selectConversationScreen();
+                case 3: menuController.selectWalletScreen();
+                case 4: menuController.selectProfileScreen();
               }
             },
           ),
@@ -96,31 +90,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         );
       }),
     );
-  }
-
-  BottomNavyBarItem _barItem(String icon, String label, int index, DashboardController menuController) {
-    return BottomNavyBarItem(
-      activeColor: Theme.of(context).primaryColor,
-      textAlign: TextAlign.center,
-      icon: index == menuController.currentTab ? const SizedBox() :
-      SizedBox(width: Dimensions.iconSizeMenu,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3),
-          child: Image.asset(icon, color : index == menuController.currentTab ?
-          Theme.of(context).cardColor : Theme.of(context).hintColor),
-        )),
-      title: Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Image.asset(icon, color : index == menuController.currentTab ?
-        Colors.white : Theme.of(context).hintColor,
-          width: 16,
-        ),
-
-        SizedBox(width: Dimensions.paddingSizeSmall,),
-        FittedBox(
-          child: Text(label, style: rubikRegular.copyWith(color: index == menuController.currentTab ?
-          Colors.white : Theme.of(context).hintColor, overflow: TextOverflow.ellipsis)),
-        ),]));
-
   }
 
 

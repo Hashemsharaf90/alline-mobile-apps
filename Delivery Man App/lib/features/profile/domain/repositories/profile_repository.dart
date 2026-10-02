@@ -23,24 +23,24 @@ class ProfileRepository implements ProfileRepositoryInterface{
 
   @override
   Future<Response> profileStatusOnnOff( int status) async {
-    Response _response = await apiClient.postData(AppConstants.statusOnOffUri,
+    Response response = await apiClient.postData(AppConstants.statusOnOffUri,
       {
         'is_online': status,
         '_method': "put"
       });
-    return _response;
+    return response;
   }
 
 
   @override
   Future<Response> resetPassword(String? phone, String password ,String confirmPassword) async {
-    Response _response = await apiClient.postData(AppConstants.resetPassword,
+    Response response = await apiClient.postData(AppConstants.resetPassword,
         {
           'phone': phone,
           'password' : password,
           'confirm_password': confirmPassword
         });
-    return _response;
+    return response;
   }
 
 
@@ -51,9 +51,9 @@ class ProfileRepository implements ProfileRepositoryInterface{
     if(file != null){
       request.files.add(http.MultipartFile('image', file.readAsBytes().asStream(), file.lengthSync(), filename: file.path.split('/').last));
     }
-    Map<String, String> _fields = {};
+    Map<String, String> fields = {};
 
-    _fields.addAll(<String, String>{
+    fields.addAll(<String, String>{
       '_method': 'put', 'f_name': userInfoModel.fName!,
       'l_name': userInfoModel.lName!,
       'address': userInfoModel.address!,
@@ -61,9 +61,9 @@ class ProfileRepository implements ProfileRepositoryInterface{
       'confirm_password' : password,
     });
 
-    request.fields.addAll(_fields);
+    request.fields.addAll(fields);
     if (kDebugMode) {
-      print('========>$file/${_fields.toString()}');
+      print('========>$file/${fields.toString()}');
     }
     http.StreamedResponse response = await request.send();
     return response;

@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sixvalley_delivery_boy/features/auth/screens/login_screen.dart';
@@ -11,8 +12,8 @@ class DriverWelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
@@ -29,7 +30,7 @@ class DriverWelcomeScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Get.theme.colorScheme.surface,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
@@ -43,7 +44,7 @@ class DriverWelcomeScreen extends StatelessWidget {
                     Images.logo,
                     height: 80,
                     width: 80,
-                    errorBuilder: (_, __, ___) => const Icon(
+                    errorBuilder: (_, __, ___) => Icon(
                       Icons.delivery_dining,
                       size: 60,
                       color: primaryBlue,
@@ -57,7 +58,7 @@ class DriverWelcomeScreen extends StatelessWidget {
                 'join_alline_team'.tr,
                 style: rubikBold.copyWith(
                   fontSize: 24,
-                  color: const Color(0xFF1B2430),
+                  color: Get.theme.colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -69,22 +70,22 @@ class DriverWelcomeScreen extends StatelessWidget {
                   'join_alline_subtitle'.tr,
                   style: rubikRegular.copyWith(
                     fontSize: 14,
-                    color: const Color(0xFF5D6B82),
+                    color: Get.theme.colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 36),
+              const SizedBox(height: 32),
 
               // Highlight Feature Cards
               _buildFeatureItem(
                 icon: Icons.payments_outlined,
                 title: 'benefit_income_title'.tr,
                 subtitle: 'benefit_income_desc'.tr,
-                color: const Color(0xFF04BB7B),
+                color: AllineColors.success,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
               _buildFeatureItem(
                 icon: Icons.near_me_outlined,
@@ -92,20 +93,19 @@ class DriverWelcomeScreen extends StatelessWidget {
                 subtitle: 'benefit_nearby_desc'.tr,
                 color: primaryBlue,
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
               _buildFeatureItem(
                 icon: Icons.support_agent_outlined,
                 title: 'benefit_support_title'.tr,
                 subtitle: 'benefit_support_desc'.tr,
-                color: const Color(0xFFFF9800),
+                color: AllineColors.warning,
               ),
               const SizedBox(height: 40),
 
               // Action Buttons
               SizedBox(
                 width: double.infinity,
-                height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryBlue,
@@ -120,28 +120,29 @@ class DriverWelcomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.person_add_alt_1, color: Colors.white, size: 20),
+                      const Icon(Icons.person_add_alt_1,
+                          color: Colors.white, size: 20),
                       const SizedBox(width: 8),
-                      Text(
+                      Flexible(
+                          child: Text(
                         'create_driver_account'.tr,
                         style: rubikBold.copyWith(
                           fontSize: 16,
                           color: Colors.white,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
               SizedBox(
                 width: double.infinity,
-                height: 52,
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: primaryBlue, width: 1.5),
+                    backgroundColor: Get.theme.colorScheme.surface,
+                    side: BorderSide(color: primaryBlue, width: 1.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -175,9 +176,9 @@ class DriverWelcomeScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Get.theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5EDF8)),
+        border: Border.all(color: Get.theme.colorScheme.outline),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -205,7 +206,7 @@ class DriverWelcomeScreen extends StatelessWidget {
                   title,
                   style: rubikBold.copyWith(
                     fontSize: 15,
-                    color: const Color(0xFF1B2430),
+                    color: Get.theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -213,7 +214,7 @@ class DriverWelcomeScreen extends StatelessWidget {
                   subtitle,
                   style: rubikRegular.copyWith(
                     fontSize: 12,
-                    color: const Color(0xFF757D8A),
+                    color: Get.theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

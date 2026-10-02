@@ -1,4 +1,4 @@
-library bottom_navy_bar;
+library;
 
 import 'package:flutter/material.dart';
 import 'package:sixvalley_delivery_boy/utill/dimensions.dart';

@@ -62,7 +62,7 @@ class OrderDetailsController extends GetxController implements GetxService {
   ];
 
 
-  String? _reasonValue = '';
+  final String _reasonValue = '';
   String? get reasonValue => _reasonValue;
 
   List<OrderModel>? _orderList;
@@ -96,24 +96,38 @@ class OrderDetailsController extends GetxController implements GetxService {
 
 
   Future<bool> updateOrderStatus({int? orderId, String? status,BuildContext? context}) async {
-    _isLoading =  true;
+    if (_isLoading) return false;
+    _isLoading = true;
     update();
+    try {
     Response response = await  orderDetailsServiceInterface.updateOrderStatus(orderId: orderId, status: status);
-    bool _isSuccess;
-    if(response.body != null && response.statusCode == 200) {
-      Get.back();
+    bool isSuccess;
+    if(response.body is Map && response.statusCode == 200 && response.body['success'] != 0) {
+      if (Get.isDialogOpen == true || Get.isBottomSheetOpen == true) Get.back();
+      for (final detail in _orderDetails ?? <OrderDetailsModel>[]) {
+        if (detail.orderModel?.id == orderId) {
+          detail.orderModel?.driverJourneyStatus = status;
+          if (status == 'picked_up') detail.orderModel?.orderStatus = 'out_for_delivery';
+          if (status == 'delivered') detail.orderModel?.orderStatus = 'delivered';
+        }
+      }
       showCustomSnackBarWidget(response.body['message'], isError: false);
-      _isSuccess = true;
+      isSuccess = true;
       Get.find<OrderController>().getCurrentOrders();
       Get.find<OrderController>().getAllOrderHistory('', '', '', '', '',0);
       Get.find<ProfileController>().getProfile();
     }else {
       ApiChecker.checkApi(response);
-      _isSuccess = false;
+      isSuccess = false;
     }
-    _isLoading = false;
-    update();
-    return _isSuccess;
+    return isSuccess;
+    } catch (_) {
+      showCustomSnackBarWidget('alline_load_failed'.tr);
+      return false;
+    } finally {
+      _isLoading = false;
+      update();
+    }
   }
 
 
@@ -121,39 +135,39 @@ class OrderDetailsController extends GetxController implements GetxService {
   Future<bool> cancelOrderStatus({int? orderId, String? cause,BuildContext? context}) async {
     _isLoading = true;
     update();
-    bool _isSuccess = await orderDetailsServiceInterface.cancelOrderStatus(orderId: orderId,  cause: cause);
+    bool isSuccess = await orderDetailsServiceInterface.cancelOrderStatus(orderId: orderId,  cause: cause);
     Get.back();
-    if(_isSuccess) {
+    if(isSuccess) {
       getOrderDetails(orderId.toString(), Get.context!);
     }
 
     _isLoading = false;
     update();
-    return _isSuccess;
+    return isSuccess;
   }
 
   Future<bool> rescheduleOrderStatus({int? orderId, String? deliveryDate, String? cause, BuildContext? context}) async {
     _isLoading = true;
     update();
-    bool _isSuccess = await orderDetailsServiceInterface.rescheduleOrder(orderId: orderId, deliveryDate: deliveryDate, cause: cause);
+    bool isSuccess = await orderDetailsServiceInterface.rescheduleOrder(orderId: orderId, deliveryDate: deliveryDate, cause: cause);
     Get.back();
 
-    if(_isSuccess) {
+    if(isSuccess) {
       showCustomSnackBarWidget('order_status_rescheduled_successfully'.tr, isError: false);
     }
     _isLoading = false;
     update();
-    return _isSuccess;
+    return isSuccess;
   }
 
   Future<bool> pauseAndResumeOrder({int? orderId, int? isPos, String? cause, BuildContext? context}) async {
     _isLoading = true;
     update();
-    bool _isSuccess = await orderDetailsServiceInterface.pauseAndResumeOrder(orderId: orderId, isPos: isPos, cause: cause);
+    bool isSuccess = await orderDetailsServiceInterface.pauseAndResumeOrder(orderId: orderId, isPos: isPos, cause: cause);
     Get.find<OrderController>().getCurrentOrders();
     _isLoading = false;
     update();
-    return _isSuccess;
+    return isSuccess;
   }
 
   Future<Response?> updatePaymentStatus({int? orderId, String? status}) async {

@@ -14,16 +14,16 @@ class OrderDetailsService implements OrderDetailsServiceInterface{
   @override
   Future cancelOrderStatus({int? orderId, String? cause}) async {
     Response response = await orderDetailsRepositoryInterface.cancelOrderStatus(orderId: orderId, cause: cause);
-    bool _isSuccess;
+    bool isSuccess;
     if(response.body != null && response.statusCode == 200) {
       showCustomSnackBarWidget(response.body['message'], isError: false);
-      _isSuccess = true;
+      isSuccess = true;
       Get.find<OrderController>().getCurrentOrders();
     }else {
       ApiChecker.checkApi(response);
-      _isSuccess = false;
+      isSuccess = false;
     }
-    return _isSuccess;
+    return isSuccess;
   }
 
 
@@ -37,32 +37,32 @@ class OrderDetailsService implements OrderDetailsServiceInterface{
   @override
   Future pauseAndResumeOrder({int? orderId, int? isPos, String? cause}) async{
     Response response = await orderDetailsRepositoryInterface.pauseAndResumeOrder(orderId: orderId, isPos: isPos, cause: cause);
-    bool _isSuccess;
+    bool isSuccess;
     if(response.body != null && response.statusCode == 200) {
       Get.back();
       showCustomSnackBarWidget(response.body['message'], isError: false);
-      _isSuccess = true;
+      isSuccess = true;
     }else {
       ApiChecker.checkApi(response);
-      _isSuccess = false;
+      isSuccess = false;
     }
 
-    return _isSuccess;
+    return isSuccess;
   }
 
   @override
   Future rescheduleOrder({int? orderId, String? deliveryDate, String? cause}) async{
     Response response = await orderDetailsRepositoryInterface.rescheduleOrder(orderId: orderId, deliveryDate: deliveryDate, cause: cause);
-    bool _isSuccess;
+    bool isSuccess;
     if(response.body != null && response.statusCode == 200) {
       showCustomSnackBarWidget(response.body['message'], isError: false);
-      _isSuccess = true;
+      isSuccess = true;
       Get.find<OrderController>().getCurrentOrders();
     }else {
       ApiChecker.checkApi(response);
-      _isSuccess = false;
+      isSuccess = false;
     }
-    return _isSuccess;
+    return isSuccess;
   }
 
   @override

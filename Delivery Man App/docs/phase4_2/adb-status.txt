@@ -1,0 +1,5 @@
+Authorized Samsung SM-S918W, Android 15/API 35
+adb install: PASS
+adb reverse tcp:8000 tcp:8000: PASS
+App process observed; foreground later switched away from driver app
+No attached-order fixture; current orders 0

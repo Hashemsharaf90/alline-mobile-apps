@@ -1,0 +1,46 @@
+ M android/build/reports/problems/problems-report.html
+ M android/gradle.properties
+ M assets/language/ar.json
+ M assets/language/en.json
+ M lib/common/basewidgets/online_offline_button_widget.dart
+ M lib/data/api/api_checker.dart
+ M lib/data/api/api_client.dart
+ M lib/features/auth/controllers/auth_controller.dart
+ M lib/features/auth/domain/models/response_model.dart
+ M lib/features/auth/domain/repositories/auth_repository.dart
+ M lib/features/auth/domain/repositories/auth_repository_interface.dart
+ M lib/features/auth/domain/services/auth_service.dart
+ M lib/features/auth/domain/services/auth_service_interface.dart
+ M lib/features/auth/screens/login_screen.dart
+ M lib/features/chat/domain/repositories/chat_repository.dart
+ M lib/features/dashboard/controllers/dashboard_controller.dart
+ M lib/features/dashboard/screens/dashboard_screen.dart
+ M lib/features/home/screens/home_screen.dart
+ M lib/features/order/controllers/order_controller.dart
+ M lib/features/order/domain/models/order_model.dart
+ M lib/features/order/screens/order_history_screen.dart
+ M lib/features/order_details/controllers/order_details_controller.dart
+ M lib/features/order_details/screens/order_details_screen.dart
+ M lib/features/order_details/widgets/order_info_with_customer_widget.dart
+ M lib/features/order_details/widgets/order_status_change_custom_button_widget.dart
+ M lib/features/order_details/widgets/verify_otp_sheet_widget.dart
+ M lib/features/profile/controllers/profile_controller.dart
+ M lib/features/profile/domain/models/userinfo_model.dart
+ M lib/features/profile/domain/services/profile_service.dart
+ M lib/features/splash/screens/splash_screen.dart
+ M lib/helper/get_di.dart
+ M lib/theme/dark_theme.dart
+ M lib/theme/light_theme.dart
+ M lib/utill/app_constants.dart
+ M test/widget_test.dart
+?? docs/
+?? lib/common/basewidgets/alline/
+?? lib/features/driver_onboarding/
+?? lib/features/home/widgets/alline_active_delivery_card.dart
+?? lib/features/home/widgets/alline_home_hero_widget.dart
+?? lib/features/live_tracking/controllers/location_tracking_controller.dart
+?? lib/features/order/widgets/alline_order_history_item_widget.dart
+?? lib/features/order_details/widgets/alline_delivery_map.dart
+?? lib/theme/alline/
+?? test/phase1_security_test.dart
+?? test/phase2_onboarding_test.dart

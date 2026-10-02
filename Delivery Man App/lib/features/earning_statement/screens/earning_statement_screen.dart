@@ -7,7 +7,7 @@ import 'package:sixvalley_delivery_boy/features/earning_statement/widgets/earnin
 import 'package:sixvalley_delivery_boy/features/earning_statement/widgets/earning_statement_list_widget.dart';
 
 class EarningStatementScreen extends StatefulWidget {
-  const EarningStatementScreen({Key? key}) : super(key: key);
+  const EarningStatementScreen({super.key});
 
   @override
   State<EarningStatementScreen> createState() => _EarningStatementScreenState();
@@ -23,7 +23,6 @@ class _EarningStatementScreenState extends State<EarningStatementScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    Get.find<WalletController>().getOrderWiseDeliveryCharge('', '', 1,'');
     return Scaffold(
       appBar: CustomAppBarWidget(title: 'earning_statement'.tr, isBack: true),
       body: RefreshIndicator(

@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -13,7 +14,8 @@ class DriverProfileStepScreen extends StatefulWidget {
   const DriverProfileStepScreen({super.key});
 
   @override
-  State<DriverProfileStepScreen> createState() => _DriverProfileStepScreenState();
+  State<DriverProfileStepScreen> createState() =>
+      _DriverProfileStepScreenState();
 }
 
 class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
@@ -37,7 +39,8 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
         _emailController.text = candidate.email ?? '';
         _addressController.text = candidate.address ?? '';
         _identityNumController.text = candidate.identityNumber ?? '';
-        if (candidate.identityType != null && candidate.identityType!.isNotEmpty) {
+        if (candidate.identityType != null &&
+            candidate.identityType!.isNotEmpty) {
           _identityType = candidate.identityType!;
         }
         setState(() {});
@@ -57,7 +60,8 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    final XFile? image =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (image != null) {
       setState(() {
         _pickedImage = image;
@@ -85,7 +89,8 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
       return;
     }
 
-    bool success = await Get.find<DriverOnboardingController>().updatePersonalInfo(
+    bool success =
+        await Get.find<DriverOnboardingController>().updatePersonalInfo(
       fName: fName,
       lName: lName,
       email: email.isNotEmpty ? email : null,
@@ -102,24 +107,26 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         title: Text(
           'driver_onboarding_title'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.grey),
             tooltip: 'logout'.tr,
-            onPressed: () => Get.find<DriverOnboardingController>().logoutCandidate(),
+            onPressed: () =>
+                Get.find<DriverOnboardingController>().logoutCandidate(),
           ),
         ],
       ),
@@ -158,14 +165,23 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
                             ),
                             child: ClipOval(
                               child: _pickedImage != null
-                                  ? Image.file(File(_pickedImage!.path), fit: BoxFit.cover)
-                                  : Get.find<DriverOnboardingController>().candidate?.imageUrl != null
+                                  ? Image.file(File(_pickedImage!.path),
+                                      fit: BoxFit.cover)
+                                  : Get.find<DriverOnboardingController>()
+                                              .candidate
+                                              ?.imageUrl !=
+                                          null
                                       ? Image.network(
-                                          Get.find<DriverOnboardingController>().candidate!.imageUrl!,
+                                          Get.find<DriverOnboardingController>()
+                                              .candidate!
+                                              .imageUrl!,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 50, color: Colors.grey),
+                                          errorBuilder: (_, __, ___) =>
+                                              const Icon(Icons.person,
+                                                  size: 50, color: Colors.grey),
                                         )
-                                      : const Icon(Icons.person, size: 50, color: Colors.grey),
+                                      : const Icon(Icons.person,
+                                          size: 50, color: Colors.grey),
                             ),
                           ),
                           Positioned(
@@ -175,11 +191,12 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
                               onTap: _pickImage,
                               child: Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   color: primaryBlue,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                                child: const Icon(Icons.camera_alt,
+                                    color: Colors.white, size: 16),
                               ),
                             ),
                           ),
@@ -190,7 +207,8 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
                     Center(
                       child: Text(
                         'driver_photo_optional'.tr,
-                        style: rubikRegular.copyWith(fontSize: 12, color: Colors.grey),
+                        style: rubikRegular.copyWith(
+                            fontSize: 12, color: Colors.grey),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -229,28 +247,39 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
                     // Identity Type Dropdown
                     Text(
                       'identity_type'.tr,
-                      style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+                      style: rubikMedium.copyWith(
+                          fontSize: 14, color: Get.theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Get.theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFDDE4EE)),
+                        border:
+                            Border.all(color: Get.theme.colorScheme.outline),
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _identityType,
                           isExpanded: true,
                           items: [
-                            DropdownMenuItem(value: 'nid', child: Text('identity_nid'.tr)),
-                            DropdownMenuItem(value: 'passport', child: Text('identity_passport'.tr)),
-                            DropdownMenuItem(value: 'driving_license', child: Text('identity_driving_license'.tr)),
-                            DropdownMenuItem(value: 'residence_permit', child: Text('identity_residence_permit'.tr)),
+                            DropdownMenuItem(
+                                value: 'nid', child: Text('identity_nid'.tr)),
+                            DropdownMenuItem(
+                                value: 'passport',
+                                child: Text('identity_passport'.tr)),
+                            DropdownMenuItem(
+                                value: 'driving_license',
+                                child: Text('identity_driving_license'.tr)),
+                            DropdownMenuItem(
+                                value: 'residence_permit',
+                                child: Text('identity_residence_permit'.tr)),
                           ],
                           onChanged: (val) {
-                            if (val != null) setState(() => _identityType = val);
+                            if (val != null) {
+                              setState(() => _identityType = val);
+                            }
                           },
                         ),
                       ),
@@ -273,7 +302,7 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
                       hint: 'Sanaa, Hadda St',
                       maxLines: 2,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 24),
 
                     // Submit & Continue Button
                     GetBuilder<DriverOnboardingController>(
@@ -285,24 +314,28 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryBlue,
                               elevation: 2,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: controller.isSubmitting ? null : _submit,
                             child: controller.isSubmitting
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2.5),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         'save_and_continue_docs'.tr,
-                                        style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                                        style: rubikBold.copyWith(
+                                            fontSize: 16, color: Colors.white),
                                       ),
                                       const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                                      const Icon(Icons.arrow_forward_ios,
+                                          size: 16, color: Colors.white),
                                     ],
                                   ),
                           ),
@@ -332,14 +365,15 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
       children: [
         Text(
           label,
-          style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+          style: rubikMedium.copyWith(
+              fontSize: 14, color: Get.theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Get.theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFDDE4EE)),
+            border: Border.all(color: Get.theme.colorScheme.outline),
           ),
           child: TextField(
             controller: controller,
@@ -347,9 +381,11 @@ class _DriverProfileStepScreenState extends State<DriverProfileStepScreen> {
             maxLines: maxLines,
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: rubikRegular.copyWith(fontSize: 14, color: Colors.grey.shade400),
+              hintStyle: rubikRegular.copyWith(
+                  fontSize: 14, color: Colors.grey.shade400),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             ),
           ),
         ),

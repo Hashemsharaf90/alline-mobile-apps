@@ -16,13 +16,13 @@ class ReviewRepository implements ReviewRepositoryInterface {
 
   @override
   Future<Response> saveReview( int? reviewId, int isSaved) async {
-    Response _response = await apiClient.postData(AppConstants.addToSavedReviewList,
+    Response response = await apiClient.postData(AppConstants.addToSavedReviewList,
       {
         'review_id': reviewId,
         '_method': "put",
         'is_saved': isSaved
       });
-    return _response;
+    return response;
   }
 
   @override

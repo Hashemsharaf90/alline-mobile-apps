@@ -11,14 +11,15 @@ class OrderService implements OrderServiceInterface{
   @override
   Future getCurrentOrders() async{
     Response response = await orderRepoInterface.getCurrentOrders();
-    List<OrderModel> _currentOrders = [];
+    List<OrderModel> currentOrders = [];
     if (response.body != null && response.body != {} && response.statusCode == 200) {
-      _currentOrders = [];
-      response.body.forEach((order) {_currentOrders.add(OrderModel.fromJson(order));});
+      currentOrders = [];
+      response.body.forEach((order) {currentOrders.add(OrderModel.fromJson(order));});
     } else {
       ApiChecker.checkApi(response);
+      return null;
     }
-    return _currentOrders;
+    return currentOrders;
   }
   @override
   Future<Response> getAllOrderHistory(String dateType, String type, String startDate, String endDate, String search, int isPause) {

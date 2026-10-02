@@ -35,19 +35,22 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key, this.body});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey();
   StreamSubscription<List<ConnectivityResult>>? _onConnectivityChanged;
+  bool _configFailed = false;
 
   @override
   void initState() {
     super.initState();
 
+    if (!AppConstants.localQa) {
     FirebaseMessaging.instance.subscribeToTopic(AppConstants.topic);
     FirebaseMessaging.instance.subscribeToTopic(AppConstants.maintenanceModeTopic);
+    }
     _onConnectivityChanged = NetworkInfo.checkConnectivity(context);
     Get.find<SplashController>().initSharedData();
     _route();
@@ -60,8 +63,13 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _route() {
+    if (mounted) setState(() => _configFailed = false);
     bool showIntro = Get.find<SplashController>().showIntro() ?? false;
     Get.find<SplashController>().getConfigData().then((isSuccess) async {
+      if (!isSuccess) {
+        if (mounted) setState(() => _configFailed = true);
+        return;
+      }
       String? approvalStatus = Get.find<SharedPreferences>().getString(AppConstants.driverApprovalStatus);
       if(Get.find<AuthController>().isLoggedIn() && (approvalStatus == null || approvalStatus == 'active')) {
         await Get.find<ProfileController>().getProfile();
@@ -171,12 +179,18 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Image.asset(Images.logo, width: Dimensions.splashLogoWidth),
            SizedBox(height: Dimensions.paddingSizeDefault),
-          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Wrap(alignment: WrapAlignment.center, children: [
               Text(AppConstants.appName,
                   style: rubikMedium.copyWith(fontSize: Dimensions.fontSizeOverLarge), textAlign: TextAlign.center),
                SizedBox(width: Dimensions.fontSizeExtraSmall),
               Text('APP', style: rubikMedium.copyWith(fontSize: Dimensions.fontSizeOverLarge,
                   color: Theme.of(context).primaryColor), textAlign: TextAlign.center)]),
+          if (_configFailed) ...[
+            const SizedBox(height: 24),
+            Text('alline_load_failed'.tr, textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            ElevatedButton(onPressed: _route, child: Text('alline_retry'.tr)),
+          ] else const Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator()),
         ]))),
     );
   }

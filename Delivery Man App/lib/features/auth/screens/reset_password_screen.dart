@@ -17,7 +17,7 @@ class ResetPasswordWidget extends StatefulWidget {
   const ResetPasswordWidget({super.key,required this.mobileNumber});
 
   @override
-  _ResetPasswordWidgetState createState() => _ResetPasswordWidgetState();
+  State<ResetPasswordWidget> createState() => _ResetPasswordWidgetState();
 }
 
 class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
@@ -38,24 +38,24 @@ class _ResetPasswordWidgetState extends State<ResetPasswordWidget> {
 
 
   void resetPassword() async {
-      String _password = _passwordController!.text.trim();
-      String _confirmPassword = _confirmPasswordController!.text.trim();
+      String password = _passwordController!.text.trim();
+      String confirmPassword = _confirmPasswordController!.text.trim();
 
-      if (_password.isEmpty) {
+      if (password.isEmpty) {
      showCustomSnackBarWidget('password_is_required'.tr);
-      } else if (_confirmPassword.isEmpty) {
+      } else if (confirmPassword.isEmpty) {
        showCustomSnackBarWidget('confirm_password_is_required'.tr);
       }
-      else if (_password.length < 8) {
+      else if (password.length < 8) {
         showCustomSnackBarWidget('password_at_least_8_character'.tr);
       }
-      else if (_password != _confirmPassword) {
+      else if (password != confirmPassword) {
        showCustomSnackBarWidget('password_not_match'.tr);
       } else if(!Get.find<ProfileController>().isPasswordValid()){
         showCustomSnackBarWidget('enter_valid_password'.tr);
       } else {
         Get.find<ProfileController>().resetPassword(widget.mobileNumber,
-            _password, _confirmPassword).then((value) {
+            password, confirmPassword).then((value) {
           if(value.statusCode == 200) {
             Get.to(const LoginScreen());
           }

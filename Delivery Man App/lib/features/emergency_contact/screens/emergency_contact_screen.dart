@@ -4,12 +4,17 @@ import 'package:sixvalley_delivery_boy/features/emergency_contact/controllers/em
 import 'package:sixvalley_delivery_boy/common/basewidgets/custom_app_bar_widget.dart';
 import 'package:sixvalley_delivery_boy/features/emergency_contact/widgets/emergency_contact_list_widget.dart';
 
-class EmergencyContactScreen extends StatelessWidget {
+class EmergencyContactScreen extends StatefulWidget {
   const EmergencyContactScreen({super.key});
 
   @override
+  State<EmergencyContactScreen> createState()=>_EmergencyContactScreenState();
+}
+class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
+  @override
+  void initState(){super.initState();Get.find<EmergencyContactController>().getEmergencyContactList();}
+  @override
   Widget build(BuildContext context) {
-    Get.find<EmergencyContactController>().getEmergencyContactList();
     return Scaffold(
       appBar: CustomAppBarWidget(title: 'emergency_contact'.tr, isBack: true),
       body: RefreshIndicator(

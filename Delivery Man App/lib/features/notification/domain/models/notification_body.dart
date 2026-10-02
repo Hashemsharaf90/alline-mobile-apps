@@ -1,10 +1,4 @@
-
-enum NotificationType{
-  message,
-  order,
-  general,
-  orderRequest
-}
+enum NotificationType { message, order, general, orderRequest }
 
 class NotificationBody {
   NotificationType? notificationType;
@@ -15,15 +9,14 @@ class NotificationBody {
   int? conversationId;
   String? messageKey;
 
-  NotificationBody({
-    this.notificationType,
-    this.orderId,
-    this.customerId,
-    this.vendorId,
-    this.type,
-    this.conversationId,
-    this.messageKey
-  });
+  NotificationBody(
+      {this.notificationType,
+      this.orderId,
+      this.customerId,
+      this.vendorId,
+      this.type,
+      this.conversationId,
+      this.messageKey});
 
   NotificationBody.fromJson(Map<String, dynamic> json) {
     notificationType = convertToEnum(json['order_notification']);
@@ -47,13 +40,13 @@ class NotificationBody {
   }
 
   NotificationType convertToEnum(String? enumString) {
-    if(enumString == NotificationType.general.toString()) {
+    if (enumString == NotificationType.general.toString()) {
       return NotificationType.general;
-    }else if(enumString == NotificationType.order.toString()) {
+    } else if (enumString == NotificationType.order.toString()) {
       return NotificationType.order;
-    }else if(enumString == NotificationType.orderRequest.toString()) {
+    } else if (enumString == NotificationType.orderRequest.toString()) {
       return NotificationType.orderRequest;
-    }else if(enumString == NotificationType.message.toString()) {
+    } else if (enumString == NotificationType.message.toString()) {
       return NotificationType.message;
     }
     return NotificationType.general;

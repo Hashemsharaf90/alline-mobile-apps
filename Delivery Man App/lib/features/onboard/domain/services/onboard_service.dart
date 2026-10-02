@@ -11,13 +11,13 @@ class OnboardService implements OnboardServiceInterface{
   @override
   Future getOnBoardingList() async {
     Response response = await onboardRepoInterface.getList();
-    List<OnBoardingModel> _onBoardingList = [];
+    List<OnBoardingModel> onBoardingList = [];
    if (response.statusCode == 200) {
-     _onBoardingList = [];
-     _onBoardingList.addAll(response.body);
+     onBoardingList = [];
+     onBoardingList.addAll(response.body);
    } else {
      ApiChecker.checkApi(response);
    }
-   return _onBoardingList;
+   return onBoardingList;
   }
 }

@@ -24,6 +24,7 @@ import 'package:sixvalley_delivery_boy/features/language/controllers/language_co
 import 'package:sixvalley_delivery_boy/common/controllers/localization_controller.dart';
 import 'package:sixvalley_delivery_boy/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:sixvalley_delivery_boy/features/live_tracking/controllers/rider_controller.dart';
+import 'package:sixvalley_delivery_boy/features/live_tracking/controllers/location_tracking_controller.dart';
 import 'package:sixvalley_delivery_boy/features/notification/controllers/notification_controller.dart';
 import 'package:sixvalley_delivery_boy/features/notification/domain/repositories/notification_repository_interface.dart';
 import 'package:sixvalley_delivery_boy/features/notification/domain/services/notification_service.dart';
@@ -192,6 +193,7 @@ Future<Map<String, Map<String, String>>> init() async {
 
   Get.lazyPut(() => LocalizationController(sharedPreferences: sharedPreferences));
   Get.lazyPut(() => RiderController(riderRepo : Get.find()));
+  Get.lazyPut(() => LocationTrackingController(apiClient: Get.find()));
   Get.lazyPut(() => DashboardController());
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
   Get.lazyPut(() => LocalizationController(sharedPreferences: Get.find()));

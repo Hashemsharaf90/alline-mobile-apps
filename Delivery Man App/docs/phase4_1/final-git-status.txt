@@ -1,0 +1,126 @@
+ M android/app/src/debug/AndroidManifest.xml
+ M android/build/reports/problems/problems-report.html
+ M android/gradle.properties
+ M assets/language/ar.json
+ M assets/language/en.json
+ M lib/common/basewidgets/custom_app_bar_widget.dart
+ M lib/common/basewidgets/custom_botom_navy_bar_widget.dart
+ M lib/common/basewidgets/custom_button_widget.dart
+ M lib/common/basewidgets/custom_search_widget.dart
+ M lib/common/basewidgets/custom_text_field_widget.dart
+ M lib/common/basewidgets/flutter_custom_switch_widget.dart
+ M lib/common/basewidgets/online_offline_button_widget.dart
+ M lib/common/basewidgets/rating_bar_widget.dart
+ M lib/data/api/api_checker.dart
+ M lib/data/api/api_client.dart
+ M lib/data/models/response/error_response.dart
+ M lib/features/auth/controllers/auth_controller.dart
+ M lib/features/auth/domain/models/response_model.dart
+ M lib/features/auth/domain/repositories/auth_repository.dart
+ M lib/features/auth/domain/repositories/auth_repository_interface.dart
+ M lib/features/auth/domain/services/auth_service.dart
+ M lib/features/auth/domain/services/auth_service_interface.dart
+ M lib/features/auth/screens/login_screen.dart
+ M lib/features/auth/screens/reset_password_screen.dart
+ M lib/features/auth/widgets/code_picker_widget.dart
+ M lib/features/chat/controllers/chat_controller.dart
+ M lib/features/chat/domain/repositories/chat_repository.dart
+ M lib/features/chat/domain/repositories/chat_repository_interface.dart
+ M lib/features/chat/domain/services/chat_service.dart
+ M lib/features/chat/domain/services/chat_service_interface.dart
+ M lib/features/chat/screens/chat_screen.dart
+ M lib/features/chat/screens/conversation_screen.dart
+ M lib/features/chat/widgets/conversation_item_card_widget.dart
+ M lib/features/chat/widgets/message_list_view_widget.dart
+ M lib/features/chat/widgets/message_sendig_section_widget.dart
+ M lib/features/dashboard/controllers/dashboard_controller.dart
+ M lib/features/dashboard/screens/dashboard_screen.dart
+ M lib/features/earning_statement/screens/earning_statement_screen.dart
+ M lib/features/emergency_contact/screens/emergency_contact_screen.dart
+ M lib/features/emergency_contact/widgets/emergency_contact_card_widget.dart
+ M lib/features/help_and_support/screens/help_and_support_screen.dart
+ M lib/features/home/screens/home_screen.dart
+ M lib/features/home/widgets/on_going_order_map_widget.dart
+ M lib/features/live_tracking/controllers/rider_controller.dart
+ M lib/features/live_tracking/screens/order_tracking_screen.dart
+ M lib/features/notification/controllers/notification_controller.dart
+ M lib/features/notification/domain/models/notification_body.dart
+ M lib/features/notification/domain/models/notification_model.dart
+ M lib/features/notification/domain/models/notifications_model.dart
+ M lib/features/notification/domain/repositories/notification_repository.dart
+ M lib/features/notification/domain/repositories/notification_repository_interface.dart
+ M lib/features/notification/domain/services/notification_service.dart
+ M lib/features/notification/domain/services/notification_service_interface.dart
+ M lib/features/notification/screens/notification_screen.dart
+ M lib/features/notification/widgets/notification_card_item_widget.dart
+ M lib/features/notification/widgets/notification_dialog_widget.dart
+ M lib/features/notification/widgets/notification_screen_shimmer_widget.dart
+ M lib/features/onboard/domain/services/onboard_service.dart
+ M lib/features/onboard/screens/onboarding_screen.dart
+ M lib/features/order/controllers/order_controller.dart
+ M lib/features/order/domain/models/order_model.dart
+ M lib/features/order/domain/services/order_service.dart
+ M lib/features/order/screens/order_history_screen.dart
+ M lib/features/order/widgets/order_history_appbar.dart
+ M lib/features/order_details/controllers/order_details_controller.dart
+ M lib/features/order_details/domain/models/order_details_model.dart
+ M lib/features/order_details/domain/services/order_details_service.dart
+ M lib/features/order_details/screens/order_delivered_screen.dart
+ M lib/features/order_details/screens/order_details_screen.dart
+ M lib/features/order_details/widgets/cal_chat_widget.dart
+ M lib/features/order_details/widgets/order_info_with_customer_widget.dart
+ M lib/features/order_details/widgets/order_item_info_widget.dart
+ M lib/features/order_details/widgets/order_status_change_custom_button_widget.dart
+ M lib/features/order_details/widgets/slider_button_widget.dart
+ M lib/features/order_details/widgets/tracking_stepper_widget.dart
+ M lib/features/order_details/widgets/verify_otp_sheet_widget.dart
+ M lib/features/profile/controllers/profile_controller.dart
+ M lib/features/profile/domain/models/userinfo_model.dart
+ M lib/features/profile/domain/repositories/profile_repository.dart
+ M lib/features/profile/domain/services/profile_service.dart
+ M lib/features/profile/screens/bank_info_edit_screen.dart
+ M lib/features/profile/screens/bank_info_screen.dart
+ M lib/features/profile/screens/edit_profile_screen.dart
+ M lib/features/profile/screens/html_view_screen.dart
+ M lib/features/profile/screens/profile_screen.dart
+ M lib/features/profile/widgets/account_info_widget.dart
+ M lib/features/profile/widgets/general_info_widget.dart
+ M lib/features/review/domain/repositories/review_repository.dart
+ M lib/features/setting/screens/setting_screen.dart
+ M lib/features/splash/screens/splash_screen.dart
+ M lib/features/update/screen/update_screen.dart
+ M lib/features/wallet/screens/wallet_screen.dart
+ M lib/features/wallet/widgets/wallet_withdraw_send_card_widget.dart
+ M lib/features/withdraw/screens/withdraw_request_screen.dart
+ M lib/helper/get_di.dart
+ M lib/helper/image_size_checker.dart
+ M lib/helper/network_info.dart
+ M lib/helper/price_converter.dart
+ M lib/helper/shop_helper.dart
+ M lib/main.dart
+ M lib/theme/dark_theme.dart
+ M lib/theme/light_theme.dart
+ M lib/utill/app_constants.dart
+ M lib/utill/styles.dart
+ M pubspec.yaml
+ M test/widget_test.dart
+?? android/app/src/debug/res/
+?? assets/fonts/tajawal/
+?? docs/
+?? lib/common/basewidgets/alline/
+?? lib/features/driver_onboarding/
+?? lib/features/home/widgets/alline_active_delivery_card.dart
+?? lib/features/home/widgets/alline_home_hero_widget.dart
+?? lib/features/live_tracking/controllers/location_tracking_controller.dart
+?? lib/features/order/widgets/alline_order_history_item_widget.dart
+?? lib/features/order_details/widgets/alline_delivery_map.dart
+?? lib/features/order_details/widgets/alline_journey_timeline.dart
+?? lib/features/profile/screens/driver_records_screen.dart
+?? lib/helper/delivery_destination.dart
+?? lib/helper/driver_journey.dart
+?? lib/helper/financial_input.dart
+?? lib/theme/alline/
+?? test/goldens/
+?? test/phase1_security_test.dart
+?? test/phase2_onboarding_test.dart
+?? test/phase4_1_ux_test.dart

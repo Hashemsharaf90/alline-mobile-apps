@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -12,7 +13,8 @@ class DriverLocationStepScreen extends StatefulWidget {
   const DriverLocationStepScreen({super.key});
 
   @override
-  State<DriverLocationStepScreen> createState() => _DriverLocationStepScreenState();
+  State<DriverLocationStepScreen> createState() =>
+      _DriverLocationStepScreenState();
 }
 
 class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
@@ -73,14 +75,7 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
       });
       showCustomSnackBarWidget('location_detected_success'.tr, isError: false);
     } catch (e) {
-      // Fallback default coordinates (Sanaa, Yemen) if GPS timeout
-      if (_latitude == null || _longitude == null) {
-        setState(() {
-          _latitude = 15.3694;
-          _longitude = 44.1910;
-        });
-        showCustomSnackBarWidget('default_location_assigned'.tr, isError: false);
-      }
+      showCustomSnackBarWidget('location_permission_denied'.tr);
     } finally {
       setState(() => _isLocating = false);
     }
@@ -98,7 +93,8 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
       return;
     }
 
-    bool success = await Get.find<DriverOnboardingController>().saveLocationCoords(
+    bool success =
+        await Get.find<DriverOnboardingController>().saveLocationCoords(
       latitude: _latitude!,
       longitude: _longitude!,
       address: address,
@@ -111,21 +107,23 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B2430), size: 20),
+          icon: Icon(Icons.arrow_back,
+              color: Get.theme.colorScheme.onSurface, size: 20),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'driver_onboarding_title'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -147,9 +145,10 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Get.theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFE5EDF8)),
+                        border:
+                            Border.all(color: Get.theme.colorScheme.outline),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.02),
@@ -166,7 +165,7 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                               color: primaryBlue.withValues(alpha: 0.08),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.my_location,
                               color: primaryBlue,
                               size: 38,
@@ -175,16 +174,20 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                           const SizedBox(height: 12),
                           Text(
                             'preferred_coverage_location'.tr,
-                            style: rubikBold.copyWith(fontSize: 16, color: const Color(0xFF1B2430)),
+                            style: rubikBold.copyWith(
+                                fontSize: 16,
+                                color: Get.theme.colorScheme.onSurface),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'preferred_coverage_location_desc'.tr,
-                            style: rubikRegular.copyWith(fontSize: 13, color: const Color(0xFF757D8A)),
+                            style: rubikRegular.copyWith(
+                                fontSize: 13,
+                                color: Get.theme.colorScheme.onSurfaceVariant),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
 
                           // GPS Detect Button
                           SizedBox(
@@ -193,19 +196,26 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                             child: ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: primaryBlue,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
                               ),
-                              onPressed: _isLocating ? null : _getCurrentLocation,
+                              onPressed:
+                                  _isLocating ? null : _getCurrentLocation,
                               icon: _isLocating
                                   ? const SizedBox(
                                       width: 18,
                                       height: 18,
-                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                      child: CircularProgressIndicator(
+                                          color: Colors.white, strokeWidth: 2),
                                     )
-                                  : const Icon(Icons.gps_fixed, color: Colors.white, size: 20),
+                                  : const Icon(Icons.gps_fixed,
+                                      color: Colors.white, size: 20),
                               label: Text(
-                                _isLocating ? 'detecting_location'.tr : 'detect_my_location'.tr,
-                                style: rubikBold.copyWith(fontSize: 14, color: Colors.white),
+                                _isLocating
+                                    ? 'detecting_location'.tr
+                                    : 'detect_my_location'.tr,
+                                style: rubikBold.copyWith(
+                                    fontSize: 14, color: Colors.white),
                               ),
                             ),
                           ),
@@ -219,13 +229,14 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF7FBF9),
+                          color: Get.theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFD4EDDA)),
+                          border: Border.all(color: Get.theme.colorScheme.outline),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.check_circle, color: Color(0xFF04BB7B), size: 22),
+                            const Icon(Icons.check_circle,
+                                color: AllineColors.success, size: 22),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -233,12 +244,16 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                                 children: [
                                   Text(
                                     'coordinates_captured'.tr,
-                                    style: rubikBold.copyWith(fontSize: 13, color: const Color(0xFF155724)),
+                                    style: rubikBold.copyWith(
+                                        fontSize: 13,
+                                        color: Get.theme.colorScheme.onSurface),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Lat: ${_latitude!.toStringAsFixed(5)}, Long: ${_longitude!.toStringAsFixed(5)}',
-                                    style: rubikRegular.copyWith(fontSize: 12, color: const Color(0xFF28A745)),
+                                    style: rubikRegular.copyWith(
+                                        fontSize: 12,
+                                        color: AllineColors.success),
                                   ),
                                 ],
                               ),
@@ -251,23 +266,27 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                     // Address Field
                     Text(
                       'coverage_address_label'.tr,
-                      style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+                      style: rubikMedium.copyWith(
+                          fontSize: 14, color: Get.theme.colorScheme.onSurface),
                     ),
                     const SizedBox(height: 6),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Get.theme.colorScheme.surface,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFDDE4EE)),
+                        border:
+                            Border.all(color: Get.theme.colorScheme.outline),
                       ),
                       child: TextField(
                         controller: _addressController,
                         maxLines: 3,
                         decoration: InputDecoration(
                           hintText: 'address_detail_hint'.tr,
-                          hintStyle: rubikRegular.copyWith(fontSize: 14, color: Colors.grey.shade400),
+                          hintStyle: rubikRegular.copyWith(
+                              fontSize: 14, color: Colors.grey.shade400),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 14),
                         ),
                       ),
                     ),
@@ -283,24 +302,28 @@ class _DriverLocationStepScreenState extends State<DriverLocationStepScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryBlue,
                               elevation: 2,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
                             ),
                             onPressed: controller.isSubmitting ? null : _submit,
                             child: controller.isSubmitting
                                 ? const SizedBox(
                                     width: 24,
                                     height: 24,
-                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2.5),
                                   )
                                 : Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         'continue_to_review'.tr,
-                                        style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                                        style: rubikBold.copyWith(
+                                            fontSize: 16, color: Colors.white),
                                       ),
                                       const SizedBox(width: 8),
-                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white),
+                                      const Icon(Icons.arrow_forward_ios,
+                                          size: 16, color: Colors.white),
                                     ],
                                   ),
                           ),

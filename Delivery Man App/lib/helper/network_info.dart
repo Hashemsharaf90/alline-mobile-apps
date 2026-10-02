@@ -23,6 +23,7 @@ class NetworkInfo {
         Get.find<SplashController>().setFirstTimeConnectionCheck(false);
       }else {
         bool isConnected = result.contains(ConnectivityResult.wifi)  || result.contains(ConnectivityResult.mobile);
+        if (!context.mounted) return;
         final messenger = ScaffoldMessenger.maybeOf(context);
         if (messenger == null) {
           return;

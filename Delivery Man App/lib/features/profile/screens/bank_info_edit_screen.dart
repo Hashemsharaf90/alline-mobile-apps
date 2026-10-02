@@ -41,6 +41,13 @@ class _BankInfoEditScreenState extends State<BankInfoEditScreen> {
   }
 
   @override
+  void dispose(){
+    _accountNameFocus.dispose();_bankNameFocus.dispose();_branchNameFocus.dispose();_accountNumberFocus.dispose();
+    _accountNameController.dispose();_bankNameController.dispose();_branchNameController.dispose();_accountNumberController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBarWidget(title: 'bank_info'.tr, isBack: true),

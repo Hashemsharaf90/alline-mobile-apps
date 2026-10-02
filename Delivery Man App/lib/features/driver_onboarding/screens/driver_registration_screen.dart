@@ -1,3 +1,4 @@
+import 'package:sixvalley_delivery_boy/theme/alline/alline_colors.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,7 +12,8 @@ class DriverRegistrationScreen extends StatefulWidget {
   const DriverRegistrationScreen({super.key});
 
   @override
-  State<DriverRegistrationScreen> createState() => _DriverRegistrationScreenState();
+  State<DriverRegistrationScreen> createState() =>
+      _DriverRegistrationScreenState();
 }
 
 class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
@@ -20,7 +22,8 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   String _countryCode = '+967';
   bool _obscurePassword = true;
@@ -83,21 +86,23 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryBlue = Color(0xFF015FC9);
-    const Color bgLight = Color(0xFFF4F8FE);
+    final Color primaryBlue = AllineColors.primaryBlue;
+    final Color bgLight = Get.theme.scaffoldBackgroundColor;
 
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Get.theme.colorScheme.surface,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF1B2430), size: 20),
+          icon: Icon(Icons.arrow_back,
+              color: Get.theme.colorScheme.onSurface, size: 20),
           onPressed: () => Get.back(),
         ),
         title: Text(
           'create_driver_account'.tr,
-          style: rubikBold.copyWith(fontSize: 18, color: const Color(0xFF1B2430)),
+          style: rubikBold.copyWith(
+              fontSize: 18, color: Get.theme.colorScheme.onSurface),
         ),
         centerTitle: true,
       ),
@@ -109,7 +114,9 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
             children: [
               Text(
                 'driver_registration_desc'.tr,
-                style: rubikRegular.copyWith(fontSize: 14, color: const Color(0xFF5D6B82)),
+                style: rubikRegular.copyWith(
+                    fontSize: 14,
+                    color: Get.theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
 
@@ -140,14 +147,15 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
               // Phone with country code picker
               Text(
                 'phone_number'.tr,
-                style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+                style: rubikMedium.copyWith(
+                    fontSize: 14, color: Get.theme.colorScheme.onSurface),
               ),
               const SizedBox(height: 6),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Get.theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFDDE4EE)),
+                  border: Border.all(color: Get.theme.colorScheme.outline),
                 ),
                 child: Row(
                   children: [
@@ -162,18 +170,24 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                       showCountryOnly: false,
                       showOnlyCountryWhenClosed: false,
                       alignLeft: false,
-                      textStyle: rubikBold.copyWith(fontSize: 14, color: const Color(0xFF1B2430)),
+                      textStyle: rubikBold.copyWith(
+                          fontSize: 14, color: Get.theme.colorScheme.onSurface),
                     ),
-                    Container(width: 1, height: 28, color: const Color(0xFFDDE4EE)),
+                    Container(
+                        width: 1,
+                        height: 28,
+                        color: Get.theme.colorScheme.outline),
                     Expanded(
                       child: TextField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: InputDecoration(
                           hintText: '770000000',
-                          hintStyle: rubikRegular.copyWith(fontSize: 14, color: Colors.grey.shade400),
+                          hintStyle: rubikRegular.copyWith(
+                              fontSize: 14, color: Colors.grey.shade400),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 14),
                         ),
                       ),
                     ),
@@ -196,12 +210,17 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
               _buildInputField(
                 controller: _passwordController,
                 label: 'password'.tr,
-                hint: '••••••••',
+                hint: 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢',
                 icon: Icons.lock_outline,
                 obscureText: _obscurePassword,
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey),
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
               const SizedBox(height: 16),
@@ -210,15 +229,18 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
               _buildInputField(
                 controller: _confirmPasswordController,
                 label: 'confirm_password'.tr,
-                hint: '••••••••',
+                hint: 'â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢',
                 icon: Icons.lock_outline,
                 obscureText: _obscureConfirm,
                 suffixIcon: IconButton(
-                  icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
-                  onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                  icon: Icon(
+                      _obscureConfirm ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey),
+                  onPressed: () =>
+                      setState(() => _obscureConfirm = !_obscureConfirm),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
 
               // Terms & Conditions Checkbox
               Row(
@@ -226,12 +248,15 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                   Checkbox(
                     value: _termsAccepted,
                     activeColor: primaryBlue,
-                    onChanged: (val) => setState(() => _termsAccepted = val ?? false),
+                    onChanged: (val) =>
+                        setState(() => _termsAccepted = val ?? false),
                   ),
                   Expanded(
                     child: Text(
                       'agree_to_alline_terms'.tr,
-                      style: rubikRegular.copyWith(fontSize: 13, color: const Color(0xFF5D6B82)),
+                      style: rubikRegular.copyWith(
+                          fontSize: 13,
+                          color: Get.theme.colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ],
@@ -248,18 +273,21 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryBlue,
                         elevation: 2,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: controller.isLoading ? null : _submit,
                       child: controller.isLoading
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2.5),
                             )
                           : Text(
                               'continue_and_verify_phone'.tr,
-                              style: rubikBold.copyWith(fontSize: 16, color: Colors.white),
+                              style: rubikBold.copyWith(
+                                  fontSize: 16, color: Colors.white),
                             ),
                     ),
                   );
@@ -274,13 +302,16 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
                   children: [
                     Text(
                       'already_have_driver_account'.tr,
-                      style: rubikRegular.copyWith(fontSize: 14, color: const Color(0xFF757D8A)),
+                      style: rubikRegular.copyWith(
+                          fontSize: 14,
+                          color: Get.theme.colorScheme.onSurfaceVariant),
                     ),
                     TextButton(
                       onPressed: () => Get.to(() => const LoginScreen()),
                       child: Text(
                         'login_now'.tr,
-                        style: rubikBold.copyWith(fontSize: 14, color: primaryBlue),
+                        style: rubikBold.copyWith(
+                            fontSize: 14, color: primaryBlue),
                       ),
                     ),
                   ],
@@ -307,26 +338,30 @@ class _DriverRegistrationScreenState extends State<DriverRegistrationScreen> {
       children: [
         Text(
           label,
-          style: rubikMedium.copyWith(fontSize: 14, color: const Color(0xFF2C3E50)),
+          style: rubikMedium.copyWith(
+              fontSize: 14, color: Get.theme.colorScheme.onSurface),
         ),
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Get.theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFDDE4EE)),
+            border: Border.all(color: Get.theme.colorScheme.outline),
           ),
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
             obscureText: obscureText,
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: const Color(0xFF757D8A), size: 20),
+              prefixIcon: Icon(icon,
+                  color: Get.theme.colorScheme.onSurfaceVariant, size: 20),
               suffixIcon: suffixIcon,
               hintText: hint,
-              hintStyle: rubikRegular.copyWith(fontSize: 14, color: Colors.grey.shade400),
+              hintStyle: rubikRegular.copyWith(
+                  fontSize: 14, color: Colors.grey.shade400),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
             ),
           ),
         ),

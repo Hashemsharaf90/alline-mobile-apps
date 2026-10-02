@@ -12,8 +12,8 @@ class HtmlViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(backgroundColor: Theme.of(context).cardColor,
+      appBar: CustomAppBarWidget(title: page?.title ?? '', isBack: true),
       body: Column(children: [
-        CustomAppBarWidget(title: page?.title ?? '', isBack: true),
         Expanded(child: SingleChildScrollView(
           padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
           physics: const BouncingScrollPhysics(),
@@ -38,7 +38,7 @@ class HtmlViewScreen extends StatelessWidget {
                 onTapUrl: (String url) {
                   return launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
                 },
-                textStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                textStyle: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
           ),
