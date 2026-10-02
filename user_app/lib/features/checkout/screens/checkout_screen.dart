@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter_sixvalley_ecommerce/features/address/controllers/address_controller.dart';
 import 'package:flutter_sixvalley_ecommerce/features/cart/domain/models/cart_model.dart';
@@ -814,10 +815,10 @@ class CheckoutScreenState extends State<CheckoutScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.chat_bubble_outline_rounded,
-                  color: Color(0xFF25D366),
-                  size: 20,
+                SvgPicture.asset(
+                  'assets/svg/whatsapp_official.svg',
+                  width: 20,
+                  height: 20,
                 ),
                 const SizedBox(width: 6),
                 Text(

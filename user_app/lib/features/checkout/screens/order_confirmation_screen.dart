@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_sixvalley_ecommerce/theme/alline_colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
@@ -1179,10 +1180,10 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.chat_outlined,
-                    size: 14,
-                    color: successGreen,
+                  SvgPicture.asset(
+                    'assets/svg/whatsapp_official.svg',
+                    width: 16,
+                    height: 16,
                   ),
                   const SizedBox(width: 4),
                   Text(

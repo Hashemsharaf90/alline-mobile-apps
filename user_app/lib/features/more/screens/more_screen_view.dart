@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/custom_image_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/common/basewidget/not_logged_in_bottom_sheet_widget.dart';
 import 'package:flutter_sixvalley_ecommerce/features/auth/controllers/auth_controller.dart';
@@ -1324,6 +1325,11 @@ class _MoreScreenState extends State<MoreScreen> {
           // 2. تواصل عبر واتساب
           _buildSettingsTile(
             icon: Icons.chat_bubble_outline_rounded,
+            iconWidget: SvgPicture.asset(
+              'assets/svg/whatsapp_official.svg',
+              width: 22,
+              height: 22,
+            ),
             iconColor: brandGreen,
             title: 'تواصل عبر واتساب',
             colors: colors,
@@ -1499,6 +1505,7 @@ class _MoreScreenState extends State<MoreScreen> {
     required VoidCallback onTap,
     Color iconColor = brandBlue,
     Widget? badge,
+    Widget? iconWidget,
   }) {
     return InkWell(
       onTap: onTap,
@@ -1507,7 +1514,7 @@ class _MoreScreenState extends State<MoreScreen> {
         child: Row(
           children: [
             // Icon
-            Icon(icon, size: 22, color: iconColor),
+            iconWidget ?? Icon(icon, size: 22, color: iconColor),
             const SizedBox(width: 14),
 
             // Title
